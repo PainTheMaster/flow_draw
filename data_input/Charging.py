@@ -3,6 +3,46 @@ import flow_draw.definitions as defs
 from flow_draw.data_input import UnitOperation as uo
 from typing import List
 
+
+charging_method_liq = 'liquid_port'
+charging_method_shower = 'shower'
+charging_method_press = 'press_vessel'
+charging_method_pow ='powder_port'
+charging_method_placeholder = 'placeholder'
+list_charging_method =[charging_method_liq,
+                    charging_method_shower,
+                    charging_method_press,
+                    charging_method_pow,
+                    charging_method_placeholder
+                    ]
+
+time_control_none = "No time control"
+time_control_min="Time control with minimum"
+time_control_max="Time control with maximum"
+time_control_min_max='Time control with minimum and maximum'
+time_control_placeholder = 'Placeholder'
+list_time_control =[
+    time_control_none,
+    time_control_min,
+    time_control_max,
+    time_control_min_max,
+    time_control_placeholder
+]
+
+temp_control_none = "No temp control"
+temp_control_min="Temp control with minimum"
+temp_control_max="Temp control with maximum"
+temp_control_min_max='Temp control with minimum and maximum'
+temp_control_placeholder = 'Placeholder'
+list_temp_control =[
+    temp_control_none,
+    temp_control_min,
+    temp_control_max,
+    temp_control_min_max,
+    temp_control_placeholder
+]
+
+
 class Charging(uo.UnitOperation):
     """
     Inherited:
@@ -22,43 +62,7 @@ class Charging(uo.UnitOperation):
     error_range_placeholder='place holder'
     list_error_range = [None, 1.0, None, None, None, 5.0, error_range_placeholder]
 
-    charging_method_liq = 'liquid_port'
-    charging_method_shower = 'shower'
-    charging_method_press = 'press_vessel'
-    charging_method_pow ='powder_port'
-    charging_method_placeholder = 'placeholder'
-    list_charging_method =[charging_method_liq,
-                        charging_method_shower,
-                        charging_method_press,
-                        charging_method_pow,
-                        charging_method_placeholder
-                        ]
 
-    time_control_none = "No time control"
-    time_control_min="Time control with minimum"
-    time_control_max="Time control with maximum"
-    time_control_min_max='Time control with minimum and maximum'
-    time_control_placeholder = 'Placeholder'
-    list_time_control =[
-        time_control_none,
-        time_control_min,
-        time_control_max,
-        time_control_min_max,
-        time_control_placeholder
-    ]
-
-    temp_control_none = "No temp control"
-    temp_control_min="Temp control with minimum"
-    temp_control_max="Temp control with maximum"
-    temp_control_min_max='Temp control with minimum and maximum'
-    temp_control_placeholder = 'Placeholder'
-    list_temp_control =[
-        temp_control_none,
-        temp_control_min,
-        temp_control_max,
-        temp_control_min_max,
-        temp_control_placeholder
-    ]
     
     def __init__(self, operation_seq=-1):
         self.unit_operation = uo.op_charging
@@ -117,12 +121,79 @@ class Charging(uo.UnitOperation):
 
             #line-2
             str_qty = str(material.qty_kg)+'±'+str(material.error_kg)+' kg'
-            list_col_time
-list_col_method
-list_col_content
-list_col_record
-list_col_operator
-list_col_witness
+            list_col_time.append(None)
+            list_col_method.append(None)
+            list_col_content.append(str_qty)
+            list_col_record.append(defs.part_record_lot)
+            list_col_operator.append(None)
+            list_col_witness.append(None)
+            
+            self.flow_sheet.body_organizer(list_col_time=list_col_time,
+                                           list_col_method=list_col_method,
+                                           list_col_content=list_col_content,
+                                           list_col_record=list_col_record,
+                                           list_col_operator=list_col_operator,
+                                           list_col_witness=list_col_witness)
+
+            #li liq: flex ID 
+            #line-3
+            list_col_time=[]
+            list_col_method=[]
+            list_col_content=[]
+            list_col_record=[]
+            list_col_operator=[]
+            list_col_witness=[]
+
+            if (material.method == charging_method_liq or
+                material.method == charging_method_press or
+                material.method == charging_method_shower):
+
+                list_col_time.append(None)
+                list_col_method.append(None)
+                list_col_content.append(None)
+                list_col_record.append(defs.part_record_flex)
+                list_col_operator.append(None)
+                list_col_witness.append(defs.part_signature)
+
+                if not (self.time_control == time_control_min or
+                        self.time_control == time_control_max or
+                        self.time_control == time_control_min_max):
+                    list_col_time.append(None)
+                    list_col_method.append(None)
+                    list_col_content.append(None)
+                    list_col_record.append(defs.part_check_charged)
+                    list_col_operator.append(defs.part_signature)
+                    list_col_witness.append(None)
+
+                self.flow_sheet.body_organizer(list_col_time=list_col_time,
+                                           list_col_method=list_col_method,
+                                           list_col_content=list_col_content,
+                                           list_col_record=list_col_record,
+                                           list_col_operator=list_col_operator,
+                                           list_col_witness=list_col_witness)
+
+            if (self.time_control == time_control_min):
+                sentece_instruction = "*滴下時間"+str(material.time_min)+"以上"
+                list_col_time.append(defs.part_time)
+                list_col_method.append("仕込み開始")
+                list_col_content.append(None)
+                list_col_record.append(None)
+                list_col_operator.append(defs.part_signature)
+                list_col_witness.append(defs.part_signature)
+
+                list_col_time.append(None)
+                list_col_method.append(None)
+                list_col_content.append(None)
+                list_col_record.append(None)
+                list_col_operator.append(None)
+                list_col_witness.append(None)            
+
+                list_col_time.append(defs.part_time)
+                list_col_method.append("仕込み終了")
+                list_col_content.append(None)
+                list_col_record.append(None)
+                list_col_operator.append(defs.part_signature)
+                list_col_witness.append(defs.part_signature)       
 
 
 
@@ -185,35 +256,35 @@ list_col_witness
             print("> ", end='')
             specif_yesno = int(input())
             if defs.list_yesno[specif_yesno] == defs.tag_yes:
-                for idx in range(len(Charging.list_charging_method)):
-                    print(str(idx)+': '+Charging.list_charging_method[idx])
+                for idx in range(len(list_charging_method)):
+                    print(str(idx)+': '+list_charging_method[idx])
                 print("> ", end='')
                 choice_chargingmethod = int(input())
-                self.method = Charging.list_charging_method[choice_chargingmethod]
+                self.method = list_charging_method[choice_chargingmethod]
             
             print("Specicfy a time control method?: ")
-            for idx in range(len(Charging.list_time_control)):
-                print(str(idx)+': '+Charging.list_time_control[idx])
+            for idx in range(len(list_time_control)):
+                print(str(idx)+': '+list_time_control[idx])
             print("> ", end='')
             choice_time_control = int(input())
-            self.time_control = Charging.list_time_control[choice_time_control]
-            if self.time_control == Charging.time_control_min or self.time_control == Charging.time_control_min_max:
+            self.time_control = list_time_control[choice_time_control]
+            if self.time_control == time_control_min or self.time_control == time_control_min_max:
                 print("Charging time lower limit?: ", end='')
                 self.time_min = input()
-            if self.time_control == Charging.time_control_max or self.time_control == Charging.time_control_min_max:
+            if self.time_control == time_control_max or self.time_control == time_control_min_max:
                 print("Charging time upper limit?: ", end='')
                 self.time_max = input()
             
             print("Specicfy a temperature control method?: ")
-            for idx in range(len(Charging.list_temp_control)):
-                print(str(idx)+': '+Charging.list_temp_control[idx])
+            for idx in range(len(list_temp_control)):
+                print(str(idx)+': '+list_temp_control[idx])
             print("> ", end='')
             choice_temp_control = int(input())
-            self.temp_control = Charging.list_temp_control[choice_temp_control]
-            if self.temp_control == Charging.temp_control_min or self.temp_control == Charging.temp_control_min_max:
+            self.temp_control = list_temp_control[choice_temp_control]
+            if self.temp_control == temp_control_min or self.temp_control == temp_control_min_max:
                 print("Charging temperature (℃) lower limit?: ", end='')
                 self.t_i_min = float(input())
-            if self.temp_control == Charging.temp_control_max or self.temp_control == Charging.temp_control_min_max:
+            if self.temp_control == temp_control_max or self.temp_control == temp_control_min_max:
                 print("Charging temperature (℃) upper limit?: ", end='')
                 self.t_i_max = float(input())
             
@@ -227,11 +298,11 @@ list_col_witness
             self.error_pct = 5.0
             #self.qty_kg = None
             #self.error_kg = None
-            self.method = Charging.charging_method_liq
-            self.time_control = Charging.time_control_min
+            self.method = charging_method_liq
+            self.time_control = time_control_min
             self.time_min = '1h'
             self.time_max = None
-            self.temp_control = Charging.temp_control_min_max
+            self.temp_control = temp_control_min_max
             self.t_i_min = 15
             self.t_i_max = 25
             self.calc_qty()
