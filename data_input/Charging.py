@@ -172,6 +172,13 @@ class Charging(uo.UnitOperation):
                                            list_col_witness=list_col_witness)
 
             if (material.time_control == time_control_min):
+                list_col_time=[]
+                list_col_method=[]
+                list_col_content=[]
+                list_col_record=[]
+                list_col_operator=[]
+                list_col_witness=[]
+
                 sentece_instruction = "*滴下時間"+str(material.time_min)+"以上"
                 list_col_time.append(defs.part_time)
                 list_col_method.append("仕込み開始")
@@ -200,6 +207,8 @@ class Charging(uo.UnitOperation):
                                            list_col_record=list_col_record,
                                            list_col_operator=list_col_operator,
                                            list_col_witness=list_col_witness)
+                
+                self.flow_sheet.linefeed()
 
 
     class Material:

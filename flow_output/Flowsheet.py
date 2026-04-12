@@ -77,6 +77,9 @@ class Flowsheet:
                          len_list_operator,
                          len_list_witness)
         self.current_line += max_length
+    
+    def linefeed(self):
+        self.current_line += 1
 
 
 
