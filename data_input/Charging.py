@@ -149,24 +149,24 @@ class Charging(uo.UnitOperation):
             choice_time_control = int(input())
             self.time_control = Charging.list_time_control[choice_time_control]
             if self.time_control == Charging.time_control_min or self.time_control == Charging.time_control_min_max:
-                print("Chargint time lower limit?: ", end='')
-                self.time_min = int(input())
+                print("Charging time lower limit?: ", end='')
+                self.time_min = input()
             if self.time_control == Charging.time_control_max or self.time_control == Charging.time_control_min_max:
-                print("Chargint time upper limit?: ", end='')
-                self.time_max = int(input())
+                print("Charging time upper limit?: ", end='')
+                self.time_max = input()
             
             print("Specicfy a temperature control method?: ")
-            for idx in range(len(Charging.list_time_control)):
-                print(str(idx)+': '+Charging.list_time_control[idx])
+            for idx in range(len(Charging.list_temp_control)):
+                print(str(idx)+': '+Charging.list_temp_control[idx])
             print("> ", end='')
-            choice_time_control = int(input())
-            self.time_control = Charging.list_time_control[choice_time_control]
-            if self.time_control == Charging.time_control_min or self.time_control == Charging.time_control_min_max:
-                print("Chargint time lower limit?: ", end='')
-                self.time_min = int(input())
-            if self.time_control == Charging.time_control_max or self.time_control == Charging.time_control_min_max:
-                print("Chargint time upper limit?: ", end='')
-                self.time_max = int(input())
+            choice_temp_control = int(input())
+            self.temp_control = Charging.list_temp_control[choice_temp_control]
+            if self.temp_control == Charging.temp_control_min or self.temp_control == Charging.temp_control_min_max:
+                print("Charging temperature (℃) lower limit?: ", end='')
+                self.t_i_min = float(input())
+            if self.temp_control == Charging.temp_control_max or self.temp_control == Charging.temp_control_min_max:
+                print("Charging temperature (℃) upper limit?: ", end='')
+                self.t_i_max = float(input())
 
             print(str(self))
 
