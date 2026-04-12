@@ -131,7 +131,7 @@ class Charging(uo.UnitOperation):
             self.metrics_val = float(input())
 
             
-            print('permissible error?:')
+            print('Permissible error?:')
             for idx in range(len(Charging.list_error_range)):
                 if Charging.list_error_range[idx] is not None:
                     print(str(idx)+": "+str(Charging.list_error_range[idx])+"%")
