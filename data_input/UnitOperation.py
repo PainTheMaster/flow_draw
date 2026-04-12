@@ -1,6 +1,7 @@
-import json
+
 from flow_draw import definitions as defs
 from flow_draw import chemistry as chem
+from flow_draw.flow_output import Flowsheet as fsht
 
 
 op_line_clearance = "line_clearance"
@@ -43,6 +44,7 @@ op_placeholder = "placeholder"
 
 class UnitOperation:
     chem_data = None
+    flow_sheet = None
     def __init__(self, unit_operation="", operation_seq=-1):
         self.unit_operation = unit_operation
         self.operation_seq = operation_seq
@@ -51,6 +53,9 @@ class UnitOperation:
     @classmethod 
     def set_chemdata(cls, chem_data:chem.Chemistry):
         cls.chem_data = chem_data
+    @classmethod 
+    def set_flowsheet(cls, flow_sheet:fsht.Flowsheet):
+        cls.flow_sheet = flow_sheet
 
 
 

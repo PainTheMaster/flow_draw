@@ -1,6 +1,7 @@
 
 import flow_draw.definitions as defs
 from flow_draw.data_input import UnitOperation as uo
+from typing import List
 
 class Charging(uo.UnitOperation):
     """
@@ -63,17 +64,21 @@ class Charging(uo.UnitOperation):
         self.unit_operation = uo.op_charging
         self.operation_seq = operation_seq
         self.material_count = 0
-        self.materials = []
+        self.materials: List[Charging.Material] = []
 
 
     def interact(self):
         print("Unit operation-"+str(self.operation_seq)+": Charging")
+        print("Pre-comment?:")
+        self.pre_comment = input()
         print("How many input materials?: ", end="")
         self.material_count=int(input())
         for i in range(self.material_count):
             this_material = self.Material()
             this_material.interact()
             self.materials.append(this_material)
+        print("Post-comment?:")
+        self.post_comment = input()
 
     def test_data_creation(self):
         print("Unit operation-"+str(self.operation_seq)+": Charging")
@@ -83,10 +88,45 @@ class Charging(uo.UnitOperation):
             this_material = self.Material()
             this_material.test_data_creation()
             self.materials.append(this_material)
-        print("test data created with "+str(self.material_count)+" material(s)")        
+        print("test data created with "+str(self.material_count)+" material(s)")
+
+    def output_unit_operation(self):
+        self.flow_sheet.header_organizer(op_nr=self.operation_seq, title=self.unit_operation)
+        if not (self.pre_comment == None or self.pre_comment == ''):
+            self.flow_sheet.body_organizer(list_col_time=[],
+                                           list_col_method=[],
+                                           list_col_content=self.pre_comment,
+                                           list_col_record=[],
+                                           list_col_operator=[],
+                                           list_col_witness=[])
+        for material in self.materials:
+            list_col_time=[]
+            list_col_method=[]
+            list_col_content=[]
+            list_col_record=[]
+            list_col_operator=[]
+            list_col_witness=[]
+
+            #line-1
+            list_col_time.append(defs.part_time)
+            list_col_method.append(material.method)
+            list_col_content.append(material.name)
+            list_col_record.append(defs.part_record_input)
+            list_col_operator.append(defs.part_signature)
+            list_col_witness.append(defs.part_signature)
+
+            #line-2
+            str_qty = str(material.qty_kg)+'±'+str(material.error_kg)+' kg'
+            list_col_time
+list_col_method
+list_col_content
+list_col_record
+list_col_operator
+list_col_witness
 
 
-    class Material():
+
+    class Material:
         """This class is for each material charged, each instance correspnds to each dosage in a charging operation.
         """
         def __init__(self):

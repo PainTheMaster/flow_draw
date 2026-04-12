@@ -7,5 +7,7 @@ list_yesno=[tag_no, tag_yes]
 tag_metrics_equiv = "equiv"
 tag_metrics_vol = "v/w"
 
-
+part_time = '___:___'
+part_record_input = '仕込み量__________kg'
+part_signature = '   /  /  _____'
 
