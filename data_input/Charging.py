@@ -64,9 +64,8 @@ class Charging(uo.UnitOperation):
 
 
     
-    def __init__(self, operation_seq=-1):
-        self.unit_operation = uo.op_charging
-        self.operation_seq = operation_seq
+    def __init__(self, operation_seq=None):
+        super().__init__(unit_operation=uo.op_charging, operation_seq=operation_seq)
         self.material_count = 0
         self.materials: List[Charging.Material] = []
 
@@ -155,9 +154,9 @@ class Charging(uo.UnitOperation):
                 list_col_operator.append(None)
                 list_col_witness.append(defs.part_signature)
 
-                if not (self.time_control == time_control_min or
-                        self.time_control == time_control_max or
-                        self.time_control == time_control_min_max):
+                if not (material.time_control == time_control_min or
+                        material.time_control == time_control_max or
+                        material.time_control == time_control_min_max):
                     list_col_time.append(None)
                     list_col_method.append(None)
                     list_col_content.append(None)
@@ -172,7 +171,7 @@ class Charging(uo.UnitOperation):
                                            list_col_operator=list_col_operator,
                                            list_col_witness=list_col_witness)
 
-            if (self.time_control == time_control_min):
+            if (material.time_control == time_control_min):
                 sentece_instruction = "*滴下時間"+str(material.time_min)+"以上"
                 list_col_time.append(defs.part_time)
                 list_col_method.append("仕込み開始")
@@ -195,6 +194,12 @@ class Charging(uo.UnitOperation):
                 list_col_operator.append(defs.part_signature)
                 list_col_witness.append(defs.part_signature)       
 
+                self.flow_sheet.body_organizer(list_col_time=list_col_time,
+                                           list_col_method=list_col_method,
+                                           list_col_content=list_col_content,
+                                           list_col_record=list_col_record,
+                                           list_col_operator=list_col_operator,
+                                           list_col_witness=list_col_witness)
 
 
     class Material:

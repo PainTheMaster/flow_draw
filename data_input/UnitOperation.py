@@ -45,7 +45,7 @@ op_placeholder = "placeholder"
 class UnitOperation:
     chem_data = None
     flow_sheet = None
-    def __init__(self, unit_operation="", operation_seq=-1):
+    def __init__(self, unit_operation: str=None, operation_seq: int=None):
         self.unit_operation = unit_operation
         self.operation_seq = operation_seq
         self.pre_comment = ''
