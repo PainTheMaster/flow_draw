@@ -64,7 +64,7 @@ class Charging(uo.UnitOperation):
         self.operation_seq = operation_seq
         self.material_count = 0
         self.materials = []
-        self.interact()
+
 
     def interact(self):
         print("Unit operation-"+str(self.operation_seq)+": Charging")
@@ -72,7 +72,18 @@ class Charging(uo.UnitOperation):
         self.material_count=int(input())
         for i in range(self.material_count):
             this_material = self.Material()
+            this_material.interact()
             self.materials.append(this_material)
+
+    def test_data_creation(self):
+        print("Unit operation-"+str(self.operation_seq)+": Charging")
+        print("How many input materials?: ", end="")
+        self.material_count=int(input())
+        for i in range(self.material_count):
+            this_material = self.Material()
+            this_material.test_data_creation()
+            self.materials.append(this_material)
+        print("test data created with "+str(self.material_count)+" material(s)")        
 
 
     class Material():
@@ -92,8 +103,6 @@ class Charging(uo.UnitOperation):
             self.temp_control = None
             self.t_i_min = None
             self.t_i_max = None
-            self.interact()
-            self.calc_qty()
 
         def calc_qty(self):
             """Calculates the quantity of the material and permissible error in "kg" unit. 
@@ -167,8 +176,27 @@ class Charging(uo.UnitOperation):
             if self.temp_control == Charging.temp_control_max or self.temp_control == Charging.temp_control_min_max:
                 print("Charging temperature (℃) upper limit?: ", end='')
                 self.t_i_max = float(input())
+            
+            self.calc_qty()
 
-            print(str(self))
+
+        def test_data_creation(self):
+            self.name = 'H2O'
+            self.metrics_unit = defs.tag_metrics_vol
+            self.metrics_val = 1.0
+            self.error_pct = 5.0
+            #self.qty_kg = None
+            #self.error_kg = None
+            self.method = Charging.charging_method_liq
+            self.time_control = Charging.time_control_min
+            self.time_min = '1h'
+            self.time_max = None
+            self.temp_control = Charging.temp_control_min_max
+            self.t_i_min = 15
+            self.t_i_max = 25
+            self.calc_qty()
+
+
 
 
 #charge = Charging(operation_seq=1)
