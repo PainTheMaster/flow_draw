@@ -172,46 +172,14 @@ class Charging(uo.UnitOperation):
                                            list_col_witness=list_col_witness)
 
             #TODO: this part should be replaced by a dedicated function
-            if (material.time_control == time_control_min):
-                list_col_time=[]
-                list_col_method=[]
-                list_col_content=[]
-                list_col_record=[]
-                list_col_operator=[]
-                list_col_witness=[]
-
-                sentece_instruction = "*滴下時間"+str(material.time_min)+"以上"
-                list_col_time.append(defs.part_time)
-                list_col_method.append("仕込み開始")
-                list_col_content.append(None)
-                list_col_record.append(None)
-                list_col_operator.append(defs.part_signature)
-                list_col_witness.append(defs.part_signature)
-
-                list_col_time.append(None)
-                list_col_method.append(None)
-                list_col_content.append(None)
-                list_col_record.append(None)
-                list_col_operator.append(None)
-                list_col_witness.append(None)            
-
-                if not (material.temp_control != temp_control_none or material.temp_control is None):
-                    self.put_temp_control(material=material,
-                                          col_time=list_col_time,
-                                          col_method=list_col_method,
-                                          col_content=list_col_content,
-                                          col_record=list_col_record,
-                                          col_operator=list_col_operator,
-                                          col_witness=list_col_witness)        
-                    
-
-                list_col_time.append(defs.part_time)
-                list_col_method.append("仕込み終了")
-                list_col_content.append(None)
-                list_col_record.append(defs.part_check_charged)
-                list_col_operator.append(defs.part_signature)
-                list_col_witness.append(defs.part_signature)       
-
+            if not (material.time_control == time_control_none or material.time_control is None):
+                self.put_time_control(material=material,
+                                        col_time=list_col_time,
+                                        col_method=list_col_method,
+                                        col_content=list_col_content,
+                                        col_record=list_col_record,
+                                        col_operator=list_col_operator,
+                                        col_witness=list_col_witness)
                 self.flow_sheet.body_organizer(list_col_time=list_col_time,
                                            list_col_method=list_col_method,
                                            list_col_content=list_col_content,
@@ -221,7 +189,7 @@ class Charging(uo.UnitOperation):
                 
                 self.flow_sheet.linefeed()
 
-    #TODO: please implement me!!!
+    #TODO: please test me!
     def put_time_control(self, material: Charging.Material,
                          col_time: List[str],
                          col_method: List[str],
@@ -229,7 +197,6 @@ class Charging(uo.UnitOperation):
                          col_record: List[str],
                          col_operator: List[str],
                          col_witness: List[str]):
-        #TODO: I need "if" sentences!
 
         if (material.time_control == time_control_min):
             sentece_instruction = "*滴下時間"+str(material.time_min)+"以上"
