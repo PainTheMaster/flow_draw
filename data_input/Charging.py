@@ -194,6 +194,10 @@ class Charging(uo.UnitOperation):
                 list_col_operator.append(None)
                 list_col_witness.append(None)            
 
+                if not (material.temp_control != temp_control_none or material.temp_control is None):
+                    #TODO: call an appropriate function !!!!!!
+                    pass
+
                 list_col_time.append(defs.part_time)
                 list_col_method.append("仕込み終了")
                 list_col_content.append(None)
@@ -209,6 +213,97 @@ class Charging(uo.UnitOperation):
                                            list_col_witness=list_col_witness)
                 
                 self.flow_sheet.linefeed()
+
+    def put_temp_control(self, material: Charging.Material,
+                         col_time: List[str],
+                         col_method: List[str],
+                         col_content: List[str],
+                         col_record: List[str],
+                         col_operator: List[str],
+                         col_witness: List[str]):
+        if material.temp_control == temp_control_min:
+            sentence = "仕込み時内温"+str(material.t_i_min)+"℃以上"
+            col_time.append(None)
+            col_method.append(None)
+            col_content.append(sentence)
+            col_record.append(defs.part_record_temp_ini)
+            col_operator.append(None)
+            col_witness.append(None)
+
+            col_time.append(None)
+            col_method.append(None)
+            col_content.append(None)
+            col_record.append(defs.part_record_temp_min)
+            col_operator.append(None)
+            col_witness.append(None)
+
+            col_time.append(None)
+            col_method.append(None)
+            col_content.append(None)
+            col_record.append(defs.part_record_temp_max)
+            col_operator.append(None)
+            col_witness.append(None)
+
+            col_time.append(None)
+            col_method.append(None)
+            col_content.append(None)
+            col_record.append(defs.part_record_temp_end)
+            col_operator.append(None)
+            col_witness.append(None)
+        elif material.temp_control == temp_control_max:
+            sentence = "仕込み時内温"+str(material.t_i_max)+"℃以下"
+            sentence = "仕込み時内温"+str(material.t_i_min)+'～'+str(material.t_i_max)+"℃"
+            col_time.append(None)
+            col_method.append(None)
+            col_content.append(sentence)
+            col_record.append(defs.part_record_temp_ini)
+            col_operator.append(None)
+            col_witness.append(None)
+
+            col_time.append(None)
+            col_method.append(None)
+            col_content.append(None)
+            col_record.append(defs.part_record_temp_max)
+            col_operator.append(None)
+            col_witness.append(None)
+
+            col_time.append(None)
+            col_method.append(None)
+            col_content.append(None)
+            col_record.append(defs.part_record_temp_end)
+            col_operator.append(None)
+            col_witness.append(None)
+
+        elif material.temp_control == temp_control_min_max:
+            sentence = "仕込み時内温"+str(material.t_i_min)+'～'+str(material.t_i_max)+"℃"
+            col_time.append(None)
+            col_method.append(None)
+            col_content.append(sentence)
+            col_record.append(defs.part_record_temp_ini)
+            col_operator.append(None)
+            col_witness.append(None)
+            
+            col_time.append(None)
+            col_method.append(None)
+            col_content.append(None)
+            col_record.append(defs.part_record_temp_min)
+            col_operator.append(None)
+            col_witness.append(None)
+
+            col_time.append(None)
+            col_method.append(None)
+            col_content.append(None)
+            col_record.append(defs.part_record_temp_max)
+            col_operator.append(None)
+            col_witness.append(None)
+
+            col_time.append(None)
+            col_method.append(None)
+            col_content.append(None)
+            col_record.append(defs.part_record_temp_end)
+            col_operator.append(None)
+            col_witness.append(None)    
+
 
 
     class Material:
