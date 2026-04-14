@@ -70,6 +70,13 @@ class Flowsheet:
         for row_rel in range(len_list_witness):
             self.ws.cell(row=self.current_line+row_rel, column=col_witness).value = list_col_witness[row_rel]
 
+        list_col_time.clear()
+        list_col_method.clear()
+        list_col_content.clear()
+        list_col_record.clear()
+        list_col_operator.clear()
+        list_col_witness.clear()
+
         max_length = max(len_list_time,
                          len_list_method,
                          len_list_content,

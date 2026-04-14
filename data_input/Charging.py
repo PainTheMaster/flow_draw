@@ -98,7 +98,7 @@ class Charging(uo.UnitOperation):
         if not (self.pre_comment == None or self.pre_comment == ''):
             self.flow_sheet.body_organizer(list_col_time=[],
                                            list_col_method=[],
-                                           list_col_content=self.pre_comment,
+                                           list_col_content=[self.pre_comment],
                                            list_col_record=[],
                                            list_col_operator=[],
                                            list_col_witness=[])
@@ -110,20 +110,20 @@ class Charging(uo.UnitOperation):
             list_col_operator=[]
             list_col_witness=[]
 
-            #line-1
+            #line-1: RM name, charging method, lot record
             list_col_time.append(defs.part_time)
             list_col_method.append(material.method)
             list_col_content.append(material.name)
-            list_col_record.append(defs.part_record_input)
+            list_col_record.append(defs.part_record_lot)
             list_col_operator.append(defs.part_signature)
             list_col_witness.append(defs.part_signature)
 
-            #line-2
+            #line-2: QTY instruction and record
             str_qty = str(material.qty_kg)+'±'+str(material.error_kg)+' kg'
             list_col_time.append(None)
             list_col_method.append(None)
             list_col_content.append(str_qty)
-            list_col_record.append(defs.part_record_lot)
+            list_col_record.append(defs.part_record_input)
             list_col_operator.append(None)
             list_col_witness.append(None)
             
@@ -134,15 +134,7 @@ class Charging(uo.UnitOperation):
                                            list_col_operator=list_col_operator,
                                            list_col_witness=list_col_witness)
 
-            #li liq: flex ID 
-            #line-3
-            list_col_time=[]
-            list_col_method=[]
-            list_col_content=[]
-            list_col_record=[]
-            list_col_operator=[]
-            list_col_witness=[]
-
+            #For liquid only, flex ID 
             if (material.method == charging_method_liq or
                 material.method == charging_method_press or
                 material.method == charging_method_shower):
@@ -154,15 +146,16 @@ class Charging(uo.UnitOperation):
                 list_col_operator.append(None)
                 list_col_witness.append(defs.part_signature)
 
-                if not (material.time_control == time_control_min or
-                        material.time_control == time_control_max or
-                        material.time_control == time_control_min_max):
-                    list_col_time.append(None)
-                    list_col_method.append(None)
-                    list_col_content.append(None)
-                    list_col_record.append(defs.part_check_charged)
-                    list_col_operator.append(defs.part_signature)
-                    list_col_witness.append(None)
+                # #TODO: this if part shall be removed. Only one end-of-dosing method at the end.
+                # if not (material.time_control == time_control_min or
+                #         material.time_control == time_control_max or
+                #         material.time_control == time_control_min_max):
+                #     self.put_end_of_dosing(list_col_time=list_col_time,
+                #                            list_col_method=list_col_method,
+                #                            list_col_content=list_col_content,
+                #                            list_col_record=list_col_record,
+                #                            list_col_operator=list_col_operator,
+                #                            list_col_witness=list_col_witness)
 
                 self.flow_sheet.body_organizer(list_col_time=list_col_time,
                                            list_col_method=list_col_method,
@@ -170,10 +163,30 @@ class Charging(uo.UnitOperation):
                                            list_col_record=list_col_record,
                                            list_col_operator=list_col_operator,
                                            list_col_witness=list_col_witness)
-
-            #TODO: this part should be replaced by a dedicated function
+            #for both liq and solid; temp and time control.
             if not (material.time_control == time_control_none or material.time_control is None):
                 self.put_time_control(material=material,
+                                        col_time=list_col_time,
+                                        col_method=list_col_method,
+                                        col_content=list_col_content,
+                                        col_record=list_col_record,
+                                        col_operator=list_col_operator,
+                                        col_witness=list_col_witness)
+                # self.put_end_of_dosing(col_time=list_col_time,
+                #                        col_method=list_col_method,
+                #                        col_content=list_col_content,
+                #                        col_record=list_col_record,
+                #                        col_operator=list_col_operator,
+                #                        col_witness=list_col_witness)
+                self.flow_sheet.body_organizer(list_col_time=list_col_time,
+                                           list_col_method=list_col_method,
+                                           list_col_content=list_col_content,
+                                           list_col_record=list_col_record,
+                                           list_col_operator=list_col_operator,
+                                           list_col_witness=list_col_witness)
+
+            if not (material.temp_control == temp_control_none or material.temp_control is None):
+                self.put_temp_control(material=material,
                                         col_time=list_col_time,
                                         col_method=list_col_method,
                                         col_content=list_col_content,
@@ -186,10 +199,23 @@ class Charging(uo.UnitOperation):
                                            list_col_record=list_col_record,
                                            list_col_operator=list_col_operator,
                                            list_col_witness=list_col_witness)
-                
-                self.flow_sheet.linefeed()
 
+            self.put_end_of_dosing(col_time=list_col_time,
+                                    col_method=list_col_method,
+                                    col_content=list_col_content,
+                                    col_record=list_col_record,
+                                    col_operator=list_col_operator,
+                                    col_witness=list_col_witness)
+            self.flow_sheet.body_organizer(list_col_time=list_col_time,
+                                        list_col_method=list_col_method,
+                                        list_col_content=list_col_content,
+                                        list_col_record=list_col_record,
+                                        list_col_operator=list_col_operator,
+                                        list_col_witness=list_col_witness)
+            self.flow_sheet.linefeed()
     #TODO: please test me!
+    
+    
     def put_time_control(self, material: Charging.Material,
                          col_time: List[str],
                          col_method: List[str],
@@ -207,21 +233,14 @@ class Charging(uo.UnitOperation):
             col_operator.append(defs.part_signature)
             col_witness.append(defs.part_signature)
 
-            col_time.append(None)
-            col_method.append(None)
-            col_content.append(None)
-            col_record.append(None)
-            col_operator.append(None)
-            col_witness.append(None)            
-
-            if not (material.temp_control != temp_control_none or material.temp_control is None):
-                self.put_temp_control(material=material,
-                                        col_time=col_time,
-                                        col_method=col_method,
-                                        col_content=col_content,
-                                        col_record=col_record,
-                                        col_operator=col_operator,
-                                        col_witness=col_witness)
+            # if not (material.temp_control == temp_control_none or material.temp_control is None):
+            #     self.put_temp_control(material=material,
+            #                             col_time=col_time,
+            #                             col_method=col_method,
+            #                             col_content=col_content,
+            #                             col_record=col_record,
+            #                             col_operator=col_operator,
+            #                             col_witness=col_witness)
         
         elif (material.time_control == time_control_max):
             sentece_instruction = "*滴下時間"+str(material.time_max)+"以内"
@@ -230,23 +249,17 @@ class Charging(uo.UnitOperation):
             col_content.append(None)
             col_record.append(None)
             col_operator.append(defs.part_signature)
-            col_witness.append(defs.part_signature)
+            col_witness.append(defs.part_signature)    
 
-            col_time.append(None)
-            col_method.append(None)
-            col_content.append(None)
-            col_record.append(None)
-            col_operator.append(None)
-            col_witness.append(None)            
+            # if not (material.temp_control == temp_control_none or material.temp_control is None):
+            #     self.put_temp_control(material=material,
+            #                             col_time=col_time,
+            #                             col_method=col_method,
+            #                             col_content=col_content,
+            #                             col_record=col_record,
+            #                             col_operator=col_operator,
+            #                             col_witness=col_witness)
 
-            if not (material.temp_control != temp_control_none or material.temp_control is None):
-                self.put_temp_control(material=material,
-                                        col_time=col_time,
-                                        col_method=col_method,
-                                        col_content=col_content,
-                                        col_record=col_record,
-                                        col_operator=col_operator,
-                                        col_witness=col_witness)
         elif (material.time_control == time_control_min_max):
             sentece_instruction = "*滴下時間"+str(material.time_min)+"～"+str(material.time_max)+"以内"
             col_time.append(defs.part_time)
@@ -256,29 +269,22 @@ class Charging(uo.UnitOperation):
             col_operator.append(defs.part_signature)
             col_witness.append(defs.part_signature)
 
-            col_time.append(None)
-            col_method.append(None)
-            col_content.append(None)
-            col_record.append(None)
-            col_operator.append(None)
-            col_witness.append(None)            
-
-            if not (material.temp_control != temp_control_none or material.temp_control is None):
-                self.put_temp_control(material=material,
-                                        col_time=col_time,
-                                        col_method=col_method,
-                                        col_content=col_content,
-                                        col_record=col_record,
-                                        col_operator=col_operator,
-                                        col_witness=col_witness)        
+            # if not (material.temp_control == temp_control_none or material.temp_control is None):
+            #     self.put_temp_control(material=material,
+            #                             col_time=col_time,
+            #                             col_method=col_method,
+            #                             col_content=col_content,
+            #                             col_record=col_record,
+            #                             col_operator=col_operator,
+            #                             col_witness=col_witness)        
             
 
-        col_time.append(defs.part_time)
-        col_method.append("仕込み終了")
-        col_content.append(None)
-        col_record.append(defs.part_check_charged)
-        col_operator.append(defs.part_signature)
-        col_witness.append(defs.part_signature)
+        # col_time.append(defs.part_time)
+        # col_method.append("仕込み終了")
+        # col_content.append(None)
+        # col_record.append(defs.part_check_charged)
+        # col_operator.append(defs.part_signature)
+        # col_witness.append(defs.part_signature)
 
 
 
@@ -372,7 +378,22 @@ class Charging(uo.UnitOperation):
             col_content.append(None)
             col_record.append(defs.part_record_temp_end)
             col_operator.append(None)
-            col_witness.append(None)    
+            col_witness.append(None)
+
+    def put_end_of_dosing(self,
+                         col_time: List[str],
+                         col_method: List[str],
+                         col_content: List[str],
+                         col_record: List[str],
+                         col_operator: List[str],
+                         col_witness: List[str]):
+
+            col_time.append(defs.part_time)
+            col_method.append("仕込み終了")
+            col_content.append(None)
+            col_record.append(defs.part_check_charged)
+            col_operator.append(defs.part_signature)
+            col_witness.append(defs.part_signature)
 
 
 
