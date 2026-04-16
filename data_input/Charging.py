@@ -42,6 +42,12 @@ list_temp_control =[
     temp_control_placeholder
 ]
 
+list_metrics_unit = [defs.tag_metrics_equiv, defs.tag_metrics_vol]
+
+error_range_placeholder='place holder'
+list_error_range = [None, 1.0, None, None, None, 5.0, error_range_placeholder]
+
+
 
 class Charging(uo.UnitOperation):
     """
@@ -56,11 +62,10 @@ class Charging(uo.UnitOperation):
         self.materials[]
 
     """
-    list_metrics_unit = [defs.tag_metrics_equiv, defs.tag_metrics_vol]
+    # list_metrics_unit = [defs.tag_metrics_equiv, defs.tag_metrics_vol]
 
-    #dict_error_range={1:1.0, 5:5.0, 6:"place holder"}
-    error_range_placeholder='place holder'
-    list_error_range = [None, 1.0, None, None, None, 5.0, error_range_placeholder]
+    # error_range_placeholder='place holder'
+    # list_error_range = [None, 1.0, None, None, None, 5.0, error_range_placeholder]
 
 
     
@@ -84,15 +89,6 @@ class Charging(uo.UnitOperation):
         self.post_comment = input()
 
     def test_data_creation(self):
-        # print("Unit operation-"+str(self.operation_seq)+": Charging")
-        # print("How many input materials?: ", end="")
-        # self.material_count=int(input())
-        # for i in range(self.material_count):
-        #     this_material = self.Material()
-        #     this_material.test_data_creation()
-        #     self.materials.append(this_material)
-        # print("test data created with "+str(self.material_count)+" material(s)")
-
         self.pre_comment = 'This is the line-1 of a dummy pre-comment\nThis is the line-2 of a dummy pre-comment'
         self.post_comment = 'This is the line-1 of a dummy post-comment;This is the line-2 of a dummy post-comment;The product is salty.'
         material_count = 2
@@ -419,23 +415,23 @@ class Charging(uo.UnitOperation):
             self.name = input()
         
             print("Metrics unit?: ")
-            for idx in range(len(Charging.list_metrics_unit)):
-                print(str(idx)+": "+Charging.list_metrics_unit[idx])
+            for idx in range(len(list_metrics_unit)):
+                print(str(idx)+": "+list_metrics_unit[idx])
             print("> ", end='')
             idx = int(input())
-            self.metrics_unit = Charging.list_metrics_unit[idx]
+            self.metrics_unit = list_metrics_unit[idx]
             
             print("Metrics value?: ", end='')
             self.metrics_val = float(input())
 
             
             print('Permissible error?:')
-            for idx in range(len(Charging.list_error_range)):
-                if Charging.list_error_range[idx] is not None:
-                    print(str(idx)+": "+str(Charging.list_error_range[idx])+"%")
+            for idx in range(len(list_error_range)):
+                if list_error_range[idx] is not None:
+                    print(str(idx)+": "+str(list_error_range[idx])+"%")
             print("> ", end='')
             choice_error_range = int(input())
-            self.error_pct = Charging.list_error_range[choice_error_range]
+            self.error_pct = list_error_range[choice_error_range]
 
             print('Specify a charging method?:')
             for idx in range(len(defs.list_yesno)):
@@ -509,8 +505,3 @@ class Charging(uo.UnitOperation):
             self.t_i_min = 15
             self.t_i_max = 25
             self.calc_qty()
-
-
-
-
-#charge = Charging(operation_seq=1)
