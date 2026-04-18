@@ -4,6 +4,35 @@ from flow_draw.data_input import UnitOperation as uo
 from typing import List
 
 
+header_material_name = 'Material Name'
+header_metrics_value = 'Metrics Value'
+header_metrics_unit = 'Metrics Unit'
+header_error = 'Permissible Error (%)'
+header_method = 'Charging Method'
+header_time_control = 'Time Control'
+header_time_min = 'Minimum Time (min)'
+header_time_max = 'Maximum Time (min)'
+header_temp_control = 'Temp Control'
+header_temp_min = 'Minimum Temp (min)'
+header_temp_max = 'Maximum Temp (min)'
+
+list_header_items = [
+    header_material_name,
+    header_metrics_value,
+    header_metrics_unit,
+    header_error,
+    header_method,
+    header_time_control,
+    header_time_min,
+    header_time_max,
+    header_temp_control,
+    header_temp_min,
+    header_temp_max
+]
+
+
+
+
 charging_method_liq = 'liquid_port'
 charging_method_shower = 'shower'
 charging_method_press = 'press_vessel'
@@ -74,6 +103,8 @@ class Charging(uo.UnitOperation):
         self.material_count = 0
         self.materials: List[Charging.Material] = []
 
+    def data_form_header_generator(self, subitems: int)->List[str]:
+        return list_header_items
 
     def interact(self):
         print("Unit operation-"+str(self.operation_seq)+": Charging")
@@ -134,7 +165,7 @@ class Charging(uo.UnitOperation):
             #line-1: RM name, charging method, lot record
             list_col_time.append(defs.part_time)
             list_col_method.append(material.method)
-            list_col_content.append(material.name)
+            list_col_content.append(material.material_name)
             list_col_record.append(defs.part_record_lot)
             list_col_operator.append(defs.part_signature)
             list_col_witness.append(defs.part_signature)
@@ -379,12 +410,11 @@ class Charging(uo.UnitOperation):
             col_witness.append(defs.part_signature)
 
 
-
     class Material:
         """This class is for each material charged, each instance correspnds to each dosage in a charging operation.
         """
         def __init__(self):
-            self.name = ""
+            self.material_name = ""
             self.metrics_unit = ""
             self.metrics_val = None
             self.error_pct = None
@@ -402,17 +432,17 @@ class Charging(uo.UnitOperation):
             """Calculates the quantity of the material and permissible error in "kg" unit. 
             """
             if self.metrics_unit == defs.tag_metrics_equiv:
-                self.qty_kg = uo.UnitOperation.chem_data.to_kilogram(material = self.name, equiv=self.metrics_val)
+                self.qty_kg = uo.UnitOperation.chem_data.to_kilogram(material = self.material_name, equiv=self.metrics_val)
                 self.error_kg = self.qty_kg * (self.error_pct/100.0)
             elif self.metrics_unit == defs.tag_metrics_vol:
-                self.qty_kg = uo.UnitOperation.chem_data.to_kilogram(material = self.name, vol=self.metrics_val)
+                self.qty_kg = uo.UnitOperation.chem_data.to_kilogram(material = self.material_name, vol=self.metrics_val)
                 self.error_kg = self.qty_kg * (self.error_pct/100.0)
             else:
                 raise ValueError('metrics_unit not defined')
         
         def interact(self):
             print("Material name?: ", end='')
-            self.name = input()
+            self.material_name = input()
         
             print("Metrics unit?: ")
             for idx in range(len(list_metrics_unit)):
@@ -475,7 +505,7 @@ class Charging(uo.UnitOperation):
 
 
         def test_data_creation1(self):
-            self.name = 'H2O'
+            self.material_name = 'H2O'
             self.metrics_unit = defs.tag_metrics_vol
             self.metrics_val = 1.0
             self.error_pct = 5.0
@@ -491,7 +521,7 @@ class Charging(uo.UnitOperation):
             self.calc_qty()
 
         def test_data_creation2(self):
-            self.name = 'NaCl'
+            self.material_name = 'NaCl'
             self.metrics_unit = defs.tag_metrics_equiv
             self.metrics_val = 2.0
             self.error_pct = 5.0

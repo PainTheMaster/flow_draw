@@ -27,7 +27,7 @@ op_placeholder = "placeholder"
 
 class UnitOperation:
     chem_data = None
-    flow_sheet = None
+    flow_sheet: fsht.Flowsheet = None
     def __init__(self, unit_operation: str=None, operation_seq: int=None):
         self.unit_operation = unit_operation
         self.operation_seq = operation_seq
@@ -65,6 +65,9 @@ class UnitOperation:
         
 
     def output_unit_operation(self):
+        raise NotImplementedError()
+    
+    def input_form_generator(self):
         raise NotImplementedError()
     
 
