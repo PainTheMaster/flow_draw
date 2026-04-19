@@ -1,4 +1,5 @@
 import openpyxl as xl
+import flow_draw.definitions as defs
 from openpyxl.worksheet.worksheet import Worksheet
 
 base_file_name_input = "Input"
@@ -47,11 +48,17 @@ class InputForm:
         #This function makes the summary input form based on the number of the unit operations in the process.
         self.current_line_summary = 1
         self.summary_ws.cell(row = self.current_line_summary, column = summary_col_seq, value=header_summary_sequence)
+        self.summary_ws.cell(row = self.current_line_summary, column = summary_col_seq).border = defs.xl_line_around
         self.summary_ws.cell(row = self.current_line_summary, column = summary_col_uo, value=header_summary_uo)
+        self.summary_ws.cell(row = self.current_line_summary, column = summary_col_uo).border = defs.xl_line_around
         self.summary_ws.cell(row = self.current_line_summary, column = summary_col_editcomment, value=header_summary_edit_comment)
+        self.summary_ws.cell(row = self.current_line_summary, column = summary_col_editcomment).border = defs.xl_line_around
         self.current_line_summary += 1
         for i in range(self.count_unit_op):
             self.summary_ws.cell(row=self.current_line_summary, column=summary_col_seq, value=i+1)
+            self.summary_ws.cell(row=self.current_line_summary, column=summary_col_seq).border = defs.xl_line_around
+            self.summary_ws.cell(row = self.current_line_summary, column = summary_col_uo).border = defs.xl_line_around
+            self.summary_ws.cell(row = self.current_line_summary, column = summary_col_editcomment).border = defs.xl_line_around
             self.current_line_summary += 1
         self.wb.save(filename=self.file_name)
         

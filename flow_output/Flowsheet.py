@@ -3,16 +3,18 @@ from openpyxl.styles.borders import Border, Side
 from openpyxl.styles import Alignment
 from typing import List
 
+import flow_draw.definitions as defs
 
-line_thin = Side(style="thin")
 
-line_left = Border(left=line_thin)
-line_right = Border(right=line_thin)
-line_top = Border(top=line_thin)
-line_bottom = Border(bottom=line_thin)
-line_around = Border(left=line_thin, right=line_thin, top=line_thin, bottom=line_thin)
-alignment_center = Alignment(horizontal='center')
-alignment_left = Alignment(horizontal='left')
+line_thin = defs.xl_line_thin
+
+line_left = defs.xl_line_left
+line_right = defs.xl_line_right
+line_top = defs.xl_line_top
+line_bottom = defs.xl_line_bottom
+line_around = defs.xl_line_around
+alignment_center = defs.xl_alignment_center
+alignment_left = defs.xl_alignment_left
 
 col_time = 1
 col_op_nr = 2

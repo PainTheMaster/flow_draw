@@ -1,3 +1,7 @@
+import openpyxl as xl
+from openpyxl.styles.borders import Border, Side
+from openpyxl.styles import Alignment
+
 #general
 tag_yes = 'Yes'
 tag_no = 'No'
@@ -17,3 +21,20 @@ part_record_temp_min = '仕込み時最低内温_______℃'
 part_record_temp_end = '終了時内温_______℃'
 part_check_charged ='□ 仕込み実施'
 part_signature = '   /  /  _____'
+
+
+#OpenPyXL styles
+xl_line_thin = Side(style="thin")
+
+xl_line_left = Border(left=xl_line_thin)
+xl_line_right = Border(right=xl_line_thin)
+xl_line_top = Border(top=xl_line_thin)
+xl_line_bottom = Border(bottom=xl_line_thin)
+xl_line_around = Border(left=xl_line_thin, right=xl_line_thin, top=xl_line_thin, bottom=xl_line_thin)
+xl_alignment_center = Alignment(horizontal='center')
+xl_alignment_left = Alignment(horizontal='left')
+
+
+
+
+
