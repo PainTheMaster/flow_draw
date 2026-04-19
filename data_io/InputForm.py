@@ -1,4 +1,5 @@
 import os
+import math
 import openpyxl as xl
 import pandas as pd
 import flow_draw.definitions as defs
@@ -38,11 +39,7 @@ class InputForm:
     def __init__(self, process_name: str, num_unit_op: int):
         self.process_name = process_name
         self.count_unit_op = num_unit_op
-        self.file_path =base_file_name_input+process_name+'.xlsx'
-        # self.wb = xl.Workbook()
-        # self.summary_ws:Worksheet = self.wb.create_sheet(title=sheet_summary_input)
-        # self.detail_ws: Worksheet = self.wb.create_sheet(title=sheet_detail_input)
-        # self.wb.remove(worksheet=self.wb['Sheet'])
+        self.file_path = base_file_name_input+process_name+'.xlsx'
         self.__manage_io()
         self.df_summary: pd.DataFrame = None
         self.current_line_summary = 1
@@ -65,7 +62,7 @@ class InputForm:
                 self.detail_ws: Worksheet = self.wb.create_sheet(title=sheet_detail_input)
             else:
                 self.detail_ws: Worksheet = self.wb[sheet_detail_input]
-            #TODO: implement the logic for the case where the file already exists
+
 
 
     def save_summary_form(self):
@@ -75,21 +72,19 @@ class InputForm:
         return self.file_path
 
     def put_summary_input_form(self, list_unit_ops: List[str]):
+        #This function makes the summary input form based on the number of the unit operations in the process.
         options_dv: str = '"'
         for item in list_unit_ops:
             options_dv += (item+',')
         options_dv = options_dv[:-1]
         options_dv = options_dv+'"'
-
         dv_unitops = DataValidation(
             type='list',
             formula1=options_dv,
             allow_blank=False
         )
-
         self.summary_ws.add_data_validation(dv_unitops)
 
-        #This function makes the summary input form based on the number of the unit operations in the process.
         self.current_line_summary = 1
         self.summary_ws.cell(row = self.current_line_summary, column = summary_col_seq, value=header_summary_sequence)
         self.summary_ws.cell(row = self.current_line_summary, column = summary_col_seq).border = defs.xl_border_around
@@ -124,7 +119,10 @@ class InputForm:
         if self.df_summary == None:
             self.load_process_summary()
         num_sub_items = self.df_summary[self.df_summary[header_summary_sequence]==seq][header_summary_num_subitems].item()
-        num_sub_items = int(num_sub_items)
+        if math.isnan(num_sub_items):
+            num_sub_items = 1
+        else:
+            num_sub_items = int(num_sub_items)
         menu_dict_local: Dict[str, DataValidation] = {}
         for key in menu_dict:
             options = '"'
@@ -162,6 +160,31 @@ class InputForm:
             self.current_line_detail +=1
         
         self.current_line_detail +=1
+
+    def load_process_details(self) -> List[pd.DataFrame]:
+        crude_df = pd.read_excel(io=self.file_path, sheet_name=sheet_detail_input, header=None)
+        temp_list_series: List[pd.Series] = []
+        tables: List[pd.DataFrame] = []
+
+        for _, row in crude_df.iterrows():
+            if row.isna().all():
+                if temp_list_series:
+                    tables.append(pd.DataFrame(temp_list_series))
+                    temp_list_series.clear()
+            else:
+                temp_list_series.append(row)
+        if temp_list_series:
+            tables.append(pd.DataFrame(temp_list_series))
+            temp_list_series.clear()
+
+        for i in range(len(tables)):
+            tables[i].dropna(axis='columns', how='all', inplace=True)
+            tables[i].columns = tables[i].iloc[0]
+            tables[i] = (tables[i])[1:].reset_index(drop=True)
+
+        return tables
+
+
 
 
         
