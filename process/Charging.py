@@ -1,6 +1,6 @@
 
 import flow_draw.definitions as defs
-from flow_draw.data_input import UnitOperation as uo
+from flow_draw.process import UnitOperation as uo
 from typing import List
 
 
@@ -103,7 +103,7 @@ class Charging(uo.UnitOperation):
         self.material_count = 0
         self.materials: List[Charging.Material] = []
 
-    def data_form_header_generator(self, subitems: int)->List[str]:
+    def data_form_header_generator(self, subitems: int):
         return list_header_items
 
     def interact(self):

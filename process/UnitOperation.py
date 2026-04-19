@@ -67,7 +67,7 @@ class UnitOperation:
     def output_unit_operation(self):
         raise NotImplementedError()
     
-    def input_form_generator(self):
+    def input_form_generator(self, sub_items: int):
         raise NotImplementedError()
     
 
