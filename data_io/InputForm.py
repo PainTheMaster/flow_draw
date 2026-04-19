@@ -1,3 +1,4 @@
+import os
 import openpyxl as xl
 import pandas as pd
 import flow_draw.definitions as defs
@@ -7,21 +8,23 @@ from typing import List, Dict
 
 base_file_name_input = "input_"
 sheet_summary_input = "summary"
-sheet_detail_input = "sataInput"
-
-summary_col_seq = 1
-summary_col_uo = 2
-summary_col_editcomment = 3
+sheet_detail_input = "detail"
 
 header_summary_sequence = 'Sequence'
 header_summary_uo = 'Unit Operation'
+header_summary_num_subitems = 'Number of Subitems'
 header_summary_edit_comment = 'Edit Comment'
 
-header_detail_seq = 'Sequence'
-header_detail_operation = 'Operation'
+summary_col_seq = 1
+summary_col_uo = 2
+summary_col_num_subitems = 3
+summary_col_editcomment = 4
+
+header_detail_seq = header_summary_sequence
+header_detail_operation = header_summary_uo
 header_detail_edit_comment = header_summary_edit_comment
 header_detail_precomment = 'Pre-comment'
-header_detail_postcomment = 'post-comment'
+header_detail_postcomment = 'Post-comment'
 
 common_header_detail = [
     header_detail_seq,
@@ -32,17 +35,39 @@ common_header_detail = [
 ]
 
 class InputForm:
-    def __init__(self, process_name: str, count_unit_op: int):
+    def __init__(self, process_name: str, num_unit_op: int):
         self.process_name = process_name
-        self.count_unit_op = count_unit_op
-        self.wb = xl.Workbook()
-        self.summary_ws:Worksheet = self.wb.create_sheet(title=sheet_summary_input)
-        self.detail_ws: Worksheet = self.wb.create_sheet(title=sheet_detail_input)
-        self.wb.remove(worksheet=self.wb['Sheet'])
+        self.count_unit_op = num_unit_op
         self.file_path =base_file_name_input+process_name+'.xlsx'
+        # self.wb = xl.Workbook()
+        # self.summary_ws:Worksheet = self.wb.create_sheet(title=sheet_summary_input)
+        # self.detail_ws: Worksheet = self.wb.create_sheet(title=sheet_detail_input)
+        # self.wb.remove(worksheet=self.wb['Sheet'])
+        self.__manage_io()
+        self.df_summary: pd.DataFrame = None
         self.current_line_summary = 1
         self.current_line_detail = 1
     
+    def __manage_io(self):
+        if not os.path.isfile(self.file_path):
+            self.wb = xl.Workbook()
+            self.wb.remove(worksheet=self.wb['Sheet'])
+            self.summary_ws:Worksheet = self.wb.create_sheet(title=sheet_summary_input)
+            self.detail_ws: Worksheet = self.wb.create_sheet(title=sheet_detail_input)
+        else:
+            self.wb=xl.load_workbook(self.file_path)
+            sheet_names = self.wb.sheetnames
+            if sheet_names.count(sheet_summary_input) == 0:
+                self.summary_ws:Worksheet = self.wb.create_sheet(title=sheet_summary_input)
+            else:
+                self.summary_ws: Worksheet = self.wb[sheet_summary_input]
+            if sheet_names.count(sheet_detail_input) == 0:
+                self.detail_ws: Worksheet = self.wb.create_sheet(title=sheet_detail_input)
+            else:
+                self.detail_ws: Worksheet = self.wb[sheet_detail_input]
+            #TODO: implement the logic for the case where the file already exists
+
+
     def save_summary_form(self):
         self.wb.save(filename=self.file_path)
 
@@ -70,6 +95,8 @@ class InputForm:
         self.summary_ws.cell(row = self.current_line_summary, column = summary_col_seq).border = defs.xl_border_around
         self.summary_ws.cell(row = self.current_line_summary, column = summary_col_uo, value=header_summary_uo)
         self.summary_ws.cell(row = self.current_line_summary, column = summary_col_uo).border = defs.xl_border_around
+        self.summary_ws.cell(row = self.current_line_summary, column = summary_col_num_subitems, value=header_summary_num_subitems)
+        self.summary_ws.cell(row = self.current_line_summary, column = summary_col_num_subitems).border = defs.xl_border_around        
         self.summary_ws.cell(row = self.current_line_summary, column = summary_col_editcomment, value=header_summary_edit_comment)
         self.summary_ws.cell(row = self.current_line_summary, column = summary_col_editcomment).border = defs.xl_border_around
         self.current_line_summary += 1
@@ -78,23 +105,30 @@ class InputForm:
             self.summary_ws.cell(row=self.current_line_summary, column=summary_col_seq).border = defs.xl_border_around
             self.summary_ws.cell(row = self.current_line_summary, column = summary_col_uo).border = defs.xl_border_around
             dv_unitops.add(self.summary_ws.cell(row = self.current_line_summary, column = summary_col_uo))
+            self.summary_ws.cell(row = self.current_line_summary, column = summary_col_num_subitems).border = defs.xl_border_around
             self.summary_ws.cell(row = self.current_line_summary, column = summary_col_editcomment).border = defs.xl_border_around
             self.current_line_summary += 1
         
 
     def load_process_summary(self) -> pd.DataFrame:
         df = pd.read_excel(io = self.file_path, sheet_name=sheet_summary_input, header=0)
+        self.df_summary = df
         return df
 
     
-        #TODO: implement me!
-    def put_detail_input_form(self, seq: int,specif_header: List[str], menu_dict: Dict[str, List[str]], sub_items: int=1):
+    def put_detail_input_form(self, seq: int,specif_header: List[str], menu_dict: Dict[str, List[str]]):
         #This function makes the detail input form based on the number of the unit operations in the process.
         #Prepare options for drop down list(s) called data validation.
-        local_menu_dict: Dict[str, DataValidation] = {}
-        for key in local_menu_dict:
+
+        self.summary_ws = None
+        if self.df_summary == None:
+            self.load_process_summary()
+        num_sub_items = self.df_summary[self.df_summary[header_summary_sequence]==seq][header_summary_num_subitems].item()
+        num_sub_items = int(num_sub_items)
+        menu_dict_local: Dict[str, DataValidation] = {}
+        for key in menu_dict:
             options = '"'
-            for item in local_menu_dict[key]:
+            for item in menu_dict[key]:
                 options += (item+',')
             options = options[:-1]
             options += '"'
@@ -103,19 +137,33 @@ class InputForm:
                 formula1=options,
                 allow_blank=True
             )
-            local_menu_dict[key]=dv_unitops
+            menu_dict_local[key]=dv_unitops
             self.detail_ws.add_data_validation(dv_unitops)
 
         header = [None]+common_header_detail+specif_header
-        for col in range(start=1, stop=len(header), step=1):
+        for col in range(1, len(header), 1):
             self.detail_ws.cell(row = self.current_line_detail, column = col, value=header[col])
             self.detail_ws.cell(row = self.current_line_detail, column = col).border = defs.xl_border_around
             self.detail_ws.cell(row = self.current_line_detail, column = col).font = defs.xl_font_bold
         self.current_line_detail += 1
 
-        for _ in range(sub_items):
+        for count in range(num_sub_items):
             #TODO: implement the logic to put the neceesary items in the body of the table
-            pass
+            for col in range(1, len(header), 1):
+                self.detail_ws.cell(row = self.current_line_detail, column = col).border = defs.xl_border_around
+                if header[col] == header_detail_seq:
+                    self.detail_ws.cell(row = self.current_line_detail, column = col).value = seq
+                if header[col] == header_detail_edit_comment and count == 0:
+                    self.detail_ws.cell(row = self.current_line_detail, column = col).value = self.df_summary[self.df_summary[header_summary_sequence]==seq][header_summary_edit_comment].item()
+                if header[col] in menu_dict_local:
+                    #TODO: please implement something
+                    temp_key = header[col]
+                    menu_dict_local[temp_key].add(self.detail_ws.cell(row = self.current_line_detail, column = col))
+            self.current_line_detail +=1
+        
+        self.current_line_detail +=1
+
+
         
         
 

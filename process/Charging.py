@@ -31,19 +31,18 @@ list_header_items = [
 ]
 
 
-
-
 charging_method_liq = 'liquid_port'
 charging_method_shower = 'shower'
 charging_method_press = 'press_vessel'
 charging_method_pow ='powder_port'
 charging_method_placeholder = 'placeholder'
-list_charging_method =[charging_method_liq,
-                    charging_method_shower,
-                    charging_method_press,
-                    charging_method_pow,
-                    charging_method_placeholder
-                    ]
+list_charging_method =[
+    charging_method_liq,
+    charging_method_shower,
+    charging_method_press,
+    charging_method_pow,
+    charging_method_placeholder
+]
 
 time_control_none = "No time control"
 time_control_min="Time control with minimum"
@@ -76,6 +75,12 @@ list_metrics_unit = [defs.tag_metrics_equiv, defs.tag_metrics_vol]
 error_range_placeholder='place holder'
 list_error_range = [None, 1.0, None, None, None, 5.0, error_range_placeholder]
 
+menu_dict ={
+    header_metrics_unit: list_metrics_unit,
+    header_method: list_charging_method,
+    header_time_control: list_time_control,
+    header_temp_control: list_temp_control
+}
 
 
 class Charging(uo.UnitOperation):
