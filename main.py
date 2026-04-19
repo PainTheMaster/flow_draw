@@ -50,5 +50,8 @@ from flow_draw.data_io import InputForm as ipt
 # test_sheet.test_save()
 
 input_form = ipt.InputForm(process_name='test_process', count_unit_op=5)
-input_form.put_summary_input_form()
+input_form.put_summary_input_form(list_unit_ops=uo.list_unit_ops)
+input_form.save_summary_form()
 
+# summary_df = input_form.load_summary()
+# print(summary_df)

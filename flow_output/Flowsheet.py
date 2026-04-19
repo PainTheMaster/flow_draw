@@ -8,11 +8,11 @@ import flow_draw.definitions as defs
 
 line_thin = defs.xl_line_thin
 
-line_left = defs.xl_line_left
-line_right = defs.xl_line_right
-line_top = defs.xl_line_top
-line_bottom = defs.xl_line_bottom
-line_around = defs.xl_line_around
+border_left = defs.xl_border_left
+border_right = defs.xl_border_right
+border_top = defs.xl_border_top
+border_bottom = defs.xl_border_bottom
+border_around = defs.xl_border_around
 alignment_center = defs.xl_alignment_center
 alignment_left = defs.xl_alignment_left
 
@@ -40,7 +40,7 @@ class Flowsheet:
         self.ws.merge_cells(start_row=self.current_line, start_column=col_title1, end_row=self.current_line, end_column=col_title2)
         self.ws.cell(row=self.current_line, column=col_op_nr, value=op_nr)
         self.ws.cell(row=self.current_line, column=col_title1, value=title)
-        self.ws.cell(row=self.current_line, column=col_op_nr).border = line_around
+        self.ws.cell(row=self.current_line, column=col_op_nr).border = border_around
         self.ws.cell(row=self.current_line, column=col_op_nr).alignment = alignment_center
         self.ws.cell(row=self.current_line, column=col_title1).border = Border(left=line_thin, top=line_thin, bottom=line_thin)
         self.ws.cell(row=self.current_line, column=col_title2).border = Border(top=line_thin, bottom=line_thin, right=line_thin)

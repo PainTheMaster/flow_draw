@@ -24,6 +24,26 @@ op_tare = "tare"
 op_prod_discharge = "prod_discharge"
 op_placeholder = "placeholder"
 
+list_unit_ops =[
+    op_line_clearance,
+    op_N2_replace,
+    op_temp_control,
+    op_charging,
+    op_agitation,
+    op_settling,
+    op_aq_discharge,
+    op_distillation,
+    op_cip,
+    op_transfer,
+    op_filtration,
+    op_rinse,
+    op_reslurry,
+    op_drying,
+    op_tare,
+    op_prod_discharge,
+    op_placeholder
+]
+
 
 class UnitOperation:
     chem_data = None
