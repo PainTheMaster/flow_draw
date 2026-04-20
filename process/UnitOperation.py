@@ -1,3 +1,5 @@
+import pandas as pd
+
 
 from flow_draw import definitions as defs
 from flow_draw import chemistry as chem
@@ -87,9 +89,11 @@ class UnitOperation:
     def output_unit_operation(self):
         raise NotImplementedError()
     
-    def input_form_generator(self, sub_items: int):
+    def get_detail_header(self) -> List[str]:
         raise NotImplementedError()
     
+    def load_from_df(df: pd.DataFrame):
+        raise NotImplementedError()
 
 
 

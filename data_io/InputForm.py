@@ -115,7 +115,9 @@ class InputForm:
         #This function makes the detail input form based on the number of the unit operations in the process.
         #Prepare options for drop down list(s) called data validation.
 
+        #summary_ws is no loner necessay, as this instance is needed to edit the worksheet before put out to the excel workbook. 
         self.summary_ws = None
+
         if self.df_summary == None:
             self.load_process_summary()
         num_sub_items = self.df_summary[self.df_summary[header_summary_sequence]==seq][header_summary_num_subitems].item()

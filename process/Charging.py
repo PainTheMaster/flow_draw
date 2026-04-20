@@ -1,8 +1,12 @@
-
+import pandas as pd
 import flow_draw.definitions as defs
 from flow_draw.process import UnitOperation as uo
+from flow_draw.data_io import InputForm
 from typing import List
 
+
+header_precomment = InputForm.header_detail_precomment #Don't include this in the specific header list!!!
+header_postcomment = InputForm.header_detail_postcomment #Don't include this in the specific header list!!!
 
 header_material_name = 'Material Name'
 header_metrics_value = 'Metrics Value'
@@ -13,8 +17,8 @@ header_time_control = 'Time Control'
 header_time_min = 'Minimum Time (min)'
 header_time_max = 'Maximum Time (min)'
 header_temp_control = 'Temp Control'
-header_temp_min = 'Minimum Temp (min)'
-header_temp_max = 'Maximum Temp (min)'
+header_temp_min = 'Minimum Temp (deg-C)'
+header_temp_max = 'Maximum Temp (deg-C)'
 
 list_header_items = [
     header_material_name,
@@ -108,33 +112,48 @@ class Charging(uo.UnitOperation):
         self.material_count = 0
         self.materials: List[Charging.Material] = []
 
-    def data_form_header_generator(self, subitems: int):
+    def get_detail_header(self) -> List[str]:
         return list_header_items
 
-    def interact(self):
-        print("Unit operation-"+str(self.operation_seq)+": Charging")
-        print("Pre-comment?:")
-        self.pre_comment = input()
-        print("How many input materials?: ", end="")
-        self.material_count=int(input())
-        for i in range(self.material_count):
-            this_material = self.Material()
-            this_material.interact()
-            self.materials.append(this_material)
-        print("Post-comment?:")
-        self.post_comment = input()
+    def load_from_df(self, df: pd.DataFrame):
+        #TODO: please check if my implementation is sufficient!!!!
+        first_row = df.iloc[0]
+        if not pd.isna(first_row[header_precomment]):
+            self.pre_comment = first_row[header_precomment]
+        if not pd.isna(first_row[header_postcomment]):
+            self.post_comment = first_row[header_postcomment]
+        for _, subitem in df.iterrows():
+            new_material = self.Material()
+            new_material.load_from_ser(subitem)
+            self.materials.append(new_material)
+            self.material_count += 1
 
-    def test_data_creation(self):
-        self.pre_comment = 'This is the line-1 of a dummy pre-comment\nThis is the line-2 of a dummy pre-comment'
-        self.post_comment = 'This is the line-1 of a dummy post-comment;This is the line-2 of a dummy post-comment;The product is salty.'
-        material_count = 2
-        material1 = self.Material()
-        material1.test_data_creation1()
-        self.materials.append(material1)
-        material2 = self.Material()
-        material2.test_data_creation2()
-        self.materials.append(material2)
-        print("Test data created for salt water.")
+        
+
+    # def interact(self):
+    #     print("Unit operation-"+str(self.operation_seq)+": Charging")
+    #     print("Pre-comment?:")
+    #     self.pre_comment = input()
+    #     print("How many input materials?: ", end="")
+    #     self.material_count=int(input())
+    #     for i in range(self.material_count):
+    #         this_material = self.Material()
+    #         this_material.interact()
+    #         self.materials.append(this_material)
+    #     print("Post-comment?:")
+    #     self.post_comment = input()
+
+    # def test_data_creation(self):
+    #     self.pre_comment = 'This is the line-1 of a dummy pre-comment\nThis is the line-2 of a dummy pre-comment'
+    #     self.post_comment = 'This is the line-1 of a dummy post-comment;This is the line-2 of a dummy post-comment;The product is salty.'
+    #     material_count = 2
+    #     material1 = self.Material()
+    #     material1.test_data_creation1()
+    #     self.materials.append(material1)
+    #     material2 = self.Material()
+    #     material2.test_data_creation2()
+    #     self.materials.append(material2)
+    #     print("Test data created for salt water.")
 
     def output_unit_operation(self):
         self.flow_sheet.header_organizer(op_nr=self.operation_seq, title=self.unit_operation)
@@ -176,7 +195,8 @@ class Charging(uo.UnitOperation):
             list_col_witness.append(defs.part_signature)
 
             #line-2: QTY instruction and record
-            str_qty = str(material.qty_kg)+'±'+str(material.error_kg)+' kg'
+            #str_qty = str(material.qty_kg)+'±'+str(material.error_kg)+' kg'
+            str_qty = f'{material.qty_kg}±{material.error_kg} kg'
             list_col_time.append(None)
             list_col_method.append(None)
             list_col_content.append(str_qty)
@@ -212,7 +232,7 @@ class Charging(uo.UnitOperation):
             
             #for both liq and solid; temp and time control.
             if not (material.time_control == time_control_none or material.time_control is None):
-                self.put_time_control(material=material,
+                self.__put_time_control(material=material,
                                         col_time=list_col_time,
                                         col_method=list_col_method,
                                         col_content=list_col_content,
@@ -227,7 +247,7 @@ class Charging(uo.UnitOperation):
                                            list_col_witness=list_col_witness)
 
             if not (material.temp_control == temp_control_none or material.temp_control is None):
-                self.put_temp_control(material=material,
+                self.__put_temp_control(material=material,
                                         col_time=list_col_time,
                                         col_method=list_col_method,
                                         col_content=list_col_content,
@@ -241,7 +261,7 @@ class Charging(uo.UnitOperation):
                                            list_col_operator=list_col_operator,
                                            list_col_witness=list_col_witness)
 
-            self.put_end_of_dosing(col_time=list_col_time,
+            self.__put_end_of_dosing(col_time=list_col_time,
                                     col_method=list_col_method,
                                     col_content=list_col_content,
                                     col_record=list_col_record,
@@ -271,9 +291,32 @@ class Charging(uo.UnitOperation):
                                             list_col_witness=list_col_witness)
             self.flow_sheet.linefeed()
             
+    def interact(self):
+        print("Unit operation-"+str(self.operation_seq)+": Charging")
+        print("Pre-comment?:")
+        self.pre_comment = input()
+        print("How many input materials?: ", end="")
+        self.material_count=int(input())
+        for i in range(self.material_count):
+            this_material = self.Material()
+            this_material.interact()
+            self.materials.append(this_material)
+        print("Post-comment?:")
+        self.post_comment = input()
 
+    def test_data_creation(self):
+        self.pre_comment = 'This is the line-1 of a dummy pre-comment\nThis is the line-2 of a dummy pre-comment'
+        self.post_comment = 'This is the line-1 of a dummy post-comment;This is the line-2 of a dummy post-comment;The product is salty.'
+        material_count = 2
+        material1 = self.Material()
+        material1.test_data_creation1()
+        self.materials.append(material1)
+        material2 = self.Material()
+        material2.test_data_creation2()
+        self.materials.append(material2)
+        print("Test data created for salt water.")
 
-    def put_time_control(self, material: Charging.Material,
+    def __put_time_control(self, material: Charging.Material,
                          col_time: List[str],
                          col_method: List[str],
                          col_content: List[str],
@@ -282,7 +325,8 @@ class Charging(uo.UnitOperation):
                          col_witness: List[str]):
 
         if (material.time_control == time_control_min):
-            sentece_instruction = "*滴下時間"+str(material.time_min)+"以上"
+            #sentece_instruction = "*滴下時間"+str(material.time_min)+"以上"
+            sentece_instruction = f'*滴下時間{material.time_min}以上'
             col_time.append(defs.part_time)
             col_method.append("仕込み開始")
             col_content.append(sentece_instruction)
@@ -291,7 +335,8 @@ class Charging(uo.UnitOperation):
             col_witness.append(defs.part_signature)
 
         elif (material.time_control == time_control_max):
-            sentece_instruction = "*滴下時間"+str(material.time_max)+"以内"
+            #sentece_instruction = "*滴下時間"+str(material.time_max)+"以内"
+            sentece_instruction = f'*滴下時間{material.time_max}以内'
             col_time.append(defs.part_time)
             col_method.append("仕込み開始")
             col_content.append(sentece_instruction)
@@ -300,7 +345,8 @@ class Charging(uo.UnitOperation):
             col_witness.append(defs.part_signature)    
 
         elif (material.time_control == time_control_min_max):
-            sentece_instruction = "*滴下時間"+str(material.time_min)+"～"+str(material.time_max)+"以内"
+            #sentece_instruction = "*滴下時間"+str(material.time_min)+"～"+str(material.time_max)+"以内"
+            sentece_instruction = f'*滴下時間{material.time_min}～{material.time_max}以内'
             col_time.append(defs.part_time)
             col_method.append("仕込み開始")
             col_content.append(sentece_instruction)
@@ -309,7 +355,7 @@ class Charging(uo.UnitOperation):
             col_witness.append(defs.part_signature)
 
 
-    def put_temp_control(self, material: Charging.Material,
+    def __put_temp_control(self, material: Charging.Material,
                          col_time: List[str],
                          col_method: List[str],
                          col_content: List[str],
@@ -399,7 +445,7 @@ class Charging(uo.UnitOperation):
             col_operator.append(None)
             col_witness.append(None)
 
-    def put_end_of_dosing(self,
+    def __put_end_of_dosing(self,
                          col_time: List[str],
                          col_method: List[str],
                          col_content: List[str],
@@ -433,17 +479,17 @@ class Charging(uo.UnitOperation):
             self.t_i_min = None
             self.t_i_max = None
 
-        def calc_qty(self):
-            """Calculates the quantity of the material and permissible error in "kg" unit. 
-            """
-            if self.metrics_unit == defs.tag_metrics_equiv:
-                self.qty_kg = uo.UnitOperation.chem_data.to_kilogram(material = self.material_name, equiv=self.metrics_val)
-                self.error_kg = self.qty_kg * (self.error_pct/100.0)
-            elif self.metrics_unit == defs.tag_metrics_vol:
-                self.qty_kg = uo.UnitOperation.chem_data.to_kilogram(material = self.material_name, vol=self.metrics_val)
-                self.error_kg = self.qty_kg * (self.error_pct/100.0)
-            else:
-                raise ValueError('metrics_unit not defined')
+        # def __calc_qty(self):
+        #     """Calculates the quantity of the material and permissible error in "kg" unit. 
+        #     """
+        #     if self.metrics_unit == defs.tag_metrics_equiv:
+        #         self.qty_kg = uo.UnitOperation.chem_data.to_kilogram(material = self.material_name, equiv=self.metrics_val)
+        #         self.error_kg = self.qty_kg * (self.error_pct/100.0)
+        #     elif self.metrics_unit == defs.tag_metrics_vol:
+        #         self.qty_kg = uo.UnitOperation.chem_data.to_kilogram(material = self.material_name, vol=self.metrics_val)
+        #         self.error_kg = self.qty_kg * (self.error_pct/100.0)
+        #     else:
+        #         raise ValueError('metrics_unit not defined')
         
         def interact(self):
             print("Material name?: ", end='')
@@ -506,8 +552,79 @@ class Charging(uo.UnitOperation):
                 print("Charging temperature (℃) upper limit?: ", end='')
                 self.t_i_max = float(input())
             
-            self.calc_qty()
+            self.__calc_qty()
 
+        def load_from_ser(self, ser: pd.Series):
+            #TODO re-write this part from interactive mode to read-from-data set
+            #print("Material name?: ", end='')
+            self.material_name = ser[header_material_name]
+
+        
+            #print("Metrics unit?: ")
+            #for idx in range(len(list_metrics_unit)):
+            #    print(str(idx)+": "+list_metrics_unit[idx])
+            #print("> ", end='')
+            #idx = int(input())
+            #self.metrics_unit = list_metrics_unit[idx]
+            self.metrics_unit = ser[header_metrics_unit]
+
+            #print("Metrics value?: ", end='')
+            #self.metrics_val = float(input())
+            self.metrics_val = ser[header_metrics_value]
+
+            
+            # print('Permissible error?:')
+            # for idx in range(len(list_error_range)):
+            #     if list_error_range[idx] is not None:
+            #         print(str(idx)+": "+str(list_error_range[idx])+"%")
+            # print("> ", end='')
+            # choice_error_range = int(input())
+            # self.error_pct = list_error_range[choice_error_range]
+            self.error_pct = ser[header_error]
+
+            # print('Specify a charging method?:')
+            # for idx in range(len(defs.list_yesno)):
+            #     print(str(idx)+': '+defs.list_yesno[idx])
+            # print("> ", end='')
+            # specif_yesno = int(input())
+            # if defs.list_yesno[specif_yesno] == defs.tag_yes:
+            #     for idx in range(len(list_charging_method)):
+            #         print(str(idx)+': '+list_charging_method[idx])
+            #     print("> ", end='')
+            #     choice_chargingmethod = int(input())
+            #     self.method = list_charging_method[choice_chargingmethod]
+            self.method  = ser[header_method]
+
+
+            # print("Specicfy a time control method?: ")
+            # for idx in range(len(list_time_control)):
+            #     print(str(idx)+': '+list_time_control[idx])
+            # print("> ", end='')
+            # choice_time_control = int(input())
+            # self.time_control = list_time_control[choice_time_control]
+            self.time_control = ser[header_time_control]
+            if self.time_control == time_control_min or self.time_control == time_control_min_max:
+                #print("Charging time lower limit?: ", end='')
+                self.time_min = ser[header_time_min]
+            if self.time_control == time_control_max or self.time_control == time_control_min_max:
+                #print("Charging time upper limit?: ", end='')
+                self.time_max = ser[header_time_max]
+            
+            # print("Specicfy a temperature control method?: ")
+            # for idx in range(len(list_temp_control)):
+            #     print(str(idx)+': '+list_temp_control[idx])
+            # print("> ", end='')
+            # choice_temp_control = int(input())
+            # self.temp_control = list_temp_control[choice_temp_control]
+            self.temp_control = ser[header_temp_min]
+            if self.temp_control == temp_control_min or self.temp_control == temp_control_min_max:
+                # print("Charging temperature (℃) lower limit?: ", end='')
+                self.t_i_min = ser[header_temp_min]
+            if self.temp_control == temp_control_max or self.temp_control == temp_control_min_max:
+                #print("Charging temperature (℃) upper limit?: ", end='')
+                self.t_i_max = ser[header_temp_max]
+
+            self.__calc_qty()
 
         def test_data_creation1(self):
             self.material_name = 'H2O'
@@ -523,7 +640,7 @@ class Charging(uo.UnitOperation):
             self.temp_control = temp_control_min_max
             self.t_i_min = 15
             self.t_i_max = 25
-            self.calc_qty()
+            self.__calc_qty()
 
         def test_data_creation2(self):
             self.material_name = 'NaCl'
@@ -539,4 +656,16 @@ class Charging(uo.UnitOperation):
             self.temp_control = temp_control_min_max
             self.t_i_min = 15
             self.t_i_max = 25
-            self.calc_qty()
+            self.__calc_qty()
+
+        def __calc_qty(self):
+            """Calculates the quantity of the material and permissible error in "kg" unit. 
+            """
+            if self.metrics_unit == defs.tag_metrics_equiv:
+                self.qty_kg = uo.UnitOperation.chem_data.to_kilogram(material = self.material_name, equiv=self.metrics_val)
+                self.error_kg = self.qty_kg * (self.error_pct/100.0)
+            elif self.metrics_unit == defs.tag_metrics_vol:
+                self.qty_kg = uo.UnitOperation.chem_data.to_kilogram(material = self.material_name, vol=self.metrics_val)
+                self.error_kg = self.qty_kg * (self.error_pct/100.0)
+            else:
+                raise ValueError('metrics_unit not defined')
