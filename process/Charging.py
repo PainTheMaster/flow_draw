@@ -100,12 +100,6 @@ class Charging(uo.UnitOperation):
         self.materials[]
 
     """
-    # list_metrics_unit = [defs.tag_metrics_equiv, defs.tag_metrics_vol]
-
-    # error_range_placeholder='place holder'
-    # list_error_range = [None, 1.0, None, None, None, 5.0, error_range_placeholder]
-
-
     
     def __init__(self, operation_seq=None):
         super().__init__(unit_operation=uo.op_charging, operation_seq=operation_seq)
@@ -124,7 +118,7 @@ class Charging(uo.UnitOperation):
             self.post_comment = first_row[header_postcomment]
         for _, subitem in df.iterrows():
             new_material = self.Material()
-            new_material.load_from_ser(subitem)
+            new_material.load_from_series(subitem)
             self.materials.append(new_material)
             self.material_count += 1
 
@@ -554,45 +548,11 @@ class Charging(uo.UnitOperation):
             
             self.__calc_qty()
 
-        def load_from_ser(self, ser: pd.Series):
-            #TODO re-write this part from interactive mode to read-from-data set
-            #print("Material name?: ", end='')
+        def load_from_series(self, ser: pd.Series):
             self.material_name = ser[header_material_name]
-
-        
-            #print("Metrics unit?: ")
-            #for idx in range(len(list_metrics_unit)):
-            #    print(str(idx)+": "+list_metrics_unit[idx])
-            #print("> ", end='')
-            #idx = int(input())
-            #self.metrics_unit = list_metrics_unit[idx]
             self.metrics_unit = ser[header_metrics_unit]
-
-            #print("Metrics value?: ", end='')
-            #self.metrics_val = float(input())
             self.metrics_val = ser[header_metrics_value]
-
-            
-            # print('Permissible error?:')
-            # for idx in range(len(list_error_range)):
-            #     if list_error_range[idx] is not None:
-            #         print(str(idx)+": "+str(list_error_range[idx])+"%")
-            # print("> ", end='')
-            # choice_error_range = int(input())
-            # self.error_pct = list_error_range[choice_error_range]
             self.error_pct = ser[header_error]
-
-            # print('Specify a charging method?:')
-            # for idx in range(len(defs.list_yesno)):
-            #     print(str(idx)+': '+defs.list_yesno[idx])
-            # print("> ", end='')
-            # specif_yesno = int(input())
-            # if defs.list_yesno[specif_yesno] == defs.tag_yes:
-            #     for idx in range(len(list_charging_method)):
-            #         print(str(idx)+': '+list_charging_method[idx])
-            #     print("> ", end='')
-            #     choice_chargingmethod = int(input())
-            #     self.method = list_charging_method[choice_chargingmethod]
             self.method  = ser[header_method]
 
 

@@ -35,6 +35,8 @@ common_header_detail = [
     header_detail_postcomment 
 ]
 
+no_comment_instr = '(No comment here)'
+
 class InputForm:
     def __init__(self, process_name: str, num_unit_op: int):
         self.process_name = process_name
@@ -140,23 +142,25 @@ class InputForm:
             menu_dict_local[key]=dv_unitops
             self.detail_ws.add_data_validation(dv_unitops)
 
+        #Note: header[0] == None to align with Excel
         header = [None]+common_header_detail+specif_header
         for col in range(1, len(header), 1):
             self.detail_ws.cell(row = self.current_line_detail, column = col, value=header[col])
             self.detail_ws.cell(row = self.current_line_detail, column = col).border = defs.xl_border_around
             self.detail_ws.cell(row = self.current_line_detail, column = col).font = defs.xl_font_bold
         self.current_line_detail += 1
-
+        
         for count in range(num_sub_items):
-            #TODO: implement the logic to put the neceesary items in the body of the table
+            #Note: header[0] == None to align with Excel
             for col in range(1, len(header), 1):
                 self.detail_ws.cell(row = self.current_line_detail, column = col).border = defs.xl_border_around
                 if header[col] == header_detail_seq:
                     self.detail_ws.cell(row = self.current_line_detail, column = col).value = seq
                 if header[col] == header_detail_edit_comment and count == 0:
                     self.detail_ws.cell(row = self.current_line_detail, column = col).value = self.df_summary[self.df_summary[header_summary_sequence]==seq][header_summary_edit_comment].item()
+                if (header[col] == header_detail_precomment or header[col] == header_detail_postcomment) and count > 0:
+                    self.detail_ws.cell(row = self.current_line_detail, column = col).value = no_comment_instr
                 if header[col] in menu_dict_local:
-                    #TODO: please implement something
                     temp_key = header[col]
                     menu_dict_local[temp_key].add(self.detail_ws.cell(row = self.current_line_detail, column = col))
             self.current_line_detail +=1
