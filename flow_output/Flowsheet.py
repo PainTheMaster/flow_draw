@@ -2,7 +2,7 @@ import openpyxl as xl
 from openpyxl.styles.borders import Border, Side
 from openpyxl.styles import Alignment
 from typing import List
-
+import re
 import flow_draw.definitions as defs
 
 
@@ -34,8 +34,16 @@ class Flowsheet:
         self.ws = self.wb.active
         self.current_line = 1
 
+    def put_body_comments(self, comments :str):
+        cmt_brkdwn = re.split('[\n;]', comments)
+        self.body_organizer(list_col_time=[],
+                            list_col_method=[],
+                            list_col_content=cmt_brkdwn,
+                            list_col_record=[],
+                            list_col_operator=[],
+                            list_col_witness=[])
+        self.linefeed()
 
-    
     def header_organizer(self, op_nr: int, title: str):
         self.ws.merge_cells(start_row=self.current_line, start_column=col_title1, end_row=self.current_line, end_column=col_title2)
         self.ws.cell(row=self.current_line, column=col_op_nr, value=op_nr)
@@ -45,6 +53,15 @@ class Flowsheet:
         self.ws.cell(row=self.current_line, column=col_title1).border = Border(left=line_thin, top=line_thin, bottom=line_thin)
         self.ws.cell(row=self.current_line, column=col_title2).border = Border(top=line_thin, bottom=line_thin, right=line_thin)
         self.ws.cell(row=self.current_line, column=col_title1).alignment = alignment_center
+        self.current_line += 1
+
+    def put_line(self, time: str ='', method: str='', content: str='', record: str='', operator: str='', witness: str=''):
+        self.ws.cell(row=self.current_line, column=col_time).value = time
+        self.ws.cell(row=self.current_line, column=col_method).value = method
+        self.ws.cell(row=self.current_line, column=col_content).value = content
+        self.ws.cell(row=self.current_line, column=col_record).value = record
+        self.ws.cell(row=self.current_line, column=col_operator).value = operator
+        self.ws.cell(row=self.current_line, column=col_witness).value = witness
         self.current_line += 1
 
     def body_organizer(self, list_col_time: List[str], list_col_method: List[str], list_col_content: List[str], list_col_record: List[str], list_col_operator: List[str], list_col_witness: List[str]):
@@ -93,8 +110,8 @@ class Flowsheet:
 
 
 
-    def test_save(self):
-        self.wb.save("test_output.xlsx")
+    def save(self, filename: str):
+        self.wb.save(filename=filename)
 
 
 

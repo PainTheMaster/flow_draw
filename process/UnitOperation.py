@@ -51,10 +51,10 @@ class UnitOperation:
     chem_data = None
     flow_sheet: fsht.Flowsheet = None
     def __init__(self, unit_operation: str=None, operation_seq: int=None):
-        self.unit_operation = unit_operation
-        self.operation_seq = operation_seq
-        self.pre_comment = ''
-        self.post_comment = ''
+        self.unit_operation: str = unit_operation
+        self.operation_seq: int = operation_seq
+        self.pre_comment: str = ''
+        self.post_comment: str = ''
 
 
     @classmethod 
@@ -92,7 +92,7 @@ class UnitOperation:
     def get_detail_header(self) -> List[str]:
         raise NotImplementedError()
     
-    def load_from_df(df: pd.DataFrame):
+    def load_from_df(self, df: pd.DataFrame):
         raise NotImplementedError()
 
 

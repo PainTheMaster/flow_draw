@@ -122,167 +122,43 @@ class Charging(uo.UnitOperation):
             self.materials.append(new_material)
             self.material_count += 1
 
-        
-
-    # def interact(self):
-    #     print("Unit operation-"+str(self.operation_seq)+": Charging")
-    #     print("Pre-comment?:")
-    #     self.pre_comment = input()
-    #     print("How many input materials?: ", end="")
-    #     self.material_count=int(input())
-    #     for i in range(self.material_count):
-    #         this_material = self.Material()
-    #         this_material.interact()
-    #         self.materials.append(this_material)
-    #     print("Post-comment?:")
-    #     self.post_comment = input()
-
-    # def test_data_creation(self):
-    #     self.pre_comment = 'This is the line-1 of a dummy pre-comment\nThis is the line-2 of a dummy pre-comment'
-    #     self.post_comment = 'This is the line-1 of a dummy post-comment;This is the line-2 of a dummy post-comment;The product is salty.'
-    #     material_count = 2
-    #     material1 = self.Material()
-    #     material1.test_data_creation1()
-    #     self.materials.append(material1)
-    #     material2 = self.Material()
-    #     material2.test_data_creation2()
-    #     self.materials.append(material2)
-    #     print("Test data created for salt water.")
-
     def output_unit_operation(self):
         self.flow_sheet.header_organizer(op_nr=self.operation_seq, title=self.unit_operation)
-        list_col_time: List[str] = []
-        list_col_method: List[str]=[]
-        list_col_content: List[str]=[]
-        list_col_record: List[str]=[]
-        list_col_operator: List[str]=[]
-        list_col_witness: List[str]=[]
         if not (self.pre_comment == None or self.pre_comment == ''):
-            self.put_comment(comments=self.pre_comment,
-                            list_col_time=list_col_time,
-                            list_col_method=list_col_method,
-                            list_col_content=list_col_content,
-                            list_col_record=list_col_record,
-                            list_col_operator=list_col_operator,
-                            list_col_witness=list_col_witness)
-            self.flow_sheet.body_organizer(list_col_time=list_col_time,
-                                           list_col_method=list_col_method,
-                                           list_col_content=list_col_content,
-                                           list_col_record=list_col_record,
-                                           list_col_operator=list_col_operator,
-                                           list_col_witness=list_col_witness)
+            self.flow_sheet.put_body_comments(self.pre_comment)
 
         for material in self.materials:
-            list_col_time.clear()
-            list_col_method.clear()
-            list_col_content.clear()
-            list_col_record.clear()
-            list_col_operator.clear()
-            list_col_witness.clear()
-
-            #line-1: RM name, charging method, lot record
-            list_col_time.append(defs.part_time)
-            list_col_method.append(material.method)
-            list_col_content.append(material.material_name)
-            list_col_record.append(defs.part_record_lot)
-            list_col_operator.append(defs.part_signature)
-            list_col_witness.append(defs.part_signature)
+            self.flow_sheet.put_line(time=defs.part_time,
+                                     method=material.method,
+                                     content=material.material_name,
+                                     record=defs.part_record_lot,
+                                     operator=defs.part_signature,
+                                     witness=defs.part_signature)
 
             #line-2: QTY instruction and record
-            #str_qty = str(material.qty_kg)+'±'+str(material.error_kg)+' kg'
             str_qty = f'{material.qty_kg}±{material.error_kg} kg'
-            list_col_time.append(None)
-            list_col_method.append(None)
-            list_col_content.append(str_qty)
-            list_col_record.append(defs.part_record_input)
-            list_col_operator.append(None)
-            list_col_witness.append(None)
-            
-            self.flow_sheet.body_organizer(list_col_time=list_col_time,
-                                           list_col_method=list_col_method,
-                                           list_col_content=list_col_content,
-                                           list_col_record=list_col_record,
-                                           list_col_operator=list_col_operator,
-                                           list_col_witness=list_col_witness)
+            self.flow_sheet.put_line(content=str_qty, record=defs.part_record_input)
 
             #For liquid only, flex ID 
             if (material.method == charging_method_liq or
                 material.method == charging_method_press or
                 material.method == charging_method_shower):
-
-                list_col_time.append(None)
-                list_col_method.append(None)
-                list_col_content.append(None)
-                list_col_record.append(defs.part_record_flex)
-                list_col_operator.append(defs.part_signature)
-                list_col_witness.append(defs.part_signature)
-
-                self.flow_sheet.body_organizer(list_col_time=list_col_time,
-                                           list_col_method=list_col_method,
-                                           list_col_content=list_col_content,
-                                           list_col_record=list_col_record,
-                                           list_col_operator=list_col_operator,
-                                           list_col_witness=list_col_witness)
+                self.flow_sheet.put_line(record=defs.part_record_flex,
+                                         operator=defs.part_signature,
+                                         witness=defs.part_signature)
             
             #for both liq and solid; temp and time control.
             if not (material.time_control == time_control_none or material.time_control is None):
-                self.__put_time_control(material=material,
-                                        col_time=list_col_time,
-                                        col_method=list_col_method,
-                                        col_content=list_col_content,
-                                        col_record=list_col_record,
-                                        col_operator=list_col_operator,
-                                        col_witness=list_col_witness)
-                self.flow_sheet.body_organizer(list_col_time=list_col_time,
-                                           list_col_method=list_col_method,
-                                           list_col_content=list_col_content,
-                                           list_col_record=list_col_record,
-                                           list_col_operator=list_col_operator,
-                                           list_col_witness=list_col_witness)
+                self.__put_time_control(material=material)
 
             if not (material.temp_control == temp_control_none or material.temp_control is None):
-                self.__put_temp_control(material=material,
-                                        col_time=list_col_time,
-                                        col_method=list_col_method,
-                                        col_content=list_col_content,
-                                        col_record=list_col_record,
-                                        col_operator=list_col_operator,
-                                        col_witness=list_col_witness)              
-                self.flow_sheet.body_organizer(list_col_time=list_col_time,
-                                           list_col_method=list_col_method,
-                                           list_col_content=list_col_content,
-                                           list_col_record=list_col_record,
-                                           list_col_operator=list_col_operator,
-                                           list_col_witness=list_col_witness)
-
-            self.__put_end_of_dosing(col_time=list_col_time,
-                                    col_method=list_col_method,
-                                    col_content=list_col_content,
-                                    col_record=list_col_record,
-                                    col_operator=list_col_operator,
-                                    col_witness=list_col_witness)
-            self.flow_sheet.body_organizer(list_col_time=list_col_time,
-                                        list_col_method=list_col_method,
-                                        list_col_content=list_col_content,
-                                        list_col_record=list_col_record,
-                                        list_col_operator=list_col_operator,
-                                        list_col_witness=list_col_witness)
+                self.__put_temp_control(material=material)              
+     
+            self.__put_end_of_dosing()
             self.flow_sheet.linefeed()
 
         if not (self.post_comment == None or self.post_comment == ''):
-            self.put_comment(comments=self.post_comment,
-                            list_col_time=list_col_time,
-                            list_col_method=list_col_method,
-                            list_col_content=list_col_content,
-                            list_col_record=list_col_record,
-                            list_col_operator=list_col_operator,
-                            list_col_witness=list_col_witness)
-            self.flow_sheet.body_organizer(list_col_time=list_col_time,
-                                            list_col_method=list_col_method,
-                                            list_col_content=list_col_content,
-                                            list_col_record=list_col_record,
-                                            list_col_operator=list_col_operator,
-                                            list_col_witness=list_col_witness)
+            self.flow_sheet.put_body_comments(self.post_comment)
             self.flow_sheet.linefeed()
             
     def interact(self):
@@ -301,7 +177,6 @@ class Charging(uo.UnitOperation):
     def test_data_creation(self):
         self.pre_comment = 'This is the line-1 of a dummy pre-comment\nThis is the line-2 of a dummy pre-comment'
         self.post_comment = 'This is the line-1 of a dummy post-comment;This is the line-2 of a dummy post-comment;The product is salty.'
-        material_count = 2
         material1 = self.Material()
         material1.test_data_creation1()
         self.materials.append(material1)
@@ -310,149 +185,52 @@ class Charging(uo.UnitOperation):
         self.materials.append(material2)
         print("Test data created for salt water.")
 
-    def __put_time_control(self, material: Charging.Material,
-                         col_time: List[str],
-                         col_method: List[str],
-                         col_content: List[str],
-                         col_record: List[str],
-                         col_operator: List[str],
-                         col_witness: List[str]):
 
+    def __put_time_control(self, material: Charging.Material):
+        sentence_instruction: str = ''
         if (material.time_control == time_control_min):
-            #sentece_instruction = "*滴下時間"+str(material.time_min)+"以上"
-            sentece_instruction = f'*滴下時間{material.time_min}以上'
-            col_time.append(defs.part_time)
-            col_method.append("仕込み開始")
-            col_content.append(sentece_instruction)
-            col_record.append(None)
-            col_operator.append(defs.part_signature)
-            col_witness.append(defs.part_signature)
+            sentence_instruction = f'*滴下時間{material.time_min}以上'
 
         elif (material.time_control == time_control_max):
-            #sentece_instruction = "*滴下時間"+str(material.time_max)+"以内"
-            sentece_instruction = f'*滴下時間{material.time_max}以内'
-            col_time.append(defs.part_time)
-            col_method.append("仕込み開始")
-            col_content.append(sentece_instruction)
-            col_record.append(None)
-            col_operator.append(defs.part_signature)
-            col_witness.append(defs.part_signature)    
+            sentence_instruction = f'*滴下時間{material.time_max}以内'
 
         elif (material.time_control == time_control_min_max):
-            #sentece_instruction = "*滴下時間"+str(material.time_min)+"～"+str(material.time_max)+"以内"
-            sentece_instruction = f'*滴下時間{material.time_min}～{material.time_max}以内'
-            col_time.append(defs.part_time)
-            col_method.append("仕込み開始")
-            col_content.append(sentece_instruction)
-            col_record.append(None)
-            col_operator.append(defs.part_signature)
-            col_witness.append(defs.part_signature)
+            sentence_instruction = f'*滴下時間{material.time_min}～{material.time_max}以内'
+        
+        self.flow_sheet.put_line(time=defs.part_time,
+                                method=defs.part_method_charging_ini,
+                                content=sentence_instruction,
+                                operator=defs.part_signature,
+                                witness=defs.part_signature)
 
 
-    def __put_temp_control(self, material: Charging.Material,
-                         col_time: List[str],
-                         col_method: List[str],
-                         col_content: List[str],
-                         col_record: List[str],
-                         col_operator: List[str],
-                         col_witness: List[str]):
+    def __put_temp_control(self, material: Charging.Material):
+        #TODO: rewrite this part by using Flowsheet.put_line()
         if material.temp_control == temp_control_min:
-            sentence = "仕込み時内温"+str(material.t_i_min)+"℃以上"
-            col_time.append(None)
-            col_method.append(None)
-            col_content.append(sentence)
-            col_record.append(defs.part_record_temp_ini)
-            col_operator.append(None)
-            col_witness.append(None)
+            sentence = "仕込み中内温"+str(material.t_i_min)+"℃以上"
+            self.flow_sheet.put_line(content=sentence, record=defs.part_record_temp_ini)
+            self.flow_sheet.put_line(record=defs.part_record_temp_min)
+            self.flow_sheet.put_line(record=defs.part_record_temp_end)
 
-            col_time.append(None)
-            col_method.append(None)
-            col_content.append(None)
-            col_record.append(defs.part_record_temp_min)
-            col_operator.append(None)
-            col_witness.append(None)
-
-            col_time.append(None)
-            col_method.append(None)
-            col_content.append(None)
-            col_record.append(defs.part_record_temp_max)
-            col_operator.append(None)
-            col_witness.append(None)
-
-            col_time.append(None)
-            col_method.append(None)
-            col_content.append(None)
-            col_record.append(defs.part_record_temp_end)
-            col_operator.append(None)
-            col_witness.append(None)
         elif material.temp_control == temp_control_max:
-            sentence = "仕込み時内温"+str(material.t_i_max)+"℃以下"
-            sentence = "仕込み時内温"+str(material.t_i_min)+'～'+str(material.t_i_max)+"℃"
-            col_time.append(None)
-            col_method.append(None)
-            col_content.append(sentence)
-            col_record.append(defs.part_record_temp_ini)
-            col_operator.append(None)
-            col_witness.append(None)
-
-            col_time.append(None)
-            col_method.append(None)
-            col_content.append(None)
-            col_record.append(defs.part_record_temp_max)
-            col_operator.append(None)
-            col_witness.append(None)
-
-            col_time.append(None)
-            col_method.append(None)
-            col_content.append(None)
-            col_record.append(defs.part_record_temp_end)
-            col_operator.append(None)
-            col_witness.append(None)
+            sentence = "仕込み中内温"+str(material.t_i_max)+"℃以下"
+            self.flow_sheet.put_line(content=sentence, record=defs.part_record_temp_ini)
+            self.flow_sheet.put_line(record=defs.part_record_temp_max)
+            self.flow_sheet.put_line(record=defs.part_record_temp_end)
 
         elif material.temp_control == temp_control_min_max:
-            sentence = "仕込み時内温"+str(material.t_i_min)+'～'+str(material.t_i_max)+"℃"
-            col_time.append(None)
-            col_method.append(None)
-            col_content.append(sentence)
-            col_record.append(defs.part_record_temp_ini)
-            col_operator.append(None)
-            col_witness.append(None)
+            sentence = "仕込み中内温"+str(material.t_i_min)+'～'+str(material.t_i_max)+"℃"
+            self.flow_sheet.put_line(content=sentence, record=defs.part_record_temp_ini)
+            self.flow_sheet.put_line(record=defs.part_record_temp_min)
+            self.flow_sheet.put_line(record=defs.part_record_temp_max)
+            self.flow_sheet.put_line(record=defs.part_record_temp_end)
 
-            col_time.append(None)
-            col_method.append(None)
-            col_content.append(None)
-            col_record.append(defs.part_record_temp_min)
-            col_operator.append(None)
-            col_witness.append(None)
-
-            col_time.append(None)
-            col_method.append(None)
-            col_content.append(None)
-            col_record.append(defs.part_record_temp_max)
-            col_operator.append(None)
-            col_witness.append(None)
-
-            col_time.append(None)
-            col_method.append(None)
-            col_content.append(None)
-            col_record.append(defs.part_record_temp_end)
-            col_operator.append(None)
-            col_witness.append(None)
-
-    def __put_end_of_dosing(self,
-                         col_time: List[str],
-                         col_method: List[str],
-                         col_content: List[str],
-                         col_record: List[str],
-                         col_operator: List[str],
-                         col_witness: List[str]):
-
-            col_time.append(defs.part_time)
-            col_method.append("仕込み終了")
-            col_content.append(None)
-            col_record.append(defs.part_check_charged)
-            col_operator.append(defs.part_signature)
-            col_witness.append(defs.part_signature)
+    def __put_end_of_dosing(self):
+            self.flow_sheet.put_line(time=defs.part_time,
+                                     method=defs.part_method_charging_end,
+                                     record=defs.part_check_charged,
+                                     operator=defs.part_signature,
+                                     witness=defs.part_signature)
 
 
     class Material:
@@ -472,18 +250,6 @@ class Charging(uo.UnitOperation):
             self.temp_control = None
             self.t_i_min = None
             self.t_i_max = None
-
-        # def __calc_qty(self):
-        #     """Calculates the quantity of the material and permissible error in "kg" unit. 
-        #     """
-        #     if self.metrics_unit == defs.tag_metrics_equiv:
-        #         self.qty_kg = uo.UnitOperation.chem_data.to_kilogram(material = self.material_name, equiv=self.metrics_val)
-        #         self.error_kg = self.qty_kg * (self.error_pct/100.0)
-        #     elif self.metrics_unit == defs.tag_metrics_vol:
-        #         self.qty_kg = uo.UnitOperation.chem_data.to_kilogram(material = self.material_name, vol=self.metrics_val)
-        #         self.error_kg = self.qty_kg * (self.error_pct/100.0)
-        #     else:
-        #         raise ValueError('metrics_unit not defined')
         
         def interact(self):
             print("Material name?: ", end='')
@@ -554,36 +320,16 @@ class Charging(uo.UnitOperation):
             self.metrics_val = ser[header_metrics_value]
             self.error_pct = ser[header_error]
             self.method  = ser[header_method]
-
-
-            # print("Specicfy a time control method?: ")
-            # for idx in range(len(list_time_control)):
-            #     print(str(idx)+': '+list_time_control[idx])
-            # print("> ", end='')
-            # choice_time_control = int(input())
-            # self.time_control = list_time_control[choice_time_control]
             self.time_control = ser[header_time_control]
             if self.time_control == time_control_min or self.time_control == time_control_min_max:
-                #print("Charging time lower limit?: ", end='')
                 self.time_min = ser[header_time_min]
             if self.time_control == time_control_max or self.time_control == time_control_min_max:
-                #print("Charging time upper limit?: ", end='')
                 self.time_max = ser[header_time_max]
-            
-            # print("Specicfy a temperature control method?: ")
-            # for idx in range(len(list_temp_control)):
-            #     print(str(idx)+': '+list_temp_control[idx])
-            # print("> ", end='')
-            # choice_temp_control = int(input())
-            # self.temp_control = list_temp_control[choice_temp_control]
             self.temp_control = ser[header_temp_min]
             if self.temp_control == temp_control_min or self.temp_control == temp_control_min_max:
-                # print("Charging temperature (℃) lower limit?: ", end='')
                 self.t_i_min = ser[header_temp_min]
             if self.temp_control == temp_control_max or self.temp_control == temp_control_min_max:
-                #print("Charging temperature (℃) upper limit?: ", end='')
                 self.t_i_max = ser[header_temp_max]
-
             self.__calc_qty()
 
         def test_data_creation1(self):
