@@ -18,13 +18,11 @@ df_chem = pd.read_excel(io='flow_draw/input.xlsx', sheet_name='Chemistry')
 df_sm = pd.read_excel(io='flow_draw/input.xlsx', sheet_name='SM')
 
 chem_data = chem.Chemistry(df_chem=df_chem, df_sm=df_sm)
-uo.UnitOperation.set_chemdata(chem_data=chem_data)
-test_charging = chg.Charging(1)
+test_sheet = fs.Flowsheet()
+
+test_charging = chg.Charging(chem_data=chem_data, flow_sheet=test_sheet, operation_seq=1)
 test_charging.test_data_creation()
 
-
-test_sheet = fs.Flowsheet()
-uo.UnitOperation.set_flowsheet(test_sheet)
 test_charging.output_unit_operation()
 
 

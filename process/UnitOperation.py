@@ -48,23 +48,25 @@ list_unit_ops =[
 
 
 class UnitOperation:
-    chem_data = None
-    flow_sheet: fsht.Flowsheet = None
-    def __init__(self, unit_operation: str=None, operation_seq: int=None):
+    # chem_data = None
+    # flow_sheet: fsht.Flowsheet = None
+    def __init__(self, chem_data:chem.Chemistry, flow_sheet:fsht.Flowsheet, unit_operation: str=None, operation_seq: int=None):
+        self.chem_data:chem.Chemistry = chem_data
+        self.flow_sheet: fsht.Flowsheet = flow_sheet
         self.unit_operation: str = unit_operation
         self.operation_seq: int = operation_seq
         self.pre_comment: str = ''
         self.post_comment: str = ''
 
 
-    @classmethod 
-    def set_chemdata(cls, chem_data:chem.Chemistry):
-        cls.chem_data = chem_data
+    # @classmethod 
+    # def set_chemdata(cls, chem_data:chem.Chemistry):
+    #     self.chem_data = chem_data
 
 
-    @classmethod 
-    def set_flowsheet(cls, flow_sheet:fsht.Flowsheet):
-        cls.flow_sheet = flow_sheet
+    # @classmethod 
+    # def set_flowsheet(cls, flow_sheet:fsht.Flowsheet):
+    #     cls.flow_sheet = flow_sheet
     
 
     def put_comment(self,
