@@ -21,12 +21,14 @@ summary_col_uo = 2
 summary_col_num_subitems = 3
 summary_col_editcomment = 4
 
+#TODO let's move the common header detail items to defs
 header_detail_seq = header_summary_sequence
 header_detail_operation = header_summary_uo
 header_detail_edit_comment = header_summary_edit_comment
 header_detail_precomment = 'Pre-comment'
 header_detail_postcomment = 'Post-comment'
 
+#TODO let's move the common header list to defs
 common_header_detail = [
     header_detail_seq,
     header_detail_operation,
@@ -65,7 +67,7 @@ class InputForm:
     """
     def __init__(self, process_name: str, num_unit_op: int):
         self.process_name:str = process_name
-        self.count_unit_op: int = num_unit_op
+        self.num_unit_op: int = num_unit_op
         self.file_path = base_file_name_input+process_name+'.xlsx'
         self.summary_ws: Worksheet = None
         self.detail_ws: Worksheet = None
@@ -83,7 +85,7 @@ class InputForm:
         if not os.path.isfile(self.file_path):
             self.wb = xl.Workbook()
             self.wb.remove(worksheet=self.wb['Sheet'])
-            self.summary_ws:Worksheet = self.wb.create_sheet(title=sheet_summary_input)
+            self.summary_ws: Worksheet = self.wb.create_sheet(title=sheet_summary_input)
             self.detail_ws: Worksheet = self.wb.create_sheet(title=sheet_detail_input)
         else:
             self.wb=xl.load_workbook(self.file_path)
@@ -163,7 +165,7 @@ class InputForm:
         self.summary_ws.cell(row = self._current_line_summary, column = summary_col_editcomment, value=header_summary_edit_comment)
         self.summary_ws.cell(row = self._current_line_summary, column = summary_col_editcomment).border = defs.xl_border_around
         self._current_line_summary += 1
-        for i in range(self.count_unit_op):
+        for i in range(self.num_unit_op):
             self.summary_ws.cell(row=self._current_line_summary, column=summary_col_seq, value=i+1)
             self.summary_ws.cell(row=self._current_line_summary, column=summary_col_seq).border = defs.xl_border_around
             self.summary_ws.cell(row = self._current_line_summary, column = summary_col_uo).border = defs.xl_border_around
@@ -174,17 +176,34 @@ class InputForm:
         
 
     def load_process_summary(self) -> pd.DataFrame:
+        """
+        Loads process summary data (seq, unit operation name, number of subitems, and edit comment) from the summary worksheet in the input Excel file.
+        The data is acquired in DataFrame format. The obtained DataFrame object is both stored in an instance variable and returned to the caller.
+
+        Parameters
+        --------------
+        None
+
+        Returns
+        --------------
+        df: pandas.DataFrame
+            The summary input data. This is expected to be consists of four columns with a header--Sequence, unit operation name, number of subitems, edit comennt.
+        """
         df = pd.read_excel(io = self.file_path, sheet_name=sheet_summary_input, header=0)
+        #count() counts non-NaN items in the column
+        self.num_unit_op = df[header_summary_uo].count()
         self.df_summary = df
         return df
 
     
-    def put_detail_input_form(self, seq: int,specif_header: List[str], menu_dict: Dict[str, List[str]]):
-        #This function makes the detail input form based on the number of the unit operations in the process.
-        #Prepare options for drop down list(s) called data validation.
-
+    def put_detail_input_table(self, seq: int,specif_header: List[str], menu_dict: Dict[str, List[str]]):
+        """
+        Makes the detail input table for one unit operation.
+        Prepare options for drop-down list(s) called "data validation".
+        """
         #summary_ws is no loner necessay, as this instance is needed to edit the worksheet before put out to the excel workbook. 
-        self.summary_ws = None
+        #self.summary_ws does not have to be cleared. As long as it is edited, the contents on the sheet stays intact. The workbook object is responsible for retaining the original data of the ws.
+        #self.summary_ws = None
 
         if self.df_summary == None:
             self.load_process_summary()
@@ -217,7 +236,7 @@ class InputForm:
         self._current_line_detail += 1
         
         for count in range(num_sub_items):
-            #Note: header[0] == None to align with Excel
+            #Note: header[0] == None in order to align with Excel
             for col in range(1, len(header), 1):
                 self.detail_ws.cell(row = self._current_line_detail, column = col).border = defs.xl_border_around
                 if header[col] == header_detail_seq:
@@ -230,7 +249,7 @@ class InputForm:
                     temp_key = header[col]
                     menu_dict_local[temp_key].add(self.detail_ws.cell(row = self._current_line_detail, column = col))
             self._current_line_detail +=1
-        
+
         self._current_line_detail +=1
 
     def load_process_details(self) -> List[pd.DataFrame]:
