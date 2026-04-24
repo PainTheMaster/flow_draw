@@ -1,14 +1,14 @@
 import pandas as pd
 import flow_draw.definitions as defs
 from flow_draw.project.process.unit_operations import unit_operation as uo
-from flow_draw.data_io import InputForm
+from flow_draw.data_io import input_form
 from flow_draw import chemistry as chem
 from flow_draw.flow_output import Flowsheet as fsht
 from typing import List
 
 
-header_precomment = InputForm.header_detail_precomment #Don't include this in the specific header list!!!
-header_postcomment = InputForm.header_detail_postcomment #Don't include this in the specific header list!!!
+header_precomment = input_form.header_detail_precomment #Don't include this in the specific header list!!!
+header_postcomment = input_form.header_detail_postcomment #Don't include this in the specific header list!!!
 
 header_material_name = 'Material Name'
 header_metrics_value = 'Metrics Value'

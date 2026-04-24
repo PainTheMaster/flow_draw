@@ -45,6 +45,9 @@ list_unit_ops =[
     op_prod_discharge,
     op_placeholder
 ]
+"""
+This list covers the names of all unit operations.
+"""
 
 
 class UnitOperation:

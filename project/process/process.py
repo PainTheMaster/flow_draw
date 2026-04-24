@@ -45,6 +45,10 @@ class Process:
     def put_summary_input_form(self):
         self.data_input.put_summary_input_form(list_unit_ops=unit_operation.list_unit_ops)
 
-    #TODO 
+    #TODO: Read the summary input form
+
+    #TODO: create the detail input form
+
+    #TODO
 
 
