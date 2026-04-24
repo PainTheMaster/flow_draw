@@ -1,6 +1,6 @@
 import pandas as pd
 import flow_draw.definitions as defs
-from flow_draw.process import UnitOperation as uo
+from flow_draw.project.process.unit_operations import unit_operation as uo
 from flow_draw.data_io import InputForm
 from flow_draw import chemistry as chem
 from flow_draw.flow_output import Flowsheet as fsht
