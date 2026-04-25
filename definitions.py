@@ -3,6 +3,10 @@ from openpyxl.styles.borders import Border, Side
 from openpyxl.styles import Alignment
 from openpyxl.styles import Font
 
+#################################################
+#ITEMS FOR INTERNAL DATA PROCESSING: TAGS ETC.###
+#################################################
+
 #general
 tag_yes = 'Yes'
 tag_no = 'No'
@@ -12,7 +16,11 @@ list_yesno=[tag_no, tag_yes]
 tag_metrics_equiv = "equiv"
 tag_metrics_vol = "v/w"
 
-part_time = '___:___'
+
+
+""""""
+part_time = '___:___' 
+"""This is for """
 part_method_charging_ini = '仕込み開始'
 part_method_charging_end = '仕込み終了'
 part_record_input = '仕込み量__________kg'
