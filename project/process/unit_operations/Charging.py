@@ -76,7 +76,8 @@ list_temp_control =[
     temp_control_placeholder
 ]
 
-list_metrics_unit = [defs.tag_metrics_equiv, defs.tag_metrics_vol]
+#list_metrics_unit = [defs.tag_metrics_equiv, defs.tag_metrics_vol]
+list_metrics_unit = defs.list_metrics_unit
 
 error_range_placeholder='place holder'
 list_error_range = [None, 1.0, None, None, None, 5.0, error_range_placeholder]
@@ -111,7 +112,13 @@ class Charging(uo.UnitOperation):
     def get_detail_header(self) -> List[str]:
         return list_header_items
 
-    def load_from_df(self, df: pd.DataFrame):
+    def load_params_from_df(self, df: pd.DataFrame):
+        """
+        Loads necessary parameters from a DataFrame object.
+        The header items must be in line with the definition the class Charging.
+        The header items can be passed from the get_detail_header() of each UnitOperation-drived class.
+        This is the overriding mehtod in the class Charging..
+        """
         #TODO: please check if my implementation is sufficient!!!!
         first_row = df.iloc[0]
         if not pd.isna(first_row[header_precomment]):
@@ -120,7 +127,7 @@ class Charging(uo.UnitOperation):
             self.post_comment = first_row[header_postcomment]
         for _, subitem in df.iterrows():
             new_material = Material(chem_data=self.chem_data)
-            new_material.load_from_series(subitem)
+            new_material.load_params_from_series(subitem)
             self.materials.append(new_material)
             self.material_count += 1
 
@@ -207,7 +214,6 @@ class Charging(uo.UnitOperation):
 
 
     def __put_temp_control(self, material: Material):
-        #TODO: rewrite this part by using Flowsheet.put_line()
         if material.temp_control == temp_control_min:
             sentence = "仕込み中内温"+str(material.t_i_min)+"℃以上"
             self.flow_sheet.put_line(content=sentence, record=defs.part_record_temp_ini)
@@ -316,7 +322,21 @@ class Material:
         
         self.__calc_qty()
 
-    def load_from_series(self, ser: pd.Series):
+    def load_params_from_series(self, ser: pd.Series):
+        """
+        Loads charing operation parameters from a pandas.Series object which is cut out from an pandas.DataFrame object.
+        This method is intended to be used solely in Charging.load_params_from_df().
+
+        Parameters
+        --------------
+        ser: pd.Series
+            A series with a header. The series holds input data for each material charged/dosed in the unit operation.
+            The header items shall be in line with those defined in the module.
+
+        Returns
+        --------------
+        None
+        """
         self.material_name = ser[header_material_name]
         self.metrics_unit = ser[header_metrics_unit]
         self.metrics_val = ser[header_metrics_value]
@@ -367,13 +387,24 @@ class Material:
         self.__calc_qty()
 
     def __calc_qty(self):
-        """Calculates the quantity of the material and permissible error in "kg" unit. 
+        """
+        Calculates the quantity of the material and permissible error in "kg" unit.
+        For this function to work, instance/values of chem_data, metrics unit (equiv or v/w), metrics value (a factor to the main starting material) have to have been let to the instance variable.
+        The calculated result is set to the self.qty_kg, self.error_kg, and returns nothing.
+
+        Parameters
+        -----------
+        None
+
+        Returns
+        -----------
+        None
         """
         if self.metrics_unit == defs.tag_metrics_equiv:
             self.qty_kg = self.chem_data.to_kilogram(material = self.material_name, equiv=self.metrics_val)
             self.error_kg = self.qty_kg * (self.error_pct/100.0)
         elif self.metrics_unit == defs.tag_metrics_vol:
-            self.qty_kg = self.chem_data.to_kilogram(material = self.material_name, vol=self.metrics_val)
+            self.qty_kg = self.chem_data.to_kilogram(material = self.material_name, vol_per_weight=self.metrics_val)
             self.error_kg = self.qty_kg * (self.error_pct/100.0)
         else:
             raise ValueError('metrics_unit not defined')

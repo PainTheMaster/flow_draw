@@ -106,16 +106,6 @@ class UnitOperation:
         self.post_comment: str = ''
 
 
-    # @classmethod 
-    # def set_chemdata(cls, chem_data:chem.Chemistry):
-    #     self.chem_data = chem_data
-
-
-    # @classmethod 
-    # def set_flowsheet(cls, flow_sheet:fsht.Flowsheet):
-    #     cls.flow_sheet = flow_sheet
-    
-
     # def put_comment(self,
     #                 comments: str,
     #                 list_col_time: List[str],
@@ -150,10 +140,11 @@ class UnitOperation:
         """
         raise NotImplementedError()
     
-    def load_from_df(self, df: pd.DataFrame):
+    def load_params_from_df(self, df: pd.DataFrame):
         """
-        Loads necessary parameters from a DataFrame object. The header items must be recognizable by the UnitOperation object.
-        The header items can be given by the get_detail_header().
+        Loads necessary parameters from a DataFrame object.
+        The header items must be in line with the definition in the UnitOperation-derived classes.
+        The header items can be passed  by the get_detail_header().
         The UnitOperation class provides only skelton. Each derived class must override the methd.
         
         Parameters
