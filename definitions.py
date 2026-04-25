@@ -8,9 +8,9 @@ from openpyxl.styles import Font
 ###############################################
 
 #general
-tag_yes = 'Yes'
-tag_no = 'No'
-list_yesno=[tag_no, tag_yes]
+tag_yes: str = 'Yes'
+tag_no: str = 'No'
+list_yesno: list[str]=[tag_no, tag_yes]
 
 #unit_operations
 op_line_clearance: str = "line_clearance"

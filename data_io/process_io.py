@@ -7,9 +7,14 @@ from openpyxl.worksheet.worksheet import Worksheet
 from openpyxl.worksheet.datavalidation import DataValidation
 from typing import List, Dict
 
-base_file_name_input = "input_"
-sheet_summary_input = "summary"
-sheet_detail_input = "detail"
+inputfile_base_name = "_process_input"
+"""Base name for process input Excel file"""
+
+suffix_summary_input_ws = "_summary"
+"""suffix for summary input worksheet (tab)"""
+
+suffix_detail_input_ws = "_detail"
+"""suffix for detail input worksheet (tab)"""
 
 header_summary_sequence = 'Sequence'
 header_summary_uo = 'Unit Operation'
@@ -65,11 +70,14 @@ class InputForm:
 
 
     """
-    def __init__(self, process_name: str, num_unit_op: int):
+    def __init__(self, project_name: str, process_name: str, num_unit_op: int):
+        self.project_name: str = project_name
         self.process_name:str = process_name
         self.num_unit_op: int = num_unit_op
-        self.file_path = base_file_name_input+process_name+'.xlsx'
+        self.file_path = project_name+inputfile_base_name+'.xlsx'
+        self.title_summary_ws: str = process_name+suffix_summary_input_ws
         self.summary_ws: Worksheet = None
+        self.title_detail_ws: str = project_name+suffix_detail_input_ws
         self.detail_ws: Worksheet = None
         self.__manage_io()
         self.df_summary: pd.DataFrame = None
@@ -85,19 +93,19 @@ class InputForm:
         if not os.path.isfile(self.file_path):
             self.wb = xl.Workbook()
             self.wb.remove(worksheet=self.wb['Sheet'])
-            self.summary_ws: Worksheet = self.wb.create_sheet(title=sheet_summary_input)
-            self.detail_ws: Worksheet = self.wb.create_sheet(title=sheet_detail_input)
+            self.summary_ws: Worksheet = self.wb.create_sheet(title=self.title_summary_ws)
+            self.detail_ws: Worksheet = self.wb.create_sheet(title=self.title_detail_ws)
         else:
             self.wb=xl.load_workbook(self.file_path)
             sheet_names = self.wb.sheetnames
-            if sheet_names.count(sheet_summary_input) == 0:
-                self.summary_ws:Worksheet = self.wb.create_sheet(title=sheet_summary_input)
+            if not self.title_summary_ws in sheet_names:
+                self.summary_ws:Worksheet = self.wb.create_sheet(title=self.title_summary_ws)
             else:
-                self.summary_ws: Worksheet = self.wb[sheet_summary_input]
-            if sheet_names.count(sheet_detail_input) == 0:
-                self.detail_ws: Worksheet = self.wb.create_sheet(title=sheet_detail_input)
+                self.summary_ws: Worksheet = self.wb[self.title_summary_ws]
+            if not self.title_detail_ws in sheet_names:
+                self.detail_ws: Worksheet = self.wb.create_sheet(title=self.title_detail_ws)
             else:
-                self.detail_ws: Worksheet = self.wb[sheet_detail_input]
+                self.detail_ws: Worksheet = self.wb[self.title_detail_ws]
 
 
 
@@ -115,19 +123,19 @@ class InputForm:
         """
         self.wb.save(filename=self.file_path)
 
-    def get_paht_to_forms(self)->str:
+    def get_path_to_forms(self)->str:
         return self.file_path
 
-    def put_summary_input_form(self, list_unit_ops: List[str]):
+    def generate_proc_summary_form(self, list_unit_ops: List[str]):
         """
-        Creates the summary input form based on the number of the unit operations in the process.\n
+        Creates a summary input form based on the number of the unit operations in the process.\n
         There will be four coloumns in the newly created form:\n
             -Sequnece Number
             -Unit Operation
             -Nuber of Sub-items
             -Edit Comment
         A pull-down menu will be set in each cell in the Unit Operation column.
-        The method only edits the summary_ws in the class, and does not save it as an file on the storage. Another method must be called to do so.
+        The method only edits the summary_ws in the class, and does not save it as an file on the storage. It's up to another method.
 
         Parameters
         ---------------
@@ -179,6 +187,7 @@ class InputForm:
         """
         Loads process summary data (seq, unit operation name, number of subitems, and edit comment) from the summary worksheet in the input Excel file.
         The data is acquired in DataFrame format. The obtained DataFrame object is both stored in an instance variable and returned to the caller.
+        The number of the unit operations is counted. process_io.num_unit_op is updated with it so that the generator of the detail input table can make the right nuber of input tables.
 
         Parameters
         --------------
@@ -189,17 +198,29 @@ class InputForm:
         df: pandas.DataFrame
             The summary input data. This is expected to be consists of four columns with a header--Sequence, unit operation name, number of subitems, edit comennt.
         """
-        df = pd.read_excel(io = self.file_path, sheet_name=sheet_summary_input, header=0)
+        df = pd.read_excel(io = self.file_path, sheet_name=self.title_summary_ws, header=0)
         #count() counts non-NaN items in the column
         self.num_unit_op = df[header_summary_uo].count()
         self.df_summary = df
         return df
 
     
-    def put_detail_input_table(self, seq: int,specif_header: List[str], menu_dict: Dict[str, List[str]]):
+    def generate_detail_input_table(self, seq: int, specif_header: list[str], menu_dict: dict[str, list[str]]):
         """
-        Makes the detail input table for one unit operation.
-        Prepare options for drop-down list(s) called "data validation".
+        Makes a detail input table for one unit operation.
+        Prepares options for drop-down list(s) called "data validation".
+        if self.df_summary, from which the unit operation corresponding to the given seq is retrieved, is empty, the method loads the DataFrame object by using self.load_process_summary().
+        
+        Parameters
+        -------------
+        seq: int
+            Sequnece number of the unit operation.
+        
+        specif_header: list[str]
+            List of header items specific to the unit operation.
+        
+        menu_dict: dict[str, list[str]]
+            (Optional) drop-down items for columns for the unit operation. Each string key is the header item which needs a drop-down list. The list[str] value is the items for the drop-down list.
         """
         #summary_ws is no loner necessay, as this instance is needed to edit the worksheet before put out to the excel workbook. 
         #self.summary_ws does not have to be cleared. As long as it is edited, the contents on the sheet stays intact. The workbook object is responsible for retaining the original data of the ws.
@@ -208,15 +229,19 @@ class InputForm:
         if self.df_summary == None:
             self.load_process_summary()
         num_sub_items = self.df_summary[self.df_summary[header_summary_sequence]==seq][header_summary_num_subitems].item()
+
+        #perhaps users will omit specifying sub-item numbers if it is 1.
         if math.isnan(num_sub_items):
             num_sub_items = 1
         else:
             num_sub_items = int(num_sub_items)
-        menu_dict_local: Dict[str, DataValidation] = {}
+        menu_dict_local: dict[str, DataValidation] = {}
         for key in menu_dict:
             options = '"'
+            #note that menu_dict[key] is a list[str]
             for item in menu_dict[key]:
                 options += (item+',')
+            #A "," at the end is not needed.
             options = options[:-1]
             options += '"'
             dv_unitops = DataValidation(
@@ -252,10 +277,23 @@ class InputForm:
 
         self._current_line_detail +=1
 
-    def load_process_details(self) -> List[pd.DataFrame]:
-        crude_df = pd.read_excel(io=self.file_path, sheet_name=sheet_detail_input, header=None)
-        temp_list_series: List[pd.Series] = []
-        tables: List[pd.DataFrame] = []
+    def load_process_details(self) -> list[pd.DataFrame]:
+        """
+        Processes the detail input sheet in an Excel file into a collection of DataFrame objects, each of which represents a single unit operation.
+        The input Excel sheet contains multiple tables with various width. This method decomposes it more UnitOperation-object-friendly form.
+
+        Parameters
+        ------------
+            None
+
+        Returns
+        ------------
+        tables: list[pd.DataFrame]
+            Each value of which is a DataFrame object for a single unit operation in the process.
+        """
+        crude_df = pd.read_excel(io=self.file_path, sheet_name=self.title_detail_ws, header=None)
+        temp_list_series: list[pd.Series] = [] #Collection of lines (rows) cut out from a valid table. Temporal.
+        tables: list[pd.DataFrame] = []
 
         for _, row in crude_df.iterrows():
             if row.isna().all():

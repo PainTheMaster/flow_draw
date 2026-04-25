@@ -1,7 +1,7 @@
 from typing import List
 from flow_draw.project.process.unit_operations import unit_operation
 from flow_draw.project.process.unit_operations.unit_operation import UnitOperation as uo
-from flow_draw.data_io.input_form import InputForm as inpt
+from flow_draw.data_io.process_io import InputForm as inpt
 from flow_draw.flow_output.flowsheet import Flowsheet as fsht
 
 class Process:
@@ -43,7 +43,7 @@ class Process:
 
     #TODO: Let the InputForm class create the summary input form.
     def put_summary_input_form(self):
-        self.data_input.put_summary_input_form(list_unit_ops=unit_operation.list_unit_ops)
+        self.data_input.generate_proc_summary_form(list_unit_ops=unit_operation.list_unit_ops)
 
     #TODO: Read the summary input form
 
