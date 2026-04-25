@@ -90,22 +90,13 @@ menu_dict ={
 }
 
 
-class Charging(uo.UnitOperation):
+class Charging(uo.UnitOperation, op_key=defs.op_charging):
     """
-    Inherited:
-        self.unit_operation: str
-        self.operation_seq: int
-        self.pre_comment: str
-        self.post_commnt: str
-    
-    New here:
-        self.material_count
-        self.materials[]
-
+    TODO: Make some comment here.
     """
     
     def __init__(self, chem_data:chem.Chemistry, flow_sheet:fsht.Flowsheet, operation_seq=None):
-        super().__init__(chem_data=chem_data, flow_sheet=flow_sheet, unit_operation=uo.op_charging, operation_seq=operation_seq)
+        super().__init__(chem_data=chem_data, flow_sheet=flow_sheet, operation_seq=operation_seq)
         self.material_count = 0
         self.materials: List[Material] = []
 

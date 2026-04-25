@@ -12,6 +12,57 @@ tag_yes = 'Yes'
 tag_no = 'No'
 list_yesno=[tag_no, tag_yes]
 
+#unit_operations
+op_line_clearance: str = "line_clearance"
+"""Tag for an unit operation line clearance"""
+
+op_N2_replace: str = "N2_placement"
+"""Tag for an unit operation N2 replacement"""
+
+op_temp_control: str = "temp_control"
+"""Tag for an unit operation for temperature control"""
+
+op_charging: str = "charging"
+"""Tag for an unit operation charging/dosing"""
+
+op_agitation: str = "agitation"
+"""Tag for an unit operation agitation/mixing"""
+
+op_settling: str = "settling"
+"""Tag for an unit operation settling"""
+
+op_aq_discharge: str = "aq_discharge"
+"""Tag for an unit operation discharging aqueous phase"""
+
+op_distillation: str = "distillation"
+"""Tag for an unit operation dietillation"""
+
+op_cip: str = "cip"
+"""Tag for an unit operation cleaning in place"""
+
+op_transfer: str = "transfer"
+"""Tag for an unit operation liquid transfer"""
+
+op_filtration: str = "filtration"
+"""Tag for an unit operation filtration of (normally) recrystallizaion slurry"""
+
+op_rinse: str = "rinse"
+"""Tag for an unit operation rinsing filter cake"""
+
+op_reslurry: str = "reslurry"
+"""Tag for an unit operation reslurry washing of obtained crystal"""
+
+op_drying: str = "drying"
+"""Tag for an unit operation drying wet filter cake"""
+
+op_tare: str = "tare"
+"""Tag for an unit operation taring packaging material before discharge"""
+
+op_prod_discharge: str = "prod_discharge"
+"""Tag for an unit operation discharging finished product"""
+
+op_placeholder: str = "placeholder"
+"""Tag for a placeholder for an undefined unit operation..."""
 
 
 

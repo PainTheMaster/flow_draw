@@ -1,3 +1,5 @@
+from abc import ABC, abstractmethod
+from __future__ import annotations
 import pandas as pd
 
 
@@ -8,49 +10,45 @@ from typing import List
 import re
 
 
-op_line_clearance = "line_clearance"
-op_N2_replace = "N2_placement"
-op_temp_control = "temp_control"
-op_charging = "charging"
-op_agitation = "agitation"
-op_settling = "settling"
-op_aq_discharge = "aq_discharge"
-op_distillation = "distillation"
-op_cip = "cip"
-op_transfer = "transfer"
-op_filtration = "filtration"
-op_rinse = "rinse"
-op_reslurry = "reslurry"
-op_drying = "drying"
-op_tare = "tare"
-op_prod_discharge = "prod_discharge"
-op_placeholder = "placeholder"
-
-list_unit_ops =[
-    op_line_clearance,
-    op_N2_replace,
-    op_temp_control,
-    op_charging,
-    op_agitation,
-    op_settling,
-    op_aq_discharge,
-    op_distillation,
-    op_cip,
-    op_transfer,
-    op_filtration,
-    op_rinse,
-    op_reslurry,
-    op_drying,
-    op_tare,
-    op_prod_discharge,
-    op_placeholder
-]
+#TODO please delete this list when the automatic registration by __init_subclass__() is fully fully functional
+# list_unit_ops =[
+#     op_line_clearance,
+#     op_N2_replace,
+#     op_temp_control,
+#     op_charging,
+#     op_agitation,
+#     op_settling,
+#     op_aq_discharge,
+#     op_distillation,
+#     op_cip,
+#     op_transfer,
+#     op_filtration,
+#     op_rinse,
+#     op_reslurry,
+#     op_drying,
+#     op_tare,
+#     op_prod_discharge,
+#     op_placeholder
+# ]
 """
 This list covers the names of all unit operations.
 """
 
 
-class UnitOperation:
+registry_uo_cls: dict[str, type[UnitOperation]] = {}
+"""
+This dictionary hols pairs of unit operation key (string) and unit operation class object (type[UnitOperation]).
+The pairs are automatically registered by unit_operation.UniotOperation.__init_subclass_() everytime a new unit operation class becomes available (imported)
+Therefore, this dictionaly represnts all the available unit operation at that moment.
+"""
+
+list_unit_ops: list[str] = []
+"""
+Simply, this is a list of key to unit operations. Like registry_uo_cls, this list is also automatically extended.
+"""
+
+
+class UnitOperation(ABC):
     """
     The base class of various unit operations.
 
@@ -74,8 +72,28 @@ class UnitOperation:
     post_comment: str
         An optional post-comment for the unit operation.
     """
+    def __init_subclass__(cls,*, op_key: str|None = None, **kwargs):
+        """
+        Automatically triggered everytime each unit operation-derived class (not an instance!) is created.
+        This method compells each unit operation class to register itself to registry_uo_cls[str, type[UnitOperation]] and .
 
-    def __init__(self, chem_data:chem.Chemistry, flow_sheet:fsht.Flowsheet, unit_operation: str=None, operation_seq: int=None):
+        Parameters
+        --------------
+        op_key: str
+            Keyword corresponding to each unit operation. This shoudl be defined in each unit operation module. 
+        """
+        super.__init_subclass__(**kwargs)
+        if cls is UnitOperation:
+            return
+        if not op_key:
+            raise RuntimeError(f"Class {cls.__name__}: An empty op_key is not allowed.")
+        if op_key in registry_uo_cls:
+            raise RuntimeError(f"Class {cls.__name__}: op_key \"{op_key}\" already exists.")
+        cls.op_key = op_key
+        registry_uo_cls[op_key] = cls
+        list_unit_ops.append(op_key)
+
+    def __init__(self, chem_data:chem.Chemistry, flow_sheet:fsht.Flowsheet, operation_seq: int=None):    
         """
         Set the necessary items in the instance variables.
         
@@ -86,44 +104,24 @@ class UnitOperation:
         
         flow_sheet: flow_draw.flow_output.Flowsheet
             Flowsheet object takes care of the output. The object should hold an OpenPyXL Workbook object. The class is responsible for formatting the output.
-        
-        unit_operation: str
-            The name of the unit operation. This must be recognizable by this modue. These are defined in the modolue. 
 
         operation_seq: int
             The sequence number of the operation. 
 
         Returns
         ------------
-            None
+         None
         """
         
         self.chem_data:chem.Chemistry = chem_data
         self.flow_sheet: fsht.Flowsheet = flow_sheet
-        self.unit_operation: str = unit_operation
+        #TODO: please remove the comment-out part below after a test.
+        #self.unit_operation: str = unit_operation
         self.operation_seq: int = operation_seq
         self.pre_comment: str = ''
         self.post_comment: str = ''
-
-
-    # def put_comment(self,
-    #                 comments: str,
-    #                 list_col_time: List[str],
-    #                 list_col_method: List[str],
-    #                 list_col_content: List[str],
-    #                 list_col_record: List[str],
-    #                 list_col_operator: List[str],
-    #                 list_col_witness: List[str]):
-        
-    #     cmt_brkdwn = re.split('[\n;]', comments)
-    #     for single_cmt in cmt_brkdwn:
-    #         list_col_time.append(None)
-    #         list_col_method.append(None)
-    #         list_col_content.append(single_cmt)
-    #         list_col_record.append(None)
-    #         list_col_operator.append(None)
-    #         list_col_witness.append(None)
     
+    @abstractmethod
     def get_detail_header(self) -> List[str]:
         """
         Returns the header elements specific to the unit operation as a List[str].
@@ -140,6 +138,7 @@ class UnitOperation:
         """
         raise NotImplementedError()
     
+    @abstractmethod
     def load_params_from_df(self, df: pd.DataFrame):
         """
         Loads necessary parameters from a DataFrame object.
@@ -158,7 +157,7 @@ class UnitOperation:
         """
         raise NotImplementedError()
 
-
+    @abstractmethod
     def output_unit_operation(self):
         """
         Outputs the items for the unit operation.
