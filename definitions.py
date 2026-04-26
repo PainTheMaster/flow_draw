@@ -70,6 +70,43 @@ op_placeholder: str = "placeholder"
 #PARTS FOR PROCESS DATA IO: HEADER ITEMS, DROP-DOWN OPTIONS ETC#
 ################################################################
 
+####PROCESS_IO####
+inputfile_base_name = "_process_input"
+"""Base name for process input Excel file"""
+
+suffix_summary_input_ws = "_summary"
+"""suffix for summary input worksheet (tab)"""
+
+suffix_detail_input_ws = "_detail"
+"""suffix for detail input worksheet (tab)"""
+
+header_summary_sequence = 'Sequence'
+header_summary_uo = 'Unit Operation'
+header_summary_num_subitems = 'Number of Subitems'
+header_summary_edit_comment = 'Edit Comment'
+
+summary_col_seq = 1
+summary_col_uo = 2
+summary_col_num_subitems = 3
+summary_col_editcomment = 4
+
+header_detail_seq = header_summary_sequence
+header_detail_uo = header_summary_uo
+header_detail_edit_comment = header_summary_edit_comment
+header_detail_precomment = 'Pre-comment'
+header_detail_postcomment = 'Post-comment'
+
+common_header_detail = [
+    header_detail_seq,
+    header_detail_uo,
+    header_detail_edit_comment,
+    header_detail_precomment,
+    header_detail_postcomment 
+]
+
+no_comment_instr = '(No comment here)'
+
+
 ####CHARGING####
 tag_metrics_equiv = "equiv"
 tag_metrics_vol = "v/w"

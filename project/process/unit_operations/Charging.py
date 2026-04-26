@@ -91,7 +91,7 @@ menu_dict ={
 }
 
 
-class Charging(uo.UnitOperation, op_key=defs.op_charging):
+class Charging(uo.UnitOperation, uo_name=defs.op_charging):
     """
     TODO: Make some comment here.
     """
@@ -106,9 +106,11 @@ class Charging(uo.UnitOperation, op_key=defs.op_charging):
             The calling object. In the case of the class Charging, GetChem class is expected. From the given caller object, Charging expects chemistry.Chemistry given by get_chem() method.
         """
         super().__init__(caller=caller, flow_sheet=flow_sheet, operation_seq=operation_seq, edit_comment=edit_comment)
-        self.chem_data: chem.Chemistry = self.caller.get_chem()
+        self.chem_data: chem.Chemistry = GetChem(self.caller).get_chem #なんかやだからキャストする。
         self.material_count = 0
         self.materials: list[Material] = []
+
+        self.output_unit_operation()
 
     def get_detail_header(self) -> list[str]:
         return list_header_items

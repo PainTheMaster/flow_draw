@@ -73,7 +73,7 @@ class UnitOperation(ABC):
     post_comment: str
         An optional post-comment for the unit operation.
     """
-    def __init_subclass__(cls,*, op_key: str|None = None, **kwargs):
+    def __init_subclass__(cls,*, uo_name: str|None = None, **kwargs):
         """
         Automatically triggered everytime each unit operation-derived class (not an instance!) is created.
         This method compells each unit operation class to register itself to registry_uo_cls[str, type[UnitOperation]] and .
@@ -86,13 +86,13 @@ class UnitOperation(ABC):
         super().__init_subclass__(**kwargs)
         if cls is UnitOperation:
             return
-        if not op_key:
+        if not uo_name:
             raise RuntimeError(f"Class {cls.__name__}: An empty op_key is not allowed.")
-        if op_key in registry_uo_cls:
-            raise RuntimeError(f"Class {cls.__name__}: op_key \"{op_key}\" already exists.")
-        cls.op_key = op_key
-        registry_uo_cls[op_key] = cls
-        list_unit_ops.append(op_key)
+        if uo_name in registry_uo_cls:
+            raise RuntimeError(f"Class {cls.__name__}: op_key \"{uo_name}\" already exists.")
+        cls.uo_name:str = uo_name
+        registry_uo_cls[uo_name] = cls
+        list_unit_ops.append(uo_name)
 
     def __init__(self, caller: type[UniversalTrait] =None, flow_sheet:fsht.Flowsheet=None, operation_seq: int=None, edit_comment:str=None):    
         """
@@ -113,13 +113,12 @@ class UnitOperation(ABC):
         ------------
          None
         """
-        
-        self.caller = caller
+        self.caller: type[UniversalTrait] = caller
         self.flow_sheet: fsht.Flowsheet = flow_sheet
         #TODO: please remove the comment-out part below after a test.
         #self.unit_operation: str = unit_operation
         self.operation_seq: int = operation_seq
-        self.edit_comment = edit_comment
+        self.edit_comment:str = edit_comment
         self.pre_comment: str = ''
         self.post_comment: str = ''
     

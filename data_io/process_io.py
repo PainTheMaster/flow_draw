@@ -7,42 +7,34 @@ from openpyxl.worksheet.worksheet import Worksheet
 from openpyxl.worksheet.datavalidation import DataValidation
 from typing import List, Dict
 
-inputfile_base_name = "_process_input"
+inputfile_base_name = defs.inputfile_base_name
 """Base name for process input Excel file"""
 
-suffix_summary_input_ws = "_summary"
+suffix_summary_input_ws = defs.suffix_summary_input_ws
 """suffix for summary input worksheet (tab)"""
 
-suffix_detail_input_ws = "_detail"
+suffix_detail_input_ws = defs.suffix_detail_input_ws
 """suffix for detail input worksheet (tab)"""
 
-header_summary_sequence = 'Sequence'
-header_summary_uo = 'Unit Operation'
-header_summary_num_subitems = 'Number of Subitems'
-header_summary_edit_comment = 'Edit Comment'
+header_summary_sequence = defs.header_summary_sequence
+header_summary_uo = defs.header_summary_uo
+header_summary_num_subitems = defs.header_summary_num_subitems
+header_summary_edit_comment = defs.header_summary_edit_comment
 
-summary_col_seq = 1
-summary_col_uo = 2
-summary_col_num_subitems = 3
-summary_col_editcomment = 4
+summary_col_seq = defs.summary_col_seq
+summary_col_uo = defs.summary_col_uo
+summary_col_num_subitems = defs.summary_col_num_subitems
+summary_col_editcomment = defs.summary_col_editcomment
 
-#TODO let's move the common header detail items to defs
-header_detail_seq = header_summary_sequence
-header_detail_operation = header_summary_uo
+header_detail_seq = defs.header_detail_seq
+header_detail_uo = defs.header_detail_uo
 header_detail_edit_comment = header_summary_edit_comment
-header_detail_precomment = 'Pre-comment'
-header_detail_postcomment = 'Post-comment'
+header_detail_precomment = defs.header_detail_precomment
+header_detail_postcomment = defs.header_detail_postcomment
 
-#TODO let's move the common header list to defs
-common_header_detail = [
-    header_detail_seq,
-    header_detail_operation,
-    header_detail_edit_comment,
-    header_detail_precomment,
-    header_detail_postcomment 
-]
+common_header_detail = defs.common_header_detail
 
-no_comment_instr = '(No comment here)'
+no_comment_instr = defs.no_comment_instr
 
 class ProcessIO:
     """
@@ -186,7 +178,7 @@ class ProcessIO:
     def load_process_summary(self) -> pd.DataFrame:
         """
         Loads process summary data (seq, unit operation name, number of subitems, and edit comment) from the summary worksheet in the input Excel file.
-        The data is acquired in DataFrame format. The obtained DataFrame object is both stored in an instance variable and returned to the caller.
+        The data is acquired in DataFrame format. The obtained DataFrame object is both stored as an instance variable and returned to the caller.
         The number of the unit operations is counted. process_io.num_unit_op is updated with it so that the generator of the detail input table can make the right nuber of input tables.
 
         Parameters
@@ -205,7 +197,7 @@ class ProcessIO:
         return df
 
     
-    def generate_detail_input_table(self, seq: int, specif_header: list[str], menu_dict: dict[str, list[str]]):
+    def put_detail_input_table(self, seq: int, specif_header: list[str], menu_dict: dict[str, list[str]]):
         """
         Makes a detail input table for one unit operation.
         Prepares options for drop-down list(s) called "data validation".
@@ -266,6 +258,8 @@ class ProcessIO:
                 self.detail_ws.cell(row = self._current_line_detail, column = col).border = defs.xl_border_around
                 if header[col] == header_detail_seq:
                     self.detail_ws.cell(row = self._current_line_detail, column = col).value = seq
+                if header[col] == header_detail_uo:
+                    self.detail_ws.cell(row = self._current_line_detail, column = col).value = self.df_summary[self.df_summary[header_summary_sequence]==seq][header_summary_uo].item()
                 if header[col] == header_detail_edit_comment and count == 0:
                     self.detail_ws.cell(row = self._current_line_detail, column = col).value = self.df_summary[self.df_summary[header_summary_sequence]==seq][header_summary_edit_comment].item()
                 if (header[col] == header_detail_precomment or header[col] == header_detail_postcomment) and count > 0:
