@@ -2,7 +2,7 @@ from typing import List
 from flow_draw.project.process.unit_operations import unit_operation
 from flow_draw.project.process.unit_operations.unit_operation import UnitOperation as uo
 from flow_draw.data_io.process_io import InputForm as inpt
-from flow_draw.flow_output.flowsheet import Flowsheet as fsht
+from flow_draw.data_io.flowsheet import Flowsheet as fsht
 
 class Process:
     """
