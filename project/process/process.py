@@ -1,10 +1,13 @@
-from typing import List
+#from typing import List
 from flow_draw.project.process.unit_operations import unit_operation
 from flow_draw.project.process.unit_operations.unit_operation import UnitOperation as uo
-from flow_draw.data_io.process_io import InputForm as inpt
+from flow_draw.data_io.process_io import ProcessIO as proc_io
 from flow_draw.data_io.flowsheet import Flowsheet as fsht
+from flow_draw.chemistry import Chemistry as chem
 
-class Process:
+from flow_draw.trait_def.trait_def import GetChem as GetChem
+
+class Process(GetChem):
     """
     The Process is for a process, which consists of many unit operations. The class holds a name, an instance of InputForm class, a sries of UnitOperation(s).
 
@@ -36,8 +39,9 @@ class Process:
         """
         self.process_name = process_name
         self.num_uo = num_uo
-        self.data_input = inpt(process_name=process_name, num_unit_op=num_uo)
-        self.list_uo: List[uo] = []
+        self.chem_data: chem = None
+        self.data_input = proc_io(process_name=process_name, num_unit_op=num_uo)
+        self.list_uo: list[uo] = []
         self.flowsheet: fsht = fsht()
 
 
@@ -51,4 +55,6 @@ class Process:
 
     #TODO
 
+    def get_chem(self) -> chem:
+        return self.chem_data
 

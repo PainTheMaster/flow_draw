@@ -44,7 +44,7 @@ common_header_detail = [
 
 no_comment_instr = '(No comment here)'
 
-class InputForm:
+class ProcessIO:
     """
     This class manages IO for process information. Each instance of this class corresponds one-on-one with a process.
     This class has methods to create an input form for summary and details each, load data from the forms, and save the forms as worksheets in an Excel workbook.

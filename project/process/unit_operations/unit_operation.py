@@ -4,9 +4,10 @@ import pandas as pd
 
 
 from flow_draw import definitions as defs
-from flow_draw import chemistry as chem
+#from flow_draw import chemistry as chem
 from flow_draw.flow_output import Flowsheet as fsht
-from typing import List
+from flow_draw.trait_def.trait_def import UniversalTrait
+#from typing import List
 import re
 
 
@@ -82,7 +83,7 @@ class UnitOperation(ABC):
         op_key: str
             Keyword corresponding to each unit operation. This shoudl be defined in each unit operation module. 
         """
-        super.__init_subclass__(**kwargs)
+        super().__init_subclass__(**kwargs)
         if cls is UnitOperation:
             return
         if not op_key:
@@ -93,14 +94,14 @@ class UnitOperation(ABC):
         registry_uo_cls[op_key] = cls
         list_unit_ops.append(op_key)
 
-    def __init__(self, chem_data:chem.Chemistry, flow_sheet:fsht.Flowsheet, operation_seq: int=None):    
+    def __init__(self, caller: type[UniversalTrait] =None, flow_sheet:fsht.Flowsheet=None, operation_seq: int=None, edit_comment:str=None):    
         """
         Set the necessary items in the instance variables.
         
         Parameters
         ------------
-        chem_data: flow_draw.chemistry.Chemistry
-            The chem_data object should include the data of chemical materials used in the process.
+        caller: type[flow_draw.trait_def.trait_def.UniversalTrait]
+            The caller object of the this method. Each derived class expect different traits (derived class of UniversalTrait). Normally, \"self\" when the function is called is expected. 
         
         flow_sheet: flow_draw.flow_output.Flowsheet
             Flowsheet object takes care of the output. The object should hold an OpenPyXL Workbook object. The class is responsible for formatting the output.
@@ -113,16 +114,17 @@ class UnitOperation(ABC):
          None
         """
         
-        self.chem_data:chem.Chemistry = chem_data
+        self.caller = caller
         self.flow_sheet: fsht.Flowsheet = flow_sheet
         #TODO: please remove the comment-out part below after a test.
         #self.unit_operation: str = unit_operation
         self.operation_seq: int = operation_seq
+        self.edit_comment = edit_comment
         self.pre_comment: str = ''
         self.post_comment: str = ''
     
     @abstractmethod
-    def get_detail_header(self) -> List[str]:
+    def get_detail_header(self) -> list[str]:
         """
         Returns the header elements specific to the unit operation as a List[str].
         The UnitOperation class provides only skelton. Each derived class must override the method.

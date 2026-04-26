@@ -4,7 +4,8 @@ from flow_draw.project.process.unit_operations import unit_operation as uo
 from flow_draw.data_io import process_io
 from flow_draw import chemistry as chem
 from flow_draw.flow_output import Flowsheet as fsht
-from typing import List
+from flow_draw.trait_def.trait_def import GetChem
+#from typing import List
 
 
 header_precomment = process_io.header_detail_precomment #Don't include this in the specific header list!!!
@@ -95,12 +96,21 @@ class Charging(uo.UnitOperation, op_key=defs.op_charging):
     TODO: Make some comment here.
     """
     
-    def __init__(self, chem_data:chem.Chemistry, flow_sheet:fsht.Flowsheet, operation_seq=None):
-        super().__init__(chem_data=chem_data, flow_sheet=flow_sheet, operation_seq=operation_seq)
-        self.material_count = 0
-        self.materials: List[Material] = []
+    def __init__(self, caller: GetChem=None, flow_sheet:fsht.Flowsheet=None, operation_seq:int=None, edit_comment:str=None):
+        """
+        Initialises the newly created instance of the class Charging.
 
-    def get_detail_header(self) -> List[str]:
+        Parameters
+        ---------------
+        caller: flow_draw.trait_def.trait_def.GetChem
+            The calling object. In the case of the class Charging, GetChem class is expected. From the given caller object, Charging expects chemistry.Chemistry given by get_chem() method.
+        """
+        super().__init__(caller=caller, flow_sheet=flow_sheet, operation_seq=operation_seq, edit_comment=edit_comment)
+        self.chem_data: chem.Chemistry = self.caller.get_chem()
+        self.material_count = 0
+        self.materials: list[Material] = []
+
+    def get_detail_header(self) -> list[str]:
         return list_header_items
 
     def load_params_from_df(self, df: pd.DataFrame):
