@@ -94,7 +94,7 @@ class UnitOperation(ABC):
         registry_uo_cls[uo_name] = cls
         list_unit_ops.append(uo_name)
 
-    def __init__(self, caller: type[UniversalTrait] =None, flow_sheet:fsht.Flowsheet=None, operation_seq: int=None, edit_comment:str=None):    
+    def __init__(self, caller: type[UniversalTrait] =None, flow_sheet:fsht.Flowsheet=None, operation_seq: int=None, num_subitems: int = None, edit_comment:str=None):    
         """
         Set the necessary items in the instance variables.
         
@@ -118,6 +118,7 @@ class UnitOperation(ABC):
         #TODO: please remove the comment-out part below after a test.
         #self.unit_operation: str = unit_operation
         self.operation_seq: int = operation_seq
+        self.num_subitems: int = num_subitems
         self.edit_comment:str = edit_comment
         self.pre_comment: str = ''
         self.post_comment: str = ''

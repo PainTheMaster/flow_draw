@@ -63,8 +63,31 @@ class ProcessIO:
 
     """
     def __init__(self, project_name: str, process_name: str, num_unit_op: int):
+        """
+        Sets the necessary parameters as follows:\n
+            -project name
+            -process name
+            -unit operation number
+            -file path to the input file
+            -worksheet titles for summary and detail in the file
+            -current reading line of summary and detail
+        The file name is automatically set as <project name>+<base name="_process_input">+".xlsx".
+        In a similar manner, the worksheet are named after process name (<process name>+<suffix>).
+        self.__manage_io() is called to newly create the file and worksheets if they don't exist. Otherwise, existing data is loaded.
+
+        Parameters
+        ------------
+        project_name: str
+            The project name.
+        
+        process_name: str
+            The process name.
+        
+        num_unit_op: int
+            The number of the unit operations constituting the process.
+        """
         self.project_name: str = project_name
-        self.process_name:str = process_name
+        self.process_name: str = process_name
         self.num_unit_op: int = num_unit_op
         self.file_path = project_name+inputfile_base_name+'.xlsx'
         self.title_summary_ws: str = process_name+suffix_summary_input_ws

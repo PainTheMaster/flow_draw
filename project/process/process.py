@@ -2,7 +2,7 @@
 import pandas as pd
 import flow_draw.definitions as defs
 from flow_draw.project.process.unit_operations import unit_operation
-from flow_draw.project.process.unit_operations.unit_operation import UnitOperation as uo
+from flow_draw.project.process.unit_operations.unit_operation import UnitOperation as unitop
 from flow_draw.data_io.process_io import ProcessIO as proc_io
 from flow_draw.data_io.flowsheet import Flowsheet as fsht
 from flow_draw.chemistry import Chemistry as chem
@@ -43,7 +43,7 @@ class Process(GetChem):
         self.num_uo = num_uo
         self.chem_data: chem = None #TODO please put the right chem object
         self.data_input = proc_io(process_name=process_name, num_unit_op=num_uo)
-        self.list_uo: list[uo] = []
+        self.list_uo: list[unitop] = []
         self.flowsheet: fsht = fsht()
 
         
@@ -51,9 +51,67 @@ class Process(GetChem):
 
     #TODO: Let the InputForm class create the summary input form.
     def put_summary_input_form(self):
+        """
+        Triggered by a method of the class Project, calls 
+        """
         self.data_input.generate_proc_summary_form(list_unit_ops=unit_operation.list_unit_ops)
 
-    #TODO: Load the process summary
+
+
+
+    #TODO: Please implement me! Load the process summary
+    def load_uo_summary(self):
+        """
+        Loads summary data from a process summary DataFrame and creates a series of (partially filled) UnitOperation instances by interpreting a given process summary DataFrame. 
+        After the run, the self.list_uo will hold a series of unit operation instances each of which knwos the category of the unit operation (the type(sub-class) itself), sequenc number, number of subitems, and edit comment.
+        
+        Parameters
+        -----------
+        None
+
+        Returns
+        ----------
+        None
+        """
+        df_summary = self.data_input.load_process_summary()
+        uo_reg = unit_operation.registry_uo_cls
+        for _, row in df_summary.iterrows():
+            seq = int(row[defs.header_summary_sequence])
+            uo_title = str(row[defs.header_summary_uo])
+            num_subitems = int(row[defs.header_summary_num_subitems])
+            edit_comment = str(row[defs.header_summary_edit_comment])
+        if not uo_title in uo_reg:
+            raise RuntimeError(f"{self.__class__.__name__}: Unit operation name \"{uo_title}\" not in the registry.")
+        
+        new_uo_inst = uo_reg[uo_title](self, self.flowsheet, seq, num_subitems=num_subitems, edit_comment=edit_comment)
+        self.list_uo.append(new_uo_inst)
+
+    # def __prep_uo(self, df_summary: pd.DataFrame):
+    #     """
+    #     Creates a series of (partially filled) UnitOperation instances by interpreting a given process summary DataFrame.
+    #     After the run, the self.list_uo will hold a series of unit operation instances each of which knwos the category of the unit operation (the type(sub-class) itself), sequenc number, number of subitems, and edit comment.
+        
+    #     Parameters
+    #     -----------
+    #     df_summary: pandas.DataFrame
+    #         A DataFrame object containing a seiries of unit operations with sequence number, number of subitems, and edit comment for each. The header items shall be consistent with the definition in the definitions module.
+        
+    #     Returns:
+    #         None
+    #     """
+    #     uo_reg = unit_operation.registry_uo_cls
+    #     for _, row in df_summary.iterrows():
+    #         seq = int(row[defs.header_summary_sequence])
+    #         uo_title = str(row[defs.header_summary_uo])
+    #         num_subitems = int(row[defs.header_summary_num_subitems])
+    #         edit_comment = str(row[defs.header_summary_edit_comment])
+    #     if not uo_title in uo_reg:
+    #         raise RuntimeError(f"{self.__class__.__name__}: Unit operation name \"{uo_title}\" not in the registry.")
+        
+    #     new_uo_inst = uo_reg[uo_title](self, self.flowsheet, seq, num_subitems=num_subitems, edit_comment=edit_comment)
+    #     self.list_uo.append(new_uo_inst)
+        
+
 
     #TODO: Create the process detail input form
 
