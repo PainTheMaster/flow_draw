@@ -3,6 +3,13 @@ from openpyxl.styles.borders import Border, Side
 from openpyxl.styles import Alignment
 from openpyxl.styles import Font
 
+############################
+#        Parameters        #
+############################
+#Chem
+chem_default_num_rows = 100
+
+
 ###############################################
 #ITEMS FOR INTERNAL DATA PROCESSING: TAGS ETC #
 ###############################################
@@ -107,13 +114,62 @@ common_header_detail = [
 no_comment_instr = '(No comment here)'
 
 
+####CHEMISTRY####
+chem_suffix_ws:str = "_chem"
+"""Suffix for raw material information input worksheet"""
+
+chem_header_material:str = "Material"
+"""header item for the column for raw material names"""
+chem_col_material:int = 1
+"""Column number for material names"""
+
+chem_header_main = "Main(*)"
+"""Header item for the column to identify the core raw materials"""
+chem_col_main:int = 2
+"""Column number for the main material star (*)"""
+
+chem_header_MW:str = "MW (g/mol)"
+"""Header item for the column for molecular weight"""
+chem_col_MW : int= 3
+"""Column number for molecular weights"""
+
+chem_header_density:str = "Density (g/mL)"
+"""The header for the density/specific gravity of the raw material"""
+chem_col_density: int = 4
+"""Comlumn number for density"""
+
+chem_header_conc_assay:str = "Conc/Assay(%)"
+"""The header for the concentration or assay of the raw material"""
+chem_col_conc_assay: int = 5
+"""Column number for concentration or assay"""
+
+chem_header_weight_main:str = "Weight Main (kg)"
+"""Header item for the weight of core building block weight (kg)"""
+chem_col_weight_main:int = 6
+"""Column number for weight of the core building block"""
+
+chem_header_remark:str = "Remark"
+"""The header for optional remarks"""
+chem_col_remark: int = 7
+"""Column number for comment"""
+
+chem_list_header: list[str] = [chem_header_material,
+                               chem_header_main,
+                               chem_header_MW,
+                               chem_header_density,
+                               chem_header_conc_assay,
+                               chem_header_weight_main,
+                               chem_header_remark]
+
+chem_component_option_star:str = "*"
+"""Star (*) marker to indicate the core raw material"""
+
+
 ####CHARGING####
 tag_metrics_equiv = "equiv"
 tag_metrics_vol = "v/w"
 list_metrics_unit = [tag_metrics_equiv, tag_metrics_vol]
 """For process.unit_operations.charging.Charging. This is for drop-down list in the detail input form."""
-
-
 
 
 ################################################################

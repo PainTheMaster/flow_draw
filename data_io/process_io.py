@@ -13,6 +13,8 @@ inputfile_base_name = defs.inputfile_base_name
 suffix_summary_input_ws = defs.suffix_summary_input_ws
 """suffix for summary input worksheet (tab)"""
 
+suffix_chem_input_ws = defs.chem_suffix_ws
+
 suffix_detail_input_ws = defs.suffix_detail_input_ws
 """suffix for detail input worksheet (tab)"""
 
@@ -90,13 +92,16 @@ class ProcessIO:
         self.process_name: str = process_name
         self.num_unit_op: int = num_unit_op
         self.file_path = project_name+inputfile_base_name+'.xlsx'
-        self.title_summary_ws: str = process_name+suffix_summary_input_ws
+        self.title_summary_ws: str = process_name+suffix_chem_input_ws
         self.summary_ws: Worksheet = None
+        self.title_chem_ws: str = process_name+suffix_chem_input_ws
+        self.chem_ws: Worksheet = None
         self.title_detail_ws: str = project_name+suffix_detail_input_ws
         self.detail_ws: Worksheet = None
         self.__manage_io()
         self.df_summary: pd.DataFrame = None
         self._current_line_summary:int = 1
+        self._current_line_chem:int = 1
         self._current_line_detail:int = 1
     
     def __manage_io(self):
@@ -109,6 +114,7 @@ class ProcessIO:
             self.wb = xl.Workbook()
             self.wb.remove(worksheet=self.wb['Sheet'])
             self.summary_ws: Worksheet = self.wb.create_sheet(title=self.title_summary_ws)
+            self.chem_ws: Worksheet = self.wb.create_sheet(title=self.title_chem_ws)
             self.detail_ws: Worksheet = self.wb.create_sheet(title=self.title_detail_ws)
         else:
             self.wb=xl.load_workbook(self.file_path)
@@ -117,6 +123,10 @@ class ProcessIO:
                 self.summary_ws:Worksheet = self.wb.create_sheet(title=self.title_summary_ws)
             else:
                 self.summary_ws: Worksheet = self.wb[self.title_summary_ws]
+            if not self.title_chem_ws in sheet_names:
+                self.chem_ws: Worksheet = self.wb.create_sheet(title=self.title_chem_ws)
+            else:
+                self.chem_ws: Worksheet =self.wb[self.title_chem_ws]
             if not self.title_detail_ws in sheet_names:
                 self.detail_ws: Worksheet = self.wb.create_sheet(title=self.title_detail_ws)
             else:
@@ -197,6 +207,52 @@ class ProcessIO:
             self.summary_ws.cell(row = self._current_line_summary, column = summary_col_editcomment).border = defs.xl_border_around
             self._current_line_summary += 1
         
+    def generate_chem_form(self):
+        """
+        Generates the input form worksheet for the raw materials for the proces. The worksheet is a part of the input file.
+
+        Parameters
+        ------------
+        None
+
+        Returns
+        ------------
+        None
+        """
+        options_dv: str = f'{defs.chem_component_option_star},\"\"'
+        dv_main = DataValidation(
+            type='list',
+            formula1=options_dv,
+            allow_blank=True
+        )
+        self.chem_ws.add_data_validation(dv_main)
+        self._current_line_chem = 1
+        self.chem_ws.cell(row=self._current_line_chem, column=defs.chem_col_material).value=defs.chem_header_material
+        self.chem_ws.cell(row=self._current_line_chem, column=defs.chem_col_material).border = defs.xl_border_around
+        self.chem_ws.cell(row=self._current_line_chem, column=defs.chem_col_main).value=defs.chem_header_main
+        self.chem_ws.cell(row=self._current_line_chem, column=defs.chem_col_main).border = defs.xl_border_around
+        self.chem_ws.cell(row=self._current_line_chem, column=defs.chem_col_MW).value=defs.chem_header_MW
+        self.chem_ws.cell(row=self._current_line_chem, column=defs.chem_col_MW).border = defs.xl_border_around
+        self.chem_ws.cell(row=self._current_line_chem, column=defs.chem_col_density).value=defs.chem_header_density
+        self.chem_ws.cell(row=self._current_line_chem, column=defs.chem_col_density).border = defs.xl_border_around
+        self.chem_ws.cell(row=self._current_line_chem, column=defs.chem_col_conc_assay).value=defs.chem_header_conc_assay
+        self.chem_ws.cell(row=self._current_line_chem, column=defs.chem_col_conc_assay).border = defs.xl_border_around
+        self.chem_ws.cell(row=self._current_line_chem, column=defs.chem_col_weight_main).value=defs.chem_header_weight_main
+        self.chem_ws.cell(row=self._current_line_chem, column=defs.chem_col_weight_main).border = defs.xl_border_around
+        self.chem_ws.cell(row=self._current_line_chem, column=defs.chem_col_remark).value=defs.chem_header_remark
+        self.chem_ws.cell(row=self._current_line_chem, column=defs.chem_col_remark).border = defs.xl_border_around
+        self._current_line_chem += 1
+        for _ in range(defs.chem_default_num_rows):
+            self.chem_ws.cell(row=self._current_line_chem, column=defs.chem_col_material).border = defs.xl_border_around
+            self.chem_ws.cell(row=self._current_line_chem, column=defs.chem_col_main).border = defs.xl_border_around
+            dv_main.add(self.chem_ws.cell(row=self._current_line_chem, column=defs.chem_col_main))
+            self.chem_ws.cell(row=self._current_line_chem, column=defs.chem_col_MW).border = defs.xl_border_around
+            self.chem_ws.cell(row=self._current_line_chem, column=defs.chem_col_density).border = defs.xl_border_around
+            self.chem_ws.cell(row=self._current_line_chem, column=defs.chem_col_conc_assay).border = defs.xl_border_around
+            self.chem_ws.cell(row=self._current_line_chem, column=defs.chem_col_weight_main).border = defs.xl_border_around
+            self.chem_ws.cell(row=self._current_line_chem, column=defs.chem_col_remark).border = defs.xl_border_around
+            self._current_line_chem += 1
+
 
     def load_process_summary(self) -> pd.DataFrame:
         """
