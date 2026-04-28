@@ -2,7 +2,7 @@ import pandas as pd
 import flow_draw.definitions as defs
 from flow_draw.project.process.unit_operations import unit_operation as uo
 from flow_draw.data_io import process_io
-from flow_draw import chemistry as chem
+from flow_draw.chemistry import chemistry as chem
 from flow_draw.flow_output import Flowsheet as fsht
 from flow_draw.trait_def.trait_def import GetChem
 #from typing import List
@@ -129,7 +129,9 @@ class Charging(uo.UnitOperation, uo_name=defs.op_charging):
         if not pd.isna(first_row[header_postcomment]):
             self.post_comment = first_row[header_postcomment]
         for _, subitem in df.iterrows():
+            #chem_data contains information for all the materials used in the process. At the moment, newly created Material instance has not been differentiated.
             new_material = Material(chem_data=self.chem_data)
+            #each line of the df = each input material, now, the Material instance is unique in terms of the content.
             new_material.load_params_from_series(subitem)
             self.materials.append(new_material)
             self.material_count += 1

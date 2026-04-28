@@ -3,6 +3,7 @@ import math
 import openpyxl as xl
 import pandas as pd
 import flow_draw.definitions as defs
+import flow_draw.chemistry.chemistry as chem
 from openpyxl.worksheet.worksheet import Worksheet
 from openpyxl.worksheet.datavalidation import DataValidation
 from typing import List, Dict
@@ -275,6 +276,10 @@ class ProcessIO:
         self.df_summary = df
         return df
 
+    def load_chem(self) -> chem.Chemistry:
+        df =pd.read_excel(io=self.file_path, sheet_name=self.title_chem_ws, header=0)
+        chem_this_proc = chem.Chemistry(df)
+        return chem_this_proc
     
     def put_detail_input_table(self, seq: int, specif_header: list[str], menu_dict: dict[str, list[str]]):
         """

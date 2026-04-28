@@ -5,7 +5,7 @@ from flow_draw.project.process.unit_operations import unit_operation
 from flow_draw.project.process.unit_operations.unit_operation import UnitOperation as unitop
 from flow_draw.data_io.process_io import ProcessIO as proc_io
 from flow_draw.data_io.flowsheet import Flowsheet as fsht
-from flow_draw.chemistry import Chemistry as chem
+from flow_draw.chemistry.chemistry import Chemistry as chem
 
 from flow_draw.trait_def.trait_def import GetChem as GetChem
 

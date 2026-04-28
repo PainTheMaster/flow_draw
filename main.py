@@ -2,7 +2,7 @@ import pandas as pd
 
 from flow_draw.project.process.unit_operations import unit_operation as uo
 from flow_draw.project.process.unit_operations import Charging as chg
-from flow_draw import chemistry as chem
+from flow_draw.chemistry import chemistry as chem
 
 #from flow_draw.flow_output.Flowsheet import Flowsheet as fs
 from flow_draw.flow_output import Flowsheet as fs

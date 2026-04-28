@@ -1,6 +1,6 @@
 import pandas as pd
 
-import chemistry as chem
+import flow_draw.chemistry.chemistry as chem
 
 xls_file = pd.ExcelFile('./input.xlsx')
 xls_sheets = xls_file.sheet_names
