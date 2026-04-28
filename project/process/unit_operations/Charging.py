@@ -105,7 +105,7 @@ class Charging(uo.UnitOperation, uo_name=defs.op_charging):
         caller: flow_draw.trait_def.trait_def.GetChem
             The calling object. In the case of the class Charging, GetChem class is expected. From the given caller object, Charging expects chemistry.Chemistry given by get_chem() method.
         """
-        super().__init__(caller=caller, flow_sheet=flow_sheet, operation_seq=operation_seq, num_subitems=num_subitems edit_comment=edit_comment)
+        super().__init__(caller=caller, flow_sheet=flow_sheet, operation_seq=operation_seq, num_subitems=num_subitems, edit_comment=edit_comment)
         self.chem_data: chem.Chemistry = GetChem(self.caller).get_chem #なんかやだからキャストする。
         self.material_count = 0
         self.materials: list[Material] = []

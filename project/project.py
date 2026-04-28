@@ -6,7 +6,19 @@ class Project:
 
     #TODO please implement me!
     def load_process_summary(self):
+        """
+        Lets each process constituting the project load the summary data from a ProcessIO object.
 
+        Parameters
+        ------------
+        None
+
+        Returns
+        ------------
+        None
+        """
+        for proc in self.list_proc:
+            proc.load_uo_summary()
 
 
     def load_process_details(self):
