@@ -54,7 +54,7 @@ class Chemistry:
                
 
     #TODO 2026/04/29 Pleae test me. I was modified to be consistent with the new input form header style.
-    def to_kilogram(self, material:str = None, equiv: float = None, vol_per_weight:float = None) -> float:
+    def to_kilogram(self, material_name:str = None, equiv: float = None, vol_per_weight:float = None) -> float:
         """
         Converts metrics value in equiv or volume/weight of a given material to kilogram.
         This method depends on the DataFrame objects for both all the raw materials and the main starting material.
@@ -79,15 +79,15 @@ class Chemistry:
         """
         if not (equiv is None or vol_per_weight is None):
             raise ValueError(f"chemistry.Chemistry.to_kilogram(): Dual input of equiv: {equiv} and vol_per_weight: {vol_per_weight}. A value for only one of those shall be provided.")
-        if not self.df_chem[defs.chem_header_material].isin([material]).any():
-            raise ValueError(f"chemistry.Chemistry.to_kilogram(): A compound name \"{material}\" is not defined in the raw materials table.")
-        conc_assay = self.df_chem[self.df_chem[defs.chem_header_material]==material][defs.chem_header_conc_assay].item()
+        if not self.df_chem[defs.chem_header_material].isin([material_name]).any():
+            raise ValueError(f"chemistry.Chemistry.to_kilogram(): A compound name \"{material_name}\" is not defined in the raw materials table.")
+        conc_assay = self.df_chem[self.df_chem[defs.chem_header_material]==material_name][defs.chem_header_conc_assay].item()
         if not conc_assay or conc_assay==0.0:
-            raise UserWarning(f"{self.__class__.__name__}.to_kilogram(): The concentration or assay for the material \"{material}\" is empty or zero.",
+            raise UserWarning(f"{self.__class__.__name__}.to_kilogram(): The concentration or assay for the material \"{material_name}\" is empty or zero.",
                               "For this run, 100%% is assumed.")
             conc_assay = 100.0
-        mw = self.df_chem[self.df_chem[defs.chem_header_material]==material][defs.chem_header_MW].item()
-        density = self.df_chem[self.df_chem[defs.chem_header_material]==material][defs.chem_header_density].item()
+        mw = self.df_chem[self.df_chem[defs.chem_header_material]==material_name][defs.chem_header_MW].item()
+        density = self.df_chem[self.df_chem[defs.chem_header_material]==material_name][defs.chem_header_density].item()
         weight = 0.0
         if equiv is not None:
             mol = self.sm_mol * equiv

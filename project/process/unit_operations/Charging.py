@@ -107,8 +107,8 @@ class Charging(uo.UnitOperation, uo_name=defs.op_charging):
         """
         super().__init__(caller=caller, flow_sheet=flow_sheet, operation_seq=operation_seq, num_subitems=num_subitems, edit_comment=edit_comment)
         self.chem_data: chem.Chemistry = GetChem(self.caller).get_chem #なんかやだからキャストする。
-        self.material_count = 0
-        self.materials: list[Material] = []
+        self.input_count = 0
+        self.inputs: list[Input] = []
 
         self.output_unit_operation()
 
@@ -130,43 +130,43 @@ class Charging(uo.UnitOperation, uo_name=defs.op_charging):
             self.post_comment = first_row[header_postcomment]
         for _, subitem in df.iterrows():
             #chem_data contains information for all the materials used in the process. At the moment, newly created Material instance has not been differentiated.
-            new_material = Material(chem_data=self.chem_data)
+            new_input = Input(chem_data=self.chem_data)
             #each line of the df = each input material, now, the Material instance is unique in terms of the content.
-            new_material.load_params_from_series(subitem)
-            self.materials.append(new_material)
-            self.material_count += 1
+            new_input.load_params_from_series(subitem)
+            self.inputs.append(new_input)
+            self.input_count += 1
 
     def output_unit_operation(self):
         self.flow_sheet.header_organizer(op_nr=self.operation_seq, title=self.unit_operation)
         if not (self.pre_comment == None or self.pre_comment == ''):
             self.flow_sheet.put_body_comments(self.pre_comment)
 
-        for material in self.materials:
+        for temp_inpt in self.inputs:
             self.flow_sheet.put_line(time=defs.part_time,
-                                     method=material.method,
-                                     content=material.material_name,
+                                     method=temp_inpt.method,
+                                     content=temp_inpt.material_name,
                                      record=defs.part_record_lot,
                                      operator=defs.part_signature,
                                      witness=defs.part_signature)
 
             #line-2: QTY instruction and record
-            str_qty = f'{material.qty_kg}±{material.error_kg} kg'
+            str_qty = f'{temp_inpt.qty_kg}±{temp_inpt.error_kg} kg'
             self.flow_sheet.put_line(content=str_qty, record=defs.part_record_input)
 
             #For liquid only, flex ID 
-            if (material.method == charging_method_liq or
-                material.method == charging_method_press or
-                material.method == charging_method_shower):
+            if (temp_inpt.method == charging_method_liq or
+                temp_inpt.method == charging_method_press or
+                temp_inpt.method == charging_method_shower):
                 self.flow_sheet.put_line(record=defs.part_record_flex,
                                          operator=defs.part_signature,
                                          witness=defs.part_signature)
             
             #for both liq and solid; temp and time control.
-            if not (material.time_control == time_control_none or material.time_control is None):
-                self.__put_time_control(material=material)
+            if not (temp_inpt.time_control == time_control_none or temp_inpt.time_control is None):
+                self.__put_time_control(input=temp_inpt)
 
-            if not (material.temp_control == temp_control_none or material.temp_control is None):
-                self.__put_temp_control(material=material)              
+            if not (temp_inpt.temp_control == temp_control_none or temp_inpt.temp_control is None):
+                self.__put_temp_control(input=temp_inpt)              
      
             self.__put_end_of_dosing()
             self.flow_sheet.linefeed()
@@ -180,36 +180,36 @@ class Charging(uo.UnitOperation, uo_name=defs.op_charging):
         print("Pre-comment?:")
         self.pre_comment = input()
         print("How many input materials?: ", end="")
-        self.material_count=int(input())
-        for i in range(self.material_count):
-            this_material = Material(chem_data=self.chem_data)
+        self.input_count=int(input())
+        for i in range(self.input_count):
+            this_material = Input(chem_data=self.chem_data)
             this_material.interact()
-            self.materials.append(this_material)
+            self.inputs.append(this_material)
         print("Post-comment?:")
         self.post_comment = input()
 
     def test_data_creation(self):
         self.pre_comment = 'This is the line-1 of a dummy pre-comment\nThis is the line-2 of a dummy pre-comment'
         self.post_comment = 'This is the line-1 of a dummy post-comment;This is the line-2 of a dummy post-comment;The product is salty.'
-        material1 = Material(chem_data=self.chem_data)
+        material1 = Input(chem_data=self.chem_data)
         material1.test_data_creation1()
-        self.materials.append(material1)
-        material2 = Material(chem_data=self.chem_data)
+        self.inputs.append(material1)
+        material2 = Input(chem_data=self.chem_data)
         material2.test_data_creation2()
-        self.materials.append(material2)
+        self.inputs.append(material2)
         print("Test data created for salt water.")
 
 
-    def __put_time_control(self, material: Material):
+    def __put_time_control(self, input: Input=None):
         sentence_instruction: str = ''
-        if (material.time_control == time_control_min):
-            sentence_instruction = f'*滴下時間{material.time_min}以上'
+        if (input.time_control == time_control_min):
+            sentence_instruction = f'*滴下時間{input.time_min}以上'
 
-        elif (material.time_control == time_control_max):
-            sentence_instruction = f'*滴下時間{material.time_max}以内'
+        elif (input.time_control == time_control_max):
+            sentence_instruction = f'*滴下時間{input.time_max}以内'
 
-        elif (material.time_control == time_control_min_max):
-            sentence_instruction = f'*滴下時間{material.time_min}～{material.time_max}以内'
+        elif (input.time_control == time_control_min_max):
+            sentence_instruction = f'*滴下時間{input.time_min}～{input.time_max}以内'
         
         self.flow_sheet.put_line(time=defs.part_time,
                                 method=defs.part_method_charging_ini,
@@ -218,21 +218,21 @@ class Charging(uo.UnitOperation, uo_name=defs.op_charging):
                                 witness=defs.part_signature)
 
 
-    def __put_temp_control(self, material: Material):
-        if material.temp_control == temp_control_min:
-            sentence = "仕込み中内温"+str(material.t_i_min)+"℃以上"
+    def __put_temp_control(self, input: Input=None):
+        if input.temp_control == temp_control_min:
+            sentence = "仕込み中内温"+str(input.t_i_min)+"℃以上"
             self.flow_sheet.put_line(content=sentence, record=defs.part_record_temp_ini)
             self.flow_sheet.put_line(record=defs.part_record_temp_min)
             self.flow_sheet.put_line(record=defs.part_record_temp_end)
 
-        elif material.temp_control == temp_control_max:
-            sentence = "仕込み中内温"+str(material.t_i_max)+"℃以下"
+        elif input.temp_control == temp_control_max:
+            sentence = "仕込み中内温"+str(input.t_i_max)+"℃以下"
             self.flow_sheet.put_line(content=sentence, record=defs.part_record_temp_ini)
             self.flow_sheet.put_line(record=defs.part_record_temp_max)
             self.flow_sheet.put_line(record=defs.part_record_temp_end)
 
-        elif material.temp_control == temp_control_min_max:
-            sentence = "仕込み中内温"+str(material.t_i_min)+'～'+str(material.t_i_max)+"℃"
+        elif input.temp_control == temp_control_min_max:
+            sentence = "仕込み中内温"+str(input.t_i_min)+'～'+str(input.t_i_max)+"℃"
             self.flow_sheet.put_line(content=sentence, record=defs.part_record_temp_ini)
             self.flow_sheet.put_line(record=defs.part_record_temp_min)
             self.flow_sheet.put_line(record=defs.part_record_temp_max)
@@ -245,7 +245,7 @@ class Charging(uo.UnitOperation, uo_name=defs.op_charging):
                                      operator=defs.part_signature,
                                      witness=defs.part_signature)
 
-class Material:
+class Input:
     """This class is for each material charged, each instance correspnds to each dosage in a charging operation.
     """
     def __init__(self, chem_data:chem.Chemistry):
@@ -406,10 +406,10 @@ class Material:
         None
         """
         if self.metrics_unit == defs.tag_metrics_equiv:
-            self.qty_kg = self.chem_data.to_kilogram(material = self.material_name, equiv=self.metrics_val)
+            self.qty_kg = self.chem_data.to_kilogram(material_name = self.material_name, equiv=self.metrics_val)
             self.error_kg = self.qty_kg * (self.error_pct/100.0)
         elif self.metrics_unit == defs.tag_metrics_vol:
-            self.qty_kg = self.chem_data.to_kilogram(material = self.material_name, vol_per_weight=self.metrics_val)
+            self.qty_kg = self.chem_data.to_kilogram(material_name = self.material_name, vol_per_weight=self.metrics_val)
             self.error_kg = self.qty_kg * (self.error_pct/100.0)
         else:
             raise ValueError('metrics_unit not defined')
