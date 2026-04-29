@@ -164,13 +164,45 @@ mats_list_header: list[str] = [mats_header_material,
 mats_compo_desig_star:str = "*"
 """Star (*) marker to indicate the core raw material"""
 
+####CHARGING HEADER ITEMS####
+hedr_charging_material_name = 'Material Name'
+hedr_charging_metrics_value = 'Metrics Value'
+hedr_charging_metrics_unit = 'Metrics Unit'
+hedr_charging_error = 'Permissible Error (%)'
+hedr_charging_method = 'Charging Method'
+hedr_charging_time_control = 'Time Control'
+hedr_charging_time_min = 'Minimum Time (min)'
+hedr_charging_time_max = 'Maximum Time (min)'
+hedr_charging_temp_control = 'Temp Control'
+hedr_charging_temp_min = 'Minimum Temp (deg-C)'
+hedr_charging_temp_max = 'Maximum Temp (deg-C)'
 
-####CHARGING####
+
+####CHARGING TAGS####
 tag_metrics_equiv = "equiv"
 tag_metrics_vol = "v/w"
 list_metrics_unit = [tag_metrics_equiv, tag_metrics_vol]
 """For process.unit_operations.charging.Charging. This is for drop-down list in the detail input form."""
 
+charging_method_liq = 'liquid_port'
+charging_method_shower = 'shower'
+charging_method_press = 'press_vessel'
+charging_method_pow ='powder_port'
+charging_method_placeholder = 'placeholder'
+
+charging_timectrl_none = "No time control"
+charging_timectrl_min="Time control with minimum"
+charging_timectrl_max="Time control with maximum"
+charging_timectrl_min_max='Time control with minimum and maximum'
+charging_timectrl_placeholder = 'Placeholder'
+
+charging_temprctrl_none = "No temp control"
+charging_temprctrl_min="Temp control with minimum"
+charging_temprctrl_max="Temp control with maximum"
+charging_temprctrl_min_max='Temp control with minimum and maximum'
+charging_temprctrl_placeholder = 'Placeholder'
+
+charging_error_range_placeholder='place holder'
 
 ################################################################
 #                      PARTS FLOW SHEETS                       #

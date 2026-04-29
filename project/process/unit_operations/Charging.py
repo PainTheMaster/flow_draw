@@ -8,86 +8,86 @@ from flow_draw.trait_def.trait_def import GetMats
 #from typing import List
 
 
-header_precomment = process_io.header_detail_precomment #Don't include this in the specific header list!!!
-header_postcomment = process_io.header_detail_postcomment #Don't include this in the specific header list!!!
+header_precomment = defs.header_detail_precomment #Don't include this in the specific header list!!!
+header_postcomment = defs.header_detail_postcomment #Don't include this in the specific header list!!!
 
-header_material_name = 'Material Name'
-header_metrics_value = 'Metrics Value'
-header_metrics_unit = 'Metrics Unit'
-header_error = 'Permissible Error (%)'
-header_method = 'Charging Method'
-header_time_control = 'Time Control'
-header_time_min = 'Minimum Time (min)'
-header_time_max = 'Maximum Time (min)'
-header_temp_control = 'Temp Control'
-header_temp_min = 'Minimum Temp (deg-C)'
-header_temp_max = 'Maximum Temp (deg-C)'
+hedr_material_name = defs.hedr_charging_material_name
+hedr_metrics_value = defs.hedr_charging_metrics_value
+hedr_metrics_unit = defs.hedr_charging_metrics_unit
+hedr_error = defs.hedr_charging_error
+hedr_method = defs.hedr_charging_method
+hedr_time_control = defs.hedr_charging_time_control
+hedr_time_min = defs.hedr_charging_time_min
+hedr_time_max = defs.hedr_charging_time_max
+hedr_temp_control = defs.hedr_charging_temp_control
+hedr_temp_min = defs.hedr_charging_temp_min
+hedr_temp_max = defs.hedr_charging_temp_max
 
 list_header_items = [
-    header_material_name,
-    header_metrics_value,
-    header_metrics_unit,
-    header_error,
-    header_method,
-    header_time_control,
-    header_time_min,
-    header_time_max,
-    header_temp_control,
-    header_temp_min,
-    header_temp_max
+    hedr_material_name,
+    hedr_metrics_value,
+    hedr_metrics_unit,
+    hedr_error,
+    hedr_method,
+    hedr_time_control,
+    hedr_time_min,
+    hedr_time_max,
+    hedr_temp_control,
+    hedr_temp_min,
+    hedr_temp_max
 ]
 
 
-charging_method_liq = 'liquid_port'
-charging_method_shower = 'shower'
-charging_method_press = 'press_vessel'
-charging_method_pow ='powder_port'
-charging_method_placeholder = 'placeholder'
+method_liq = defs.charging_method_liq
+method_shower = defs.charging_method_shower
+method_press = defs.charging_method_press
+method_pow = defs.charging_method_pow
+method_placeholder = defs.charging_method_placeholder
 list_charging_method =[
-    charging_method_liq,
-    charging_method_shower,
-    charging_method_press,
-    charging_method_pow,
-    charging_method_placeholder
+    method_liq,
+    method_shower,
+    method_press,
+    method_pow,
+    method_placeholder
 ]
 
-time_control_none = "No time control"
-time_control_min="Time control with minimum"
-time_control_max="Time control with maximum"
-time_control_min_max='Time control with minimum and maximum'
-time_control_placeholder = 'Placeholder'
+timectrl_none = defs.charging_timectrl_none
+timectrl_min = defs.charging_timectrl_min
+timectrl_max = defs.charging_timectrl_max
+timectrl_min_max = defs.charging_timectrl_min_max
+timectrl_placeholder = defs.charging_timectrl_placeholder
 list_time_control =[
-    time_control_none,
-    time_control_min,
-    time_control_max,
-    time_control_min_max,
-    time_control_placeholder
+    timectrl_none,
+    timectrl_min,
+    timectrl_max,
+    timectrl_min_max,
+    timectrl_placeholder
 ]
 
-temp_control_none = "No temp control"
-temp_control_min="Temp control with minimum"
-temp_control_max="Temp control with maximum"
-temp_control_min_max='Temp control with minimum and maximum'
-temp_control_placeholder = 'Placeholder'
+temprctrl_none = defs.charging_temprctrl_none
+temprctrl_min = defs.charging_temprctrl_min
+temprctrl_max = defs.charging_temprctrl_max
+temprctrl_min_max = defs.charging_temprctrl_min_max
+temprctrl_placeholder = defs.charging_temprctrl_placeholder
 list_temp_control =[
-    temp_control_none,
-    temp_control_min,
-    temp_control_max,
-    temp_control_min_max,
-    temp_control_placeholder
+    temprctrl_none,
+    temprctrl_min,
+    temprctrl_max,
+    temprctrl_min_max,
+    temprctrl_placeholder
 ]
 
 #list_metrics_unit = [defs.tag_metrics_equiv, defs.tag_metrics_vol]
-list_metrics_unit = defs.list_metrics_unit
+list_metrics_unit = [defs.tag_metrics_equiv, defs.tag_metrics_vol]
 
-error_range_placeholder='place holder'
+error_range_placeholder = defs.charging_error_range_placeholder
 list_error_range = [None, 1.0, None, None, None, 5.0, error_range_placeholder]
 
 menu_dict ={
-    header_metrics_unit: list_metrics_unit,
-    header_method: list_charging_method,
-    header_time_control: list_time_control,
-    header_temp_control: list_temp_control
+    hedr_metrics_unit: list_metrics_unit,
+    hedr_method: list_charging_method,
+    hedr_time_control: list_time_control,
+    hedr_temp_control: list_temp_control
 }
 
 
@@ -155,18 +155,18 @@ class Charging(uo.UnitOperation, uo_name=defs.op_charging):
             self.flow_sheet.put_line(content=str_qty, record=defs.part_record_input)
 
             #For liquid only, flex ID 
-            if (temp_inpt.method == charging_method_liq or
-                temp_inpt.method == charging_method_press or
-                temp_inpt.method == charging_method_shower):
+            if (temp_inpt.method == method_liq or
+                temp_inpt.method == method_press or
+                temp_inpt.method == method_shower):
                 self.flow_sheet.put_line(record=defs.part_record_flex,
                                          operator=defs.part_signature,
                                          witness=defs.part_signature)
             
             #for both liq and solid; temp and time control.
-            if not (temp_inpt.time_control == time_control_none or temp_inpt.time_control is None):
+            if not (temp_inpt.time_control == timectrl_none or temp_inpt.time_control is None):
                 self.__put_time_control(input=temp_inpt)
 
-            if not (temp_inpt.temp_control == temp_control_none or temp_inpt.temp_control is None):
+            if not (temp_inpt.temp_control == temprctrl_none or temp_inpt.temp_control is None):
                 self.__put_temp_control(input=temp_inpt)              
      
             self.__put_end_of_dosing()
@@ -203,13 +203,13 @@ class Charging(uo.UnitOperation, uo_name=defs.op_charging):
 
     def __put_time_control(self, input: Input=None):
         sentence_instruction: str = ''
-        if (input.time_control == time_control_min):
+        if (input.time_control == timectrl_min):
             sentence_instruction = f'*滴下時間{input.time_min}以上'
 
-        elif (input.time_control == time_control_max):
+        elif (input.time_control == timectrl_max):
             sentence_instruction = f'*滴下時間{input.time_max}以内'
 
-        elif (input.time_control == time_control_min_max):
+        elif (input.time_control == timectrl_min_max):
             sentence_instruction = f'*滴下時間{input.time_min}～{input.time_max}以内'
         
         self.flow_sheet.put_line(time=defs.part_time,
@@ -220,19 +220,19 @@ class Charging(uo.UnitOperation, uo_name=defs.op_charging):
 
 
     def __put_temp_control(self, input: Input=None):
-        if input.temp_control == temp_control_min:
+        if input.temp_control == temprctrl_min:
             sentence = "仕込み中内温"+str(input.t_i_min)+"℃以上"
             self.flow_sheet.put_line(content=sentence, record=defs.part_record_temp_ini)
             self.flow_sheet.put_line(record=defs.part_record_temp_min)
             self.flow_sheet.put_line(record=defs.part_record_temp_end)
 
-        elif input.temp_control == temp_control_max:
+        elif input.temp_control == temprctrl_max:
             sentence = "仕込み中内温"+str(input.t_i_max)+"℃以下"
             self.flow_sheet.put_line(content=sentence, record=defs.part_record_temp_ini)
             self.flow_sheet.put_line(record=defs.part_record_temp_max)
             self.flow_sheet.put_line(record=defs.part_record_temp_end)
 
-        elif input.temp_control == temp_control_min_max:
+        elif input.temp_control == temprctrl_min_max:
             sentence = "仕込み中内温"+str(input.t_i_min)+'～'+str(input.t_i_max)+"℃"
             self.flow_sheet.put_line(content=sentence, record=defs.part_record_temp_ini)
             self.flow_sheet.put_line(record=defs.part_record_temp_min)
@@ -306,10 +306,10 @@ class Input:
         print("> ", end='')
         choice_time_control = int(input())
         self.time_control = list_time_control[choice_time_control]
-        if self.time_control == time_control_min or self.time_control == time_control_min_max:
+        if self.time_control == timectrl_min or self.time_control == timectrl_min_max:
             print("Charging time lower limit?: ", end='')
             self.time_min = input()
-        if self.time_control == time_control_max or self.time_control == time_control_min_max:
+        if self.time_control == timectrl_max or self.time_control == timectrl_min_max:
             print("Charging time upper limit?: ", end='')
             self.time_max = input()
         
@@ -319,10 +319,10 @@ class Input:
         print("> ", end='')
         choice_temp_control = int(input())
         self.temp_control = list_temp_control[choice_temp_control]
-        if self.temp_control == temp_control_min or self.temp_control == temp_control_min_max:
+        if self.temp_control == temprctrl_min or self.temp_control == temprctrl_min_max:
             print("Charging temperature (℃) lower limit?: ", end='')
             self.t_i_min = float(input())
-        if self.temp_control == temp_control_max or self.temp_control == temp_control_min_max:
+        if self.temp_control == temprctrl_max or self.temp_control == temprctrl_min_max:
             print("Charging temperature (℃) upper limit?: ", end='')
             self.t_i_max = float(input())
         
@@ -343,21 +343,21 @@ class Input:
         --------------
         None
         """
-        self.material_name = ser[header_material_name]
-        self.metrics_unit = ser[header_metrics_unit]
-        self.metrics_val = ser[header_metrics_value]
-        self.error_pct = ser[header_error]
-        self.method  = ser[header_method]
-        self.time_control = ser[header_time_control]
-        if self.time_control == time_control_min or self.time_control == time_control_min_max:
-            self.time_min = ser[header_time_min]
-        if self.time_control == time_control_max or self.time_control == time_control_min_max:
-            self.time_max = ser[header_time_max]
-        self.temp_control = ser[header_temp_min]
-        if self.temp_control == temp_control_min or self.temp_control == temp_control_min_max:
-            self.t_i_min = ser[header_temp_min]
-        if self.temp_control == temp_control_max or self.temp_control == temp_control_min_max:
-            self.t_i_max = ser[header_temp_max]
+        self.material_name = ser[hedr_material_name]
+        self.metrics_unit = ser[hedr_metrics_unit]
+        self.metrics_val = ser[hedr_metrics_value]
+        self.error_pct = ser[hedr_error]
+        self.method  = ser[hedr_method]
+        self.time_control = ser[hedr_time_control]
+        if self.time_control == timectrl_min or self.time_control == timectrl_min_max:
+            self.time_min = ser[hedr_time_min]
+        if self.time_control == timectrl_max or self.time_control == timectrl_min_max:
+            self.time_max = ser[hedr_time_max]
+        self.temp_control = ser[hedr_temp_min]
+        if self.temp_control == temprctrl_min or self.temp_control == temprctrl_min_max:
+            self.t_i_min = ser[hedr_temp_min]
+        if self.temp_control == temprctrl_max or self.temp_control == temprctrl_min_max:
+            self.t_i_max = ser[hedr_temp_max]
         self.__calc_qty()
 
     def test_data_creation1(self):
@@ -367,11 +367,11 @@ class Input:
         self.error_pct = 5.0
         #self.qty_kg = None
         #self.error_kg = None
-        self.method = charging_method_liq
-        self.time_control = time_control_min
+        self.method = method_liq
+        self.time_control = timectrl_min
         self.time_min = '1h'
         self.time_max = None
-        self.temp_control = temp_control_min_max
+        self.temp_control = temprctrl_min_max
         self.t_i_min = 15
         self.t_i_max = 25
         self.__calc_qty()
@@ -383,11 +383,11 @@ class Input:
         self.error_pct = 5.0
         #self.qty_kg = None
         #self.error_kg = None
-        self.method = charging_method_pow
-        self.time_control = time_control_none
+        self.method = method_pow
+        self.time_control = timectrl_none
         self.time_min = None
         self.time_max = None
-        self.temp_control = temp_control_min_max
+        self.temp_control = temprctrl_min_max
         self.t_i_min = 15
         self.t_i_max = 25
         self.__calc_qty()

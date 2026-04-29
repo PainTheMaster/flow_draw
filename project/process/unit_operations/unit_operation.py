@@ -3,12 +3,11 @@ from abc import ABC, abstractmethod
 import pandas as pd
 
 
-from flow_draw import definitions as defs
+#from flow_draw import definitions as defs
 #from flow_draw import chemistry as chem
-from flow_draw.data_io.flowsheet import Flowsheet as fsht
-from flow_draw.trait_def.trait_def import UniversalTrait
-#from typing import List
-import re
+from flow_draw.data_io import flowsheet as fsht
+from flow_draw.trait_def import trait_def as trdf
+
 
 
 #TODO please delete this list when the automatic registration by __init_subclass__() is fully fully functional
@@ -92,7 +91,7 @@ class UnitOperation(ABC):
         list_unit_ops.append(uo_name)
 
     def __init__(self,
-                 caller: type[UniversalTrait] =None,
+                 caller: type[trdf.UniversalTrait] =None,
                  flow_sheet:fsht.Flowsheet=None,
                  operation_seq: int=None,
                  num_subitems: int = None,
@@ -115,7 +114,7 @@ class UnitOperation(ABC):
         ------------
          None
         """
-        self.caller: type[UniversalTrait] = caller
+        self.caller: type[trdf.UniversalTrait] = caller
         self.flow_sheet: fsht.Flowsheet = flow_sheet
         #TODO: please remove the comment-out part below after a test.
         #self.unit_operation: str = unit_operation
