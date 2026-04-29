@@ -2,7 +2,8 @@
 import pandas as pd
 import flow_draw.definitions as defs
 from flow_draw.project.process.unit_operations import unit_operation
-from flow_draw.project.process.unit_operations.unit_operation import UnitOperation as unitop
+#from flow_draw.project.process.unit_operations.unit_operation import UnitOperation as unitop
+from flow_draw.project.process.unit_operations import unit_operation as unitop
 from flow_draw.data_io import process_io as proc_io
 from flow_draw.data_io import flowsheet as fsht
 from flow_draw.materials.materials import Materials as mats
@@ -26,7 +27,7 @@ class Process(GetMats):
     flowsheet: flow_draw.flow_output.Flowsheet
         A Flowsheet object that manages the flowsheet output.
     """
-    def __init__(self,project_name:str, process_name:str, num_uo: int):
+    def __init__(self, project_name:str, process_name:str, num_uo: int):
         """
         Patameters
         --------------
@@ -43,8 +44,11 @@ class Process(GetMats):
         self.process_name = process_name
         self.num_uo = num_uo
         self.data_input = proc_io.ProcessIO(project_name=project_name, process_name=process_name, num_unit_op=num_uo)
+        # self.data_input.generate_proc_summary_form(unitop.list_unit_ops) #TODO Dont forget to give him a list of unitops!
+        # self.data_input.generate_mats_form()
+        # self.data_input.save_form()
         self.mats_data: mats = None #mats_data is stored when load_materials_data() is called.
-        self.list_uo: list[unitop] = []
+        self.list_uo: list[unitop.UnitOperation] = []
         self.flowsheet: fsht.Flowsheet = fsht.Flowsheet()
 
         
@@ -53,8 +57,7 @@ class Process(GetMats):
     #TODO: Let the InputForm class create the summary input form.
     def put_summary_mats_input_form(self):
         """
-        Triggered by a method of the class Project, calls methods to generage forms for process summary and material data.
-        This methods only create those forms in the instance of the class process_io.ProcessIO. It is programmer's responsilibity to save them as worksheets on an Excel file.
+        Calls methods to generage forms for process summary and material data. The forms are saved in the Excel file.
         
         Parameters
         ------------
@@ -68,6 +71,7 @@ class Process(GetMats):
         self.data_input.generate_proc_summary_form(list_unit_ops=unit_operation.list_unit_ops)
         #At the time of process summary creation, the material information should be available. Plus, it is neceesary before loading the detail.
         self.data_input.generate_mats_form()
+        self.data_input.save_form()
 
 
 

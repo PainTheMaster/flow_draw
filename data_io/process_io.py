@@ -100,8 +100,8 @@ class ProcessIO:
         self.mats_ws: Worksheet = None
         self.title_detail_ws: str = project_name+suffix_detail_input_ws
         self.detail_ws: Worksheet = None
-        self.__manage_io()
-        self.df_summary: pd.DataFrame = None
+        self.__manage_io() #load from a file if exist, create otherwise.
+        self.df_summary: pd.DataFrame = None #To be loaded later by a triger. 
         self._current_line_summary:int = 1
         self._current_line_mats:int = 1
         self._current_line_detail:int = 1
