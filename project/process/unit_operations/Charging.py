@@ -2,9 +2,9 @@ import pandas as pd
 import flow_draw.definitions as defs
 from flow_draw.project.process.unit_operations import unit_operation as uo
 from flow_draw.data_io import process_io
-from flow_draw.chemistry import chemistry as chem
+from flow_draw.materials import materials as mats
 from flow_draw.flow_output import Flowsheet as fsht
-from flow_draw.trait_def.trait_def import GetChem
+from flow_draw.trait_def.trait_def import GetMats
 #from typing import List
 
 
@@ -96,17 +96,18 @@ class Charging(uo.UnitOperation, uo_name=defs.op_charging):
     TODO: Make some comment here.
     """
     
-    def __init__(self, caller: GetChem=None, flow_sheet:fsht.Flowsheet=None, operation_seq:int=None, num_subitems: int =None, edit_comment:str=None):
+    def __init__(self, caller: GetMats=None, flow_sheet:fsht.Flowsheet=None, operation_seq:int=None, num_subitems: int =None, edit_comment:str=None):
         """
         Initialises the newly created instance of the class Charging.
 
         Parameters
         ---------------
-        caller: flow_draw.trait_def.trait_def.GetChem
-            The calling object. In the case of the class Charging, GetChem class is expected. From the given caller object, Charging expects chemistry.Chemistry given by get_chem() method.
+        caller: flow_draw.trait_def.trait_def.GetMats
+            The calling object. In the case of the class Charging, GetMats class is expected. From the given caller object, Charging expects materials.Materials given by get_mats() method.
         """
         super().__init__(caller=caller, flow_sheet=flow_sheet, operation_seq=operation_seq, num_subitems=num_subitems, edit_comment=edit_comment)
-        self.chem_data: chem.Chemistry = GetChem(self.caller).get_chem #なんかやだからキャストする。
+        # self.mats_data: mats.Materials = GetMats(self.caller).get_mats() #なんかやだからキャストする。
+        self.mats_data = GetMats(self.caller).get_mats()
         self.input_count = 0
         self.inputs: list[Input] = []
 
@@ -129,8 +130,8 @@ class Charging(uo.UnitOperation, uo_name=defs.op_charging):
         if not pd.isna(first_row[header_postcomment]):
             self.post_comment = first_row[header_postcomment]
         for _, subitem in df.iterrows():
-            #chem_data contains information for all the materials used in the process. At the moment, newly created Material instance has not been differentiated.
-            new_input = Input(chem_data=self.chem_data)
+            #mats_data contains information for all the materials used in the process. At the moment, newly created Material instance has not been differentiated.
+            new_input = Input(mats_data=self.mats_data)
             #each line of the df = each input material, now, the Material instance is unique in terms of the content.
             new_input.load_params_from_series(subitem)
             self.inputs.append(new_input)
@@ -182,7 +183,7 @@ class Charging(uo.UnitOperation, uo_name=defs.op_charging):
         print("How many input materials?: ", end="")
         self.input_count=int(input())
         for i in range(self.input_count):
-            this_material = Input(chem_data=self.chem_data)
+            this_material = Input(mats_data=self.mats_data)
             this_material.interact()
             self.inputs.append(this_material)
         print("Post-comment?:")
@@ -191,10 +192,10 @@ class Charging(uo.UnitOperation, uo_name=defs.op_charging):
     def test_data_creation(self):
         self.pre_comment = 'This is the line-1 of a dummy pre-comment\nThis is the line-2 of a dummy pre-comment'
         self.post_comment = 'This is the line-1 of a dummy post-comment;This is the line-2 of a dummy post-comment;The product is salty.'
-        material1 = Input(chem_data=self.chem_data)
+        material1 = Input(mats_data=self.mats_data)
         material1.test_data_creation1()
         self.inputs.append(material1)
-        material2 = Input(chem_data=self.chem_data)
+        material2 = Input(mats_data=self.mats_data)
         material2.test_data_creation2()
         self.inputs.append(material2)
         print("Test data created for salt water.")
@@ -248,8 +249,8 @@ class Charging(uo.UnitOperation, uo_name=defs.op_charging):
 class Input:
     """This class is for each material charged, each instance correspnds to each dosage in a charging operation.
     """
-    def __init__(self, chem_data:chem.Chemistry):
-        self.chem_data = chem_data
+    def __init__(self, mats_data: mats.Materials):
+        self.mats_data = mats_data
         self.material_name = ""
         self.metrics_unit = ""
         self.metrics_val = None
@@ -394,7 +395,7 @@ class Input:
     def __calc_qty(self):
         """
         Calculates the quantity of the material and permissible error in "kg" unit.
-        For this function to work, instance/values of chem_data, metrics unit (equiv or v/w), metrics value (a factor to the main starting material) have to have been let to the instance variable.
+        For this function to work, instance/values of mats_data, metrics unit (equiv or v/w), metrics value (a factor to the main starting material) have to have been let to the instance variable.
         The calculated result is set to the self.qty_kg, self.error_kg, and returns nothing.
 
         Parameters
@@ -406,10 +407,10 @@ class Input:
         None
         """
         if self.metrics_unit == defs.tag_metrics_equiv:
-            self.qty_kg = self.chem_data.to_kilogram(material_name = self.material_name, equiv=self.metrics_val)
+            self.qty_kg = self.mats_data.to_kilogram(material_name = self.material_name, equiv=self.metrics_val)
             self.error_kg = self.qty_kg * (self.error_pct/100.0)
         elif self.metrics_unit == defs.tag_metrics_vol:
-            self.qty_kg = self.chem_data.to_kilogram(material_name = self.material_name, vol_per_weight=self.metrics_val)
+            self.qty_kg = self.mats_data.to_kilogram(material_name = self.material_name, vol_per_weight=self.metrics_val)
             self.error_kg = self.qty_kg * (self.error_pct/100.0)
         else:
             raise ValueError('metrics_unit not defined')

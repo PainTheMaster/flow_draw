@@ -36,7 +36,7 @@ class Materials:
                 -Concentration/assay (%)
                 -Remark (opitonal)
             of the raw materials.\n
-            The data frame must have a header aligned with the class chemistry.Chemistry.
+            The data frame must have a header aligned with the class materials.Materials.
         
         df_sm: pandas.DataFrame
             A DataFrame object retaining information on the quantity of the starting material. It shall have:\n
@@ -46,11 +46,11 @@ class Materials:
             of the starting material.\n
         """
         self.df_mats: pd.DataFrame= df_mats
-        #TODO please find the core building block (main raw material) from df_chem. It is marked with "*".
+        #TODO please find the core building block (main raw material) from df_mats. It is marked with "*".
         #self.df_sm = df_sm
         # self.sm_name = df_sm[df_sm[header_key]==key_sm_name][header_value].item()
         # self.sm_kg = df_sm[df_sm[header_key]==key_sm_kg][header_value].item()
-        # self.sm_mol = self.sm_kg * 1000 / df_chem[df_chem[header_material]==self.sm_name][header_mw].item()
+        # self.sm_mol = self.sm_kg * 1000 / df_mats[df_mats[header_material]==self.sm_name][header_mw].item()
                
 
     #TODO 2026/04/29 Pleae test me. I was modified to be consistent with the new input form header style.
@@ -58,7 +58,7 @@ class Materials:
         """
         Converts metrics value in equiv or volume/weight of a given material to kilogram.
         This method depends on the DataFrame objects for both all the raw materials and the main starting material.
-        As long as they are set to the Chemistry instance beforehand, this method works.
+        As long as they are set to the Materials instance beforehand, this method works.
 
         Parameters
         -------------

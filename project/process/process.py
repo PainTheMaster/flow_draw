@@ -5,11 +5,11 @@ from flow_draw.project.process.unit_operations import unit_operation
 from flow_draw.project.process.unit_operations.unit_operation import UnitOperation as unitop
 from flow_draw.data_io.process_io import ProcessIO as proc_io
 from flow_draw.data_io.flowsheet import Flowsheet as fsht
-from flow_draw.chemistry.chemistry import Chemistry as chem
+from flow_draw.materials.materials import Materials as mats
 
-from flow_draw.trait_def.trait_def import GetChem as GetChem
+from flow_draw.trait_def.trait_def import GetMats as GetMats
 
-class Process(GetChem):
+class Process(GetMats):
     """
     The Process is for a process, which consists of many unit operations. The class holds a name, an instance of InputForm class, a sries of UnitOperation(s).
 
@@ -41,7 +41,7 @@ class Process(GetChem):
         """
         self.process_name = process_name
         self.num_uo = num_uo
-        self.chem_data: chem = None #TODO please put the right chem object
+        self.mats_data: mats = None #TODO please put the right Materials object
         self.data_input = proc_io(process_name=process_name, num_unit_op=num_uo)
         self.list_uo: list[unitop] = []
         self.flowsheet: fsht = fsht()
@@ -143,6 +143,6 @@ class Process(GetChem):
     #TODO Let's implement self.prep_uo() to create a list of unit operations to be ready to receive detail data.
 
 
-    def get_chem(self) -> chem:
-        return self.chem_data
+    def get_mats(self) -> mats:
+        return self.mats_data
 

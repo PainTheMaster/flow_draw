@@ -6,8 +6,8 @@ from openpyxl.styles import Font
 ############################
 #        Parameters        #
 ############################
-#Chem
-chem_default_num_rows = 100
+#MATERIALS
+mats_default_num_rows = 100
 
 
 ###############################################
@@ -114,7 +114,7 @@ common_header_detail = [
 no_comment_instr = '(No comment here)'
 
 
-####CHEMISTRY####
+####MATERIALS####
 mats_suffix_ws:str = "_materials"
 """Suffix for raw material information input worksheet"""
 
@@ -130,7 +130,7 @@ mats_col_main:int = 2
 
 mats_header_MW:str = "MW (g/mol)"
 """Header item for the column for molecular weight"""
-chem_col_MW : int= 3
+mats_col_MW : int= 3
 """Column number for molecular weights"""
 
 mats_header_density:str = "Density (g/mL)"
