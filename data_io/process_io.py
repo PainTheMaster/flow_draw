@@ -14,7 +14,7 @@ inputfile_base_name = defs.inputfile_base_name
 suffix_summary_input_ws = defs.suffix_summary_input_ws
 """suffix for summary input worksheet (tab)"""
 
-suffix_chem_input_ws = defs.chem_suffix_ws
+suffix_chem_input_ws = defs.mats_suffix_ws
 
 suffix_detail_input_ws = defs.suffix_detail_input_ws
 """suffix for detail input worksheet (tab)"""
@@ -220,7 +220,7 @@ class ProcessIO:
         ------------
         None
         """
-        options_dv: str = f'{defs.chem_component_option_star},\"\"'
+        options_dv: str = f'{defs.mats_component_option_star},\"\"'
         dv_main = DataValidation(
             type='list',
             formula1=options_dv,
@@ -228,30 +228,30 @@ class ProcessIO:
         )
         self.chem_ws.add_data_validation(dv_main)
         self._current_line_chem = 1
-        self.chem_ws.cell(row=self._current_line_chem, column=defs.chem_col_material).value=defs.chem_header_material
-        self.chem_ws.cell(row=self._current_line_chem, column=defs.chem_col_material).border = defs.xl_border_around
-        self.chem_ws.cell(row=self._current_line_chem, column=defs.chem_col_main).value=defs.chem_header_main
-        self.chem_ws.cell(row=self._current_line_chem, column=defs.chem_col_main).border = defs.xl_border_around
-        self.chem_ws.cell(row=self._current_line_chem, column=defs.chem_col_MW).value=defs.chem_header_MW
+        self.chem_ws.cell(row=self._current_line_chem, column=defs.mats_col_material).value=defs.mats_header_material
+        self.chem_ws.cell(row=self._current_line_chem, column=defs.mats_col_material).border = defs.xl_border_around
+        self.chem_ws.cell(row=self._current_line_chem, column=defs.mats_col_main).value=defs.mats_header_main
+        self.chem_ws.cell(row=self._current_line_chem, column=defs.mats_col_main).border = defs.xl_border_around
+        self.chem_ws.cell(row=self._current_line_chem, column=defs.chem_col_MW).value=defs.mats_header_MW
         self.chem_ws.cell(row=self._current_line_chem, column=defs.chem_col_MW).border = defs.xl_border_around
-        self.chem_ws.cell(row=self._current_line_chem, column=defs.chem_col_density).value=defs.chem_header_density
-        self.chem_ws.cell(row=self._current_line_chem, column=defs.chem_col_density).border = defs.xl_border_around
-        self.chem_ws.cell(row=self._current_line_chem, column=defs.chem_col_conc_assay).value=defs.chem_header_conc_assay
-        self.chem_ws.cell(row=self._current_line_chem, column=defs.chem_col_conc_assay).border = defs.xl_border_around
-        self.chem_ws.cell(row=self._current_line_chem, column=defs.chem_col_weight_main).value=defs.chem_header_weight_main
-        self.chem_ws.cell(row=self._current_line_chem, column=defs.chem_col_weight_main).border = defs.xl_border_around
-        self.chem_ws.cell(row=self._current_line_chem, column=defs.chem_col_remark).value=defs.chem_header_remark
-        self.chem_ws.cell(row=self._current_line_chem, column=defs.chem_col_remark).border = defs.xl_border_around
+        self.chem_ws.cell(row=self._current_line_chem, column=defs.mats_col_density).value=defs.mats_header_density
+        self.chem_ws.cell(row=self._current_line_chem, column=defs.mats_col_density).border = defs.xl_border_around
+        self.chem_ws.cell(row=self._current_line_chem, column=defs.mats_col_conc_assay).value=defs.mats_header_conc_assay
+        self.chem_ws.cell(row=self._current_line_chem, column=defs.mats_col_conc_assay).border = defs.xl_border_around
+        self.chem_ws.cell(row=self._current_line_chem, column=defs.mats_col_weight_main).value=defs.mats_header_weight_main
+        self.chem_ws.cell(row=self._current_line_chem, column=defs.mats_col_weight_main).border = defs.xl_border_around
+        self.chem_ws.cell(row=self._current_line_chem, column=defs.mats_col_remark).value=defs.mats_header_remark
+        self.chem_ws.cell(row=self._current_line_chem, column=defs.mats_col_remark).border = defs.xl_border_around
         self._current_line_chem += 1
         for _ in range(defs.chem_default_num_rows):
-            self.chem_ws.cell(row=self._current_line_chem, column=defs.chem_col_material).border = defs.xl_border_around
-            self.chem_ws.cell(row=self._current_line_chem, column=defs.chem_col_main).border = defs.xl_border_around
-            dv_main.add(self.chem_ws.cell(row=self._current_line_chem, column=defs.chem_col_main))
+            self.chem_ws.cell(row=self._current_line_chem, column=defs.mats_col_material).border = defs.xl_border_around
+            self.chem_ws.cell(row=self._current_line_chem, column=defs.mats_col_main).border = defs.xl_border_around
+            dv_main.add(self.chem_ws.cell(row=self._current_line_chem, column=defs.mats_col_main))
             self.chem_ws.cell(row=self._current_line_chem, column=defs.chem_col_MW).border = defs.xl_border_around
-            self.chem_ws.cell(row=self._current_line_chem, column=defs.chem_col_density).border = defs.xl_border_around
-            self.chem_ws.cell(row=self._current_line_chem, column=defs.chem_col_conc_assay).border = defs.xl_border_around
-            self.chem_ws.cell(row=self._current_line_chem, column=defs.chem_col_weight_main).border = defs.xl_border_around
-            self.chem_ws.cell(row=self._current_line_chem, column=defs.chem_col_remark).border = defs.xl_border_around
+            self.chem_ws.cell(row=self._current_line_chem, column=defs.mats_col_density).border = defs.xl_border_around
+            self.chem_ws.cell(row=self._current_line_chem, column=defs.mats_col_conc_assay).border = defs.xl_border_around
+            self.chem_ws.cell(row=self._current_line_chem, column=defs.mats_col_weight_main).border = defs.xl_border_around
+            self.chem_ws.cell(row=self._current_line_chem, column=defs.mats_col_remark).border = defs.xl_border_around
             self._current_line_chem += 1
 
 
