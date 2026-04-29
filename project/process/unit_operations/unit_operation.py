@@ -1,11 +1,11 @@
-from abc import ABC, abstractmethod
 from __future__ import annotations
+from abc import ABC, abstractmethod
 import pandas as pd
 
 
 from flow_draw import definitions as defs
 #from flow_draw import chemistry as chem
-from flow_draw.flow_output import Flowsheet as fsht
+from flow_draw.data_io.flowsheet import Flowsheet as fsht
 from flow_draw.trait_def.trait_def import UniversalTrait
 #from typing import List
 import re

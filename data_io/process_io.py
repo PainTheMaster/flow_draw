@@ -221,7 +221,7 @@ class ProcessIO:
         ------------
         None
         """
-        options_dv: str = f'{defs.mats_component_option_star},\"\"'
+        options_dv: str = f'\"{defs.mats_component_option_star},,\"'
         dv_main = DataValidation(
             type='list',
             formula1=options_dv,
