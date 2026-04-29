@@ -143,9 +143,9 @@ mats_header_conc_assay:str = "Conc/Assay(%)"
 mats_col_conc_assay: int = 5
 """Column number for concentration or assay"""
 
-mats_header_weight_main:str = "Weight Main (kg)"
+mats_header_kg_main:str = "Weight Main (kg)"
 """Header item for the weight of core building block weight (kg)"""
-mats_col_weight_main:int = 6
+mats_col_kg_main:int = 6
 """Column number for weight of the core building block"""
 
 mats_header_remark:str = "Remark"
@@ -158,10 +158,10 @@ mats_list_header: list[str] = [mats_header_material,
                                mats_header_MW,
                                mats_header_density,
                                mats_header_conc_assay,
-                               mats_header_weight_main,
+                               mats_header_kg_main,
                                mats_header_remark]
 
-mats_component_option_star:str = "*"
+mats_compo_desig_star:str = "*"
 """Star (*) marker to indicate the core raw material"""
 
 

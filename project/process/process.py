@@ -3,8 +3,8 @@ import pandas as pd
 import flow_draw.definitions as defs
 from flow_draw.project.process.unit_operations import unit_operation
 from flow_draw.project.process.unit_operations.unit_operation import UnitOperation as unitop
-from flow_draw.data_io.process_io import ProcessIO as proc_io
-from flow_draw.data_io.flowsheet import Flowsheet as fsht
+from flow_draw.data_io import process_io as proc_io
+from flow_draw.data_io import flowsheet as fsht
 from flow_draw.materials.materials import Materials as mats
 
 from flow_draw.trait_def.trait_def import GetMats as GetMats
@@ -26,7 +26,7 @@ class Process(GetMats):
     flowsheet: flow_draw.flow_output.Flowsheet
         A Flowsheet object that manages the flowsheet output.
     """
-    def __init__(self, process_name:str, num_uo: int):
+    def __init__(self,project_name:str, process_name:str, num_uo: int):
         """
         Patameters
         --------------
@@ -39,31 +39,45 @@ class Process(GetMats):
         --------------
         None
         """
+        self.project_name = project_name
         self.process_name = process_name
         self.num_uo = num_uo
-        self.mats_data: mats = None #TODO please put the right Materials object
-        self.data_input = proc_io(process_name=process_name, num_unit_op=num_uo)
+        self.data_input = proc_io.ProcessIO(project_name=project_name, process_name=process_name, num_unit_op=num_uo)
+        self.mats_data: mats = None #mats_data is stored when load_materials_data() is called.
         self.list_uo: list[unitop] = []
-        self.flowsheet: fsht = fsht()
+        self.flowsheet: fsht.Flowsheet = fsht.Flowsheet()
 
         
 
 
     #TODO: Let the InputForm class create the summary input form.
-    def put_summary_input_form(self):
+    def put_summary_mats_input_form(self):
         """
-        Triggered by a method of the class Project, calls 
+        Triggered by a method of the class Project, calls methods to generage forms for process summary and material data.
+        This methods only create those forms in the instance of the class process_io.ProcessIO. It is programmer's responsilibity to save them as worksheets on an Excel file.
+        
+        Parameters
+        ------------
+        None
+
+        Returns
+        ------------
+        None
+            Returns nothing. The results are stored in self.data_input.
         """
         self.data_input.generate_proc_summary_form(list_unit_ops=unit_operation.list_unit_ops)
+        #At the time of process summary creation, the material information should be available. Plus, it is neceesary before loading the detail.
+        self.data_input.generate_mats_form()
 
 
 
+    
 
     #TODO: Please implement me! Load the process summary
     def load_uo_summary(self):
         """
         Loads summary data from a process summary DataFrame and creates a series of (partially filled) UnitOperation instances by interpreting a given process summary DataFrame. 
-        After the run, the self.list_uo will hold a series of unit operation instances each of which knwos the category of the unit operation (the type(sub-class) itself), sequenc number, number of subitems, and edit comment.
+        After the run, the self.list_uo will hold a series of unit operation instances each of which knows the category of the unit operation (the type(sub-class) itself), sequenc number, number of subitems, and edit comment.
         
         Parameters
         -----------
@@ -80,11 +94,14 @@ class Process(GetMats):
             uo_title = str(row[defs.header_summary_uo])
             num_subitems = int(row[defs.header_summary_num_subitems])
             edit_comment = str(row[defs.header_summary_edit_comment])
-        if not uo_title in uo_reg:
-            raise RuntimeError(f"{self.__class__.__name__}: Unit operation name \"{uo_title}\" not in the registry.")
-        
-        new_uo_inst = uo_reg[uo_title](self, self.flowsheet, seq, num_subitems=num_subitems, edit_comment=edit_comment)
-        self.list_uo.append(new_uo_inst)
+            if not uo_title in uo_reg:
+                raise RuntimeError(f"{self.__class__.__name__}: Unit operation name \"{uo_title}\" not in the registry.")
+            new_uo_inst = uo_reg[uo_title](caller=self,
+                                        flow_sheet=self.flowsheet,
+                                        operation_seq=seq,
+                                        num_subitems=num_subitems,
+                                        edit_comment=edit_comment)
+            self.list_uo.append(new_uo_inst)
 
     # def __prep_uo(self, df_summary: pd.DataFrame):
     #     """
@@ -112,6 +129,20 @@ class Process(GetMats):
     #     self.list_uo.append(new_uo_inst)
         
 
+    def load_materials_data(self):
+        """
+        Reads the input Excel form (material worksheet) and loads data from it. This method is intended to be called by a method belonging to the class Project.
+        The acquired data is stored at self.mats_data. Hence, the method returns no value.
+
+        Parameters
+        ------------
+        None
+
+        Returns
+        ------------
+        None
+        """
+        self.mats_data = self.data_input.load_mats()
 
     #TODO: Create the process detail input form
 

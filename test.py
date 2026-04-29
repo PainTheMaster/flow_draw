@@ -1,6 +1,7 @@
 import unittest
 import os
 import flow_draw.definitions as defs
+import flow_draw.project.process.process as proc
 import flow_draw.data_io.process_io as proc_io
 import flow_draw.project.process.unit_operations as uos
 import flow_draw.project.process.unit_operations.charging as charging
@@ -9,21 +10,261 @@ import flow_draw.project.process.unit_operations.charging as charging
 
 class TestIO(unittest.TestCase):
     def setUp(self):
-        self.test_proc_io = proc_io.ProcessIO(project_name="test_project", process_name="test_process", num_unit_op=1)
+        self.project_name = "test_project_0000"
+        self.process_name = "test_process"
+        self.test_proc_io = proc_io.ProcessIO(project_name=self.project_name, process_name=self.process_name, num_unit_op=1)
         self.test_proc_io.generate_proc_summary_form(uos.unit_operation.list_unit_ops)
         self.test_proc_io.generate_mats_form()
-        self.test_proc_io.save_form()
+        self.test_proc_io.save_form()    
         return super().setUp()
     
-    def test_01_input_generation(self):
-        print("expected filename: ", "test_project"+defs.inputfile_base_name+".xlsx")
-        self.assertTrue(os.path.isfile("test_project"+defs.inputfile_base_name+".xlsx"))
+
+    def mats_test_data_row_injection(self, row:int = 2,
+                                    name_mat: str ="",
+                                    is_main: bool=False,
+                                    mw: float=None,
+                                    density: float=None,
+                                    assay_pct: float=None,
+                                    kg: float=None,
+                                    remark: str=""):
+        """
+        Helper method. Injects specific values to the input form (an worksheet in an Excel file on the hard drive)
+        Don't forget to save the file!
+        """
+        ws_chem = self.test_proc_io.mats_ws
+        ws_chem.cell(row=row, column=defs.mats_col_material).value=name_mat
+        if is_main:
+            ws_chem.cell(row=row, column=defs.mats_col_main).value=defs.mats_compo_desig_star
+        if mw:
+            ws_chem.cell(row=row, column=defs.mats_col_MW).value=mw 
+        if density:
+            ws_chem.cell(row=row, column=defs.mats_col_density).value=density
+        if assay_pct:
+            ws_chem.cell(row=row, column=defs.mats_col_conc_assay).value=assay_pct
+        if kg:
+            ws_chem.cell(row=row, column=defs.mats_col_kg_main).value=kg
+        ws_chem.cell(row=row, column=defs.mats_col_remark).value=remark
+        #self.test_proc_io.save_form()
     
-    def test_02_uo_deriv_registr(self):
+    def summary_test_data_row_injection(self, row:int = 2,
+                                        seq: int =None,
+                                        uo: str="",
+                                        num_subitem: int=None,
+                                        editcomment: str=""):
+        """
+        Helper method. Injects specific values to the input form (an worksheet in an Excel file on the hard drive)
+        Don't forget to save the file!
+        """
+        ws_summary = self.test_proc_io.summary_ws
+        if seq:
+            ws_summary.cell(row=row, column=defs.summary_col_seq).value=seq
+        if uo:
+            ws_summary.cell(row=row, column=defs.summary_col_uo).value=uo
+        if num_subitem:
+            ws_summary.cell(row=row, column=defs.summary_col_num_subitems).value=num_subitem
+        ws_summary.cell(row=row, column=defs.summary_col_editcomment).value=editcomment
+
+
+    def test_0001_input_generation(self):
+        """Checks if the right input excel form is generated. The form generators for summary d materials are called in self.setUp()"""
+        print("expected filename: ", self.project_name+defs.inputfile_base_name+".xlsx")
+        self.assertTrue(os.path.isfile(self.project_name+defs.inputfile_base_name+".xlsx"))
+    
+    def test_0002_uo_deriv_name_registr(self):
+        """
+        Checks if the name of each unit operation class is registerd. The registry is located in the module project.process.unit_operations.unit_operation.
+        The registration takes place when the class (not an instance) is generated.
+        """
+        self.assertIn(member=defs.op_charging, container=uos.unit_operation.list_unit_ops)
+
+    def test_0003_uo_deriv_class_registr(self):
+        """
+        Checks if each sort of unit operation class is registerd. The registry is located in the module project.process.unit_operations.unit_operation.
+        The registration takes place when the class (not an instance) is generated.
+        """
         self.assertIn(member=charging.Charging, container=uos.unit_operation.registry_uo_cls.values())
 
-    def test_03_summary_form(self):
-        pass
+    def test_0004_materials_form(self):
+        self.mats_test_data_row_injection(row=2,
+                                          name_mat="NaCl",
+                                          is_main=True,
+                                          mw=58.44,
+                                          density=2.17,
+                                          assay_pct=100.0,
+                                          kg=1.0,
+                                          remark="Table salt.")
+        self.mats_test_data_row_injection(row=3,
+                                          name_mat="Water",
+                                          is_main=False,
+                                          mw=18.01,
+                                          density=1.00,
+                                          assay_pct=100.0,
+                                          remark="Pure water.")
+        self.test_proc_io.save_form()
+
+
+class TestForProcessCls(unittest.TestCase):
+    def setUp(self):
+        self.project_name = "test_project_1000"
+        self.process_name = "test_process"
+        self.num_uo = 2
+        self.test_process = proc.Process(project_name=self.project_name, process_name=self.process_name, num_uo=self.num_uo)
+        self.test_process.put_summary_mats_input_form()
+
+
+        # self.test_proc_io = proc_io.ProcessIO(project_name=self.project_name, process_name=self.process_name, num_unit_op=1)
+        # self.test_proc_io.generate_proc_summary_form(uos.unit_operation.list_unit_ops)
+        # self.test_proc_io.generate_mats_form()
+        # self.test_proc_io.save_form()    
+        # return super().setUp()        
+
+
+    def mats_test_data_row_injection(self, row:int = 2,
+                                    name_mat: str ="",
+                                    is_main: bool=False,
+                                    mw: float=None,
+                                    density: float=None,
+                                    assay_pct: float=None,
+                                    kg: float=None,
+                                    remark: str=""):
+        """
+        Helper method. Injects specific values to the input form (an worksheet in an Excel file on the hard drive)
+        Don't forget to save the file!
+        """
+        data_input = self.test_process.data_input
+        ws_chem = data_input.mats_ws
+        ws_chem.cell(row=row, column=defs.mats_col_material).value=name_mat
+        if is_main:
+            ws_chem.cell(row=row, column=defs.mats_col_main).value=defs.mats_compo_desig_star
+        if mw:
+            ws_chem.cell(row=row, column=defs.mats_col_MW).value=mw 
+        if density:
+            ws_chem.cell(row=row, column=defs.mats_col_density).value=density
+        if assay_pct:
+            ws_chem.cell(row=row, column=defs.mats_col_conc_assay).value=assay_pct
+        if kg:
+            ws_chem.cell(row=row, column=defs.mats_col_kg_main).value=kg
+        ws_chem.cell(row=row, column=defs.mats_col_remark).value=remark
+        #self.test_proc_io.save_form()
+    
+    def summary_test_data_row_injection(self, row:int = 2,
+                                        seq: int =None,
+                                        uo: str="",
+                                        num_subitem: int=None,
+                                        editcomment: str=""):
+        """
+        Helper method. Injects specific values to the input form (an worksheet in an Excel file on the hard drive)
+        Don't forget to save the file!
+        """
+        data_input = self.test_process.data_input
+        ws_summary = data_input.summary_ws
+        if seq:
+            ws_summary.cell(row=row, column=defs.summary_col_seq).value=seq
+        if uo:
+            ws_summary.cell(row=row, column=defs.summary_col_uo).value=uo
+        if num_subitem:
+            ws_summary.cell(row=row, column=defs.summary_col_num_subitems).value=num_subitem
+        ws_summary.cell(row=row, column=defs.summary_col_editcomment).value=editcomment
+
+    def save_injected_data(self):
+        data_input = self.test_process.data_input
+        data_input.save_form()
+
+
+    def test_1000_proc_generated(self):
+        tp = self.test_process
+        check_result = ((tp.project_name == self.project_name) and
+                        (tp.process_name == self.process_name) and
+                        (tp.num_uo == self.num_uo))
+        self.assertTrue(check_result)
+    
+    def test_1001_summary_write_read_consistency(self):
+        tp=self.test_process
+
+        seq_proc_1 = 1
+        uo_proc_1 = defs.op_charging
+        num_subitem_proc_1 = 2
+        editcomment_proc_1 = "test process with two sub items 1"
+        self.summary_test_data_row_injection(row=2,
+                                             seq=seq_proc_1,
+                                             uo=uo_proc_1,
+                                             num_subitem=num_subitem_proc_1,
+                                             editcomment=editcomment_proc_1)
+
+        seq_proc_2 = 2
+        uo_proc_2 = defs.op_charging
+        num_subitem_proc_2 = 1
+        editcomment_proc_2 = "test process with only one sub item"
+        self.summary_test_data_row_injection(row=3,
+                                             seq=seq_proc_2,
+                                             uo=uo_proc_2,
+                                             num_subitem=num_subitem_proc_2,
+                                             editcomment=editcomment_proc_2)
+
+        name_NaCl="NaCl"
+        main_NaCl=True
+        mw_NaCl=58.44
+        density_NaCl=2.17
+        assay_pct_NaCl=100.0
+        kg_NaCl=1.0
+        remark_NaCl="Table salt."
+        self.mats_test_data_row_injection(row=2,
+                                          name_mat=name_NaCl,
+                                          is_main=main_NaCl,
+                                          mw=mw_NaCl,
+                                          density=density_NaCl,
+                                          assay_pct=assay_pct_NaCl,
+                                          kg=kg_NaCl,
+                                          remark=remark_NaCl)
+        
+        name_water="Water"
+        main_water=False
+        mw_Water=18.01
+        density_water=1.00
+        assay_pct_water=100.0
+        remark_water="Pure water."
+        self.mats_test_data_row_injection(row=3,
+                                          name_mat=name_water,
+                                          is_main=main_water,
+                                          mw=mw_Water,
+                                          density=density_water,
+                                          assay_pct=assay_pct_water,
+                                          remark=remark_water)
+        
+        self.save_injected_data()
+
+        tp.load_uo_summary()
+        tp.load_materials_data()
+
+
+        result_num_uos = (tp.num_uo == 2)
+
+        uo_loaded_1 = tp.list_uo[0]
+        result_proc_1 = ((uo_loaded_1.num_subitems == num_subitem_proc_1) and
+                       (uo_loaded_1.uo_name == uo_proc_1) and
+                       (uo_loaded_1.operation_seq==seq_proc_1) and
+                       (uo_loaded_1.num_subitems==num_subitem_proc_1)and
+                       (uo_loaded_1.edit_comment==editcomment_proc_1))
+        
+        uo_loaded_2 = tp.list_uo[1]
+        result_proc_2 = ((uo_loaded_2.num_subitems == num_subitem_proc_2) and
+                       (uo_loaded_2.uo_name == uo_proc_2) and
+                       (uo_loaded_2.operation_seq==seq_proc_2) and
+                       (uo_loaded_2.num_subitems==num_subitem_proc_2)and
+                       (uo_loaded_2.edit_comment==editcomment_proc_2))
+        
+        mats = tp.mats_data
+        temp_mol_NaCl = kg_NaCl*1000.0/mw_NaCl
+        result_mats1 = ((mats.kg_main_mat==kg_NaCl) and
+                        (temp_mol_NaCl*0.9999<mats.mol_main_mat) and (mats.mol_main_mat < temp_mol_NaCl*1.0001))
+        
+        self.assertTrue(result_num_uos and result_proc_1 and result_proc_2 and result_mats1)
+
+        
+        
+
+
+
 
 
 if __name__=="__main__":

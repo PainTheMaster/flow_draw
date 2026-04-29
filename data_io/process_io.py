@@ -209,6 +209,8 @@ class ProcessIO:
             self.summary_ws.cell(row = self._current_line_summary, column = summary_col_editcomment).border = defs.xl_border_around
             self._current_line_summary += 1
         
+
+        
     def generate_mats_form(self):
         """
         Generates the input form worksheet for the raw materials for the proces. The worksheet is a part of the input file.
@@ -221,7 +223,7 @@ class ProcessIO:
         ------------
         None
         """
-        options_dv: str = f'\"{defs.mats_component_option_star},,\"'
+        options_dv: str = f'\"{defs.mats_compo_desig_star},,\"'
         dv_main = DataValidation(
             type='list',
             formula1=options_dv,
@@ -239,8 +241,8 @@ class ProcessIO:
         self.mats_ws.cell(row=self._current_line_mats, column=defs.mats_col_density).border = defs.xl_border_around
         self.mats_ws.cell(row=self._current_line_mats, column=defs.mats_col_conc_assay).value=defs.mats_header_conc_assay
         self.mats_ws.cell(row=self._current_line_mats, column=defs.mats_col_conc_assay).border = defs.xl_border_around
-        self.mats_ws.cell(row=self._current_line_mats, column=defs.mats_col_weight_main).value=defs.mats_header_weight_main
-        self.mats_ws.cell(row=self._current_line_mats, column=defs.mats_col_weight_main).border = defs.xl_border_around
+        self.mats_ws.cell(row=self._current_line_mats, column=defs.mats_col_kg_main).value=defs.mats_header_kg_main
+        self.mats_ws.cell(row=self._current_line_mats, column=defs.mats_col_kg_main).border = defs.xl_border_around
         self.mats_ws.cell(row=self._current_line_mats, column=defs.mats_col_remark).value=defs.mats_header_remark
         self.mats_ws.cell(row=self._current_line_mats, column=defs.mats_col_remark).border = defs.xl_border_around
         self._current_line_mats += 1
@@ -251,7 +253,7 @@ class ProcessIO:
             self.mats_ws.cell(row=self._current_line_mats, column=defs.mats_col_MW).border = defs.xl_border_around
             self.mats_ws.cell(row=self._current_line_mats, column=defs.mats_col_density).border = defs.xl_border_around
             self.mats_ws.cell(row=self._current_line_mats, column=defs.mats_col_conc_assay).border = defs.xl_border_around
-            self.mats_ws.cell(row=self._current_line_mats, column=defs.mats_col_weight_main).border = defs.xl_border_around
+            self.mats_ws.cell(row=self._current_line_mats, column=defs.mats_col_kg_main).border = defs.xl_border_around
             self.mats_ws.cell(row=self._current_line_mats, column=defs.mats_col_remark).border = defs.xl_border_around
             self._current_line_mats += 1
 

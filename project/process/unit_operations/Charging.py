@@ -107,11 +107,11 @@ class Charging(uo.UnitOperation, uo_name=defs.op_charging):
         """
         super().__init__(caller=caller, flow_sheet=flow_sheet, operation_seq=operation_seq, num_subitems=num_subitems, edit_comment=edit_comment)
         # self.mats_data: mats.Materials = GetMats(self.caller).get_mats() #なんかやだからキャストする。
-        self.mats_data = GetMats(self.caller).get_mats()
+        self.mats_data = (self.caller).get_mats()
         self.input_count = 0
         self.inputs: list[Input] = []
 
-        self.output_unit_operation()
+        #self.output_unit_operation()
 
     def get_detail_header(self) -> list[str]:
         return list_header_items

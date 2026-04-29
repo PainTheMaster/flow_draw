@@ -1,8 +1,8 @@
-from flow_draw.project.process.process import Process
+from flow_draw.project.process import process as proc
 
 class Project:
     def __init__(self):
-        self.list_proc: list[Process]=[]
+        self.list_proc: list[proc.Process]=[]
 
     #TODO please implement me!
     def load_process_summary(self):

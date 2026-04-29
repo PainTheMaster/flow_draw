@@ -55,13 +55,10 @@ class UnitOperation(ABC):
 
     Attributes
     -------------
-    chem_data: flow_draw.chemistry.Chemistry
-        This instance contains the chemical information, e.g., molecular weight and density, and methods, e.g., volume to weight and vice versa, for the materials used in the process.
-
     flow_sheet: flow_draw.flow_output
         Flow sheet object bound to this process. This object handles output.
     
-    unit_operation: str
+    uo_name: str
         The unit operation name, e.g., line clearance, charging, agitation, etc. Just a string.
     
     operation_seq: int
@@ -94,7 +91,12 @@ class UnitOperation(ABC):
         registry_uo_cls[uo_name] = cls
         list_unit_ops.append(uo_name)
 
-    def __init__(self, caller: type[UniversalTrait] =None, flow_sheet:fsht.Flowsheet=None, operation_seq: int=None, num_subitems: int = None, edit_comment:str=None):    
+    def __init__(self,
+                 caller: type[UniversalTrait] =None,
+                 flow_sheet:fsht.Flowsheet=None,
+                 operation_seq: int=None,
+                 num_subitems: int = None,
+                 edit_comment:str=None):    
         """
         Set the necessary items in the instance variables.
         
