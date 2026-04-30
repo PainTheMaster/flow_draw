@@ -4,13 +4,13 @@ from flow_draw import definitions as defs
 
 op_list = None
 
-header_material = defs.mats_header_material
-header_main = defs.mats_header_main
-header_mw = defs.mats_header_MW
-header_density = defs.mats_header_density
-header_conc_assay = defs.mats_header_conc_assay
+header_material = defs.hedr_io_mats_mat
+header_main = defs.hedr_io_mats_main
+header_mw = defs.hedr_io_mats_mw
+header_density = defs.hedr_io_mats_dnsty
+header_conc_assay = defs.hedr_io_mats_concasy
 
-desig_star = defs.mats_compo_desig_star
+desig_star = defs.itm_io_mats_desig_star
 
 # header_key = "Key"
 # header_value = "Value"
@@ -51,21 +51,21 @@ class Materials:
         # self.sm_mol = self.sm_kg * 1000 / df_mats[df_mats[header_material]==self.sm_name][header_mw].item()
         df_extrd_main  = self.df_mats[self.df_mats[header_main]==desig_star]
         if len(df_extrd_main) == 0:
-            raise RuntimeError(f"{self.__class__.__name__}: No core building block ({defs.mats_header_main}) is designated.")
+            raise RuntimeError(f"{self.__class__.__name__}: No core building block ({defs.hedr_io_mats_main}) is designated.")
         elif len(df_extrd_main) >= 2:
-            raise RuntimeError(f"{self.__class__.__name__}: More than two (2) core building blocks ({defs.mats_header_main}) are designated.")
+            raise RuntimeError(f"{self.__class__.__name__}: More than two (2) core building blocks ({defs.hedr_io_mats_main}) are designated.")
         else:
             ser_main_mat = df_extrd_main.iloc[0]
             
-            self.kg_main_mat = float(ser_main_mat[defs.mats_header_kg_main])
+            self.kg_main_mat = float(ser_main_mat[defs.hedr_io_mats_kgmain])
             if math.isnan(self.kg_main_mat):
                 raise ValueError(f"{self.__class__.__name__}: No weight (kg) is assigned to the main material \"{self.kg_main_mat}\".")
             
-            temp_mw_main_mat = float(ser_main_mat[defs.mats_header_MW])
+            temp_mw_main_mat = float(ser_main_mat[defs.hedr_io_mats_mw])
             if math.isnan(temp_mw_main_mat):
                 raise ValueError(f"{self.__class__.__name__}: No molecular weight is assigned to the main material \"{temp_mw_main_mat}\".")
 
-            temp_assay_main_mat = float(ser_main_mat[defs.mats_header_conc_assay])
+            temp_assay_main_mat = float(ser_main_mat[defs.hedr_io_mats_concasy])
             if math.isnan(temp_assay_main_mat):
                 temp_assay_main_mat = 100.0
                 raise UserWarning(f"{self.__class__.__name__}: The concentration or assay for the main material is empty or zero.",
@@ -102,17 +102,17 @@ class Materials:
         """
         if not (equiv is None or vol_per_weight is None):
             raise ValueError(f"{self.__class__.__name__}.to_kilogram(): Dual input of equiv: {equiv} and vol_per_weight: {vol_per_weight} detected for the material \"{material_name}\". A value for only one of those shall be provided.")
-        if not self.df_mats[defs.mats_header_material].isin([material_name]).any():
+        if not self.df_mats[defs.hedr_io_mats_mat].isin([material_name]).any():
             raise ValueError(f"{self.__class__.__name__}.to_kilogram(): A compound name \"{material_name}\" is not defined in the raw materials table.")
-        conc_assay_this = self.df_mats[self.df_mats[defs.mats_header_material]==material_name][defs.mats_header_conc_assay].item()
+        conc_assay_this = self.df_mats[self.df_mats[defs.hedr_io_mats_mat]==material_name][defs.hedr_io_mats_concasy].item()
         if math.isnan(conc_assay_this) or conc_assay_this==0.0:
             conc_assay_this = 100.0
             raise UserWarning(f"{self.__class__.__name__}.to_kilogram(): The concentration or assay for the material \"{material_name}\" is empty or zero.",
                               "For this run, 100%% is assumed.")
-        mw_this = self.df_mats[self.df_mats[defs.mats_header_material]==material_name][defs.mats_header_MW].item()
+        mw_this = self.df_mats[self.df_mats[defs.hedr_io_mats_mat]==material_name][defs.hedr_io_mats_mw].item()
         if math.isnan(mw_this):
             raise ValueError(f"{self.__class__.__name__}.to_kilogram(): No molecular weight is assigned to the material \"{material_name}\".")
-        density_this = self.df_mats[self.df_mats[defs.mats_header_material]==material_name][defs.mats_header_density].item()
+        density_this = self.df_mats[self.df_mats[defs.hedr_io_mats_mat]==material_name][defs.hedr_io_mats_dnsty].item()
         if math.isnan(density_this):
             raise ValueError(f"{self.__class__.__name__}.to_kilogram(): No density is assigned to the material \"{material_name}\".")
         kg_this = 0.0

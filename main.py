@@ -2,7 +2,7 @@ import pandas as pd
 
 from flow_draw.project.process.unit_operations import unit_operation as uo
 from flow_draw.project.process.unit_operations import Charging as chg
-from flow_draw.chemistry import chemistry as chem
+from flow_draw.materials import materials as mats
 
 #from flow_draw.flow_output.Flowsheet import Flowsheet as fs
 from flow_draw.flow_output import Flowsheet as fs
@@ -17,7 +17,7 @@ from flow_draw.data_io import process_io as ipt
 df_chem = pd.read_excel(io='flow_draw/input.xlsx', sheet_name='Chemistry')
 df_sm = pd.read_excel(io='flow_draw/input.xlsx', sheet_name='SM')
 
-chem_data = chem.Chemistry(df_chem=df_chem, df_sm=df_sm)
+chem_data = mats.Materials(df_chem=df_chem, df_sm=df_sm)
 test_sheet = fs.Flowsheet()
 
 test_charging = chg.Charging(chem_data=chem_data, flow_sheet=test_sheet, operation_seq=1)

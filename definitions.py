@@ -20,234 +20,389 @@ tag_no: str = 'No'
 list_yesno: list[str]=[tag_no, tag_yes]
 
 #unit_operations
-op_line_clearance: str = "line_clearance"
+tag_uo_line_clearance: str = "line_clearance"
 """Tag for an unit operation line clearance"""
+part_uo_title_clearance_jp = "ラインクリアランス"
+"""JP expression of line clearance"""
 
-op_N2_replace: str = "N2_placement"
+tag_uo_N2replace: str = "N2_placement"
 """Tag for an unit operation N2 replacement"""
+part_uo_title_N2replace_jp = "窒素置換"
+"""JP expression of N2 replacement"""
 
-op_temp_control: str = "temp_control"
+tag_uo_temp_ctrl: str = "temp_control"
 """Tag for an unit operation for temperature control"""
+part_uo_title_temp_ctrl_jp = "温調"
+"""JP expression of temperature control"""
 
-op_charging: str = "charging"
+tag_uo_charging: str = "charging"
 """Tag for an unit operation charging/dosing"""
+part_uo_title_charging_jp = "仕込み"
+"""JP expression of charging/dosing"""
 
-op_agitation: str = "agitation"
+tag_uo_agitation: str = "agitation"
 """Tag for an unit operation agitation/mixing"""
+part_uo_title_agitation_jp = "攪拌"
+"""JP expression of agitation"""
 
-op_settling: str = "settling"
+tag_uo_settling: str = "settling"
 """Tag for an unit operation settling"""
+part_uo_title_settling_jp = "静置"
+"""JP expression of settling"""
 
-op_aq_discharge: str = "aq_discharge"
-"""Tag for an unit operation discharging aqueous phase"""
+tag_uo_aq_discard: str = "aq_discard"
+"""Tag for an unit operation discarding aqueous phase"""
+part_uo_title_aq_discard_jp = "水層排出"
+"""JP expression of discarding aqueous phase"""
 
-op_distillation: str = "distillation"
+tag_uo_evap: str = "evaporation"
 """Tag for an unit operation dietillation"""
+part_uo_title_evap_jp = "濃縮" 
+"""JP expression of """
 
-op_cip: str = "cip"
-"""Tag for an unit operation cleaning in place"""
+tag_uo_cip: str = "cip"
+"""Tag for in-process cleaning in place"""
+part_uo_title_cip_jp = "工程内洗浄"
+"""JP expression of in-process cleaning in place"""
 
-op_transfer: str = "transfer"
+tag_uo_transfer: str = "transfer"
 """Tag for an unit operation liquid transfer"""
+part_uo_title_transfer_jp = "移送"
+"""JP expression of liquid transfer"""
 
-op_filtration: str = "filtration"
+tag_uo_filt: str = "filtration"
 """Tag for an unit operation filtration of (normally) recrystallizaion slurry"""
+part_uo_title_filt_jp = "ろ過"
+"""JP expression of filtration"""
 
-op_rinse: str = "rinse"
+tag_uo_cake_rinse: str = "rinse"
 """Tag for an unit operation rinsing filter cake"""
+part_uo_title_cake_rinse_jp = "湿性末リンス"
+"""JP expression of rinsing filter cake rinsing"""
 
-op_reslurry: str = "reslurry"
-"""Tag for an unit operation reslurry washing of obtained crystal"""
+tag_uo_reslurry: str = "reslurry"
+"""Tag for an unit operation reslurry washing of obtained crystals (wet cake)"""
+part_uo_title_reslurry_jp = "結晶洗浄"
+"""JP expression of reslurry wash of the obtained crystals (wet cake)"""
 
-op_drying: str = "drying"
+tag_uo_drying: str = "drying"
 """Tag for an unit operation drying wet filter cake"""
+part_uo_title_drying_jp = "乾燥"
+"""JP expression of product drying"""
 
-op_tare: str = "tare"
+tag_uo_tare_pkg: str = "tare"
 """Tag for an unit operation taring packaging material before discharge"""
+part_uo_title_tare_pkg_jp = "風袋秤量"
+"""JP expression of taring packaging material before ischarge"""
 
-op_prod_discharge: str = "prod_discharge"
+tag_uo_prod_disch: str = "prod_discharge"
 """Tag for an unit operation discharging finished product"""
+part_uo_title_prod_disch_jp = "取出し"
+"""JP expression of product discharge"""
 
-op_placeholder: str = "placeholder"
+tag_uo_prod_weigh: str = "prod_weighing"
+"""Tag for an unit operation discharging finished product"""
+part_uo_title_prod_weigh_jp = "秤量"
+"""JP expression of product discharge"""
+
+tag_uo_placeholder: str = "placeholder"
 """Tag for a placeholder for an undefined unit operation..."""
+part_uo_title_placeholder = "<Op. place holder>"
+"""JP expression of place holder"""
 
-
+dict_jp_part_uo_titles = {tag_uo_line_clearance : part_uo_title_clearance_jp,
+                          tag_uo_N2replace : part_uo_title_N2replace_jp,
+                          tag_uo_temp_ctrl : part_uo_title_temp_ctrl_jp,
+                          tag_uo_charging : part_uo_title_charging_jp,
+                          tag_uo_agitation : part_uo_title_agitation_jp,
+                          tag_uo_settling : part_uo_title_settling_jp,
+                          tag_uo_aq_discard : part_uo_title_aq_discard_jp,
+                          tag_uo_evap : part_uo_title_evap_jp,
+                          tag_uo_cip : part_uo_title_cip_jp,
+                          tag_uo_transfer : part_uo_title_transfer_jp,
+                          tag_uo_filt : part_uo_title_filt_jp,
+                          tag_uo_cake_rinse : part_uo_title_cake_rinse_jp,
+                          tag_uo_reslurry : part_uo_title_reslurry_jp,
+                          tag_uo_drying : part_uo_title_drying_jp,
+                          tag_uo_tare_pkg : part_uo_title_tare_pkg_jp,
+                          tag_uo_prod_disch : part_uo_title_prod_disch_jp,
+                          tag_uo_prod_weigh : part_uo_title_prod_weigh_jp,
+                          tag_uo_placeholder : part_uo_title_placeholder}
 
 ################################################################
 #PARTS FOR PROCESS DATA IO: HEADER ITEMS, DROP-DOWN OPTIONS ETC#
 ################################################################
 
 ####PROCESS_IO####
-inputfile_base_name = "_process_input"
+src_io_filebasename = "_process_input"
 """Base name for process input Excel file"""
 
-suffix_summary_input_ws = "_summary"
+src_io_sfx_sumry_ws = "_summary"
 """suffix for summary input worksheet (tab)"""
 
-suffix_detail_input_ws = "_detail"
+src_io_sfx_mats_ws:str = "_materials"
+"""Suffix for raw material information input worksheet"""
+
+src_io_sfx_detail_ws = "_detail"
 """suffix for detail input worksheet (tab)"""
 
-header_summary_sequence = 'Sequence'
-header_summary_uo = 'Unit Operation'
-header_summary_num_subitems = 'Number of Subitems'
-header_summary_edit_comment = 'Edit Comment'
+hedr_io_sumry_seq = 'Sequence'
+hedr_io_summary_uo = 'Unit Operation'
+hedr_io_sumry_num_subitms = 'Number of Subitems'
+hedr_io_sumry_edt_cmnt = 'Edit Comment'
 
-summary_col_seq = 1
-summary_col_uo = 2
-summary_col_num_subitems = 3
-summary_col_editcomment = 4
+col_nr_io_sumry_seq = 1
+col_nr_io_sumry_uo = 2
+col_nr_io_sumry_num_subitms = 3
+col_nr_io_sumry_edt_cmnt = 4
 
-header_detail_seq = header_summary_sequence
-header_detail_uo = header_summary_uo
-header_detail_edit_comment = header_summary_edit_comment
-header_detail_precomment = 'Pre-comment'
-header_detail_postcomment = 'Post-comment'
+hedr_cmn_io_dtil_seq = hedr_io_sumry_seq
+hedr_cmn_io_dtil_uo = hedr_io_summary_uo
+hedr_cmn_io_dtil_edt_cmnt = hedr_io_sumry_edt_cmnt
+hedr_cmn_io_dtil_precmnt = 'Pre-comment'
+hedr_cmn_io_dtil_postcmnt = 'Post-comment'
 
-common_header_detail = [
-    header_detail_seq,
-    header_detail_uo,
-    header_detail_edit_comment,
-    header_detail_precomment,
-    header_detail_postcomment 
+list_hedr_cmn_io_dtil = [
+    hedr_cmn_io_dtil_seq,
+    hedr_cmn_io_dtil_uo,
+    hedr_cmn_io_dtil_edt_cmnt,
+    hedr_cmn_io_dtil_precmnt,
+    hedr_cmn_io_dtil_postcmnt 
 ]
 
-no_comment_instr = '(No comment here)'
+itm_cmn_io_nocmnt_instr = '(No comment here)'
 
 
 ####MATERIALS####
-mats_suffix_ws:str = "_materials"
-"""Suffix for raw material information input worksheet"""
-
-mats_header_material:str = "Material"
+hedr_io_mats_mat:str = "Material"
 """header item for the column for raw material names"""
-mats_col_material:int = 1
+col_nr_io_mats_mat:int = 1
 """Column number for material names"""
 
-mats_header_main = "Main(*)"
+hedr_io_mats_main = "Main(*)"
 """Header item for the column to identify the core raw materials"""
-mats_col_main:int = 2
+col_nr_io_mats_main:int = 2
 """Column number for the main material star (*)"""
 
-mats_header_MW:str = "MW (g/mol)"
+hedr_io_mats_mw:str = "MW (g/mol)"
 """Header item for the column for molecular weight"""
-mats_col_MW : int= 3
+col_nr_io_mats_mw : int= 3
 """Column number for molecular weights"""
 
-mats_header_density:str = "Density (g/mL)"
+hedr_io_mats_dnsty:str = "Density (g/mL)"
 """The header for the density/specific gravity of the raw material"""
-mats_col_density: int = 4
+col_nr_io_mats_dnsty: int = 4
 """Comlumn number for density"""
 
-mats_header_conc_assay:str = "Conc/Assay(%)"
+hedr_io_mats_concasy:str = "Conc/Assay(%)"
 """The header for the concentration or assay of the raw material"""
-mats_col_conc_assay: int = 5
+col_nr_io_mats_concasy: int = 5
 """Column number for concentration or assay"""
 
-mats_header_kg_main:str = "Weight Main (kg)"
+hedr_io_mats_kgmain:str = "Weight Main (kg)"
 """Header item for the weight of core building block weight (kg)"""
-mats_col_kg_main:int = 6
+col_nr_io_mats_kgmain:int = 6
 """Column number for weight of the core building block"""
 
-mats_header_remark:str = "Remark"
+hedr_io_mats_remark:str = "Remark"
 """The header for optional remarks"""
-mats_col_remark: int = 7
+col_nr_io_mats_remark: int = 7
 """Column number for comment"""
 
-mats_list_header: list[str] = [mats_header_material,
-                               mats_header_main,
-                               mats_header_MW,
-                               mats_header_density,
-                               mats_header_conc_assay,
-                               mats_header_kg_main,
-                               mats_header_remark]
+list_hedr_mats_io: list[str] = [hedr_io_mats_mat,
+                               hedr_io_mats_main,
+                               hedr_io_mats_mw,
+                               hedr_io_mats_dnsty,
+                               hedr_io_mats_concasy,
+                               hedr_io_mats_kgmain,
+                               hedr_io_mats_remark]
 
-mats_compo_desig_star:str = "*"
+itm_io_mats_desig_star:str = "*"
 """Star (*) marker to indicate the core raw material"""
 
 ####CHARGING HEADER ITEMS####
-hedr_charging_material_name = 'Material Name'
-hedr_charging_metrics_value = 'Metrics Value'
-hedr_charging_metrics_unit = 'Metrics Unit'
-hedr_charging_error = 'Permissible Error (%)'
-hedr_charging_method = 'Charging Method'
-hedr_charging_time_control = 'Time Control'
-hedr_charging_time_min = 'Minimum Time (min)'
-hedr_charging_time_max = 'Maximum Time (min)'
-hedr_charging_temp_control = 'Temp Control'
-hedr_charging_temp_min = 'Minimum Temp (deg-C)'
-hedr_charging_temp_max = 'Maximum Temp (deg-C)'
+hedr_uo_chgng_mat = 'Material Name'
+hedr_uo_chgng_mtrcs_val = 'Metrics Value'
+hedr_uo_chgng_mtrcs_unit = 'Metrics Unit'
+hedr_uo_chgng_errperm = 'Permissible Error (%)'
+hedr_uo_chgng_method = 'Charging Method'
+hedr_uo_chgng_timctrl = 'Time Control'
+hedr_uo_chgng_timmin = 'Minimum Time (min)'
+hedr_uo_chgng_timmax = 'Maximum Time (min)'
+hedr_uo_chgng_tempctrl = 'Temp Control'
+hedr_uo_chgng_tempmin = 'Minimum Temp (deg-C)'
+hedr_uo_chgng_tempmax = 'Maximum Temp (deg-C)'
 
+list_hedr_uo_chgng = [hedr_uo_chgng_mat,
+                      hedr_uo_chgng_mtrcs_val,
+                      hedr_uo_chgng_mtrcs_unit,
+                      hedr_uo_chgng_errperm,
+                      hedr_uo_chgng_method,
+                      hedr_uo_chgng_timctrl,
+                      hedr_uo_chgng_timmin,
+                      hedr_uo_chgng_timmax,
+                      hedr_uo_chgng_tempctrl,
+                      hedr_uo_chgng_tempmin,
+                      hedr_uo_chgng_tempmax]
 
-####CHARGING TAGS####
-tag_metrics_equiv = "equiv"
-tag_metrics_vol = "v/w"
-list_metrics_unit = [tag_metrics_equiv, tag_metrics_vol]
+####CHARGING OPTIONS####
+opt_uo_chgng_mtrcs_eq = "equiv"
+opt_uo_chgng_mtrcs_vol = "v/w"
+list_opt_uo_chgng_mtrcs = [opt_uo_chgng_mtrcs_eq, opt_uo_chgng_mtrcs_vol]
 """For process.unit_operations.charging.Charging. This is for drop-down list in the detail input form."""
 
-charging_method_liq = 'liquid_port'
-charging_method_shower = 'shower'
-charging_method_press = 'press_vessel'
-charging_method_pow ='powder_port'
-charging_method_placeholder = 'placeholder'
+opt_uo_chgng_method_liq = 'liquid_port'
+opt_uo_chgng_method_shower = 'shower'
+opt_uo_chgng_method_prssvesl = 'press_vessel'
+opt_uo_chgng_method_pwdr ='powder_port'
+opt_uo_chgng_method_method_plchldr = 'placeholder'
+list_opt_uo_chgng_method =[opt_uo_chgng_method_liq,
+                           opt_uo_chgng_method_shower,
+                           opt_uo_chgng_method_prssvesl,
+                           opt_uo_chgng_method_pwdr,
+                           opt_uo_chgng_method_method_plchldr]
 
-charging_timectrl_none = "No time control"
-charging_timectrl_min="Time control with minimum"
-charging_timectrl_max="Time control with maximum"
-charging_timectrl_min_max='Time control with minimum and maximum'
-charging_timectrl_placeholder = 'Placeholder'
 
-charging_temprctrl_none = "No temp control"
-charging_temprctrl_min="Temp control with minimum"
-charging_temprctrl_max="Temp control with maximum"
-charging_temprctrl_min_max='Temp control with minimum and maximum'
-charging_temprctrl_placeholder = 'Placeholder'
+opt_uo_chgng_timctrl_none = "No time control"
+opt_uo_chgng_timctrl_min="Time control with minimum"
+opt_uo_chgng_timctrl_max="Time control with maximum"
+opt_uo_chgng_timctrl_min_max='Time control with minimum and maximum'
+opt_uo_chgng_timctrl_plchldr = 'Placeholder'
+list_opt_uo_chgng_timctrl=[opt_uo_chgng_timctrl_none,
+                           opt_uo_chgng_timctrl_min,
+                           opt_uo_chgng_timctrl_max,
+                           opt_uo_chgng_timctrl_min_max,
+                           opt_uo_chgng_timctrl_plchldr]
 
-charging_error_range_placeholder='place holder'
+
+opt_uo_chgng_temprctrl_none = "No temp control"
+opt_uo_chgng_temprctrl_min="Temp control with minimum"
+opt_uo_chgng_temprctrl_max="Temp control with maximum"
+opt_uo_chgng_temprctrl_min_max='Temp control with minimum and maximum'
+opt_uo_chgng_temprctrl_plchldr = 'Placeholder'
+list_opt_uo_chgne_temprctrl = [opt_uo_chgng_temprctrl_none,
+                               opt_uo_chgng_temprctrl_min,
+                               opt_uo_chgng_temprctrl_max,
+                               opt_uo_chgng_temprctrl_min_max,
+                               opt_uo_chgng_temprctrl_plchldr]
+
+
+opt_uo_chgng_err_rng_plchldr='place holder'
 
 ################################################################
 #                      PARTS FLOW SHEETS                       #
 ################################################################
 
 #####COMMON####
-part_time = '___:___' 
+tag_flow_cmn_rec_time = "tag_flow_cmn_time"
+part_flow_cmn_rec_time_jp = '___:___' 
 """Common flowsheet component to record a point of time some action is taken."""
-part_signature = '   /  /  _____'
+
+tag_flow_cmn_rec_sign = "tag_flow_cmn_sign"
+part_flow_cmn_rec_sign_jp = '   /  /  _____'
 """Common flowsheet component for a signature"""
 
-
+dict_jp_part_flow_cmn = {tag_flow_cmn_rec_time : part_flow_cmn_rec_time_jp,
+                         tag_flow_cmn_rec_sign : part_flow_cmn_rec_sign_jp}
 
 ####CHARGING####
-part_method_charging_ini = '仕込み開始'
+# tag_part_flow_chgng_title = "tag_chgng_title"
+# part_flow_chgng_title_jp = '仕込み'
+"""JP title for charging"""
+
+tag_part_flow_chgng_instr_ini = "tag_chgng_instr_ini"
+part_flow_chgng_instr_ini_jp = '仕込み開始'
 """Flowseet component for class Charging. An action item of commencement of charging/dosing"""
 
-part_method_charging_end = '仕込み終了'
+tag_part_flow_chgng_instr_end = "tag_chgng_instr_end"
+part_flow_chgng_instr_end_jp = '仕込み終了'
 """Flowseet component for class Charging. An action item of end of charging/dosing"""
 
-part_record_input = '仕込み量__________kg'
+tag_part_flow_chgng_rec_input = "tag_chgng_rec_input"
+part_flow_chgng_rec_input_jp = '仕込み量__________kg'
 """Flowseet component for class Charging. A recording element for dispensed amount"""
 
-part_record_lot = 'ロット番号__________'
+tag_part_flow_chgng_rec_lot= "tag_chgng_rec_lot"
+part_flow_chgng_rec_lot_jp = 'ロット番号__________'
 """Flowseet component for class Charging. A recording element for the lot number of a material"""
 
-part_record_flex ='溶媒用フレキID__________'
+tag_part_flow_chgng_rec_hose = "tag_chgng_rec_hose"
+part_flow_chgng_rec_hose_jp ='溶媒用フレキID__________'
 """Flowseet component for class Charging. A recording element for the ID of flexible tube for solvents"""
 
-part_record_temp_ini = '開始時内温_______℃'
+tag_part_flow_chgng_rec_temprini = "tag_chgng_rec_temprini"
+part_flow_chgng_rec_temprini_jp = '開始時内温_______℃'
 """Flowseet component for class Charging. A recording element for initial temperature of a certain action"""
 
-part_record_temp_max = '仕込み時最高内温_______℃'
+tag_part_flow_chgng_rec_temprmax = "tag_chgng_rec_temprmax"
+part_flow_chgng_temprmax_jp = '仕込み時最高内温_______℃'
 """Flowseet component for class Charging. A recording element for the maximum temperature"""
 
-part_record_temp_min = '仕込み時最低内温_______℃'
+tag_part_flow_chgng_rec_temprmin = "tag_chgng_rec_temprmin"
+part_flow_chgng_temprmin_jp = '仕込み時最低内温_______℃'
 """Flowseet component for class Charging. A recording element for the minimum"""
 
-part_record_temp_end = '終了時内温_______℃'
+tag_part_flow_chgng_rec_temprend = "tag_chgng_rec_temprend"
+part_flow_chgng_temprend_jp = '終了時内温_______℃'
 """Flowseet component for class Charging. A recording element for the terminal temperature"""
 
-part_check_charged ='□ 仕込み実施'
+tag_part_flow_chgng_rec_cmpltd = "tag_chgng_rec_cmpltd"
+part_flow_chgng_cmpltd_jp ='□ 仕込み実施'
 """Flowseet component for class Charging. A check box for complete charging/dosing"""
 
+dict_jp_part_flow_chgng ={tag_part_flow_chgng_instr_ini : part_flow_chgng_instr_ini_jp,
+                         tag_part_flow_chgng_instr_end : part_flow_chgng_instr_end_jp,
+                         tag_part_flow_chgng_rec_input : part_flow_chgng_rec_input_jp,
+                         tag_part_flow_chgng_rec_lot : part_flow_chgng_rec_lot_jp,
+                         tag_part_flow_chgng_rec_hose : part_flow_chgng_rec_hose_jp,
+                         tag_part_flow_chgng_rec_temprini : part_flow_chgng_rec_temprini_jp,
+                         tag_part_flow_chgng_rec_temprmax : part_flow_chgng_temprmax_jp,
+                         tag_part_flow_chgng_rec_temprmin : part_flow_chgng_temprmin_jp,
+                         tag_part_flow_chgng_rec_temprend : part_flow_chgng_temprend_jp,
+                         tag_part_flow_chgng_rec_cmpltd : part_flow_chgng_cmpltd_jp
+                         }
 
+tag_stc_flow_chgng_qty = "tag_stc_qty"
+stc_flow_chgng_qty_err_jp = '{qty}±{err} kg'
+
+tag_stc_flow_chgng_time_min = opt_uo_chgng_timctrl_min
+stc_flow_chgng_time_min_jp = '*滴下時間{min}以上'
+"""Flowsheet component for class Charging. Charging instruction with minimum time"""
+
+tag_stc_flow_chgng_time_max = opt_uo_chgng_timctrl_max
+stc_flow_chgng_time_max_jp = '*滴下時間{max}以内'
+"""Flowsheet component for class Charging. Charging instruction with maximum time"""
+
+tag_stc_flow_chgng_time_min_max = opt_uo_chgng_timctrl_min_max
+stc_flow_chgng_time_min_max_jp = '*滴下時間{min}～{max}以内'
+"""Flowsheet component for class Charging. Charging instruction with minimum and maximum time range"""
+
+tag_stc_flow_chgng_temp_min = opt_uo_chgng_temprctrl_min
+stc_flow_chgng_temp_min = "仕込み中内温{min}℃以上"
+"""Flowsheet component for class Charging. Charging instruction with lower temeperature limit"""
+
+tag_stc_flow_chgng_temp_max = opt_uo_chgng_temprctrl_max
+stc_flow_chgng_temp_max ="仕込み中内温{max}℃以下"
+"""Flowsheet component for class Charging. Charging instruction with upper temeperature limit"""
+
+tag_stc_flow_chgng_temp_min_max = opt_uo_chgng_temprctrl_min_max
+stc_flow_chgng_temp_min_max = "仕込み中内温{min}～{max}℃"
+"""Flowsheet component for class Charging. Charging instruction with temeperature range"""
+
+dict_jp_stcs_flow_chgng = {tag_stc_flow_chgng_qty : stc_flow_chgng_qty_err_jp,
+                          tag_stc_flow_chgng_time_min : stc_flow_chgng_time_min_jp,
+                          tag_stc_flow_chgng_time_max : stc_flow_chgng_time_max_jp,
+                          tag_stc_flow_chgng_time_min_max : stc_flow_chgng_time_min_max_jp,
+                          tag_stc_flow_chgng_temp_min : stc_flow_chgng_temp_min,
+                          tag_stc_flow_chgng_temp_max : stc_flow_chgng_temp_max,
+                          tag_stc_flow_chgng_temp_min_max : stc_flow_chgng_temp_min_max}
+"""Language dictionary for instruction SENTENCES with place holders 'min' and/or 'max'. Use str.format()"""
+
+
+
+####################################################
+#                 STYLE FOR OPEN PYXL              #
+####################################################
 
 #OpenPyXL styles
 xl_line_thin = Side(style="thin")

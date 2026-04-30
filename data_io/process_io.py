@@ -8,36 +8,36 @@ from openpyxl.worksheet.worksheet import Worksheet
 from openpyxl.worksheet.datavalidation import DataValidation
 from typing import List, Dict
 
-inputfile_base_name = defs.inputfile_base_name
+inputfile_base_name = defs.src_io_filebasename
 """Base name for process input Excel file"""
 
-suffix_summary_input_ws = defs.suffix_summary_input_ws
+suffix_summary_input_ws = defs.src_io_sfx_sumry_ws
 """suffix for summary input worksheet (tab)"""
 
-suffix_mats_input_ws = defs.mats_suffix_ws
+suffix_mats_input_ws = defs.src_io_sfx_mats_ws
 
-suffix_detail_input_ws = defs.suffix_detail_input_ws
+suffix_detail_input_ws = defs.src_io_sfx_detail_ws
 """suffix for detail input worksheet (tab)"""
 
-header_summary_sequence = defs.header_summary_sequence
-header_summary_uo = defs.header_summary_uo
-header_summary_num_subitems = defs.header_summary_num_subitems
-header_summary_edit_comment = defs.header_summary_edit_comment
+header_summary_sequence = defs.hedr_io_sumry_seq
+header_summary_uo = defs.hedr_io_summary_uo
+header_summary_num_subitems = defs.hedr_io_sumry_num_subitms
+header_summary_edit_comment = defs.hedr_io_sumry_edt_cmnt
 
-summary_col_seq = defs.summary_col_seq
-summary_col_uo = defs.summary_col_uo
-summary_col_num_subitems = defs.summary_col_num_subitems
-summary_col_editcomment = defs.summary_col_editcomment
+summary_col_seq = defs.col_nr_io_sumry_seq
+summary_col_uo = defs.col_nr_io_sumry_uo
+summary_col_num_subitems = defs.col_nr_io_sumry_num_subitms
+summary_col_editcomment = defs.col_nr_io_sumry_edt_cmnt
 
-header_detail_seq = defs.header_detail_seq
-header_detail_uo = defs.header_detail_uo
+header_detail_seq = defs.hedr_cmn_io_dtil_seq
+header_detail_uo = defs.hedr_cmn_io_dtil_uo
 header_detail_edit_comment = header_summary_edit_comment
-header_detail_precomment = defs.header_detail_precomment
-header_detail_postcomment = defs.header_detail_postcomment
+header_detail_precomment = defs.hedr_cmn_io_dtil_precmnt
+header_detail_postcomment = defs.hedr_cmn_io_dtil_postcmnt
 
-common_header_detail = defs.common_header_detail
+common_header_detail = defs.list_hedr_cmn_io_dtil
 
-no_comment_instr = defs.no_comment_instr
+no_comment_instr = defs.itm_cmn_io_nocmnt_instr
 
 class ProcessIO:
     """
@@ -223,7 +223,7 @@ class ProcessIO:
         ------------
         None
         """
-        options_dv: str = f'\"{defs.mats_compo_desig_star},,\"'
+        options_dv: str = f'\"{defs.itm_io_mats_desig_star},,\"'
         dv_main = DataValidation(
             type='list',
             formula1=options_dv,
@@ -231,30 +231,30 @@ class ProcessIO:
         )
         self.mats_ws.add_data_validation(dv_main)
         self._current_line_mats = 1
-        self.mats_ws.cell(row=self._current_line_mats, column=defs.mats_col_material).value=defs.mats_header_material
-        self.mats_ws.cell(row=self._current_line_mats, column=defs.mats_col_material).border = defs.xl_border_around
-        self.mats_ws.cell(row=self._current_line_mats, column=defs.mats_col_main).value=defs.mats_header_main
-        self.mats_ws.cell(row=self._current_line_mats, column=defs.mats_col_main).border = defs.xl_border_around
-        self.mats_ws.cell(row=self._current_line_mats, column=defs.mats_col_MW).value=defs.mats_header_MW
-        self.mats_ws.cell(row=self._current_line_mats, column=defs.mats_col_MW).border = defs.xl_border_around
-        self.mats_ws.cell(row=self._current_line_mats, column=defs.mats_col_density).value=defs.mats_header_density
-        self.mats_ws.cell(row=self._current_line_mats, column=defs.mats_col_density).border = defs.xl_border_around
-        self.mats_ws.cell(row=self._current_line_mats, column=defs.mats_col_conc_assay).value=defs.mats_header_conc_assay
-        self.mats_ws.cell(row=self._current_line_mats, column=defs.mats_col_conc_assay).border = defs.xl_border_around
-        self.mats_ws.cell(row=self._current_line_mats, column=defs.mats_col_kg_main).value=defs.mats_header_kg_main
-        self.mats_ws.cell(row=self._current_line_mats, column=defs.mats_col_kg_main).border = defs.xl_border_around
-        self.mats_ws.cell(row=self._current_line_mats, column=defs.mats_col_remark).value=defs.mats_header_remark
-        self.mats_ws.cell(row=self._current_line_mats, column=defs.mats_col_remark).border = defs.xl_border_around
+        self.mats_ws.cell(row=self._current_line_mats, column=defs.col_nr_io_mats_mat).value=defs.hedr_io_mats_mat
+        self.mats_ws.cell(row=self._current_line_mats, column=defs.col_nr_io_mats_mat).border = defs.xl_border_around
+        self.mats_ws.cell(row=self._current_line_mats, column=defs.col_nr_io_mats_main).value=defs.hedr_io_mats_main
+        self.mats_ws.cell(row=self._current_line_mats, column=defs.col_nr_io_mats_main).border = defs.xl_border_around
+        self.mats_ws.cell(row=self._current_line_mats, column=defs.col_nr_io_mats_mw).value=defs.hedr_io_mats_mw
+        self.mats_ws.cell(row=self._current_line_mats, column=defs.col_nr_io_mats_mw).border = defs.xl_border_around
+        self.mats_ws.cell(row=self._current_line_mats, column=defs.col_nr_io_mats_dnsty).value=defs.hedr_io_mats_dnsty
+        self.mats_ws.cell(row=self._current_line_mats, column=defs.col_nr_io_mats_dnsty).border = defs.xl_border_around
+        self.mats_ws.cell(row=self._current_line_mats, column=defs.col_nr_io_mats_concasy).value=defs.hedr_io_mats_concasy
+        self.mats_ws.cell(row=self._current_line_mats, column=defs.col_nr_io_mats_concasy).border = defs.xl_border_around
+        self.mats_ws.cell(row=self._current_line_mats, column=defs.col_nr_io_mats_kgmain).value=defs.hedr_io_mats_kgmain
+        self.mats_ws.cell(row=self._current_line_mats, column=defs.col_nr_io_mats_kgmain).border = defs.xl_border_around
+        self.mats_ws.cell(row=self._current_line_mats, column=defs.col_nr_io_mats_remark).value=defs.hedr_io_mats_remark
+        self.mats_ws.cell(row=self._current_line_mats, column=defs.col_nr_io_mats_remark).border = defs.xl_border_around
         self._current_line_mats += 1
         for _ in range(defs.mats_default_num_rows):
-            self.mats_ws.cell(row=self._current_line_mats, column=defs.mats_col_material).border = defs.xl_border_around
-            self.mats_ws.cell(row=self._current_line_mats, column=defs.mats_col_main).border = defs.xl_border_around
-            dv_main.add(self.mats_ws.cell(row=self._current_line_mats, column=defs.mats_col_main))
-            self.mats_ws.cell(row=self._current_line_mats, column=defs.mats_col_MW).border = defs.xl_border_around
-            self.mats_ws.cell(row=self._current_line_mats, column=defs.mats_col_density).border = defs.xl_border_around
-            self.mats_ws.cell(row=self._current_line_mats, column=defs.mats_col_conc_assay).border = defs.xl_border_around
-            self.mats_ws.cell(row=self._current_line_mats, column=defs.mats_col_kg_main).border = defs.xl_border_around
-            self.mats_ws.cell(row=self._current_line_mats, column=defs.mats_col_remark).border = defs.xl_border_around
+            self.mats_ws.cell(row=self._current_line_mats, column=defs.col_nr_io_mats_mat).border = defs.xl_border_around
+            self.mats_ws.cell(row=self._current_line_mats, column=defs.col_nr_io_mats_main).border = defs.xl_border_around
+            dv_main.add(self.mats_ws.cell(row=self._current_line_mats, column=defs.col_nr_io_mats_main))
+            self.mats_ws.cell(row=self._current_line_mats, column=defs.col_nr_io_mats_mw).border = defs.xl_border_around
+            self.mats_ws.cell(row=self._current_line_mats, column=defs.col_nr_io_mats_dnsty).border = defs.xl_border_around
+            self.mats_ws.cell(row=self._current_line_mats, column=defs.col_nr_io_mats_concasy).border = defs.xl_border_around
+            self.mats_ws.cell(row=self._current_line_mats, column=defs.col_nr_io_mats_kgmain).border = defs.xl_border_around
+            self.mats_ws.cell(row=self._current_line_mats, column=defs.col_nr_io_mats_remark).border = defs.xl_border_around
             self._current_line_mats += 1
 
 

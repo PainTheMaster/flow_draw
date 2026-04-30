@@ -94,10 +94,10 @@ class Process(GetMats):
         df_summary = self.data_input.load_process_summary()
         uo_reg = unit_operation.registry_uo_cls
         for _, row in df_summary.iterrows():
-            seq = int(row[defs.header_summary_sequence])
-            uo_title = str(row[defs.header_summary_uo])
-            num_subitems = int(row[defs.header_summary_num_subitems])
-            edit_comment = str(row[defs.header_summary_edit_comment])
+            seq = int(row[defs.hedr_io_sumry_seq])
+            uo_title = str(row[defs.hedr_io_summary_uo])
+            num_subitems = int(row[defs.hedr_io_sumry_num_subitms])
+            edit_comment = str(row[defs.hedr_io_sumry_edt_cmnt])
             if not uo_title in uo_reg:
                 raise RuntimeError(f"{self.__class__.__name__}: Unit operation name \"{uo_title}\" not in the registry.")
             new_uo_inst = uo_reg[uo_title](caller=self,
@@ -167,12 +167,12 @@ class Process(GetMats):
         df_uo_details: list[pd.DataFrame] = self.data_input.load_process_details()
         for i in range(len(self.list_uo)):
             temp_detail = df_uo_details[i]
-            if self.list_uo[i].uo_name == (temp_detail)[defs.header_detail_uo].iloc[0]:
+            if self.list_uo[i].uo_name == (temp_detail)[defs.hedr_cmn_io_dtil_uo].iloc[0]:
                 self.list_uo[i].load_params_from_df(temp_detail)
             else:
                 raise RuntimeError(f"{self.__class__.__name__}: Seq Nr-{self.list_uo[i].operation_seq} Unit operation name mismatch.",
                                    f"summary table: {self.list_uo[i].uo_name}",
-                                   f"detail table: {temp_detail[defs.header_detail_uo].iloc[0]}")
+                                   f"detail table: {temp_detail[defs.hedr_cmn_io_dtil_uo].iloc[0]}")
                 
 
     #TODO Let's implement self.prep_uo() to create a list of unit operations to be ready to receive detail data.

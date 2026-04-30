@@ -32,18 +32,18 @@ class TestIO(unittest.TestCase):
         Don't forget to save the file!
         """
         ws_chem = self.test_proc_io.mats_ws
-        ws_chem.cell(row=row, column=defs.mats_col_material).value=name_mat
+        ws_chem.cell(row=row, column=defs.col_nr_io_mats_mat).value=name_mat
         if is_main:
-            ws_chem.cell(row=row, column=defs.mats_col_main).value=defs.mats_compo_desig_star
+            ws_chem.cell(row=row, column=defs.col_nr_io_mats_main).value=defs.itm_io_mats_desig_star
         if mw:
-            ws_chem.cell(row=row, column=defs.mats_col_MW).value=mw 
+            ws_chem.cell(row=row, column=defs.col_nr_io_mats_mw).value=mw 
         if density:
-            ws_chem.cell(row=row, column=defs.mats_col_density).value=density
+            ws_chem.cell(row=row, column=defs.col_nr_io_mats_dnsty).value=density
         if assay_pct:
-            ws_chem.cell(row=row, column=defs.mats_col_conc_assay).value=assay_pct
+            ws_chem.cell(row=row, column=defs.col_nr_io_mats_concasy).value=assay_pct
         if kg:
-            ws_chem.cell(row=row, column=defs.mats_col_kg_main).value=kg
-        ws_chem.cell(row=row, column=defs.mats_col_remark).value=remark
+            ws_chem.cell(row=row, column=defs.col_nr_io_mats_kgmain).value=kg
+        ws_chem.cell(row=row, column=defs.col_nr_io_mats_remark).value=remark
         #self.test_proc_io.save_form()
     
     def summary_test_data_row_injection(self, row:int = 2,
@@ -57,25 +57,25 @@ class TestIO(unittest.TestCase):
         """
         ws_summary = self.test_proc_io.summary_ws
         if seq:
-            ws_summary.cell(row=row, column=defs.summary_col_seq).value=seq
+            ws_summary.cell(row=row, column=defs.col_nr_io_sumry_seq).value=seq
         if uo:
-            ws_summary.cell(row=row, column=defs.summary_col_uo).value=uo
+            ws_summary.cell(row=row, column=defs.col_nr_io_sumry_uo).value=uo
         if num_subitem:
-            ws_summary.cell(row=row, column=defs.summary_col_num_subitems).value=num_subitem
-        ws_summary.cell(row=row, column=defs.summary_col_editcomment).value=editcomment
+            ws_summary.cell(row=row, column=defs.col_nr_io_sumry_num_subitms).value=num_subitem
+        ws_summary.cell(row=row, column=defs.col_nr_io_sumry_edt_cmnt).value=editcomment
 
 
     def test_0001_input_generation(self):
         """Checks if the right input excel form is generated. The form generators for summary d materials are called in self.setUp()"""
-        print("expected filename: ", self.project_name+defs.inputfile_base_name+".xlsx")
-        self.assertTrue(os.path.isfile(self.project_name+defs.inputfile_base_name+".xlsx"))
+        print("expected filename: ", self.project_name+defs.src_io_filebasename+".xlsx")
+        self.assertTrue(os.path.isfile(self.project_name+defs.src_io_filebasename+".xlsx"))
     
     def test_0002_uo_deriv_name_registr(self):
         """
         Checks if the name of each unit operation class is registerd. The registry is located in the module project.process.unit_operations.unit_operation.
         The registration takes place when the class (not an instance) is generated.
         """
-        self.assertIn(member=defs.op_charging, container=uos.unit_operation.list_unit_ops)
+        self.assertIn(member=defs.tag_uo_charging, container=uos.unit_operation.list_unit_ops)
 
     def test_0003_uo_deriv_class_registr(self):
         """
@@ -133,18 +133,18 @@ class TestForProcessCls(unittest.TestCase):
         """
         data_input = self.test_process.data_input
         ws_chem = data_input.mats_ws
-        ws_chem.cell(row=row, column=defs.mats_col_material).value=name_mat
+        ws_chem.cell(row=row, column=defs.col_nr_io_mats_mat).value=name_mat
         if is_main:
-            ws_chem.cell(row=row, column=defs.mats_col_main).value=defs.mats_compo_desig_star
+            ws_chem.cell(row=row, column=defs.col_nr_io_mats_main).value=defs.itm_io_mats_desig_star
         if mw:
-            ws_chem.cell(row=row, column=defs.mats_col_MW).value=mw 
+            ws_chem.cell(row=row, column=defs.col_nr_io_mats_mw).value=mw 
         if density:
-            ws_chem.cell(row=row, column=defs.mats_col_density).value=density
+            ws_chem.cell(row=row, column=defs.col_nr_io_mats_dnsty).value=density
         if assay_pct:
-            ws_chem.cell(row=row, column=defs.mats_col_conc_assay).value=assay_pct
+            ws_chem.cell(row=row, column=defs.col_nr_io_mats_concasy).value=assay_pct
         if kg:
-            ws_chem.cell(row=row, column=defs.mats_col_kg_main).value=kg
-        ws_chem.cell(row=row, column=defs.mats_col_remark).value=remark
+            ws_chem.cell(row=row, column=defs.col_nr_io_mats_kgmain).value=kg
+        ws_chem.cell(row=row, column=defs.col_nr_io_mats_remark).value=remark
         #self.test_proc_io.save_form()
     
     def summary_test_data_row_injection(self, row:int = 2,
@@ -159,12 +159,12 @@ class TestForProcessCls(unittest.TestCase):
         data_input = self.test_process.data_input
         ws_summary = data_input.summary_ws
         if seq:
-            ws_summary.cell(row=row, column=defs.summary_col_seq).value=seq
+            ws_summary.cell(row=row, column=defs.col_nr_io_sumry_seq).value=seq
         if uo:
-            ws_summary.cell(row=row, column=defs.summary_col_uo).value=uo
+            ws_summary.cell(row=row, column=defs.col_nr_io_sumry_uo).value=uo
         if num_subitem:
-            ws_summary.cell(row=row, column=defs.summary_col_num_subitems).value=num_subitem
-        ws_summary.cell(row=row, column=defs.summary_col_editcomment).value=editcomment
+            ws_summary.cell(row=row, column=defs.col_nr_io_sumry_num_subitms).value=num_subitem
+        ws_summary.cell(row=row, column=defs.col_nr_io_sumry_edt_cmnt).value=editcomment
 
     def save_injected_data(self):
         data_input = self.test_process.data_input
@@ -182,7 +182,7 @@ class TestForProcessCls(unittest.TestCase):
         tp=self.test_process
 
         seq_proc_1 = 1
-        uo_proc_1 = defs.op_charging
+        uo_proc_1 = defs.tag_uo_charging
         num_subitem_proc_1 = 2
         editcomment_proc_1 = "test process with two sub items 1"
         self.summary_test_data_row_injection(row=2,
@@ -192,7 +192,7 @@ class TestForProcessCls(unittest.TestCase):
                                              editcomment=editcomment_proc_1)
 
         seq_proc_2 = 2
-        uo_proc_2 = defs.op_charging
+        uo_proc_2 = defs.tag_uo_charging
         num_subitem_proc_2 = 1
         editcomment_proc_2 = "test process with only one sub item"
         self.summary_test_data_row_injection(row=3,
