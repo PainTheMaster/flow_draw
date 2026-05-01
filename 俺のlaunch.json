@@ -9,21 +9,21 @@
             "name": "Python Debugger: Module",
             "type": "debugpy",
             "request": "launch",
-            "module": "flow_draw.main",
+            "module": "flow_draw.main"
         },
         {
             "name": "IO Test",
             "type": "debugpy",
             "request": "launch",
             "module": "flow_draw.test.io_test",
-            "args": ["-v"],
+            "args": ["-v"]
         },
         {
             "name": "Flowsheet Test",
             "type": "debugpy",
             "request": "launch",
             "module": "flow_draw.test.flowsheet_test",
-            "args": ["-v"],
-        },
+            "args": ["-v"]
+        }
     ]
 }
