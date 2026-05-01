@@ -129,11 +129,36 @@ dict_jp_part_uo_titles = {tag_uo_line_clearance : part_uo_title_clearance_jp,
                           tag_uo_prod_weigh : part_uo_title_prod_weigh_jp,
                           tag_uo_placeholder : part_uo_title_placeholder}
 
+
+################################################################
+#              PARTS FOR PROJECT OUTLINE WORKSHEET             #
+################################################################
+
+#>>>>>>>>>>>>>>>>>> sheet name <<<<<<<<<<<<<<<<<<<<#
+src_io_proj_outline_ws = "project outline"
+"""Worksheet name for the project outline"""
+
+
+#>>>>>>>>>>>>>>>>>> header items for project and some process summary <<<<<<<<<<<<<<<<<<#
+hedr_io_proj_project_name = 'Project Name'
+"""Header item for the project name"""
+hedr_io_proj_proC_name_stem = 'Name, Process-{}'
+"""Header stem for PROCESS steps. The numbers 1, 2, 3... follow for each step."""
+hedr_io_proj_proC_num_uo_stem = 'Nr Subitems, Process-{}'
+"""Header stem for the numbers of PROCESS sub-items. The numbers 1, 2, 3 follow for each step"""
+
+#>>>>>>>>>>>>>>>>>> table schema of the process outline worksheet<<<<<<<<<<<<<<<<<<#
+col_nr_io_proj_items: int = 0
+"""Column number for the items in the table"""
+col_nr_io_proj_values: int = 1
+"""Column number for the items in the table"""
+
 ################################################################
 #PARTS FOR PROCESS DATA IO: HEADER ITEMS, DROP-DOWN OPTIONS ETC#
 ################################################################
 
-####PROCESS_IO####
+        #>>>>>>>>>>>>>> file name, sheet name <<<<<<<<<<<<<<<<<<#
+
 src_io_filebasename = "_process_input"
 """Base name for process input Excel file"""
 
@@ -146,66 +171,59 @@ src_io_sfx_mats_ws:str = "_materials"
 src_io_sfx_detail_ws = "_detail"
 """suffix for detail input worksheet (tab)"""
 
-hedr_io_sumry_seq = 'Sequence'
+
+
+        #>>>>>>>>>>> header items for summary worksheet <<<<<<<<<<<<<<#
+
+hedr_io_sumry_seq = 'Seq Nr'
+"""Header item for sequence number in the process summary worksheet"""
 hedr_io_summary_uo = 'Unit Operation'
+"""Header item for unit operations in the process summary worksheet"""
 hedr_io_sumry_num_subitms = 'Number of Subitems'
+"""Header item for number of subitems for each unit operation in the process summary worksheet"""
 hedr_io_sumry_edt_cmnt = 'Edit Comment'
+"""Header item for edit comment in the process summary worksheet"""
 
 col_nr_io_sumry_seq = 1
+"""Column number designator of sequence numbers in the summary worksheet"""
 col_nr_io_sumry_uo = 2
+"""Column number designator of unit operations in the summary worksheet"""
 col_nr_io_sumry_num_subitms = 3
+"""Column number designator of number of subitems for each unit operation in the summary worksheet"""
 col_nr_io_sumry_edt_cmnt = 4
-
-hedr_cmn_io_dtil_seq = hedr_io_sumry_seq
-hedr_cmn_io_dtil_uo = hedr_io_summary_uo
-hedr_cmn_io_dtil_edt_cmnt = hedr_io_sumry_edt_cmnt
-hedr_cmn_io_dtil_precmnt = 'Pre-comment'
-hedr_cmn_io_dtil_postcmnt = 'Post-comment'
-
-list_hedr_cmn_io_dtil = [
-    hedr_cmn_io_dtil_seq,
-    hedr_cmn_io_dtil_uo,
-    hedr_cmn_io_dtil_edt_cmnt,
-    hedr_cmn_io_dtil_precmnt,
-    hedr_cmn_io_dtil_postcmnt 
-]
-
-itm_cmn_io_nocmnt_instr = '(No comment here)'
+"""Column number designator of edit comment in the summary worksheet"""
 
 
-####MATERIALS####
+
+        #>>>>>>>>>>>> header items for material worksheets <<<<<<<<<<<<#
+
 hedr_io_mats_mat:str = "Material"
 """header item for the column for raw material names"""
-col_nr_io_mats_mat:int = 1
-"""Column number for material names"""
-
 hedr_io_mats_main = "Main(*)"
 """Header item for the column to identify the core raw materials"""
-col_nr_io_mats_main:int = 2
-"""Column number for the main material star (*)"""
-
 hedr_io_mats_mw:str = "MW (g/mol)"
 """Header item for the column for molecular weight"""
-col_nr_io_mats_mw : int= 3
-"""Column number for molecular weights"""
-
 hedr_io_mats_dnsty:str = "Density (g/mL)"
 """The header for the density/specific gravity of the raw material"""
-col_nr_io_mats_dnsty: int = 4
-"""Comlumn number for density"""
-
 hedr_io_mats_concasy:str = "Conc/Assay(%)"
 """The header for the concentration or assay of the raw material"""
-col_nr_io_mats_concasy: int = 5
-"""Column number for concentration or assay"""
-
 hedr_io_mats_kgmain:str = "Weight Main (kg)"
 """Header item for the weight of core building block weight (kg)"""
-col_nr_io_mats_kgmain:int = 6
-"""Column number for weight of the core building block"""
-
 hedr_io_mats_remark:str = "Remark"
 """The header for optional remarks"""
+
+col_nr_io_mats_mat:int = 1
+"""Column number for material names"""
+col_nr_io_mats_main:int = 2
+"""Column number for the main material star (*)"""
+col_nr_io_mats_mw : int= 3
+"""Column number for molecular weights"""
+col_nr_io_mats_dnsty: int = 4
+"""Comlumn number for density"""
+col_nr_io_mats_concasy: int = 5
+"""Column number for concentration or assay"""
+col_nr_io_mats_kgmain:int = 6
+"""Column number for weight of the core building block"""
 col_nr_io_mats_remark: int = 7
 """Column number for comment"""
 
@@ -220,7 +238,38 @@ list_hedr_mats_io: list[str] = [hedr_io_mats_mat,
 itm_io_mats_desig_star:str = "*"
 """Star (*) marker to indicate the core raw material"""
 
-####CHARGING HEADER ITEMS####
+
+
+            ##### header items for detail worksheet######
+
+hedr_cmn_io_dtil_seq = hedr_io_sumry_seq
+"""Header item for <> in the process detail worksheet"""
+hedr_cmn_io_dtil_uo = hedr_io_summary_uo
+"""Header item for <> in the process detail worksheet"""
+hedr_cmn_io_dtil_edt_cmnt = hedr_io_sumry_edt_cmnt
+"""Header item for <> in the process detail worksheet"""
+hedr_cmn_io_dtil_precmnt = 'Pre-comment'
+"""Header item for <> in the process detail worksheet"""
+hedr_cmn_io_dtil_postcmnt = 'Post-comment'
+"""Header item for <> in the process detail worksheet"""
+
+list_hedr_cmn_io_dtil = [
+    hedr_cmn_io_dtil_seq,
+    hedr_cmn_io_dtil_uo,
+    hedr_cmn_io_dtil_edt_cmnt,
+    hedr_cmn_io_dtil_precmnt,
+    hedr_cmn_io_dtil_postcmnt 
+]
+
+itm_cmn_io_nocmnt_instr = '(No comment here)'
+
+
+
+######################################################
+#
+
+                        ####CHARGING HEADER ITEMS####
+
 hedr_uo_chgng_mat = 'Material Name'
 hedr_uo_chgng_mtrcs_val = 'Metrics Value'
 hedr_uo_chgng_mtrcs_unit = 'Metrics Unit'

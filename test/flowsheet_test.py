@@ -43,8 +43,22 @@ class SaltyWaterFlow(unittest.TestCase):
         tst_proc.list_uo[0].output_unit_operation()
         tst_proc.flowsheet.save("test000_SaltWaterOutputFlow.xlsx")
         self.assertTrue(True)
-    
 
+
+
+    
+    def test0001_Project(self):
+        proj_name = "flowtest000"
+        proc_name = "salt_water"
+        test_proj = proj.Project()
+        test_proj.proj_name = proj_name
+        test_proj.num_procs = 1
+        test_proj.prep_process(prep_test_df(proj_name="wrong_proj_name", proc_name=proc_name, num_uo=1))
+        test_proc = test_proj.list_proc[0]
+        result:bool = ((len(test_proj.list_proc)==1) and
+                       (test_proc.project_name==proj_name) and
+                       (test_proc.process_name==proc_name))
+        self.assertTrue(result)
 
 
 def PurchaseMaterials() -> pd.DataFrame:
@@ -106,7 +120,24 @@ def SetChgngForSaltWater() -> pd.DataFrame:
     return df_input
 
 
-    
+def prep_test_df(proj_name:str=None, proc_name:str=None, num_uo:int =0 )-> pd.DataFrame:
+    dict0: dict[str, list[str|int]] ={0:[defs.hedr_io_proj_project_name,
+                                            defs.hedr_io_proj_proC_name_stem.format(1),
+                                            defs.hedr_io_proj_proC_num_uo_stem.format(1)],
+                                    1:[proj_name,
+                                        proc_name,
+                                        num_uo]}
+
+    test_df = pd.DataFrame(dict0)
+    print("in prep_test_df(): test_df")
+    print(test_df)
+    print("==========")
+    test_df.index = test_df[0]
+    print("in prep_test_df(): test_df re-indexed")
+    print(test_df)
+    print("==========")
+    return test_df
+
 
 
 

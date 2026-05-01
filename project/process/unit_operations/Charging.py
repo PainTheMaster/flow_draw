@@ -135,7 +135,7 @@ class Charging(uo.UnitOperation, uo_name=defs.tag_uo_charging):
         Parameters
         ---------------
         caller: flow_draw.trait_def.trait_def.GetMats
-            The calling object. In the case of the class Charging, GetMats class is expected. From the given caller object, Charging expects materials.Materials given by get_mats() method.
+            The calling object. In the case of the class Charging, GetMats class is expected. From the given caller object, Charging expects materials.Materials passed by get_mats() method.
         """
         super().__init__(caller=caller, flow_sheet=flow_sheet, operation_seq=operation_seq, num_subitems=num_subitems, edit_comment=edit_comment)
         # self.mats_data: mats.Materials = GetMats(self.caller).get_mats() #なんかやだからキャストする。
@@ -177,31 +177,22 @@ class Charging(uo.UnitOperation, uo_name=defs.tag_uo_charging):
 
         for temp_inpt in self.inputs:
             self.flow_sheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
-                                    #  method=temp_inpt.method,
                                      method=lang_dict_chgng_specif[temp_inpt.method],
                                      content=temp_inpt.material_name,
-                                    #  record=defs.part_flow_chgng_rec_lot_jp,
                                      record=lang_dict_chgng_specif[tag_part_rec_lot],
-                                    #  operator=defs.part_flow_cmn_sign,
                                      operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
-                                    #  witness=defs.part_flow_cmn_sign,
                                      witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
 
             #line-2: QTY instruction and record
-            # str_qty = f'{temp_inpt.qty_kg}±{temp_inpt.error_kg} kg'
             str_qty = lang_dict_instr_stcs[tag_stc_qty].format(qty=temp_inpt.qty_kg, err=temp_inpt.error_kg)
-            #self.flow_sheet.put_line(content=str_qty, record=defs.part_flow_chgng_rec_input_jp)
             self.flow_sheet.put_line(content=str_qty, record=lang_dict_chgng_specif[tag_part_rec_input])
 
             #For liquid only, flex ID 
             if (temp_inpt.method == method_liq or
                 temp_inpt.method == method_press or
                 temp_inpt.method == method_shower):
-                self.flow_sheet.put_line(#record=defs.part_flow_chgng_rec_hose_jp,
-                                         record=lang_dict_chgng_specif[tag_part_rec_hose],
-                                         #operator=defs.part_flow_cmn_sign,
+                self.flow_sheet.put_line(record=lang_dict_chgng_specif[tag_part_rec_hose],
                                          operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
-                                         #witness=defs.part_flow_cmn_sign
                                          witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
             
             #for both liq and solid; temp and time control.
@@ -246,70 +237,46 @@ class Charging(uo.UnitOperation, uo_name=defs.tag_uo_charging):
     def __put_time_control(self, input: Input=None):
         sentence_instruction: str = ''
         if (input.time_control == timectrl_min):
-            # sentence_instruction = f'*滴下時間{input.time_min}以上'
             sentence_instruction = lang_dict_instr_stcs[tag_stc_time_min].format(min=input.time_min)
 
         elif (input.time_control == timectrl_max):
-            # sentence_instruction = f'*滴下時間{input.time_max}以内'
             sentence_instruction = lang_dict_instr_stcs[tag_stc_time_max].format(max=input.time_max)
 
         elif (input.time_control == timectrl_min_max):
-            # sentence_instruction = f'*滴下時間{input.time_min}～{input.time_max}以内'
             sentence_instruction = lang_dict_instr_stcs[tag_stc_time_min_max].format(min=input.time_min, max=input.time_max)
         
-        self.flow_sheet.put_line(#time=defs.part_flow_cmn_time,
-                                time=lang_dict_cmn[tag_flow_cmn_rec_time],
-                                #method=defs.part_flow_chgng_instr_ini_jp,
+        self.flow_sheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
                                 method=lang_dict_chgng_specif[tag_part_instr_ini],
                                 content=sentence_instruction,
-                                #operator=defs.part_flow_cmn_sign,
                                 operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
                                 witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
 
 
     def __put_temp_control(self, input: Input=None):
         if input.temp_control == temprctrl_min:
-            # sentence = "仕込み中内温"+str(input.temp_min)+"℃以上"
             sentence = lang_dict_instr_stcs[tag_stc_temp_min].format(min=input.temp_min)
-            # self.flow_sheet.put_line(content=sentence, record=defs.part_flow_chgng_rec_temprini_jp)
             self.flow_sheet.put_line(content=sentence, record=lang_dict_chgng_specif[tag_part_rec_temprini])
-            # self.flow_sheet.put_line(record=defs.part_flow_chgng_temprmin_jp)
             self.flow_sheet.put_line(record=lang_dict_chgng_specif[tag_part_rec_temprmin])
-            # self.flow_sheet.put_line(record=defs.part_flow_chgng_temprend_jp)
             self.flow_sheet.put_line(record=lang_dict_chgng_specif[tag_part_rec_temprend])
 
         elif input.temp_control == temprctrl_max:
-            # sentence = "仕込み中内温"+str(input.temp_max)+"℃以下"
             sentence = lang_dict_instr_stcs[tag_stc_temp_max].format(max=input.temp_max)
-            # self.flow_sheet.put_line(content=sentence, record=defs.part_flow_chgng_rec_temprini_jp)
             self.flow_sheet.put_line(content=sentence, record=lang_dict_chgng_specif[tag_part_rec_temprini])
-            # self.flow_sheet.put_line(record=defs.part_flow_chgng_temprmax_jp)
             self.flow_sheet.put_line(record=lang_dict_chgng_specif[tag_part_rec_temprmax])
-            # self.flow_sheet.put_line(record=defs.part_flow_chgng_temprend_jp)
             self.flow_sheet.put_line(record=lang_dict_chgng_specif[tag_part_rec_temprend])
 
         elif input.temp_control == temprctrl_min_max:
-            # sentence = "仕込み中内温"+str(input.temp_min)+'～'+str(input.temp_max)+"℃"
             sentence = lang_dict_instr_stcs[tag_stc_temp_min_max].format(min=input.temp_min, max=input.temp_max)
-            # self.flow_sheet.put_line(content=sentence, record=defs.part_flow_chgng_rec_temprini_jp)
             self.flow_sheet.put_line(content=sentence, record=lang_dict_chgng_specif[tag_part_rec_temprini])
-            # self.flow_sheet.put_line(record=defs.part_flow_chgng_temprmin_jp)
             self.flow_sheet.put_line(record=lang_dict_chgng_specif[tag_part_rec_temprmin])
-            # self.flow_sheet.put_line(record=defs.part_flow_chgng_temprmax_jp)
             self.flow_sheet.put_line(record=lang_dict_chgng_specif[tag_part_rec_temprmax])
-            # self.flow_sheet.put_line(record=defs.part_flow_chgng_temprend_jp)
             self.flow_sheet.put_line(record=lang_dict_chgng_specif[tag_part_rec_temprend])
 
     def __put_end_of_dosing(self):
-            self.flow_sheet.put_line(#time=defs.part_flow_cmn_time,
-                                     time=lang_dict_cmn[tag_flow_cmn_rec_time],
-                                    #  method=defs.part_flow_chgng_instr_end_jp,
+            self.flow_sheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
                                      method=lang_dict_chgng_specif[tag_part_instr_end],
-                                    #  record=defs.part_flow_chgng_cmpltd_jp,
                                      record=lang_dict_chgng_specif[tag_part_rec_cmpltd],
-                                    #  operator=defs.part_flow_cmn_sign,
                                      operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
-                                    #  witness=defs.part_flow_cmn_sign)
                                     witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
 
 class Input:
@@ -444,8 +411,6 @@ class Input:
         self.metrics_unit = opt_mtrcs_vol
         self.metrics_val = 1.0
         self.error_pct = 5.0
-        #self.qty_kg = None
-        #self.error_kg = None
         self.method = method_liq
         self.time_control = timectrl_min
         self.time_min = '1h'
@@ -460,8 +425,6 @@ class Input:
         self.metrics_unit = opt_mtrcs_eq
         self.metrics_val = 2.0
         self.error_pct = 5.0
-        #self.qty_kg = None
-        #self.error_kg = None
         self.method = method_pow
         self.time_control = timectrl_none
         self.time_min = None
