@@ -42,7 +42,11 @@ class Process(GetMats):
         """
         self.project_name:str = project_name
         self.process_name:str = process_name
-        self.num_uo:int = num_uo
+        self.num_uo:int = None
+        if(num_uo is not None):
+            self.num_uo = num_uo
+        else:
+            self.num_uo = 1
         self.data_input = proc_io.ProcessIO(project_name=project_name, process_name=process_name, num_unit_op=num_uo)
         # self.data_input.generate_proc_summary_form(unitop.list_unit_ops) #TODO Dont forget to give him a list of unitops!
         # self.data_input.generate_mats_form()

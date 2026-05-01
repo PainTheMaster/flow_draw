@@ -48,15 +48,17 @@ class SaltyWaterFlow(unittest.TestCase):
 
     
     def test0001_Project(self):
-        proj_name = "flowtest000"
+        wrong_proj_name = "wrong_proj_name"
+        right_proj_name = "right_proj_name"
         proc_name = "salt_water"
         test_proj = proj.Project()
-        test_proj.proj_name = proj_name
+        test_proj.proj_name = wrong_proj_name
         test_proj.num_procs = 1
-        test_proj.prep_process(prep_test_df(proj_name="wrong_proj_name", proc_name=proc_name, num_uo=1))
+        test_df = prep_test_df(proj_name=right_proj_name, proc_name=proc_name, num_uo=1)
+        test_proj.load_outline(test_df)
         test_proc = test_proj.list_proc[0]
-        result:bool = ((len(test_proj.list_proc)==1) and
-                       (test_proc.project_name==proj_name) and
+        result:bool = ((test_proj.num_procs==(len(test_df)-1)/2) and
+                       (test_proc.project_name==right_proj_name) and
                        (test_proc.process_name==proc_name))
         self.assertTrue(result)
 
@@ -123,19 +125,25 @@ def SetChgngForSaltWater() -> pd.DataFrame:
 def prep_test_df(proj_name:str=None, proc_name:str=None, num_uo:int =0 )-> pd.DataFrame:
     dict0: dict[str, list[str|int]] ={0:[defs.hedr_io_proj_project_name,
                                             defs.hedr_io_proj_proC_name_stem.format(1),
-                                            defs.hedr_io_proj_proC_num_uo_stem.format(1)],
+                                            defs.hedr_io_proj_proC_num_uo_stem.format(1),
+                                            defs.hedr_io_proj_proC_name_stem.format(2),
+                                            defs.hedr_io_proj_proC_num_uo_stem.format(2)                                            ],
                                     1:[proj_name,
+                                        proc_name,
+                                        num_uo,
                                         proc_name,
                                         num_uo]}
 
     test_df = pd.DataFrame(dict0)
     print("in prep_test_df(): test_df")
     print(test_df)
-    print("==========")
+    print("==========\n")
     test_df.index = test_df[0]
     print("in prep_test_df(): test_df re-indexed")
     print(test_df)
-    print("==========")
+    print("==========\n")
+    print("len(test_df): ", len(test_df))
+    print("==========\n")
     return test_df
 
 
