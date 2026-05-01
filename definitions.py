@@ -350,6 +350,26 @@ tag_part_flow_chgng_rec_cmpltd = "tag_chgng_rec_cmpltd"
 part_flow_chgng_cmpltd_jp ='□ 仕込み実施'
 """Flowseet component for class Charging. A check box for complete charging/dosing"""
 
+tag_part_flow_chgng_mthd_liq = opt_uo_chgng_method_liq
+part_flow_chgng_mthd_liq = "液体投入口"
+"""Flowsheet component for class Charging. Charging through liquid charging port. An ption for Liquid charging."""
+
+tag_part_flow_chgng_mthd_shower = opt_uo_chgng_method_shower
+part_flow_chgng_mthd_shower = "常設シャワー"
+"""Flowsheet component for class Charging. Charging through the fixed shower. An ption for Liquid charging."""
+
+tag_part_flow_chgng_mthd_prssvesl = opt_uo_chgng_method_prssvesl
+part_flow_chgng_mthd_prssvesl = "圧送容器"
+"""Flowsheet component for class Charging. Charging from a pressure vessel. An ption for Liquid charging."""
+
+tag_part_flow_chgng_mthd_pwdr = opt_uo_chgng_method_pwdr
+part_flow_chgng_mthd_pwdr = "粉体投入口"
+"""Flowsheet component for class Charging. Charging through the power port. An ption for powder charging."""
+
+tag_part_flow_chgng_mthd_plchldr = opt_uo_chgng_method_method_plchldr
+part_flow_chgng_mthd_plchldr = "<Placeholder: charging method>"
+"""Flowsheet component for class Charging. A place holder. An ption for Liquid charging."""
+
 dict_jp_part_flow_chgng ={tag_part_flow_chgng_instr_ini : part_flow_chgng_instr_ini_jp,
                          tag_part_flow_chgng_instr_end : part_flow_chgng_instr_end_jp,
                          tag_part_flow_chgng_rec_input : part_flow_chgng_rec_input_jp,
@@ -359,8 +379,13 @@ dict_jp_part_flow_chgng ={tag_part_flow_chgng_instr_ini : part_flow_chgng_instr_
                          tag_part_flow_chgng_rec_temprmax : part_flow_chgng_temprmax_jp,
                          tag_part_flow_chgng_rec_temprmin : part_flow_chgng_temprmin_jp,
                          tag_part_flow_chgng_rec_temprend : part_flow_chgng_temprend_jp,
-                         tag_part_flow_chgng_rec_cmpltd : part_flow_chgng_cmpltd_jp
-                         }
+                         tag_part_flow_chgng_rec_cmpltd : part_flow_chgng_cmpltd_jp,
+                         tag_part_flow_chgng_mthd_liq : part_flow_chgng_mthd_liq,
+                         tag_part_flow_chgng_mthd_shower : part_flow_chgng_mthd_shower,
+                         tag_part_flow_chgng_mthd_prssvesl : part_flow_chgng_mthd_prssvesl,
+                         tag_part_flow_chgng_mthd_pwdr : part_flow_chgng_mthd_pwdr,
+                         tag_part_flow_chgng_mthd_plchldr : part_flow_chgng_mthd_plchldr}
+
 
 tag_stc_flow_chgng_qty = "tag_stc_qty"
 stc_flow_chgng_qty_err_jp = '{qty}±{err} kg'

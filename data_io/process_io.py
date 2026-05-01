@@ -284,7 +284,7 @@ class ProcessIO:
         mats_this_proc = mats.Materials(df)
         return mats_this_proc
     
-    def put_detail_input_table(self, seq: int, specif_header: list[str], menu_dict: dict[str, list[str]]):
+    def generate_proc_detail_form(self, seq: int, specif_header: list[str], menu_dict: dict[str, list[str]]):
         """
         Makes a detail input table for one unit operation.
         Prepares options for drop-down list(s) called "data validation".

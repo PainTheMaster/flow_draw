@@ -79,7 +79,6 @@ tag_flow_cmn_rec_sign : part_flow_cmn_rec_sign_jp
 """
 
 #Tags for translation of UO-specific parts
-tag_part_title = defs.tag_part_flow_chgng_title
 tag_part_instr_ini = defs.tag_part_flow_chgng_instr_ini
 tag_part_instr_end = defs.tag_part_flow_chgng_instr_end
 tag_part_rec_input = defs.tag_part_flow_chgng_rec_input
@@ -171,6 +170,7 @@ class Charging(uo.UnitOperation, uo_name=defs.tag_uo_charging):
             self.input_count += 1
 
     def output_unit_operation(self):
+        #TODO Leave explanatory comments here.
         self.flow_sheet.header_organizer(op_nr=self.operation_seq, title=lang_dict_uo_titles[self.uo_name])
         if not (self.pre_comment == None or self.pre_comment == ''):
             self.flow_sheet.put_body_comments(self.pre_comment)
@@ -181,7 +181,7 @@ class Charging(uo.UnitOperation, uo_name=defs.tag_uo_charging):
                                      method=lang_dict_chgng_specif[temp_inpt.method],
                                      content=temp_inpt.material_name,
                                     #  record=defs.part_flow_chgng_rec_lot_jp,
-                                     record=lang_dict_cmn[tag_part_rec_lot],
+                                     record=lang_dict_chgng_specif[tag_part_rec_lot],
                                     #  operator=defs.part_flow_cmn_sign,
                                      operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
                                     #  witness=defs.part_flow_cmn_sign,
@@ -432,7 +432,7 @@ class Input:
             self.time_min = ser[hedr_time_min]
         if self.time_control == timectrl_max or self.time_control == timectrl_min_max:
             self.time_max = ser[hedr_time_max]
-        self.temp_control = ser[hedr_temp_min]
+        self.temp_control = ser[hedr_temp_control]
         if self.temp_control == temprctrl_min or self.temp_control == temprctrl_min_max:
             self.temp_min = ser[hedr_temp_min]
         if self.temp_control == temprctrl_max or self.temp_control == temprctrl_min_max:

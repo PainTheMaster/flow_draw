@@ -117,10 +117,10 @@ class Materials:
             raise ValueError(f"{self.__class__.__name__}.to_kilogram(): No density is assigned to the material \"{material_name}\".")
         kg_this = 0.0
         if equiv is not None:
-            mol_this = self.sm_mol * equiv
+            mol_this = self.mol_main_mat * equiv
             kg_this = mol_this * mw_this / (conc_assay_this/100.0) / 1000.0
         elif vol_per_weight is not None:
-            liq_volume_this = self.sm_kg * vol_per_weight #unit = L
+            liq_volume_this = self.kg_main_mat * vol_per_weight #unit = L
             kg_this = liq_volume_this * density_this / (conc_assay_this/100.0)
         else:
             raise ValueError(f"{self.__class__.__name__}.to_kilogram(): Both equiv:float and vol_per_weight:folat arguments are \"None\". Either must be given.")
