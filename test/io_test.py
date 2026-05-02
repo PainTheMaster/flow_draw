@@ -10,9 +10,9 @@ import flow_draw.batch.process.unit_operations.charging as charging
 
 class TestIO(unittest.TestCase):
     def setUp(self):
-        self.project_name = "test_project_0000"
+        self.batch_name = "test_batch_0000"
         self.process_name = "test_process"
-        self.test_proc_io = proc_io.ProcessIO(project_name=self.project_name, process_name=self.process_name, num_unit_op=1)
+        self.test_proc_io = proc_io.ProcessIO(batch_name=self.batch_name, process_name=self.process_name, num_unit_op=1)
         self.test_proc_io.generate_proc_summary_form(uos.unit_operation.list_unit_ops)
         self.test_proc_io.generate_mats_form()
         self.test_proc_io.save_form()    
@@ -67,19 +67,19 @@ class TestIO(unittest.TestCase):
 
     def test_0001_input_generation(self):
         """Checks if the right input excel form is generated. The form generators for summary d materials are called in self.setUp()"""
-        print("expected filename: ", self.project_name+defs.src_io_filebasename+".xlsx")
-        self.assertTrue(os.path.isfile(self.project_name+defs.src_io_filebasename+".xlsx"))
+        print("expected filename: ", self.batch_name+defs.src_io_filebasename+".xlsx")
+        self.assertTrue(os.path.isfile(self.batch_name+defs.src_io_filebasename+".xlsx"))
     
     def test_0002_uo_deriv_name_registr(self):
         """
-        Checks if the name of each unit operation class is registerd. The registry is located in the module project.process.unit_operations.unit_operation.
+        Checks if the name of each unit operation class is registerd. The registry is located in the module batch.process.unit_operations.unit_operation.
         The registration takes place when the class (not an instance) is generated.
         """
         self.assertIn(member=defs.tag_uo_charging, container=uos.unit_operation.list_unit_ops)
 
     def test_0003_uo_deriv_class_registr(self):
         """
-        Checks if each sort of unit operation class is registerd. The registry is located in the module project.process.unit_operations.unit_operation.
+        Checks if each sort of unit operation class is registerd. The registry is located in the module batch.process.unit_operations.unit_operation.
         The registration takes place when the class (not an instance) is generated.
         """
         self.assertIn(member=charging.Charging, container=uos.unit_operation.registry_uo_cls.values())
@@ -105,14 +105,14 @@ class TestIO(unittest.TestCase):
 
 class TestForProcessCls(unittest.TestCase):
     def setUp(self):
-        self.project_name = "test_project_1000"
+        self.batch_name = "test_batch_1000"
         self.process_name = "test_process"
         self.num_uo = 2
-        self.test_process = proc.Process(project_name=self.project_name, process_name=self.process_name, num_uo=self.num_uo)
+        self.test_process = proc.Process(batch_name=self.batch_name, process_name=self.process_name, num_uo=self.num_uo)
         self.test_process.put_summary_mats_input_form()
 
 
-        # self.test_proc_io = proc_io.ProcessIO(project_name=self.project_name, process_name=self.process_name, num_unit_op=1)
+        # self.test_proc_io = proc_io.ProcessIO(batch_name=self.batch_name, process_name=self.process_name, num_unit_op=1)
         # self.test_proc_io.generate_proc_summary_form(uos.unit_operation.list_unit_ops)
         # self.test_proc_io.generate_mats_form()
         # self.test_proc_io.save_form()    
@@ -173,7 +173,7 @@ class TestForProcessCls(unittest.TestCase):
 
     def test_1000_proc_generated(self):
         tp = self.test_process
-        check_result = ((tp.project_name == self.project_name) and
+        check_result = ((tp.batch_name == self.batch_name) and
                         (tp.process_name == self.process_name) and
                         (tp.num_uo == self.num_uo))
         self.assertTrue(check_result)

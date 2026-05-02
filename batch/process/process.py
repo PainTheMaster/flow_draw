@@ -2,7 +2,7 @@
 import pandas as pd
 import flow_draw.definitions as defs
 from flow_draw.batch.process.unit_operations import unit_operation
-#from flow_draw.project.process.unit_operations.unit_operation import UnitOperation as unitop
+#from flow_draw.batch.process.unit_operations.unit_operation import UnitOperation as unitop
 from flow_draw.batch.process.unit_operations import unit_operation as unitop
 from flow_draw.data_io import process_io as proc_io
 from flow_draw.data_io import flowsheet as fsht
@@ -22,12 +22,12 @@ class Process(GetMats):
         Number of unit operations
     data_input: flow_draw.data_io.InputForm
         Data input form. This class manages process data input. The object holds the path to an input form (Excel file), creates it, load the data. The name of the input form is associated with the process name. 
-    list_uo: List[flow_draw.project.process.unit_operations.UnitOperation]
+    list_uo: List[flow_draw.batch.process.unit_operations.UnitOperation]
         A list of unit operations that constitute the process. The sequence in this list is identical to that on the flowsheet in the real world.
     flowsheet: flow_draw.flow_output.Flowsheet
         A Flowsheet object that manages the flowsheet output.
     """
-    def __init__(self, project_name:str, process_name:str, num_uo: int):
+    def __init__(self, batch_name:str, process_name:str, num_uo: int, comment: str):
         """
         Patameters
         --------------
@@ -40,14 +40,15 @@ class Process(GetMats):
         --------------
         None
         """
-        self.project_name:str = project_name
+        self.batch_name:str = batch_name
         self.process_name:str = process_name
         self.num_uo:int = None
         if(num_uo is not None):
             self.num_uo = num_uo
         else:
             self.num_uo = 1
-        self.data_input = proc_io.ProcessIO(project_name=project_name, process_name=process_name, num_unit_op=num_uo)
+        self.comment: str = comment
+        self.data_input: proc_io.ProcessIO = proc_io.ProcessIO(batch_name=batch_name, process_name=process_name, num_unit_op=num_uo)
         # self.data_input.generate_proc_summary_form(unitop.list_unit_ops) #TODO Dont forget to give him a list of unitops!
         # self.data_input.generate_mats_form()
         # self.data_input.save_form()
@@ -139,7 +140,7 @@ class Process(GetMats):
 
     def load_materials_data(self):
         """
-        Reads the input Excel form (material worksheet) and loads data from it. This method is intended to be called by a method belonging to the class Project.
+        Reads the input Excel form (material worksheet) and loads data from it. This method is intended to be called by a method belonging to the class Batch.
         The acquired data is stored at self.mats_data. Hence, the method returns no value.
 
         Parameters
@@ -157,7 +158,7 @@ class Process(GetMats):
     #TODO Load the process detail\
     def load_unitop_detail(self):
         """
-        Expected to be triggered by the Project class, this function loads unit operation details from self.data_input.
+        Expected to be triggered by the Batch class, this function loads unit operation details from self.data_input.
         Then, passes the details to the each unit operation objec that constitutes the process.
 
         Parameters

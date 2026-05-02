@@ -131,27 +131,36 @@ dict_jp_part_uo_titles = {tag_uo_line_clearance : part_uo_title_clearance_jp,
 
 
 ################################################################
-#              PARTS FOR PROJECT OUTLINE WORKSHEET             #
+#               PARTS FOR BATCH  OUTLINE WORKSHEET             #
 ################################################################
 
 #>>>>>>>>>>>>>>>>>> file and sheet name <<<<<<<<<<<<<<<<<<<<#
-src_io_proj_input_file_name = "project_outline.xlsx"
-src_io_proj_outline_ws = "project outline"
-"""Worksheet name for the project outline"""
+src_io_batch_input_file_name:str = "batch_outline.xlsx"
+src_io_batch_outline_ws:str = "batch outline"
+"""Worksheet name for the batch outline"""
 
 
-#>>>>>>>>>>>>>>>>>> header items for project and some process summary <<<<<<<<<<<<<<<<<<#
-hedr_io_proj_project_name = 'Project Name'
-"""Header item for the project name"""
-hedr_io_proj_proC_name_stem = 'Name, Process-{}'
-"""Header stem for PROCESS steps. The numbers 1, 2, 3... follow for each step."""
-hedr_io_proj_proC_num_uo_stem = 'Nr Subitems, Process-{}'
-"""Header stem for the numbers of PROCESS sub-items. The numbers 1, 2, 3 follow for each step"""
+#>>>>>>>>>>>>>>>>>> header items for batch and some process summary <<<<<<<<<<<<<<<<<<#
+hedr_io_batch_item:str ='Item'
+"""Header for the item column in the batch outline table"""
+hedr_io_batch_value:str='Value'
+"""Header for the value column in the batch outline table"""
+item_io_batch_batch_name:str = 'Batch Name'
+"""Item for the batch name"""
+item_io_batch_batch_remark:str = 'Remark for batch' #TODO Please be sure to keep the comment in the class instance.
+"""Item for the batch comment"""
+item_io_batch_proc_name_stem:str = 'Name, Process-{}'
+"""Item for the name of each process. The numbers 1, 2, 3... follow for each step."""
+item_io_batch_proc_count_uo_stem:str = 'Count Subitems, Process-{}'
+"""Item stem for the count of each process sub-items. The numbers 1, 2, 3 follow for each step"""
+item_io_batch_proc_remark_stem:str = 'Remark, Process-{}' #TODO Please be sure to keep the comment in the class instance.
+"""Ietm stem for the comment of each process. The numbers 1, 2, 3 follow for each step"""
+
 
 #>>>>>>>>>>>>>>>>>> table schema of the process outline worksheet<<<<<<<<<<<<<<<<<<#
-col_nr_io_proj_items: int = 0
+row_hedr_io_batch_ouln_tab:int = 0
 """Column number for the items in the table"""
-col_nr_io_proj_values: int = 1
+col_item_io_batch_ouln_tab:int = 0
 """Column number for the items in the table"""
 
 ################################################################
@@ -162,13 +171,10 @@ col_nr_io_proj_values: int = 1
 
 src_io_filebasename = "_process_input"
 """Base name for process input Excel file"""
-
 src_io_sfx_sumry_ws = "_summary"
 """suffix for summary input worksheet (tab)"""
-
 src_io_sfx_mats_ws:str = "_materials"
 """Suffix for raw material information input worksheet"""
-
 src_io_sfx_detail_ws = "_detail"
 """suffix for detail input worksheet (tab)"""
 

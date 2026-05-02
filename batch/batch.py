@@ -3,16 +3,23 @@ import pandas as pd
 import flow_draw.definitions as defs
 import flow_draw.batch.process.process as proc
 
-hedr_project_name: str = defs.hedr_io_proj_project_name
-hedr_proC_name_stem: str = defs.hedr_io_proj_proC_name_stem
-hedr_proC_num_uo_stem: str = defs.hedr_io_proj_proC_num_uo_stem
-df_col_nr_items: int = defs.col_nr_io_proj_items
-df_col_nr_values: int = defs.col_nr_io_proj_values
-df_max_proc_search: int = 100
+item_batch_name: str = defs.item_io_batch_batch_name
+item_batch_comment: str = defs.item_io_batch_batch_remark
+item_proc_name_stem: str = defs.item_io_batch_proc_name_stem
+item_proc_num_uo_stem: str = defs.item_io_batch_proc_count_uo_stem
+item_proc_comment_stem: str = defs.item_io_batch_proc_remark_stem
+# df_col_nr_items: int = defs.col_label_io_batch_items
+# df_col_nr_values: int = defs.col_label_io_batch_values
+col_item = defs.hedr_io_batch_item
+col_val = defs.hedr_io_batch_value
 
-class Project:
+
+max_search_proc_df: int = 100
+
+class Batch:
     def __init__(self):
-        self.proj_name: str = None
+        self.batch_name: str = None
+        self.batch_comment: str = None
         self.num_procs: int = None
         self.list_proc: list[proc.Process]=[]
         
@@ -20,7 +27,7 @@ class Project:
     #TODO please implement me!
     def load_process_summary(self):
         """
-        Lets each process constituting the project load the summary data from a ProcessIO object.
+        Lets each process constituting the batch load the summary data from a ProcessIO object.
 
         Parameters
         ------------
@@ -34,32 +41,37 @@ class Project:
             proc.load_uo_summary()
 
 
-    def load_outline(self, df_proj_outline: pd.DataFrame):
-        self.proj_name = str(df_proj_outline.loc[hedr_project_name, df_col_nr_values])
+    def load_outline(self, df_batch_outline: pd.DataFrame):
+        self.batch_name = str(df_batch_outline.at[item_batch_name, col_val])
+        self.batch_comment = df_batch_outline.at[item_batch_comment, col_val]
+        if pd.isna(self.batch_comment):
+            self.batch_comment = None
         self.list_proc = []
-        # for i in range(self.num_procs):
-        #     temp_item_name = hedr_proC_name_stem.format(i+1)
-        #     temp_item_num_subitems = hedr_proC_num_uo_stem.format(i+1)
-        #     temp_proc_name:str = str(df_proj_outline.loc[temp_item_name, df_col_nr_values])
-        #     temp_num_uo:int = int(df_proj_outline.loc[temp_item_num_subitems, df_col_nr_values])
-        #     new_proc = proc.Process(project_name=self.proj_name, process_name=temp_proc_name, num_uo=temp_num_uo)
-        #     self.list_proc.append(new_proc)
-        for i in range(df_max_proc_search):
-            temp_item_proc_name = hedr_proC_name_stem.format(i+1)
-            temp_item_num_uo = hedr_proC_num_uo_stem.format(i+1)
-            # unk = df_proj_outline[df_col_nr_values]
-            if df_proj_outline[df_col_nr_items].isin([temp_item_proc_name]).any():
-                proc_name = df_proj_outline.loc[temp_item_proc_name, df_col_nr_values]
-                if (df_proj_outline[df_col_nr_items].isin([temp_item_num_uo]).any() and
-                    not math.isnan(df_proj_outline.loc[temp_item_num_uo, df_col_nr_values])):
-                    num_uo = df_proj_outline.loc[temp_item_num_uo, df_col_nr_values]
+        for i in range(max_search_proc_df):
+            temp_item_proc_name = item_proc_name_stem.format(i+1)
+            temp_item_num_uo = item_proc_num_uo_stem.format(i+1)
+            temp_item_comment_uo = item_proc_comment_stem.format(i+1)
+            # if df_batch_outline[hedr_item].isin([temp_item_proc_name]).any():
+            # if (df_batch_outline[col_item].isin([temp_item_proc_name]).any() and
+            if (temp_item_proc_name in df_batch_outline.index and
+                not pd.isna(df_batch_outline.at[temp_item_proc_name, col_val])):
+                proc_name = df_batch_outline.at[temp_item_proc_name, col_val]
+                if (temp_item_num_uo in df_batch_outline.index and 
+                    not pd.isna(df_batch_outline.at[temp_item_num_uo, col_val])):
+                    num_uo = int(df_batch_outline.at[temp_item_num_uo, col_val])
                 else:
                     num_uo = None 
                     """
-                    When the field for the num of unit operations is not found or when it's brank. The process contineus anyway to allow some flexibility.
-                    Anyway, the fact shall be clear and the subsequent data process shall be aware of that and put some assumption.
+                    It is possible that the field for the num of unit operations is not found or is brank evne though the subsequent processing is needed.
+                    The program allows the user to carry on for some flexibility.
+                    The fact shall be kept clear and the subsequent data process shall be aware of that and put some assumption.
                     """
-                new_proc = proc.Process(project_name=self.proj_name, process_name=proc_name, num_uo=num_uo)
+                temp_comment_uo:str = None
+                if (temp_item_comment_uo in df_batch_outline.index and
+                    not pd.isna(df_batch_outline.at[temp_item_comment_uo, col_val])):
+                    temp_comment_uo = df_batch_outline.at[temp_item_comment_uo, col_val]
+
+                new_proc = proc.Process(batch_name=self.batch_name, process_name=proc_name, num_uo=num_uo, comment=temp_comment_uo)
                 self.list_proc.append(new_proc)
             else:
                 break

@@ -9,29 +9,12 @@ import os
 
 class SaltyWaterFlow(unittest.TestCase):
     def setUp(self):
-        # test_proc = proc.Process(project_name="flowtest000",process_name="salt water",num=1)
-        # test_proc = proc.Process.__new__(proc.Process)
-        # test_proc.project_name="flowtest000"
-        # test_proc.process_name="salt water"
-        # test_proc.num_uo = 1
-        # test_proc.mats_data = mats.Materials(PrepSaltAndWater)
-        # proj_name = "flowtest000"
-        # proc_name = "salt_water"
-        # tst_proc = proc.Process(process_name=proj_name, proc_name=proc_name,num_uo=1)
-        # tst_proc.mats_data = mats.Materials(df_mats=PurchaseMaterials())
-        # tst_chgng = chgng.Charging(caller=tst_proc,
-        #                            flow_sheet=tst_proc.flowsheet,
-        #                            operation_seq=1,
-        #                            num_subitems=2,
-        #                            edit_comment="put salt and water")
-        # tst_proc.list_uo.append(tst_chgng)
-        # tst_proc.list_uo[0].load_params_from_df(SetInputData)
         return super().setUp()
     
     def test0000_OutputFlow(self):
-        proj_name = "flowtest000"
+        batch_name = "flowtest000"
         proc_name = "salt_water"
-        tst_proc = proc.Process(project_name=proj_name, process_name=proc_name,num_uo=1)
+        tst_proc = proc.Process(batch_name=batch_name, process_name=proc_name,num_uo=1, comment="comment for proc")
         tst_proc.mats_data = mats.Materials(df_mats=PurchaseMaterials())
         tst_chgng = chgng.Charging(caller=tst_proc,
                                     flow_sheet=tst_proc.flowsheet,
@@ -47,19 +30,21 @@ class SaltyWaterFlow(unittest.TestCase):
 
 
     
-    def test0001_Project(self):
-        wrong_proj_name = "wrong_proj_name"
-        right_proj_name = "right_proj_name"
+    def test0001_Batch(self):
+        wrong_batch_name = "wrong_batch_name"
+        right_batch_name = "right_batch_name"
         proc_name = "salt_water"
-        test_proj = batch.Project()
-        test_proj.proj_name = wrong_proj_name
-        test_proj.num_procs = 1
-        test_df = prep_test_df(proj_name=right_proj_name, proc_name=proc_name, num_uo=1)
-        test_proj.load_outline(test_df)
-        test_proc = test_proj.list_proc[0]
-        result:bool = ((test_proj.num_procs==(len(test_df)-1)/2) and
-                       (test_proc.project_name==right_proj_name) and
-                       (test_proc.process_name==proc_name))
+        test_batch = batch.Batch()
+        test_batch.batch_name = wrong_batch_name
+        test_batch.num_procs = 3
+        test_df = prep_test_df(batch_name=right_batch_name, proc_name=proc_name, num_uo=1)
+        test_batch.load_outline(test_df)
+        sample_proc = test_batch.list_proc[0]
+        result:bool = ((test_batch.batch_comment=="Batch comment") and
+                       (test_batch.num_procs==1) and
+                       (len(test_batch.list_proc)==1) and
+                       (sample_proc.batch_name==right_batch_name) and
+                       (sample_proc.process_name==proc_name))
         self.assertTrue(result)
 
 
@@ -122,28 +107,35 @@ def SetChgngForSaltWater() -> pd.DataFrame:
     return df_input
 
 
-def prep_test_df(proj_name:str=None, proc_name:str=None, num_uo:int =0 )-> pd.DataFrame:
-    dict0: dict[str, list[str|int]] ={0:[defs.hedr_io_proj_project_name,
-                                            defs.hedr_io_proj_proC_name_stem.format(1),
-                                            defs.hedr_io_proj_proC_num_uo_stem.format(1),
-                                            defs.hedr_io_proj_proC_name_stem.format(2),
-                                            defs.hedr_io_proj_proC_num_uo_stem.format(2)                                            ],
-                                    1:[proj_name,
-                                        proc_name,
-                                        num_uo,
-                                        proc_name,
-                                        num_uo]}
+def prep_test_df(batch_name:str=None, proc_name:str=None, num_uo:int =0)-> pd.DataFrame:
+    dict0: dict[str, list[str|int]] ={defs.hedr_io_batch_value:[batch_name,
+                                    "Batch comment",
+                                    proc_name,
+                                    num_uo,
+                                    "Remark for process-1",
+                                    None,
+                                    num_uo,
+                                    "Remark for process-2"]}
+    
+    idx=[defs.item_io_batch_batch_name,
+        defs.item_io_batch_batch_remark,
+        defs.item_io_batch_proc_name_stem.format(1),
+        defs.item_io_batch_proc_count_uo_stem.format(1),
+        defs.item_io_batch_proc_remark_stem.format(1),
+        defs.item_io_batch_proc_name_stem.format(2),
+        defs.item_io_batch_proc_count_uo_stem.format(2),
+        defs.item_io_batch_proc_remark_stem.format(2)]
 
-    test_df = pd.DataFrame(dict0)
+    test_df = pd.DataFrame(dict0, index=idx)
     print("in prep_test_df(): test_df")
     print(test_df)
     print("==========\n")
-    test_df.index = test_df[0]
-    print("in prep_test_df(): test_df re-indexed")
-    print(test_df)
-    print("==========\n")
-    print("len(test_df): ", len(test_df))
-    print("==========\n")
+    # test_df.index = test_df[0]
+    # print("in prep_test_df(): test_df re-indexed")
+    # print(test_df)
+    # print("==========\n")
+    # print("len(test_df): ", len(test_df))
+    # print("==========\n")
     return test_df
 
 

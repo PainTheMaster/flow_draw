@@ -65,24 +65,24 @@ class ProcessIO:
 
 
     """
-    def __init__(self, project_name: str, process_name: str, num_unit_op: int):
+    def __init__(self, batch_name: str, process_name: str, num_unit_op: int):
         """
         Sets the necessary parameters as follows:\n
-            -project name
+            -batch name
             -process name
             -unit operation number
             -file path to the input file
             -worksheet titles for summary and detail in the file
             -current reading line of summary and detail
-        The file name is automatically set as &lt;project name&gt;+&lt;base name="_process_input"&gt;+".xlsx".
+        The file name is automatically set as &lt;batch name&gt;+&lt;base name="_process_input"&gt;+".xlsx".
         In a similar manner, the worksheet are named after process name (&lt;process name&gt;+&lt;suffix&gt;).
-        Please note that only one file is created to gather process and raw materials information for one project. The sole file has sets of worksheets (materials + process summary + process details) to cover all processes. 
+        Please note that only one file is created to gather process and raw materials information for one batch. The sole file has sets of worksheets (materials + process summary + process details) to cover all processes. 
         self.__manage_io() is called to newly create the file and worksheets if they don't exist. Otherwise, existing data is loaded.
 
         Parameters
         ------------
-        project_name: str
-            The project name.
+        batch_name: str
+            The batch name.
         
         process_name: str
             The process name.
@@ -90,15 +90,15 @@ class ProcessIO:
         num_unit_op: int
             The number of the unit operations constituting the process.
         """
-        self.project_name: str = project_name
+        self.batch_name: str = batch_name
         self.process_name: str = process_name
         self.num_unit_op: int = num_unit_op
-        self.file_path = project_name+inputfile_base_name+'.xlsx'
+        self.file_path = batch_name+inputfile_base_name+'.xlsx'
         self.title_summary_ws: str = process_name+suffix_summary_input_ws
         self.summary_ws: Worksheet = None
         self.title_mats_ws: str = process_name+suffix_mats_input_ws
         self.mats_ws: Worksheet = None
-        self.title_detail_ws: str = project_name+suffix_detail_input_ws
+        self.title_detail_ws: str = batch_name+suffix_detail_input_ws
         self.detail_ws: Worksheet = None
         self.__manage_io() #load from a file if exist, create otherwise.
         self.df_summary: pd.DataFrame = None #To be loaded later by a triger. 
