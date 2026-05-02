@@ -27,9 +27,6 @@ class SaltyWaterFlow(unittest.TestCase):
         tst_proc.flowsheet.save("test000_SaltWaterOutputFlow.xlsx")
         self.assertTrue(True)
 
-
-
-    
     def test0001_Batch(self):
         wrong_batch_name = "wrong_batch_name"
         right_batch_name = "right_batch_name"
@@ -46,6 +43,9 @@ class SaltyWaterFlow(unittest.TestCase):
                        (sample_proc.batch_name==right_batch_name) and
                        (sample_proc.process_name==proc_name))
         self.assertTrue(result)
+
+
+
 
 
 def PurchaseMaterials() -> pd.DataFrame:

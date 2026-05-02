@@ -6,8 +6,12 @@ from openpyxl.styles import Font
 ############################
 #        Parameters        #
 ############################
+#Batch IO
+dflt_io_batch_num_procs = 100
+
 #MATERIALS
-mats_default_num_rows = 100
+dflt_mats_num_rows = 100
+
 
 
 ###############################################
@@ -147,20 +151,22 @@ hedr_io_batch_value:str='Value'
 """Header for the value column in the batch outline table"""
 item_io_batch_batch_name:str = 'Batch Name'
 """Item for the batch name"""
-item_io_batch_batch_remark:str = 'Remark for batch' #TODO Please be sure to keep the comment in the class instance.
+item_io_batch_batch_remark:str = 'Remark for batch'
 """Item for the batch comment"""
 item_io_batch_proc_name_stem:str = 'Name, Process-{}'
 """Item for the name of each process. The numbers 1, 2, 3... follow for each step."""
 item_io_batch_proc_count_uo_stem:str = 'Count Subitems, Process-{}'
 """Item stem for the count of each process sub-items. The numbers 1, 2, 3 follow for each step"""
-item_io_batch_proc_remark_stem:str = 'Remark, Process-{}' #TODO Please be sure to keep the comment in the class instance.
+item_io_batch_proc_remark_stem:str = 'Remark, Process-{}' 
 """Ietm stem for the comment of each process. The numbers 1, 2, 3 follow for each step"""
 
 
 #>>>>>>>>>>>>>>>>>> table schema of the process outline worksheet<<<<<<<<<<<<<<<<<<#
-row_hedr_io_batch_ouln_tab:int = 0
+row_io_batch_hedr_ouln_tab:int = 0
 """Column number for the items in the table"""
-col_item_io_batch_ouln_tab:int = 0
+col_io_batch_item_ouln_tab:int = 0
+"""Column number for the items in the table"""
+col_io_batch_value_ouln_tab:int = 1
 """Column number for the items in the table"""
 
 ################################################################

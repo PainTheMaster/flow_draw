@@ -101,11 +101,14 @@ class ProcessIO:
         self.title_detail_ws: str = batch_name+suffix_detail_input_ws
         self.detail_ws: Worksheet = None
         self.__manage_io() #load from a file if exist, create otherwise.
+        #TODO Placing __manage_io() here is not appropriate. This shall be done just before read/write actions.
         self.df_summary: pd.DataFrame = None #To be loaded later by a triger. 
         self._current_line_summary:int = 1
         self._current_line_mats:int = 1
         self._current_line_detail:int = 1
     
+    #TODO Loading all worksheet at once is not good as it might cause dicrepancy between the data the class holds and the file holds. This method shall be dismantled.
+    """Purpose: get the workbook and worksheet ready. At the end of the method, a proper workbook and worksheet are registered as instance variables"""
     def __manage_io(self):
         """
         Creates an Open PyXL workbook for data input, and creates brank work sheets for summary and detail input, if the data input file with the intended name doesn't eixists.
@@ -178,6 +181,7 @@ class ProcessIO:
         Requires self.summary_ws: openpyxl.worksheet.worksheet.Worksheet. The worksheet must be available before this method is called. 
 
         """
+
         options_dv: str = '"'
         for item in list_unit_ops:
             options_dv += (item+',')
@@ -246,7 +250,7 @@ class ProcessIO:
         self.mats_ws.cell(row=self._current_line_mats, column=defs.col_nr_io_mats_remark).value=defs.hedr_io_mats_remark
         self.mats_ws.cell(row=self._current_line_mats, column=defs.col_nr_io_mats_remark).border = defs.xl_border_around
         self._current_line_mats += 1
-        for _ in range(defs.mats_default_num_rows):
+        for _ in range(defs.dflt_mats_num_rows):
             self.mats_ws.cell(row=self._current_line_mats, column=defs.col_nr_io_mats_mat).border = defs.xl_border_around
             self.mats_ws.cell(row=self._current_line_mats, column=defs.col_nr_io_mats_main).border = defs.xl_border_around
             dv_main.add(self.mats_ws.cell(row=self._current_line_mats, column=defs.col_nr_io_mats_main))

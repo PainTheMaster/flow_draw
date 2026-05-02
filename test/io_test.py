@@ -1,6 +1,10 @@
 import unittest
 import os
+import openpyxl as xl
+from openpyxl.worksheet.worksheet import Worksheet
 import flow_draw.definitions as defs
+import flow_draw.batch.batch as batch
+import flow_draw.data_io.batch_io as batch_io
 import flow_draw.batch.process.process as proc
 import flow_draw.data_io.process_io as proc_io
 import flow_draw.batch.process.unit_operations as uos
@@ -108,7 +112,7 @@ class TestForProcessCls(unittest.TestCase):
         self.batch_name = "test_batch_1000"
         self.process_name = "test_process"
         self.num_uo = 2
-        self.test_process = proc.Process(batch_name=self.batch_name, process_name=self.process_name, num_uo=self.num_uo)
+        self.test_process = proc.Process(batch_name=self.batch_name, process_name=self.process_name, num_uo=self.num_uo, comment="dummy comment")
         self.test_process.put_summary_mats_input_form()
 
 
@@ -260,7 +264,35 @@ class TestForProcessCls(unittest.TestCase):
         
         self.assertTrue(result_num_uos and result_proc_1 and result_proc_2 and result_mats1)
 
-        
+
+
+class TestForBatchCls(unittest.TestCase):
+    def setUp(self):
+        self.batch_input = batch_io.BatchIO()
+        self.batch_input.generate_form()
+        self.inject_test_data(self.batch_input)
+        self.batch_input.save_wb()
+        self.test_batch = batch.Batch()
+        return super().setUp()
+    
+    def test_2000_load_from_inputform(self):
+        df_outline = self.batch_input.load_outline()
+        self.test_batch.load_outline(df_batch_outline=df_outline)
+        proc = self.test_batch.list_proc[0]
+        test_result = ((self.test_batch.batch_name == "batch_test_2000") and
+                       (self.test_batch.batch_comment == "remark for test 2000") and
+                       (self.test_batch.num_procs == 1) and
+                       (proc.process_name == "P1_test2000") and
+                       (proc.num_uo == 3))
+        self.assertTrue(test_result)
+    
+    def inject_test_data(self, bio: batch_io.BatchIO):
+        ws: Worksheet = bio.ws
+        ws.cell(row=2, column=2, value="batch_test_2000")
+        ws.cell(row=3, column=2, value="remark for test 2000")
+        ws.cell(row=4, column=2, value="P1_test2000")
+        ws.cell(row=5, column=2, value=3)        
+        ws.cell(row=6, column=2, value="Remark P1 test2000")           
         
 
 
