@@ -1,6 +1,6 @@
 import pandas as pd
 import flow_draw.definitions as defs
-from flow_draw.project.process.unit_operations import unit_operation as uo
+from flow_draw.batch.process.unit_operations import unit_operation as uo
 from flow_draw.data_io import process_io
 from flow_draw.materials import materials as mats
 from flow_draw.data_io.flowsheet import Flowsheet as fsht

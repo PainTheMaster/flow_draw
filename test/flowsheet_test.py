@@ -1,9 +1,9 @@
 import unittest
 import pandas as pd
 import flow_draw.definitions as defs
-import flow_draw.project.project as proj
-import flow_draw.project.process.process as proc
-import flow_draw.project.process.unit_operations.charging as chgng
+import flow_draw.batch.batch as batch
+import flow_draw.batch.process.process as proc
+import flow_draw.batch.process.unit_operations.charging as chgng
 import flow_draw.materials.materials as mats
 import os
 
@@ -51,7 +51,7 @@ class SaltyWaterFlow(unittest.TestCase):
         wrong_proj_name = "wrong_proj_name"
         right_proj_name = "right_proj_name"
         proc_name = "salt_water"
-        test_proj = proj.Project()
+        test_proj = batch.Project()
         test_proj.proj_name = wrong_proj_name
         test_proj.num_procs = 1
         test_df = prep_test_df(proj_name=right_proj_name, proc_name=proc_name, num_uo=1)

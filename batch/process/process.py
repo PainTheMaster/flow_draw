@@ -1,9 +1,9 @@
 #from typing import List
 import pandas as pd
 import flow_draw.definitions as defs
-from flow_draw.project.process.unit_operations import unit_operation
+from flow_draw.batch.process.unit_operations import unit_operation
 #from flow_draw.project.process.unit_operations.unit_operation import UnitOperation as unitop
-from flow_draw.project.process.unit_operations import unit_operation as unitop
+from flow_draw.batch.process.unit_operations import unit_operation as unitop
 from flow_draw.data_io import process_io as proc_io
 from flow_draw.data_io import flowsheet as fsht
 from flow_draw.materials.materials import Materials as mats

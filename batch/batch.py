@@ -1,7 +1,7 @@
 import math
 import pandas as pd
 import flow_draw.definitions as defs
-import flow_draw.project.process.process as proc
+import flow_draw.batch.process.process as proc
 
 hedr_project_name: str = defs.hedr_io_proj_project_name
 hedr_proC_name_stem: str = defs.hedr_io_proj_proC_name_stem

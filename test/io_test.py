@@ -1,10 +1,10 @@
 import unittest
 import os
 import flow_draw.definitions as defs
-import flow_draw.project.process.process as proc
+import flow_draw.batch.process.process as proc
 import flow_draw.data_io.process_io as proc_io
-import flow_draw.project.process.unit_operations as uos
-import flow_draw.project.process.unit_operations.charging as charging
+import flow_draw.batch.process.unit_operations as uos
+import flow_draw.batch.process.unit_operations.charging as charging
 
 
 
