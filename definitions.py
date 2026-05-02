@@ -134,7 +134,8 @@ dict_jp_part_uo_titles = {tag_uo_line_clearance : part_uo_title_clearance_jp,
 #              PARTS FOR PROJECT OUTLINE WORKSHEET             #
 ################################################################
 
-#>>>>>>>>>>>>>>>>>> sheet name <<<<<<<<<<<<<<<<<<<<#
+#>>>>>>>>>>>>>>>>>> file and sheet name <<<<<<<<<<<<<<<<<<<<#
+src_io_proj_input_file_name = "project_outline.xlsx"
 src_io_proj_outline_ws = "project outline"
 """Worksheet name for the project outline"""
 
