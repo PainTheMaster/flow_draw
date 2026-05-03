@@ -44,12 +44,9 @@ class Materials:
         self.df_mats: pd.DataFrame= df_mats
         self.kg_main_mat = 0.0
         self.mol_main_mat = 0.0
-        #TODO please find the core building block (main raw material) from df_mats. It is marked with "*".
-        #self.df_sm = df_sm
-        # self.sm_name = df_sm[df_sm[header_key]==key_sm_name][header_value].item()
-        # self.sm_kg = df_sm[df_sm[header_key]==key_sm_kg][header_value].item()
-        # self.sm_mol = self.sm_kg * 1000 / df_mats[df_mats[header_material]==self.sm_name][header_mw].item()
-        df_extrd_main  = self.df_mats[self.df_mats[header_main]==desig_star]
+        
+        """Extraction of the star-designated core building block."""
+        df_extrd_main  = self.df_mats[self.df_mats[header_main]==desig_star] 
         if len(df_extrd_main) == 0:
             raise RuntimeError(f"{self.__class__.__name__}: No core building block ({defs.hedr_io_mats_main}) is designated.")
         elif len(df_extrd_main) >= 2:
@@ -58,15 +55,18 @@ class Materials:
             ser_main_mat = df_extrd_main.iloc[0]
             
             self.kg_main_mat = float(ser_main_mat[defs.hedr_io_mats_kgmain])
-            if math.isnan(self.kg_main_mat):
+            # if math.isnan(self.kg_main_mat):
+            if pd.isna(self.kg_main_mat):
                 raise ValueError(f"{self.__class__.__name__}: No weight (kg) is assigned to the main material \"{self.kg_main_mat}\".")
             
             temp_mw_main_mat = float(ser_main_mat[defs.hedr_io_mats_mw])
-            if math.isnan(temp_mw_main_mat):
+            # if math.isnan(temp_mw_main_mat):
+            if pd.isna(temp_mw_main_mat):
                 raise ValueError(f"{self.__class__.__name__}: No molecular weight is assigned to the main material \"{temp_mw_main_mat}\".")
 
             temp_assay_main_mat = float(ser_main_mat[defs.hedr_io_mats_concasy])
-            if math.isnan(temp_assay_main_mat):
+            # if math.isnan(temp_assay_main_mat):
+            if pd.isna(temp_assay_main_mat):
                 temp_assay_main_mat = 100.0
                 raise UserWarning(f"{self.__class__.__name__}: The concentration or assay for the main material is empty or zero.",
                               "For this run, 100%% is assumed.")
@@ -75,8 +75,6 @@ class Materials:
             # self.mol_main_mat = self.kg_main_matser_main_mat[defs]
 
                
-
-    #TODO 2026/04/29 Pleae test me. I was modified to be consistent with the new input form header style.
     def to_kilogram(self, material_name:str = None, equiv: float = None, vol_per_weight:float = None) -> float:
         """
         Converts metrics value in equiv or volume/weight of a given material to kilogram.
@@ -105,15 +103,18 @@ class Materials:
         if not self.df_mats[defs.hedr_io_mats_mat].isin([material_name]).any():
             raise ValueError(f"{self.__class__.__name__}.to_kilogram(): A compound name \"{material_name}\" is not defined in the raw materials table.")
         conc_assay_this = self.df_mats[self.df_mats[defs.hedr_io_mats_mat]==material_name][defs.hedr_io_mats_concasy].item()
-        if math.isnan(conc_assay_this) or conc_assay_this==0.0:
+        # if math.isnan(conc_assay_this) or conc_assay_this==0.0:
+        if pd.isna(conc_assay_this) or conc_assay_this==0.0:
             conc_assay_this = 100.0
             raise UserWarning(f"{self.__class__.__name__}.to_kilogram(): The concentration or assay for the material \"{material_name}\" is empty or zero.",
                               "For this run, 100%% is assumed.")
         mw_this = self.df_mats[self.df_mats[defs.hedr_io_mats_mat]==material_name][defs.hedr_io_mats_mw].item()
-        if math.isnan(mw_this):
+        # if math.isnan(mw_this):
+        if pd.isna(mw_this):
             raise ValueError(f"{self.__class__.__name__}.to_kilogram(): No molecular weight is assigned to the material \"{material_name}\".")
         density_this = self.df_mats[self.df_mats[defs.hedr_io_mats_mat]==material_name][defs.hedr_io_mats_dnsty].item()
-        if math.isnan(density_this):
+        # if math.isnan(density_this):
+        if pd.isna(density_this):
             raise ValueError(f"{self.__class__.__name__}.to_kilogram(): No density is assigned to the material \"{material_name}\".")
         kg_this = 0.0
         if equiv is not None:

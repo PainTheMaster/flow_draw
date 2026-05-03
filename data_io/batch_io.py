@@ -16,9 +16,9 @@ row_hedr:int = defs.row_io_batch_hedr_ouln_tab
 col_item:int = defs.col_io_batch_item_ouln_tab
 col_val:int = defs.col_io_batch_value_ouln_tab
 
-row_hedr_excel:int = row_hedr+1   #The meaning is in parallel with DataFrame, but the counting start with 1 in Excel.
-col_item_excel:int = col_item+1   #The meaning is in parallel with DataFrame, but the counting start with 1 in Excel.
-col_val_excel:int = col_val+1    #The meaning is in parallel with DataFrame, but the counting start with 1 in Excel.
+row_hedr_excel:int = row_hedr+1   #The meaning is in parallel with DataFrame, but counting start with 1 in Excel.
+col_item_excel:int = col_item+1   #The meaning is in parallel with DataFrame, but counting start with 1 in Excel.
+col_val_excel:int = col_val+1    #The meaning is in parallel with DataFrame, but counting start with 1 in Excel.
 
 hedr_batch_item:str = defs.hedr_io_batch_item
 hedr_batch_value:str = defs.hedr_io_batch_value
