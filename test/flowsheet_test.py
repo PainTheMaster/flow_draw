@@ -3,7 +3,7 @@ import pandas as pd
 import flow_draw.definitions as defs
 import flow_draw.batch.batch as batch
 import flow_draw.batch.process.process as proc
-import flow_draw.batch.process.unit_operations.charging as chgng
+import flow_draw.batch.process.unit_operations.uo_charging as chgng
 import flow_draw.materials.materials as mats
 import os
 

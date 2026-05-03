@@ -8,7 +8,7 @@ import flow_draw.data_io.batch_io as batch_io
 import flow_draw.batch.process.process as proc
 import flow_draw.data_io.process_io as proc_io
 import flow_draw.batch.process.unit_operations as uos
-import flow_draw.batch.process.unit_operations.charging as charging
+import flow_draw.batch.process.unit_operations.uo_charging as uo_charging
 
 
 
@@ -86,7 +86,7 @@ class TestIO(unittest.TestCase):
         Checks if each sort of unit operation class is registerd. The registry is located in the module batch.process.unit_operations.unit_operation.
         The registration takes place when the class (not an instance) is generated.
         """
-        self.assertIn(member=charging.Charging, container=uos.unit_operation.registry_uo_cls.values())
+        self.assertIn(member=uo_charging.Charging, container=uos.unit_operation.registry_uo_cls.values())
 
     def test_0004_materials_form(self):
         self.mats_test_data_row_injection(row=2,

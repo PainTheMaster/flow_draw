@@ -169,9 +169,10 @@ col_io_batch_item_ouln_tab:int = 0
 col_io_batch_value_ouln_tab:int = 1
 """Column number for the items in the table"""
 
-################################################################
-#PARTS FOR PROCESS DATA IO: HEADER ITEMS, DROP-DOWN OPTIONS ETC#
-################################################################
+################################################################################################################################
+#                              PARTS FOR PROCESS DATA IO: HEADER ITEMS, DROP-DOWN OPTIONS ETC                                  #
+################################################################################################################################
+
 
         #>>>>>>>>>>>>>> file name, sheet name <<<<<<<<<<<<<<<<<<#
 
@@ -279,10 +280,8 @@ itm_cmn_io_nocmnt_instr = '(No comment here)'
 
 
 ######################################################
-#
-
-                        ####CHARGING HEADER ITEMS####
-
+####       CHARGING HEADER ITEMS AND OPTIONS      ####
+######################################################
 hedr_uo_chgng_mat = 'Material Name'
 hedr_uo_chgng_mtrcs_val = 'Metrics Value'
 hedr_uo_chgng_mtrcs_unit = 'Metrics Unit'
@@ -351,11 +350,26 @@ list_opt_uo_chgne_temprctrl = [opt_uo_chgng_temprctrl_none,
 
 opt_uo_chgng_err_rng_plchldr='place holder'
 
+
+######################################################
+####     PLACEHOLDER HEADER ITEMS AND OPTIONS     ####
+######################################################
+hedr_uo_plchldr_lines = "Lines"
+"""Header item for the number of lines in unit operation 'place holder' """
+
+list_hedr_uo_plchldr = [hedr_uo_plchldr_lines]
+
+
+
+
+###########################################################################################################################################
+#                                                              PARTS FOR FLOW SHEETS                                                      #
+###########################################################################################################################################
+
 ################################################################
-#                      PARTS FLOW SHEETS                       #
+#            PARTS FOR FLOW SHEETS: COMMON                     #
 ################################################################
 
-#####COMMON####
 tag_flow_cmn_rec_time = "tag_flow_cmn_time"
 part_flow_cmn_rec_time_jp = '___:___' 
 """Common flowsheet component to record a point of time some action is taken."""
@@ -367,6 +381,10 @@ part_flow_cmn_rec_sign_jp = '   /  /  _____'
 dict_jp_part_flow_cmn = {tag_flow_cmn_rec_time : part_flow_cmn_rec_time_jp,
                          tag_flow_cmn_rec_sign : part_flow_cmn_rec_sign_jp}
 
+
+################################################################
+#            PARTS FOR FLOW SHEET: UO_CHARGING                 #
+################################################################
 ####CHARGING####
 # tag_part_flow_chgng_title = "tag_chgng_title"
 # part_flow_chgng_title_jp = '仕込み'
@@ -487,9 +505,16 @@ dict_jp_stcs_flow_chgng = {tag_stc_flow_chgng_qty : stc_flow_chgng_qty_err_jp,
 
 
 
-####################################################
-#                 STYLE FOR OPEN PYXL              #
-####################################################
+###################################################
+#        PARTS FOR UO_PlACEHOLDER                 #
+###################################################
+
+"No parts for the unit operation 'placeholder'"
+
+
+############################################################################################################################################
+#                                                       STYLE FOR OPEN PYXL                                                                #
+############################################################################################################################################
 
 #OpenPyXL styles
 xl_line_thin = Side(style="thin")

@@ -1,0 +1,55 @@
+#########################################################
+# imports
+#########################################################
+import pandas as pd
+import flow_draw.definitions as defs
+from flow_draw.batch.process.unit_operations import unit_operation as uo
+from flow_draw.data_io import process_io
+from flow_draw.materials import materials as mats
+from flow_draw.data_io.flowsheet import Flowsheet as fsht
+from flow_draw.trait_def.trait_def import GetMats
+
+
+
+
+#########################################################
+# UO-specific hader items and list thereof
+#########################################################
+
+
+
+
+#########################################################
+# UO-specific options, list, header_item: list dictionry thereof (for data input and internalsignaling)
+#########################################################
+
+
+
+
+
+
+#########################################################
+# signal -> local language dictionary and tags for it
+#########################################################
+
+
+
+
+
+
+#########################################################
+# Class (uo.UnitOperation, uo_name=defs.tag_uo_<UO_NAME>)
+#------------------------------------------
+# Mandatory methods
+# -__init__(self,
+#           caller: type[trdef.UniversalTrait] =None,
+#           flowsheet:fsht.Flowsheet=None,
+#           operation_seq: int=None,
+#           num_subitems: int = None,
+#           edit_comment:str=None)
+# -get_detail_header(self) -> list[str]
+# -load_papams_from_df(self, df: pd.DataFrame)
+# -output_unit_operation(self)
+#
+#########################################################
+
