@@ -5,7 +5,7 @@ from flow_draw.data_io import process_io
 from flow_draw.materials import materials as mats
 from flow_draw.data_io.flowsheet import Flowsheet as fsht
 from flow_draw.trait_def.trait_def import GetMats
-#from typing import List
+
 
 
 header_precomment = defs.hedr_cmn_io_dtil_precmnt #Don't include this in the specific header list!!!
@@ -82,6 +82,7 @@ tag_flow_cmn_rec_sign : part_flow_cmn_rec_sign_jp
 tag_part_instr_ini = defs.tag_part_flow_chgng_instr_ini
 tag_part_instr_end = defs.tag_part_flow_chgng_instr_end
 tag_part_rec_input = defs.tag_part_flow_chgng_rec_input
+"""The tag for the input (QTY) record field."""
 tag_part_rec_lot = defs.tag_part_flow_chgng_rec_lot
 tag_part_rec_hose = defs.tag_part_flow_chgng_rec_hose
 tag_part_rec_temprini = defs.tag_part_flow_chgng_rec_temprini
@@ -154,8 +155,8 @@ class Charging(uo.UnitOperation, uo_name=defs.tag_uo_charging):
         """
         Loads necessary parameters from a DataFrame object.
         The header items must be in line with the definition the class Charging.
-        The header items can be passed from the get_detail_header() of each UnitOperation-drived class.
-        This is the overriding mehtod in the class Charging..
+        The header items can be passed from the get_detail_header() of each UnitOperation-derived class.
+        This is the overriding mehtod in the class Charging.
         """
         #TODO: please check if my implementation is sufficient!!!!
         first_row = df.iloc[0]

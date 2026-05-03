@@ -509,7 +509,7 @@ dict_jp_stcs_flow_chgng = {tag_stc_flow_chgng_qty : stc_flow_chgng_qty_err_jp,
 #        PARTS FOR UO_PlACEHOLDER                 #
 ###################################################
 
-"No parts for the unit operation 'placeholder'"
+"""No parts or dictionary for the unit operation 'placeholder'"""
 
 
 ############################################################################################################################################

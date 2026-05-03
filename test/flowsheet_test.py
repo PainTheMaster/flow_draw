@@ -4,6 +4,8 @@ import flow_draw.definitions as defs
 import flow_draw.batch.batch as batch
 import flow_draw.batch.process.process as proc
 import flow_draw.batch.process.unit_operations.uo_charging as chgng
+import flow_draw.batch.process.unit_operations.uo_placeholder as plchldr
+import flow_draw.data_io.flowsheet  as fsht
 import flow_draw.materials.materials as mats
 import os
 
@@ -34,7 +36,7 @@ class SaltyWaterFlow(unittest.TestCase):
         test_batch = batch.Batch()
         test_batch.batch_name = wrong_batch_name
         test_batch.num_procs = 3
-        test_df = prep_test_df(batch_name=right_batch_name, proc_name=proc_name, num_uo=1)
+        test_df = prep_batch_test_df(batch_name=right_batch_name, proc_name=proc_name, num_uo=1)
         test_batch.load_outline(test_df)
         sample_proc = test_batch.list_proc[0]
         result:bool = ((test_batch.batch_comment=="Batch comment") and
@@ -43,10 +45,6 @@ class SaltyWaterFlow(unittest.TestCase):
                        (sample_proc.batch_name==right_batch_name) and
                        (sample_proc.process_name==proc_name))
         self.assertTrue(result)
-
-
-
-
 
 def PurchaseMaterials() -> pd.DataFrame:
     dict_NaCl = {defs.hedr_io_mats_mat: "NaCl",
@@ -107,7 +105,7 @@ def SetChgngForSaltWater() -> pd.DataFrame:
     return df_input
 
 
-def prep_test_df(batch_name:str=None, proc_name:str=None, num_uo:int =0)-> pd.DataFrame:
+def prep_batch_test_df(batch_name:str=None, proc_name:str=None, num_uo:int =0)-> pd.DataFrame:
     dict0: dict[str, list[str|int]] ={defs.hedr_io_batch_value:[batch_name,
                                     "Batch comment",
                                     proc_name,
@@ -139,11 +137,35 @@ def prep_test_df(batch_name:str=None, proc_name:str=None, num_uo:int =0)-> pd.Da
     return test_df
 
 
+class UnitOperationOutputTest(unittest.TestCase):
+    def setUp(self):
 
+        return super().setUp()
+
+    def test_1001_placeholder(self):
+        sheet = fsht.Flowsheet()
+        uo_instance = plchldr.Placeholder(flowsheet=sheet, operation_seq=1, num_subitems=1)
+        uo_instance.pre_comment='Test 1001 precomment'
+        uo_instance.num_lines = 5
+        uo_instance.post_comment='Test 1001 postcomment'
+        uo_instance.output_unit_operation()
+        sheet.save(filename='Test1001_flowsheet_out.xlsx')
+        self.assertTrue(True)
+
+
+
+
+
+
+def suite():
+    suite = unittest.TestSuite()
+    suite.addTest(UnitOperationOutputTest("test_1001_placeholder"))
+    #For the 2nd and likewise.... suite.addTest("something here")
+    return suite
 
 
 if __name__=="__main__":
-    unittest.main()
+    unittest.TextTestRunner(verbosity=2).run(suite())
 
 
 

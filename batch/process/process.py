@@ -1,9 +1,12 @@
 #from typing import List
 import pandas as pd
 import flow_draw.definitions as defs
-from flow_draw.batch.process.unit_operations import unit_operation
+# from flow_draw.batch.process.unit_operations import unit_operation
 #from flow_draw.batch.process.unit_operations.unit_operation import UnitOperation as unitop
-from flow_draw.batch.process.unit_operations import unit_operation as unitop
+import flow_draw.batch.process.unit_operations.unit_operation as unitop
+import flow_draw.batch.process.unit_operations.uo_charging as chgng
+import flow_draw.batch.process.unit_operations.uo_placeholder as plchldr
+
 from flow_draw.data_io import process_io as proc_io
 from flow_draw.data_io import flowsheet as fsht
 from flow_draw.materials.materials import Materials as mats
@@ -75,7 +78,7 @@ class Process(GetMats):
         None
             Returns nothing. The results are stored in self.data_input.
         """
-        self.data_input.generate_proc_summary_form(list_unit_ops=unit_operation.list_unit_ops)
+        self.data_input.generate_proc_summary_form(list_unit_ops=unitop.list_unit_ops)
         #At the time of process summary creation, the material information should be available. Plus, it is neceesary before loading the detail.
         self.data_input.generate_mats_form()
         #self.data_input.save_form()
@@ -97,7 +100,7 @@ class Process(GetMats):
         None
         """
         df_summary = self.data_input.load_process_summary()
-        uo_reg = unit_operation.registry_uo_cls
+        uo_reg = unitop.registry_uo_cls
         for _, row in df_summary.iterrows():
             seq = int(row[defs.hedr_io_sumry_seq])
             uo_title = str(row[defs.hedr_io_summary_uo])

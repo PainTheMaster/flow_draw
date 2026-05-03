@@ -92,8 +92,8 @@ class Placeholder(uo.UnitOperation, uo_name=defs.tag_uo_placeholder):
         self.flowsheet.header_organizer(op_nr=self.operation_seq, title=lang_dict_uo_titles[self.uo_name])
         if not (self.pre_comment == None or self.pre_comment == ''):
             self.flowsheet.put_body_comments(self.pre_comment)
-            
-        for _ in range(self.num_lines):
+
+        for _ in range(self.num_lines-1):
             self.flowsheet.linefeed()
 
         if not (self.post_comment == None or self.post_comment == ''):

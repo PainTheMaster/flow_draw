@@ -116,8 +116,6 @@ class UnitOperation(ABC):
         """
         self.caller: type[trdef.UniversalTrait] = caller
         self.flowsheet: fsht.Flowsheet = flowsheet
-        #TODO: please remove the comment-out part below after a test.
-        #self.unit_operation: str = unit_operation
         self.operation_seq: int = operation_seq
         self.num_subitems: int = num_subitems
         self.edit_comment:str = edit_comment

@@ -41,15 +41,30 @@ from flow_draw.trait_def.trait_def import GetMats
 # Class (uo.UnitOperation, uo_name=defs.tag_uo_<UO_NAME>)
 #------------------------------------------
 # Mandatory methods
-# -__init__(self,
+# __init__(self,
 #           caller: type[trdef.UniversalTrait] =None,
 #           flowsheet:fsht.Flowsheet=None,
 #           operation_seq: int=None,
 #           num_subitems: int = None,
 #           edit_comment:str=None)
-# -get_detail_header(self) -> list[str]
-# -load_papams_from_df(self, df: pd.DataFrame)
-# -output_unit_operation(self)
+# get_detail_header(self) -> list[str]
+# load_papams_from_df(self, df: pd.DataFrame)
+# output_unit_operation(self)
 #
 #########################################################
 
+    load_paraams_from_df(self, df: pd.DataFrame):
+        """
+        Loads necessary parameters from a DataFrame object.
+        The header items must be in line with the definition the class Charging.
+        The header items can be passed from the get_detail_header() of each UnitOperation-drived class.
+        This is the overriding mehtod in the class Charging..
+        """
+
+        first_row = df.iloc[0]
+        if not pd.isna(first_row[header_precomment]):
+            self.pre_comment = first_row[header_precomment]
+        if not pd.isna(first_row[header_postcomment]):
+            self.post_comment = first_row[header_postcomment]
+        for _, subitem in df.iterrows():
+            #<uo-specific process>
