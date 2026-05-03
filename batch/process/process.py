@@ -27,7 +27,7 @@ class Process(GetMats):
     flowsheet: flow_draw.flow_output.Flowsheet
         A Flowsheet object that manages the flowsheet output.
     """
-    def __init__(self, batch_name:str, process_name:str, num_uo: int, comment: str):
+    def __init__(self, batch_name:str = None, process_name:str=None, num_uo: int = None, comment: str = None):
         """
         Patameters
         --------------
@@ -48,19 +48,21 @@ class Process(GetMats):
         else:
             self.num_uo = 1
         self.comment: str = comment
-        self.data_input: proc_io.ProcessIO = proc_io.ProcessIO(batch_name=batch_name, process_name=process_name, num_unit_op=num_uo)
-        # self.data_input.generate_proc_summary_form(unitop.list_unit_ops) #TODO Dont forget to give him a list of unitops!
-        # self.data_input.generate_mats_form()
-        # self.data_input.save_form()
+        if not(batch_name is None or process_name is None):
+            self.data_input: proc_io.ProcessIO = proc_io.ProcessIO(batch_name=batch_name, process_name=process_name, num_unit_op=num_uo)
+            """
+            Please note that self.data_input only has the information provided as the arguments. Don't know even the sequnce of unit operations.
+            Each unit operation differenciates when self.load_uo_summary() is called, and acquire details when load_unitop_detail() is called.
+            """
         self.mats_data: mats = None #mats_data is stored when load_materials_data() is called.
-        self.list_uo: list[unitop.UnitOperation] = []
+        self.list_uo: list[unitop.UnitOperation] = [] #This will be populated when self.load_uo_summary() is called.
         self.flowsheet: fsht.Flowsheet = fsht.Flowsheet()
 
         
 
 
     #TODO: Let the InputForm class create the summary input form.
-    def put_summary_mats_input_form(self):
+    def generate_summary_mats_input_form(self):
         """
         Calls methods to generage forms for process summary and material data. The forms are saved in the Excel file.
         
@@ -76,13 +78,11 @@ class Process(GetMats):
         self.data_input.generate_proc_summary_form(list_unit_ops=unit_operation.list_unit_ops)
         #At the time of process summary creation, the material information should be available. Plus, it is neceesary before loading the detail.
         self.data_input.generate_mats_form()
-        self.data_input.save_form()
+        #self.data_input.save_form()
 
 
 
-    
 
-    #TODO: Please implement me! Load the process summary
     def load_uo_summary(self):
         """
         Loads summary data from a process summary DataFrame and creates a series of (partially filled) UnitOperation instances by interpreting a given process summary DataFrame. 
@@ -106,7 +106,7 @@ class Process(GetMats):
             if not uo_title in uo_reg:
                 raise RuntimeError(f"{self.__class__.__name__}: Unit operation name \"{uo_title}\" not in the registry.")
             new_uo_inst = uo_reg[uo_title](caller=self,
-                                        flow_sheet=self.flowsheet,
+                                        flowsheet=self.flowsheet,
                                         operation_seq=seq,
                                         num_subitems=num_subitems,
                                         edit_comment=edit_comment)

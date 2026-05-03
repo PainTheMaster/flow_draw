@@ -6,7 +6,7 @@ import pandas as pd
 #from flow_draw import definitions as defs
 #from flow_draw import chemistry as chem
 from flow_draw.data_io import flowsheet as fsht
-from flow_draw.trait_def import trait_def as trdf
+from flow_draw.trait_def import trait_def as trdef
 
 
 
@@ -69,7 +69,7 @@ class UnitOperation(ABC):
     post_comment: str
         An optional post-comment for the unit operation.
     """
-    def __init_subclass__(cls,*, uo_name: str|None = None, **kwargs):
+    def __init_subclass__(cls,*, uo_name: str = None, **kwargs):
         """
         Automatically triggered everytime each unit operation-derived class (not an instance!) is created.
         This method compells each unit operation class to register itself to registry_uo_cls[str, type[UnitOperation]] and .
@@ -91,8 +91,8 @@ class UnitOperation(ABC):
         list_unit_ops.append(uo_name)
 
     def __init__(self,
-                 caller: type[trdf.UniversalTrait] =None,
-                 flow_sheet:fsht.Flowsheet=None,
+                 caller: type[trdef.UniversalTrait] =None,
+                 flowsheet:fsht.Flowsheet=None,
                  operation_seq: int=None,
                  num_subitems: int = None,
                  edit_comment:str=None):    
@@ -114,15 +114,15 @@ class UnitOperation(ABC):
         ------------
          None
         """
-        self.caller: type[trdf.UniversalTrait] = caller
-        self.flow_sheet: fsht.Flowsheet = flow_sheet
+        self.caller: type[trdef.UniversalTrait] = caller
+        self.flowsheet: fsht.Flowsheet = flowsheet
         #TODO: please remove the comment-out part below after a test.
         #self.unit_operation: str = unit_operation
         self.operation_seq: int = operation_seq
         self.num_subitems: int = num_subitems
         self.edit_comment:str = edit_comment
-        self.pre_comment: str = ''
-        self.post_comment: str = ''
+        self.pre_comment: str = None
+        self.post_comment: str = None
     
     @abstractmethod
     def get_detail_header(self) -> list[str]:

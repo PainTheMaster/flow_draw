@@ -113,7 +113,7 @@ class TestForProcessCls(unittest.TestCase):
         self.process_name = "test_process"
         self.num_uo = 2
         self.test_process = proc.Process(batch_name=self.batch_name, process_name=self.process_name, num_uo=self.num_uo, comment="dummy comment")
-        self.test_process.put_summary_mats_input_form()
+        self.test_process.generate_summary_mats_input_form()
 
 
         # self.test_proc_io = proc_io.ProcessIO(batch_name=self.batch_name, process_name=self.process_name, num_unit_op=1)
@@ -295,9 +295,65 @@ class TestForBatchCls(unittest.TestCase):
         ws.cell(row=6, column=2, value="Remark P1 test2000")           
         
 
+class BatchOutlineFormOutputTest(unittest.TestCase):
+    def setUp(self):
+        self.t_btch = batch.Batch()
+        return super().setUp()
+    
+    def test_3000_batch_outline_form_out(self):
+        self.t_btch.generate_outline_form()
+        self.assertTrue(os.path.isfile("batch_outline.xlsx"))
+
+    def test_3001_outline_data_in(self):
+        self.t_btch.load_outline()
+        proclist = self.t_btch.list_proc
+        test_result = (self.t_btch.batch_name =='test_batch_3001' and
+                       self.t_btch.num_procs == 3 and
+                       proclist[0].num_uo == 1 and
+                       proclist[0].process_name == 'TA1' and
+                       proclist[0].comment == 'Comment for TA1' and
+                       proclist[1].num_uo == 2 and
+                       proclist[2].num_uo == 3)
+        self.assertTrue(test_result)
+
+    def test_3002_process_summary_form_out(self):
+        self.t_btch.load_outline()
+        self.t_btch.generate_process_summary_form()
+        filename = 'test_batch_3001'+defs.src_io_filebasename+'.xlsx'
+        test_result = os.path.isfile(filename)
+        self.assertTrue(test_result)
+
+    
+###################################
 
 
+# class TestFoo(unittest.TestCase):
+#     def test_a(self):
+#         pass
+
+#     def test_b(self):
+#         pass
+
+def suite():
+    suite = unittest.TestSuite()
+    suite.addTest(BatchOutlineFormOutputTest('test_3001_outline_data_in'))
+    suite.addTest(BatchOutlineFormOutputTest('test_3002_process_summary_form_out'))
+    return suite
+
+# if __name__ == '__main__':
+#     unittest.TextTestRunner().run(suite())
+
+#############################################
 
 
-if __name__=="__main__":
-    unittest.main()
+# def suite():
+#     suite = unittest.TestSuite()
+#     loader = unittest.TestLoader()
+
+#     # クラスを丸ごと追加
+#     suite.addTests(loader.loadTestsFromTestCase(BatchOutlineFormOutputTest))
+
+#     return suite
+
+if __name__ == "__main__":
+    unittest.TextTestRunner(verbosity=2).run(suite())

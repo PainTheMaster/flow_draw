@@ -90,17 +90,17 @@ class ProcessIO:
         num_unit_op: int
             The number of the unit operations constituting the process.
         """
-        self.batch_name: str = batch_name
-        self.process_name: str = process_name
-        self.num_unit_op: int = num_unit_op
-        self.file_path = batch_name+inputfile_base_name+'.xlsx'
-        self.title_summary_ws: str = process_name+suffix_summary_input_ws
+        self.batch_name:str = batch_name
+        self.process_name:str = process_name
+        self.num_unit_op:int = num_unit_op
+        self.file_path:str = batch_name+inputfile_base_name+'.xlsx'
+        self.title_summary_ws:str = process_name+suffix_summary_input_ws
         self.summary_ws: Worksheet = None
-        self.title_mats_ws: str = process_name+suffix_mats_input_ws
+        self.title_mats_ws:str = process_name+suffix_mats_input_ws
         self.mats_ws: Worksheet = None
-        self.title_detail_ws: str = batch_name+suffix_detail_input_ws
+        self.title_detail_ws:str = process_name+suffix_detail_input_ws
         self.detail_ws: Worksheet = None
-        self.__manage_io() #load from a file if exist, create otherwise.
+        #self.__manage_io() #load from a file if exist, create otherwise.
         #TODO Placing __manage_io() here is not appropriate. This shall be done just before read/write actions.
         self.df_summary: pd.DataFrame = None #To be loaded later by a triger. 
         self._current_line_summary:int = 1
@@ -181,7 +181,7 @@ class ProcessIO:
         Requires self.summary_ws: openpyxl.worksheet.worksheet.Worksheet. The worksheet must be available before this method is called. 
 
         """
-
+        self.__manage_io()
         options_dv: str = '"'
         for item in list_unit_ops:
             options_dv += (item+',')
@@ -212,6 +212,7 @@ class ProcessIO:
             self.summary_ws.cell(row = self._current_line_summary, column = summary_col_num_subitems).border = defs.xl_border_around
             self.summary_ws.cell(row = self._current_line_summary, column = summary_col_editcomment).border = defs.xl_border_around
             self._current_line_summary += 1
+        self.save_form()
         
 
         
@@ -227,6 +228,7 @@ class ProcessIO:
         ------------
         None
         """
+        self.__manage_io()
         options_dv: str = f'\"{defs.itm_io_mats_desig_star},,\"'
         dv_main = DataValidation(
             type='list',
@@ -260,6 +262,7 @@ class ProcessIO:
             self.mats_ws.cell(row=self._current_line_mats, column=defs.col_nr_io_mats_kgmain).border = defs.xl_border_around
             self.mats_ws.cell(row=self._current_line_mats, column=defs.col_nr_io_mats_remark).border = defs.xl_border_around
             self._current_line_mats += 1
+        self.save_form()
 
 
     def load_process_summary(self) -> pd.DataFrame:
@@ -308,7 +311,9 @@ class ProcessIO:
         #summary_ws is no loner necessay, as this instance is needed to edit the worksheet before put out to the excel workbook. 
         #self.summary_ws does not have to be cleared. As long as it is edited, the contents on the sheet stays intact. The workbook object is responsible for retaining the original data of the ws.
         #self.summary_ws = None
-
+        
+        self.__manage_io()
+        
         if self.df_summary == None:
             self.load_process_summary()
         num_sub_items = self.df_summary[self.df_summary[header_summary_sequence]==seq][header_summary_num_subitems].item()
@@ -361,6 +366,7 @@ class ProcessIO:
             self._current_line_detail +=1
 
         self._current_line_detail +=1
+        self.save_form()
 
     def load_process_details(self) -> list[pd.DataFrame]:
         """

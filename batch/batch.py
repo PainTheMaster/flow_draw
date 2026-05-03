@@ -1,6 +1,6 @@
-import math
 import pandas as pd
 import flow_draw.definitions as defs
+import flow_draw.data_io.batch_io as btchio
 import flow_draw.batch.process.process as proc
 
 item_batch_name: str = defs.item_io_batch_batch_name
@@ -21,27 +21,19 @@ class Batch:
         self.batch_name: str = None
         self.batch_comment: str = None
         self.num_procs: int = None
+        self.btchio: btchio.BatchIO = btchio.BatchIO()
         self.list_proc: list[proc.Process]=[]
-        
-
-    #TODO please implement me!
-    def load_process_summary(self):
-        """
-        Lets each process constituting the batch load the summary data from a ProcessIO object.
-
-        Parameters
-        ------------
-        None
-
-        Returns
-        ------------
-        None
-        """
-        for proc in self.list_proc:
-            proc.load_uo_summary()
 
 
-    def load_outline(self, df_batch_outline: pd.DataFrame):
+    #TODO Implement me!
+    def generate_outline_form(self):
+        self.btchio.generate_form()  
+        self.btchio.save_wb()
+
+
+    # def load_outline(self, df_batch_outline: pd.DataFrame):
+    def load_outline(self):
+        df_batch_outline = self.btchio.load_outline()
         self.batch_name = str(df_batch_outline.at[item_batch_name, col_val])
         self.batch_comment = df_batch_outline.at[item_batch_comment, col_val]
         if pd.isna(self.batch_comment):
@@ -77,6 +69,29 @@ class Batch:
                 break
         self.num_procs = len(self.list_proc)
         
+
+  
+    #TODO Implement me!
+    def generate_process_summary_form(self):
+        for proc in self.list_proc:
+            proc.generate_summary_mats_input_form()
+
+
+    def load_process_summary(self):
+        """
+        Loads the summary data and material data for all the processes belonging to the batch by triggerring Process.load_uo_summary() and Process.load_material_data().
+
+        Parameters
+        ------------
+        None
+
+        Returns
+        ------------
+        None
+        """
+        for proc in self.list_proc:
+            proc.load_uo_summary()
+            proc.load_materials_data()
 
 
     def load_process_details(self):

@@ -137,9 +137,11 @@ class Charging(uo.UnitOperation, uo_name=defs.tag_uo_charging):
         caller: flow_draw.trait_def.trait_def.GetMats
             The calling object. In the case of the class Charging, GetMats class is expected. From the given caller object, Charging expects materials.Materials passed by get_mats() method.
         """
-        super().__init__(caller=caller, flow_sheet=flow_sheet, operation_seq=operation_seq, num_subitems=num_subitems, edit_comment=edit_comment)
+        super().__init__(caller=caller, flowsheet=flow_sheet, operation_seq=operation_seq, num_subitems=num_subitems, edit_comment=edit_comment)
         # self.mats_data: mats.Materials = GetMats(self.caller).get_mats() #なんかやだからキャストする。
-        self.mats_data = (self.caller).get_mats()
+        self.mats_data=None
+        if caller is not None:
+            self.mats_data = (self.caller).get_mats()
         self.input_count = 0
         self.inputs: list[Input] = []
 
@@ -171,12 +173,12 @@ class Charging(uo.UnitOperation, uo_name=defs.tag_uo_charging):
 
     def output_unit_operation(self):
         #TODO Leave explanatory comments here.
-        self.flow_sheet.header_organizer(op_nr=self.operation_seq, title=lang_dict_uo_titles[self.uo_name])
+        self.flowsheet.header_organizer(op_nr=self.operation_seq, title=lang_dict_uo_titles[self.uo_name])
         if not (self.pre_comment == None or self.pre_comment == ''):
-            self.flow_sheet.put_body_comments(self.pre_comment)
+            self.flowsheet.put_body_comments(self.pre_comment)
 
         for temp_inpt in self.inputs:
-            self.flow_sheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
+            self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
                                      method=lang_dict_chgng_specif[temp_inpt.method],
                                      content=temp_inpt.material_name,
                                      record=lang_dict_chgng_specif[tag_part_rec_lot],
@@ -185,13 +187,13 @@ class Charging(uo.UnitOperation, uo_name=defs.tag_uo_charging):
 
             #line-2: QTY instruction and record
             str_qty = lang_dict_instr_stcs[tag_stc_qty].format(qty=temp_inpt.qty_kg, err=temp_inpt.error_kg)
-            self.flow_sheet.put_line(content=str_qty, record=lang_dict_chgng_specif[tag_part_rec_input])
+            self.flowsheet.put_line(content=str_qty, record=lang_dict_chgng_specif[tag_part_rec_input])
 
             #For liquid only, flex ID 
             if (temp_inpt.method == method_liq or
                 temp_inpt.method == method_press or
                 temp_inpt.method == method_shower):
-                self.flow_sheet.put_line(record=lang_dict_chgng_specif[tag_part_rec_hose],
+                self.flowsheet.put_line(record=lang_dict_chgng_specif[tag_part_rec_hose],
                                          operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
                                          witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
             
@@ -203,11 +205,11 @@ class Charging(uo.UnitOperation, uo_name=defs.tag_uo_charging):
                 self.__put_temp_control(input=temp_inpt)              
      
             self.__put_end_of_dosing()
-            self.flow_sheet.linefeed()
+            self.flowsheet.linefeed()
 
         if not (self.post_comment == None or self.post_comment == ''):
-            self.flow_sheet.put_body_comments(self.post_comment)
-            self.flow_sheet.linefeed()
+            self.flowsheet.put_body_comments(self.post_comment)
+            self.flowsheet.linefeed()
             
     def interact(self):
         print("Unit operation-"+str(self.operation_seq)+": Charging")
@@ -245,7 +247,7 @@ class Charging(uo.UnitOperation, uo_name=defs.tag_uo_charging):
         elif (input.time_control == timectrl_min_max):
             sentence_instruction = lang_dict_instr_stcs[tag_stc_time_min_max].format(min=input.time_min, max=input.time_max)
         
-        self.flow_sheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
+        self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
                                 method=lang_dict_chgng_specif[tag_part_instr_ini],
                                 content=sentence_instruction,
                                 operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
@@ -255,25 +257,25 @@ class Charging(uo.UnitOperation, uo_name=defs.tag_uo_charging):
     def __put_temp_control(self, input: Input=None):
         if input.temp_control == temprctrl_min:
             sentence = lang_dict_instr_stcs[tag_stc_temp_min].format(min=input.temp_min)
-            self.flow_sheet.put_line(content=sentence, record=lang_dict_chgng_specif[tag_part_rec_temprini])
-            self.flow_sheet.put_line(record=lang_dict_chgng_specif[tag_part_rec_temprmin])
-            self.flow_sheet.put_line(record=lang_dict_chgng_specif[tag_part_rec_temprend])
+            self.flowsheet.put_line(content=sentence, record=lang_dict_chgng_specif[tag_part_rec_temprini])
+            self.flowsheet.put_line(record=lang_dict_chgng_specif[tag_part_rec_temprmin])
+            self.flowsheet.put_line(record=lang_dict_chgng_specif[tag_part_rec_temprend])
 
         elif input.temp_control == temprctrl_max:
             sentence = lang_dict_instr_stcs[tag_stc_temp_max].format(max=input.temp_max)
-            self.flow_sheet.put_line(content=sentence, record=lang_dict_chgng_specif[tag_part_rec_temprini])
-            self.flow_sheet.put_line(record=lang_dict_chgng_specif[tag_part_rec_temprmax])
-            self.flow_sheet.put_line(record=lang_dict_chgng_specif[tag_part_rec_temprend])
+            self.flowsheet.put_line(content=sentence, record=lang_dict_chgng_specif[tag_part_rec_temprini])
+            self.flowsheet.put_line(record=lang_dict_chgng_specif[tag_part_rec_temprmax])
+            self.flowsheet.put_line(record=lang_dict_chgng_specif[tag_part_rec_temprend])
 
         elif input.temp_control == temprctrl_min_max:
             sentence = lang_dict_instr_stcs[tag_stc_temp_min_max].format(min=input.temp_min, max=input.temp_max)
-            self.flow_sheet.put_line(content=sentence, record=lang_dict_chgng_specif[tag_part_rec_temprini])
-            self.flow_sheet.put_line(record=lang_dict_chgng_specif[tag_part_rec_temprmin])
-            self.flow_sheet.put_line(record=lang_dict_chgng_specif[tag_part_rec_temprmax])
-            self.flow_sheet.put_line(record=lang_dict_chgng_specif[tag_part_rec_temprend])
+            self.flowsheet.put_line(content=sentence, record=lang_dict_chgng_specif[tag_part_rec_temprini])
+            self.flowsheet.put_line(record=lang_dict_chgng_specif[tag_part_rec_temprmin])
+            self.flowsheet.put_line(record=lang_dict_chgng_specif[tag_part_rec_temprmax])
+            self.flowsheet.put_line(record=lang_dict_chgng_specif[tag_part_rec_temprend])
 
     def __put_end_of_dosing(self):
-            self.flow_sheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
+            self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
                                      method=lang_dict_chgng_specif[tag_part_instr_end],
                                      record=lang_dict_chgng_specif[tag_part_rec_cmpltd],
                                      operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
@@ -282,7 +284,7 @@ class Charging(uo.UnitOperation, uo_name=defs.tag_uo_charging):
 class Input:
     """This class is for each material charged, each instance correspnds to each dosage in a charging operation.
     """
-    def __init__(self, mats_data: mats.Materials):
+    def __init__(self, mats_data: mats.Materials = None):
         self.mats_data: mats.Materials = mats_data
         self.material_name:str = None
         """User input. Material name. Has to be consistent with the materials table"""
@@ -404,7 +406,10 @@ class Input:
             self.temp_min = ser[hedr_temp_min]
         if self.temp_control == temprctrl_max or self.temp_control == temprctrl_min_max:
             self.temp_max = ser[hedr_temp_max]
-        self.__calc_qty()
+        if self.mats_data is None:
+            raise RuntimeWarning(f"{__class__.__name}")
+        else:
+            self.__calc_qty()
 
     def test_data_creation1(self):
         self.material_name = 'H2O'
@@ -448,6 +453,8 @@ class Input:
         -----------
         None
         """
+        if self.mats_data is None:
+            raise RuntimeError(f"{__class__.__name__}.__calc_qty() (input of \"{self.material_name}\"): Material data for provided in the material input worksheet.")
         if self.metrics_unit == opt_mtrcs_eq:
             self.qty_kg = self.mats_data.to_kilogram(material_name = self.material_name, equiv=self.metrics_val)
             self.error_kg = self.qty_kg * (self.error_pct/100.0)
@@ -455,5 +462,5 @@ class Input:
             self.qty_kg = self.mats_data.to_kilogram(material_name = self.material_name, vol_per_weight=self.metrics_val)
             self.error_kg = self.qty_kg * (self.error_pct/100.0)
         else:
-            raise ValueError('metrics_unit not defined')
+            raise ValueError(f'{__class__.__name__}.__calc_qty(): metrics_unit (eq or v/w) for \"{self.material_name}\" not defined in the detail input worksheet.')
 

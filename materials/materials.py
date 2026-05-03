@@ -23,7 +23,7 @@ mol_main_sm = 1.0 #mol, placeholder
 kg_main_sm = 10 #kg, placeholder
 
 class Materials:
-    def __init__(self,df_mats:pd.DataFrame):
+    def __init__(self,df_mats:pd.DataFrame=None):
         """
         Sets a pandas.DataFrame object containing data for all the chemical materials used in the process and quantity information of the starting material. 
         When all the necessary information is provided, the data sets are stored, the name and amount of the starting mterial (starting compound) in kg and mol are calculated and set to instance variables.
@@ -45,7 +45,41 @@ class Materials:
         self.kg_main_mat = 0.0
         self.mol_main_mat = 0.0
         
-        """Extraction of the star-designated core building block."""
+        if df_mats is not None:
+            self.__load_df_mats()
+        # df_extrd_main  = self.df_mats[self.df_mats[header_main]==desig_star] 
+        # if len(df_extrd_main) == 0:
+        #     raise RuntimeError(f"{self.__class__.__name__}: No core building block ({defs.hedr_io_mats_main}) is designated.")
+        # elif len(df_extrd_main) >= 2:
+        #     raise RuntimeError(f"{self.__class__.__name__}: More than two (2) core building blocks ({defs.hedr_io_mats_main}) are designated.")
+        # else:
+        #     ser_main_mat = df_extrd_main.iloc[0]
+            
+        #     self.kg_main_mat = float(ser_main_mat[defs.hedr_io_mats_kgmain])
+        #     # if math.isnan(self.kg_main_mat):
+        #     if pd.isna(self.kg_main_mat):
+        #         raise ValueError(f"{self.__class__.__name__}: No weight (kg) is assigned to the main material \"{self.kg_main_mat}\".")
+            
+        #     temp_mw_main_mat = float(ser_main_mat[defs.hedr_io_mats_mw])
+        #     # if math.isnan(temp_mw_main_mat):
+        #     if pd.isna(temp_mw_main_mat):
+        #         raise ValueError(f"{self.__class__.__name__}: No molecular weight is assigned to the main material \"{temp_mw_main_mat}\".")
+
+        #     temp_assay_main_mat = float(ser_main_mat[defs.hedr_io_mats_concasy])
+        #     # if math.isnan(temp_assay_main_mat):
+        #     if pd.isna(temp_assay_main_mat):
+        #         temp_assay_main_mat = 100.0
+        #         raise UserWarning(f"{self.__class__.__name__}: The concentration or assay for the main material is empty or zero.",
+        #                       "For this run, 100%% is assumed.")
+            
+        #     self.mol_main_mat = (self.kg_main_mat*1000)/temp_mw_main_mat*(temp_assay_main_mat/100)
+        #     # self.mol_main_mat = self.kg_main_matser_main_mat[defs]
+
+    def __load_df_mats(self):
+        """
+        Extract the core building block, from the given DataFrame and sets its quantity information in self.kg_main_mat and self.mol_main_mat.
+        """
+        #Extraction of the star-designated core building block.
         df_extrd_main  = self.df_mats[self.df_mats[header_main]==desig_star] 
         if len(df_extrd_main) == 0:
             raise RuntimeError(f"{self.__class__.__name__}: No core building block ({defs.hedr_io_mats_main}) is designated.")
@@ -53,7 +87,6 @@ class Materials:
             raise RuntimeError(f"{self.__class__.__name__}: More than two (2) core building blocks ({defs.hedr_io_mats_main}) are designated.")
         else:
             ser_main_mat = df_extrd_main.iloc[0]
-            
             self.kg_main_mat = float(ser_main_mat[defs.hedr_io_mats_kgmain])
             # if math.isnan(self.kg_main_mat):
             if pd.isna(self.kg_main_mat):
@@ -72,7 +105,8 @@ class Materials:
                               "For this run, 100%% is assumed.")
             
             self.mol_main_mat = (self.kg_main_mat*1000)/temp_mw_main_mat*(temp_assay_main_mat/100)
-            # self.mol_main_mat = self.kg_main_matser_main_mat[defs]
+
+
 
                
     def to_kilogram(self, material_name:str = None, equiv: float = None, vol_per_weight:float = None) -> float:
