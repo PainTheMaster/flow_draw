@@ -70,7 +70,7 @@ class UnitOperation(ABC):
     post_comment: str
         An optional post-comment for the unit operation.
     """
-    def __init_subclass__(cls,*, uo_name: str = None, **kwargs):
+    def __init_subclass__(cls,*, uo_tag: str = None, **kwargs):
         """
         Automatically triggered everytime each unit operation-derived class (not an instance!) is created.
         This method compells each unit operation class to register itself to registry_uo_cls[str, type[UnitOperation]] and .
@@ -83,13 +83,13 @@ class UnitOperation(ABC):
         super().__init_subclass__(**kwargs)
         if cls is UnitOperation:
             return
-        if not uo_name:
+        if not uo_tag:
             raise RuntimeError(f"Class {cls.__name__}: An empty op_key is not allowed.")
-        if uo_name in registry_uo_cls:
-            raise RuntimeError(f"Class {cls.__name__}: op_key \"{uo_name}\" already exists.")
-        cls.uo_name:str = uo_name
-        registry_uo_cls[uo_name] = cls
-        list_unit_ops.append(uo_name)
+        if uo_tag in registry_uo_cls:
+            raise RuntimeError(f"Class {cls.__name__}: op_key \"{uo_tag}\" already exists.")
+        cls.uo_tag:str = uo_tag
+        registry_uo_cls[uo_tag] = cls
+        list_unit_ops.append(uo_tag)
 
     def __init__(self,
                  caller: type[trdef.UniversalTrait] =None,

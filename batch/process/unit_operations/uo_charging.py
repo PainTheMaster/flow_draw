@@ -58,12 +58,8 @@ list_metrics_unit = defs.list_opt_uo_chgng_mtrcs
 error_range_placeholder = defs.opt_uo_chgng_err_rng_plchldr
 list_error_range = [None, 1.0, None, None, None, 5.0, error_range_placeholder]
 
-menu_dict ={
-    hedr_metrics_unit: list_metrics_unit,
-    hedr_method: list_charging_method,
-    hedr_time_control: list_time_control,
-    hedr_temp_control: list_temp_control
-}
+dict_dtil_drpdwn = defs.dict_opt_uo_chgng
+"""The dict[str, list[str]] for drop-down lists for detail input"""
 
 
 #Language dictionary for unit operation title. Although only 'charging is needed'
@@ -125,7 +121,7 @@ lang_dict_instr_stcs = defs.dict_jp_stcs_flow_chgng
 """A language dictionary for a instruction sentence with time or temperature limit. Use str.format(min and/or max) to pur an appropriate parameter"""
 
 
-class Charging(uo.UnitOperation, uo_name=defs.tag_uo_charging):
+class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
     """
     TODO: Make some comment here.
     """
@@ -153,7 +149,7 @@ class Charging(uo.UnitOperation, uo_name=defs.tag_uo_charging):
         return list_header_items
     
     def get_detail_option_menu(self) -> Optional[dict[str, list[str]]]:
-        return menu_dict
+        return dict_dtil_drpdwn
 
     def load_params_from_df(self, df: pd.DataFrame):
         """
@@ -178,7 +174,7 @@ class Charging(uo.UnitOperation, uo_name=defs.tag_uo_charging):
 
     def output_unit_operation(self):
         #TODO Leave explanatory comments here.
-        self.flowsheet.header_organizer(op_nr=self.operation_seq, title=lang_dict_uo_titles[self.uo_name])
+        self.flowsheet.header_organizer(op_nr=self.operation_seq, title=lang_dict_uo_titles[self.uo_tag])
         if not (self.pre_comment == None or self.pre_comment == ''):
             self.flowsheet.put_body_comments(self.pre_comment)
 

@@ -33,7 +33,7 @@ list_hedr = defs.list_hedr_uo_lnclrnc
 # UO-specific options, list, header_item: list dictionry thereof (for data input and internalsignaling)
 #########################################################
 
-
+"""No UO-specific options for this unit operation."""
 
 
 
@@ -43,16 +43,18 @@ list_hedr = defs.list_hedr_uo_lnclrnc
 #########################################################
 
 lang_dict_uo_titles = defs.dict_jp_part_uo_titles
+"""language dictionary for the unit operation, line clearance in this case."""
 
-
-#Tags for translation of common parts 
+#Tags (keys) for translation of common parts 
 tag_flow_cmn_rec_time = defs.tag_flow_cmn_rec_time
+"""The key to the time-recording field for the flowsheet, a common item."""
 tag_flow_cmn_rec_sign = defs.tag_flow_cmn_rec_sign
-#language dictionary for common flowsheet items
+"""The key to the ignature field for the flowsheet, a common item."""
 lang_dict_cmn = defs.dict_jp_part_flow_cmn
 """
-tag_flow_cmn_rec_time : part_flow_cmn_rec_time_jp,
-tag_flow_cmn_rec_sign : part_flow_cmn_rec_sign_jp
+Language dictionary for common parts.
+    tag_flow_cmn_rec_time : part_flow_cmn_rec_time_jp,
+    tag_flow_cmn_rec_sign : part_flow_cmn_rec_sign_jp
 """
 
 #language dictionary for lne-clearance-specific componen and keys (tags) thereof
@@ -81,7 +83,7 @@ lang_dict_stcs_lnclrnc = defs.dict_jp_stcs_flow_lnclrnc
 #
 #########################################################
 
-class LineClearance(uo.UnitOperation, uo_name=defs.tag_uo_line_clearance):
+class LineClearance(uo.UnitOperation, uo_tag=defs.tag_uo_line_clearance):
     def __init__(self,
                  caller:trdef.UniversalTrait = None,
                  flowsheet:fsht.Flowsheet  = None,
@@ -115,7 +117,7 @@ class LineClearance(uo.UnitOperation, uo_name=defs.tag_uo_line_clearance):
         return None
 
     def output_unit_operation(self):
-        self.flowsheet.header_organizer(op_nr=self.operation_seq, title=lang_dict_uo_titles[self.uo_name])
+        self.flowsheet.header_organizer(op_nr=self.operation_seq, title=lang_dict_uo_titles[self.uo_tag])
         if not (self.pre_comment == None or self.pre_comment == ''):
             self.flowsheet.put_body_comments(self.pre_comment)
             self.flowsheet.linefeed()

@@ -29,9 +29,9 @@ tag_uo_line_clearance: str = "line_clearance"
 part_uo_title_clearance_jp = "ラインクリアランス"
 """JP expression of line clearance"""
 
-tag_uo_N2replace: str = "N2_placement"
+tag_uo_innert_replace: str = "N2_placement"
 """Tag for an unit operation N2 replacement"""
-part_uo_title_N2replace_jp = "窒素置換"
+part_uo_title_innert_replace_jp = "減圧窒素置換"
 """JP expression of N2 replacement"""
 
 tag_uo_temp_ctrl: str = "temp_control"
@@ -115,7 +115,7 @@ part_uo_title_placeholder = "<Op. place holder>"
 """JP expression of place holder"""
 
 dict_jp_part_uo_titles = {tag_uo_line_clearance : part_uo_title_clearance_jp,
-                          tag_uo_N2replace : part_uo_title_N2replace_jp,
+                          tag_uo_innert_replace : part_uo_title_innert_replace_jp,
                           tag_uo_temp_ctrl : part_uo_title_temp_ctrl_jp,
                           tag_uo_charging : part_uo_title_charging_jp,
                           tag_uo_agitation : part_uo_title_agitation_jp,
@@ -132,7 +132,7 @@ dict_jp_part_uo_titles = {tag_uo_line_clearance : part_uo_title_clearance_jp,
                           tag_uo_prod_disch : part_uo_title_prod_disch_jp,
                           tag_uo_prod_weigh : part_uo_title_prod_weigh_jp,
                           tag_uo_placeholder : part_uo_title_placeholder}
-
+"""dict[<tag>:<unit operation name] for unit operation name in local language}"""
 
 ################################################################
 #               PARTS FOR BATCH  OUTLINE WORKSHEET             #
@@ -351,6 +351,12 @@ list_opt_uo_chgne_temprctrl = [opt_uo_chgng_temprctrl_none,
 opt_uo_chgng_err_rng_plchldr='place holder'
 
 
+dict_opt_uo_chgng = {hedr_uo_chgng_mtrcs_unit : list_opt_uo_chgng_mtrcs,
+                     hedr_uo_chgng_method : list_opt_uo_chgng_method,
+                     hedr_uo_chgng_timctrl : list_opt_uo_chgng_timctrl,
+                     hedr_uo_chgng_tempctrl : list_opt_uo_chgne_temprctrl}
+
+
 ######################################################
 ####     PLACEHOLDER HEADER ITEMS AND OPTIONS     ####
 ######################################################
@@ -361,12 +367,66 @@ list_hedr_uo_plchldr = [hedr_uo_plchldr_lines]
 
 
 
-
 ######################################################
 ##      LINE_CLEARNCE HEADER ITEMS AND OPTIONS      ##
 ######################################################
 hedr_uo_lnclrnc_sop = "SOP for line-clearnce"
 list_hedr_uo_lnclrnc = [hedr_uo_lnclrnc_sop]
+
+
+
+######################################################
+##  INNERT REPLACEMENT HEADER ITEMS AND OPTIONS     ##
+######################################################
+
+                        #>>>>>>>>>>Detail table header items and list thereof <<<<<<<<<<<<<<
+#hedr_<unit operation>_<parameter> = str
+#list_heder_<unit operation> = [<header item 0>,<header item 1>,...]
+hedr_uo_innert_gas = "Innert Gas"
+"""Detail header item: Innert gas used for replacement"""
+hedr_uo_innert_neg_press = "Negative Press (MPaG)"
+"""Detail header item: Negative pressure before innert gas compensation"""
+hedr_uo_innert_num_repeat = "Repetition"
+"""Detail header item: Times the replacement (vaccum then compensation) repeated"""
+list_hedr_uo_innert = [hedr_uo_innert_gas, hedr_uo_innert_neg_press, hedr_uo_innert_num_repeat]
+"""Detail header list: List of header items for detail input form for innert gas relacement"""
+
+
+        #>>>>>>>>>>Option items, lists, and a dictionary for drop-down list in detail input form<<<<<<<<<<<<<<
+#opt_<unit operation>_<parameter>_<option> = str
+#list_opt_<unit operation>_<parameter> = [<option_0>, <option_1>, ...]
+#dict_opt_<unit operation> = {<heder_item1> : <option_list_1), ...}
+opt_uo_innert_gas_N2 = "N2"
+"""Drop-down option item: choice of gas for innertization. Nitrogen gas"""
+opt_uo_innert_gas_Ar = "Ar"
+"""Drop-down option item: choice of gas for innertization. Argon gas"""
+opt_uo_innert_gas_plchldr = "(placeholder)"
+"""Drop-down option item: choice of gas for innertization. Placeholer"""
+list_opt_uo_innert_gas = [opt_uo_innert_gas_N2,
+                          opt_uo_innert_gas_Ar,
+                          opt_uo_innert_gas_plchldr]
+"""List for a drop-down list in the detail input table"""
+
+dict_opt_uo_innert = {hedr_uo_innert_gas : list_opt_uo_innert_gas}
+"""Dictionary for drop-down lists in detail input form"""
+
+######################################################
+##      <TEMPLATE> HEADER ITEMS AND OPTIONS      ##
+######################################################
+
+                        #>>>>>>>>>>Detail table header items and list thereof <<<<<<<<<<<<<<
+#hedr_<unit operation>_<parameter> = str
+#list_heder_<unit operation> = [<header item 0>,<header item 1>,...]
+
+
+        #>>>>>>>>>>Option items, lists, and a dictionary for drop-down list in detail input form<<<<<<<<<<<<<<
+#opt_<unit operation>_<parameter>_<option> = str
+#list_opt_<unit operation>_<parameter> = [<option_0>, <option_1>, ...]
+#dict_opt_<unit operation> = {<heder_item1> : <option_list_1), ...}
+
+
+
+
 
 
 ###########################################################################################################################################
@@ -531,6 +591,76 @@ dict_jp_part_lnclrnce = {tag_part_flow_lnclrnc_rec_cmpltd : part_flow_lnclrance_
 tag_stc_flow_lnclrnc_instr = "line clearance instruction"
 stc_flow_lnclrnc_instr = "{sop}に従ってラインクリアランスを実施する。"
 dict_jp_stcs_flow_lnclrnc = {tag_stc_flow_lnclrnc_instr : stc_flow_lnclrnc_instr}
+
+
+###################################################
+#        PARTS FOR INNERT_REPLACEMENT             #
+###################################################
+
+        #>>>>>>>>>>>>>> flowsheet compoentns in local language and tags (keys) thereof <<<<<<<<<<<<<<<<<<<
+#sets of:
+#tag_part_flow_<unit operation>_<sort: instr, rec, mthod, etc>_<descr> = str
+#part_flow_<unit operation>_<sort: instr, rec, mthod, etc>_<descr>_<lang> = str
+#Follwed by 
+#dict_<lang>_part_flow_<unit operation> = {<tag> : <component loc. lang>}
+tag_part_flow_uo_innert_gas_N2 = opt_uo_innert_gas_N2
+"""Tag for replacing gas N2 on the flowsheet"""
+part_flow_uo_innert_gas_N2_jp = "窒素"
+"""Flow sheet part Nitorgen"""
+tag_part_flow_uo_innert_gas_Ar = opt_uo_innert_gas_Ar
+"""Tag for replacing gas argon on the flowsheet"""
+part_flow_uo_innert_gas_Ar_jp = "アルゴン"
+"""Flow sheet part argon"""
+tag_part_flow_uo_innert_gas_plchldr = opt_uo_innert_gas_plchldr
+"""Tag for replacing gas placeholder on the flowsheet"""
+part_flow_uo_innert_gas_plchldr_jp = "<gas: placeholder>"
+"""Flow sheet part placeholder"""
+
+tag_part_flow_uo_innert_rplace_complete = "replacement complete"
+"""tag for innert gas replacement complete check-box"""
+part_flow_uo_innert_rplace_complete_jp = "□ 置換実施"
+"""Flow sheet part for innert gas replacement complete check-box"""
+
+dict_jp_part_flow_uo_innert = {tag_part_flow_uo_innert_gas_N2 : part_flow_uo_innert_gas_N2_jp,
+                                tag_part_flow_uo_innert_gas_Ar : part_flow_uo_innert_gas_Ar_jp,
+                                tag_part_flow_uo_innert_gas_plchldr : part_flow_uo_innert_gas_plchldr_jp,
+                                tag_part_flow_uo_innert_rplace_complete : part_flow_uo_innert_rplace_complete_jp}
+"""JP language dictionary for flowsheet parts for the unit operation innert gas replacement"""
+
+
+
+        #>>>>>>>>>>>>>> Template sentences for flow sheets in local language and tags (keys) thereof <<<<<<<<<<<<<<<<<<<
+#tag_stc_<unit operation>_<item> = tag
+#stc_stc_<unit operation>_<item>_<lang> = <str with placeholder>
+#dict_<lang>_stcs_<unit operation> = {tag : sentence}
+"""Language dictionary for instruction SENTENCES with place holders 'min' and/or 'max'. Use str.format()"""
+
+tag_stc_flow_uo_innert_instr = "innert replacement instruction"
+"""Tag for the instruction sentence for innert gas replacement, the sentence has 3 placeholders: {press}, {gas}, {rep}"""
+stc_flow_uo_innert_instr_jp = "到達内圧目安:{press} MPaG, {gas}置換回数{rep}回"
+"""Instruction sentece for innert gas replacement"""
+dict_jp_stcs_uo_innert = {tag_stc_flow_uo_innert_instr : stc_flow_uo_innert_instr_jp}
+
+
+
+###################################################
+#        PARTS FOR <unit operation>               #
+###################################################
+
+        #>>>>>>>>>>>>>> flowsheet compoentns in local language and tags (keys) thereof <<<<<<<<<<<<<<<<<<<
+
+#sets of:
+#tag_part_flow_<unit operation>_<sort: instr, rec, mthod, etc>_<descr> = str
+#part_flow_<unit operation>_<sort: instr, rec, mthod, etc>_<descr>_<lang> = str
+#Follwed by 
+#dict_<lang>_part_flow_<unit operation> = {<tag> : <component loc. lang>}
+
+
+        #>>>>>>>>>>>>>> Template sentences for flow sheets in local language and tags (keys) thereof <<<<<<<<<<<<<<<<<<<
+#tag_stc_<unit operation>_<item> = tag
+#stc_stc_<unit operation>_<item>_<lang> = <str with placeholder>
+#dict_<lang>_stcs_<unit operation> = {tag : sentence}
+"""Language dictionary for instruction SENTENCES with place holders 'min' and/or 'max'. Use str.format()"""
 
 
 

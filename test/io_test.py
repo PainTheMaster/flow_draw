@@ -247,14 +247,14 @@ class TestForProcessCls(unittest.TestCase):
 
         uo_loaded_1 = tp.list_uo[0]
         result_proc_1 = ((uo_loaded_1.num_subitems == num_subitem_proc_1) and
-                       (uo_loaded_1.uo_name == uo_proc_1) and
+                       (uo_loaded_1.uo_tag == uo_proc_1) and
                        (uo_loaded_1.operation_seq==seq_proc_1) and
                        (uo_loaded_1.num_subitems==num_subitem_proc_1)and
                        (uo_loaded_1.edit_comment==editcomment_proc_1))
         
         uo_loaded_2 = tp.list_uo[1]
         result_proc_2 = ((uo_loaded_2.num_subitems == num_subitem_proc_2) and
-                       (uo_loaded_2.uo_name == uo_proc_2) and
+                       (uo_loaded_2.uo_tag == uo_proc_2) and
                        (uo_loaded_2.operation_seq==seq_proc_2) and
                        (uo_loaded_2.num_subitems==num_subitem_proc_2)and
                        (uo_loaded_2.edit_comment==editcomment_proc_2))

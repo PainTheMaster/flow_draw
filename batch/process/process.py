@@ -175,11 +175,11 @@ class Process(GetMats):
         df_uo_details: list[pd.DataFrame] = self.data_input.load_process_details()
         for i in range(len(self.list_uo)):
             temp_detail = df_uo_details[i]
-            if self.list_uo[i].uo_name == (temp_detail)[defs.hedr_cmn_io_dtil_uo].iloc[0]:
+            if self.list_uo[i].uo_tag == (temp_detail)[defs.hedr_cmn_io_dtil_uo].iloc[0]:
                 self.list_uo[i].load_params_from_df(temp_detail)
             else:
                 raise RuntimeError(f"{self.__class__.__name__}: Seq Nr-{self.list_uo[i].operation_seq} Unit operation name mismatch.",
-                                   f"summary table: {self.list_uo[i].uo_name}",
+                                   f"summary table: {self.list_uo[i].uo_tag}",
                                    f"detail table: {temp_detail[defs.hedr_cmn_io_dtil_uo].iloc[0]}")
                 
 

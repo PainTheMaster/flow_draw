@@ -59,7 +59,7 @@ lang_dict_cmn = defs.dict_jp_part_flow_cmn
 #
 #########################################################
 
-class Placeholder(uo.UnitOperation, uo_name=defs.tag_uo_placeholder):
+class Placeholder(uo.UnitOperation, uo_tag=defs.tag_uo_placeholder):
 
     def __init__(self,
                  caller:type[trdef.UniversalTrait]=None,
@@ -95,7 +95,7 @@ class Placeholder(uo.UnitOperation, uo_name=defs.tag_uo_placeholder):
 
 
     def output_unit_operation(self):
-        self.flowsheet.header_organizer(op_nr=self.operation_seq, title=lang_dict_uo_titles[self.uo_name])
+        self.flowsheet.header_organizer(op_nr=self.operation_seq, title=lang_dict_uo_titles[self.uo_tag])
         if not (self.pre_comment == None or self.pre_comment == ''):
             self.flowsheet.put_body_comments(self.pre_comment)
             self.flowsheet.linefeed()
