@@ -5,6 +5,7 @@ import flow_draw.batch.batch as batch
 import flow_draw.batch.process.process as proc
 import flow_draw.batch.process.unit_operations.uo_charging as chgng
 import flow_draw.batch.process.unit_operations.uo_placeholder as plchldr
+import flow_draw.batch.process.unit_operations.uo_line_clearance as lnclnc
 import flow_draw.data_io.flowsheet  as fsht
 import flow_draw.materials.materials as mats
 import os
@@ -145,11 +146,19 @@ class UnitOperationOutputTest(unittest.TestCase):
     def test_1001_placeholder(self):
         sheet = fsht.Flowsheet()
         uo_instance = plchldr.Placeholder(flowsheet=sheet, operation_seq=1, num_subitems=1)
-        uo_instance.pre_comment='Test 1001 precomment'
-        uo_instance.num_lines = 5
+        uo_instance.pre_comment='Test 1001 precomment\nTest1001 additional precomment (line-2)'
+        uo_instance.num_lines = 0
         uo_instance.post_comment='Test 1001 postcomment'
         uo_instance.output_unit_operation()
         sheet.save(filename='Test1001_flowsheet_out.xlsx')
+        self.assertTrue(True)
+
+    def test_1002_line_clearance(self):
+        sheet = fsht.Flowsheet()
+        uo_instance = lnclnc.LineClearance(flowsheet=sheet, operation_seq=1)
+        uo_instance.sop = "TEST SOP"
+        uo_instance.output_unit_operation()
+        sheet.save(filename='Test1002_flowsheet_out.xlsx')
         self.assertTrue(True)
 
 
@@ -159,8 +168,9 @@ class UnitOperationOutputTest(unittest.TestCase):
 
 def suite():
     suite = unittest.TestSuite()
-    suite.addTest(UnitOperationOutputTest("test_1001_placeholder"))
+    # suite.addTest(UnitOperationOutputTest("test_1001_placeholder"))
     #For the 2nd and likewise.... suite.addTest("something here")
+    suite.addTest(UnitOperationOutputTest("test_1002_line_clearance"))
     return suite
 
 

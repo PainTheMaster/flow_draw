@@ -1,5 +1,6 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
+from typing import Optional
 import pandas as pd
 
 
@@ -139,6 +140,23 @@ class UnitOperation(ABC):
         """
         raise NotImplementedError()
     
+    @abstractmethod
+    def get_detail_option_menu(self) -> Optional[dict[str, list[str]]]:
+        """
+        Returns the header elements specific to the unit operation as a List[str].
+        The UnitOperation class provides only skelton. Each derived class must override the method.
+
+        Parameters
+        --------------
+        None
+
+        Returns
+        --------------
+        unit_operation_specific_buffer:List[str]
+            The header items for the data input form.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
+        """
+        raise NotImplementedError()
+
     @abstractmethod
     def load_params_from_df(self, df: pd.DataFrame):
         """

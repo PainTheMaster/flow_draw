@@ -3,8 +3,9 @@
 #########################################################
 import pandas as pd
 import flow_draw.definitions as defs
+from typing import Optional
 from flow_draw.batch.process.unit_operations import unit_operation as uo
-from flow_draw.data_io import process_io
+from flow_draw.data_io import process_io as procio
 from flow_draw.materials import materials as mats
 from flow_draw.data_io.flowsheet import Flowsheet as fsht
 from flow_draw.trait_def import trait_def as trdef
@@ -72,6 +73,11 @@ class Placeholder(uo.UnitOperation, uo_name=defs.tag_uo_placeholder):
     def get_detail_header(self) -> list[str]:
         return list_hedr
 
+    
+    def get_detail_option_menu(self) -> Optional[dict[str, list[str]]]:
+        return None
+
+
     def load_params_from_df(self, df: pd.DataFrame):
         """
         Loads necessary parameters from the DataFrame object.
@@ -92,6 +98,7 @@ class Placeholder(uo.UnitOperation, uo_name=defs.tag_uo_placeholder):
         self.flowsheet.header_organizer(op_nr=self.operation_seq, title=lang_dict_uo_titles[self.uo_name])
         if not (self.pre_comment == None or self.pre_comment == ''):
             self.flowsheet.put_body_comments(self.pre_comment)
+            self.flowsheet.linefeed()
 
         for _ in range(self.num_lines-1):
             self.flowsheet.linefeed()
@@ -99,6 +106,8 @@ class Placeholder(uo.UnitOperation, uo_name=defs.tag_uo_placeholder):
         if not (self.post_comment == None or self.post_comment == ''):
             self.flowsheet.put_body_comments(self.post_comment)
             self.flowsheet.linefeed()
+        
+        
         
 
         

@@ -18,8 +18,8 @@ alignment_left = defs.xl_alignment_left
 
 col_time = 1
 col_op_nr = 2
-col_title1 = 3
-col_title2 =4
+col_title_left_half = 3
+col_title_right_half =4
 col_method = 4
 col_content = 5
 col_record = 6
@@ -42,17 +42,17 @@ class Flowsheet:
                             list_col_record=[],
                             list_col_operator=[],
                             list_col_witness=[])
-        self.linefeed()
+        #self.linefeed()
 
     def header_organizer(self, op_nr: int, title: str):
-        self.ws.merge_cells(start_row=self.current_line, start_column=col_title1, end_row=self.current_line, end_column=col_title2)
+        self.ws.merge_cells(start_row=self.current_line, start_column=col_title_left_half, end_row=self.current_line, end_column=col_title_right_half)
         self.ws.cell(row=self.current_line, column=col_op_nr, value=op_nr)
-        self.ws.cell(row=self.current_line, column=col_title1, value=title)
+        self.ws.cell(row=self.current_line, column=col_title_left_half, value=title)
         self.ws.cell(row=self.current_line, column=col_op_nr).border = border_around
         self.ws.cell(row=self.current_line, column=col_op_nr).alignment = alignment_center
-        self.ws.cell(row=self.current_line, column=col_title1).border = Border(left=line_thin, top=line_thin, bottom=line_thin)
-        self.ws.cell(row=self.current_line, column=col_title2).border = Border(top=line_thin, bottom=line_thin, right=line_thin)
-        self.ws.cell(row=self.current_line, column=col_title1).alignment = alignment_center
+        self.ws.cell(row=self.current_line, column=col_title_left_half).border = Border(left=line_thin, top=line_thin, bottom=line_thin)
+        self.ws.cell(row=self.current_line, column=col_title_right_half).border = Border(top=line_thin, bottom=line_thin, right=line_thin)
+        self.ws.cell(row=self.current_line, column=col_title_left_half).alignment = alignment_center
         self.current_line += 1
 
     def put_line(self, time: str ='', method: str='', content: str='', record: str='', operator: str='', witness: str=''):
@@ -62,6 +62,7 @@ class Flowsheet:
         self.ws.cell(row=self.current_line, column=col_record).value = record
         self.ws.cell(row=self.current_line, column=col_operator).value = operator
         self.ws.cell(row=self.current_line, column=col_witness).value = witness
+        self.ws.cell(row=self.current_line, column=col_title_left_half).border = border_left
         self.current_line += 1
 
     def body_organizer(self, list_col_time: List[str], list_col_method: List[str], list_col_content: List[str], list_col_record: List[str], list_col_operator: List[str], list_col_witness: List[str]):
@@ -102,9 +103,14 @@ class Flowsheet:
                          len_list_record,
                          len_list_operator,
                          len_list_witness)
+        
+        for row_rel in range(max_length):
+            self.ws.cell(row=self.current_line+row_rel, column=col_title_left_half).border = border_left
+
         self.current_line += max_length
     
     def linefeed(self):
+        self.ws.cell(row=self.current_line, column=col_title_left_half).border = border_left
         self.current_line += 1
 
 

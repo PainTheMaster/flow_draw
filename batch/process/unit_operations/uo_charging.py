@@ -1,5 +1,6 @@
 import pandas as pd
 import flow_draw.definitions as defs
+from typing import Optional
 from flow_draw.batch.process.unit_operations import unit_operation as uo
 from flow_draw.data_io import process_io
 from flow_draw.materials import materials as mats
@@ -150,6 +151,9 @@ class Charging(uo.UnitOperation, uo_name=defs.tag_uo_charging):
 
     def get_detail_header(self) -> list[str]:
         return list_header_items
+    
+    def get_detail_option_menu(self) -> Optional[dict[str, list[str]]]:
+        return menu_dict
 
     def load_params_from_df(self, df: pd.DataFrame):
         """

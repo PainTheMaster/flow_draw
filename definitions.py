@@ -362,6 +362,13 @@ list_hedr_uo_plchldr = [hedr_uo_plchldr_lines]
 
 
 
+######################################################
+##      LINE_CLEARNCE HEADER ITEMS AND OPTIONS      ##
+######################################################
+hedr_uo_lnclrnc_sop = "SOP for line-clearnce"
+list_hedr_uo_lnclrnc = [hedr_uo_lnclrnc_sop]
+
+
 ###########################################################################################################################################
 #                                                              PARTS FOR FLOW SHEETS                                                      #
 ###########################################################################################################################################
@@ -431,23 +438,23 @@ part_flow_chgng_cmpltd_jp ='□ 仕込み実施'
 """Flowseet component for class Charging. A check box for complete charging/dosing"""
 
 tag_part_flow_chgng_mthd_liq = opt_uo_chgng_method_liq
-part_flow_chgng_mthd_liq = "液体投入口"
+part_flow_chgng_mthd_liq_jp = "液体投入口"
 """Flowsheet component for class Charging. Charging through liquid charging port. An ption for Liquid charging."""
 
 tag_part_flow_chgng_mthd_shower = opt_uo_chgng_method_shower
-part_flow_chgng_mthd_shower = "常設シャワー"
+part_flow_chgng_mthd_shower_jp = "常設シャワー"
 """Flowsheet component for class Charging. Charging through the fixed shower. An ption for Liquid charging."""
 
 tag_part_flow_chgng_mthd_prssvesl = opt_uo_chgng_method_prssvesl
-part_flow_chgng_mthd_prssvesl = "圧送容器"
+part_flow_chgng_mthd_prssvesl_jp = "圧送容器"
 """Flowsheet component for class Charging. Charging from a pressure vessel. An ption for Liquid charging."""
 
 tag_part_flow_chgng_mthd_pwdr = opt_uo_chgng_method_pwdr
-part_flow_chgng_mthd_pwdr = "粉体投入口"
+part_flow_chgng_mthd_pwdr_jp = "粉体投入口"
 """Flowsheet component for class Charging. Charging through the power port. An ption for powder charging."""
 
 tag_part_flow_chgng_mthd_plchldr = opt_uo_chgng_method_method_plchldr
-part_flow_chgng_mthd_plchldr = "<Placeholder: charging method>"
+part_flow_chgng_mthd_plchldr_jp = "<Placeholder: charging method>"
 """Flowsheet component for class Charging. A place holder. An ption for Liquid charging."""
 
 dict_jp_part_flow_chgng ={tag_part_flow_chgng_instr_ini : part_flow_chgng_instr_ini_jp,
@@ -460,11 +467,11 @@ dict_jp_part_flow_chgng ={tag_part_flow_chgng_instr_ini : part_flow_chgng_instr_
                          tag_part_flow_chgng_rec_temprmin : part_flow_chgng_temprmin_jp,
                          tag_part_flow_chgng_rec_temprend : part_flow_chgng_temprend_jp,
                          tag_part_flow_chgng_rec_cmpltd : part_flow_chgng_cmpltd_jp,
-                         tag_part_flow_chgng_mthd_liq : part_flow_chgng_mthd_liq,
-                         tag_part_flow_chgng_mthd_shower : part_flow_chgng_mthd_shower,
-                         tag_part_flow_chgng_mthd_prssvesl : part_flow_chgng_mthd_prssvesl,
-                         tag_part_flow_chgng_mthd_pwdr : part_flow_chgng_mthd_pwdr,
-                         tag_part_flow_chgng_mthd_plchldr : part_flow_chgng_mthd_plchldr}
+                         tag_part_flow_chgng_mthd_liq : part_flow_chgng_mthd_liq_jp,
+                         tag_part_flow_chgng_mthd_shower : part_flow_chgng_mthd_shower_jp,
+                         tag_part_flow_chgng_mthd_prssvesl : part_flow_chgng_mthd_prssvesl_jp,
+                         tag_part_flow_chgng_mthd_pwdr : part_flow_chgng_mthd_pwdr_jp,
+                         tag_part_flow_chgng_mthd_plchldr : part_flow_chgng_mthd_plchldr_jp}
 
 
 tag_stc_flow_chgng_qty = "tag_stc_qty"
@@ -483,24 +490,24 @@ stc_flow_chgng_time_min_max_jp = '*滴下時間{min}～{max}以内'
 """Flowsheet component for class Charging. Charging instruction with minimum and maximum time range"""
 
 tag_stc_flow_chgng_temp_min = opt_uo_chgng_temprctrl_min
-stc_flow_chgng_temp_min = "仕込み中内温{min}℃以上"
+stc_flow_chgng_temp_min_jp = "仕込み中内温{min}℃以上"
 """Flowsheet component for class Charging. Charging instruction with lower temeperature limit"""
 
 tag_stc_flow_chgng_temp_max = opt_uo_chgng_temprctrl_max
-stc_flow_chgng_temp_max ="仕込み中内温{max}℃以下"
+stc_flow_chgng_temp_max_jp ="仕込み中内温{max}℃以下"
 """Flowsheet component for class Charging. Charging instruction with upper temeperature limit"""
 
 tag_stc_flow_chgng_temp_min_max = opt_uo_chgng_temprctrl_min_max
-stc_flow_chgng_temp_min_max = "仕込み中内温{min}～{max}℃"
+stc_flow_chgng_temp_min_max_jp = "仕込み中内温{min}～{max}℃"
 """Flowsheet component for class Charging. Charging instruction with temeperature range"""
 
 dict_jp_stcs_flow_chgng = {tag_stc_flow_chgng_qty : stc_flow_chgng_qty_err_jp,
                           tag_stc_flow_chgng_time_min : stc_flow_chgng_time_min_jp,
                           tag_stc_flow_chgng_time_max : stc_flow_chgng_time_max_jp,
                           tag_stc_flow_chgng_time_min_max : stc_flow_chgng_time_min_max_jp,
-                          tag_stc_flow_chgng_temp_min : stc_flow_chgng_temp_min,
-                          tag_stc_flow_chgng_temp_max : stc_flow_chgng_temp_max,
-                          tag_stc_flow_chgng_temp_min_max : stc_flow_chgng_temp_min_max}
+                          tag_stc_flow_chgng_temp_min : stc_flow_chgng_temp_min_jp,
+                          tag_stc_flow_chgng_temp_max : stc_flow_chgng_temp_max_jp,
+                          tag_stc_flow_chgng_temp_min_max : stc_flow_chgng_temp_min_max_jp}
 """Language dictionary for instruction SENTENCES with place holders 'min' and/or 'max'. Use str.format()"""
 
 
@@ -510,6 +517,21 @@ dict_jp_stcs_flow_chgng = {tag_stc_flow_chgng_qty : stc_flow_chgng_qty_err_jp,
 ###################################################
 
 """No parts or dictionary for the unit operation 'placeholder'"""
+
+
+###################################################
+#        PARTS FOR UO_LINE_CLEARANCE            #
+###################################################
+"""Flowsheet component for flowsheets. Simple ones without a placeholders."""
+tag_part_flow_lnclrnc_rec_cmpltd = "line clearance completed"
+part_flow_lnclrance_rec_cmpltd_jp = "□ラインクリアランス完了"
+dict_jp_part_lnclrnce = {tag_part_flow_lnclrnc_rec_cmpltd : part_flow_lnclrance_rec_cmpltd_jp}
+
+"""Instruction sentences with placeholders etc for flowsheets."""
+tag_stc_flow_lnclrnc_instr = "line clearance instruction"
+stc_flow_lnclrnc_instr = "{sop}に従ってラインクリアランスを実施する。"
+dict_jp_stcs_flow_lnclrnc = {tag_stc_flow_lnclrnc_instr : stc_flow_lnclrnc_instr}
+
 
 
 ############################################################################################################################################

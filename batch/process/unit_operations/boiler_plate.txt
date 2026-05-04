@@ -3,20 +3,28 @@
 #########################################################
 import pandas as pd
 import flow_draw.definitions as defs
+import flow_draw.data_io.flowsheet as fsht
 from flow_draw.batch.process.unit_operations import unit_operation as uo
-from flow_draw.data_io import process_io
+from flow_draw.data_io import process_io as procio
 from flow_draw.materials import materials as mats
-from flow_draw.data_io.flowsheet import Flowsheet as fsht
-from flow_draw.trait_def.trait_def import GetMats
+from flow_draw.trait_def import trait_def as trdef
+#from flow_draw.trait_def.trait_def import GetMats
 
 
+
+#########################################################
+# Common items: headers etc
+#########################################################
+header_precomment = defs.hedr_cmn_io_dtil_precmnt #Don't include this in the specific header list!!!
+header_postcomment = defs.hedr_cmn_io_dtil_postcmnt #Don't include this in the specific header list!!!
 
 
 #########################################################
 # UO-specific hader items and list thereof
 #########################################################
 
-
+#hedr_<something> = defs.hedr_<unit operation>_<specification item>
+#list_hedr = defs.list_hedr_<list of header items for the uo>
 
 
 #########################################################
@@ -31,10 +39,20 @@ from flow_draw.trait_def.trait_def import GetMats
 #########################################################
 # signal -> local language dictionary and tags for it
 #########################################################
+#lang_dict_uo_titles = defs.dict_jp_part_uo_titles
 
 
+#Tags for translation of common parts 
+tag_flow_cmn_rec_time = defs.tag_flow_cmn_rec_time
+tag_flow_cmn_rec_sign = defs.tag_flow_cmn_rec_sign
+#language dictionary for common flowsheet items
+lang_dict_cmn = defs.dict_jp_part_flow_cmn
+"""
+tag_flow_cmn_rec_time : part_flow_cmn_rec_time_jp,
+tag_flow_cmn_rec_sign : part_flow_cmn_rec_sign_jp
+"""
 
-
+#lang_dict_<this unit operation> = defs.dict_jp_part_<this unit operation>
 
 
 #########################################################
@@ -53,7 +71,7 @@ from flow_draw.trait_def.trait_def import GetMats
 #
 #########################################################
 
-    load_paraams_from_df(self, df: pd.DataFrame):
+    load_params_from_df(self, df: pd.DataFrame):
         """
         Loads necessary parameters from a DataFrame object.
         The header items must be in line with the definition the class Charging.
@@ -68,3 +86,14 @@ from flow_draw.trait_def.trait_def import GetMats
             self.post_comment = first_row[header_postcomment]
         for _, subitem in df.iterrows():
             #<uo-specific process>
+
+
+
+    def get_detail_header(self) -> list[str]:
+        pass
+
+    def load_params_from_df(self, df: pd.DataFrame):
+        pass
+    
+    def output_unit_operation(self):
+        pass
