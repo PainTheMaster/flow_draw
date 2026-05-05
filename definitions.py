@@ -29,14 +29,14 @@ tag_uo_line_clearance: str = "line_clearance"
 part_uo_title_clearance_jp = "ラインクリアランス"
 """JP expression of line clearance"""
 
-tag_uo_innert_replace: str = "N2_placement"
+tag_uo_innert_replace: str = "innert_gas_placement"
 """Tag for an unit operation N2 replacement"""
-part_uo_title_innert_replace_jp = "減圧窒素置換"
+part_uo_title_innert_replace_jp = "減圧不活性ガス置換"
 """JP expression of N2 replacement"""
 
-tag_uo_temp_ctrl: str = "temp_control"
+tag_uo_tempr_ctrl: str = "temp_control"
 """Tag for an unit operation for temperature control"""
-part_uo_title_temp_ctrl_jp = "温調"
+part_uo_title_tempr_ctrl_jp = "温調"
 """JP expression of temperature control"""
 
 tag_uo_charging: str = "charging"
@@ -116,7 +116,7 @@ part_uo_title_placeholder = "<Op. place holder>"
 
 dict_jp_part_uo_titles = {tag_uo_line_clearance : part_uo_title_clearance_jp,
                           tag_uo_innert_replace : part_uo_title_innert_replace_jp,
-                          tag_uo_temp_ctrl : part_uo_title_temp_ctrl_jp,
+                          tag_uo_tempr_ctrl : part_uo_title_tempr_ctrl_jp,
                           tag_uo_charging : part_uo_title_charging_jp,
                           tag_uo_agitation : part_uo_title_agitation_jp,
                           tag_uo_settling : part_uo_title_settling_jp,
@@ -411,6 +411,88 @@ dict_opt_uo_innert = {hedr_uo_innert_gas : list_opt_uo_innert_gas}
 """Dictionary for drop-down lists in detail input form"""
 
 ######################################################
+##      TEMPR_ HEADER ITEMS AND OPTIONS      ##
+######################################################
+
+                        #>>>>>>>>>>Detail table header items and list thereof <<<<<<<<<<<<<<
+#hedr_<unit operation>_<parameter> = str
+#list_heder_<unit operation> = [<header item 0>,<header item 1>,...]
+hedr_uo_tempr_ctrl_mode = "Control Mode"
+"""Detail heder item: temperature control mode (e.g. Ti, Ti/Tj, amping)"""
+hedr_uo_tempr_ctrl_Ti_sp = "Ti set point (degC)"
+"""Detail heder item: Ti set point for Ti, Ti/Tj mode"""
+hedr_uo_tempr_ctrl_Ti_low = "Ti low (degC)"
+"""Detail heder item: Ti SPEC lower limit designaetd by the process owner."""
+hedr_uo_tempr_ctrl_Ti_high = "Ti high (degC)"
+"""Detail heder item: Ti SPEC upper limit designated by the process owner."""
+hedr_uo_tempr_ctrl_Ti_tgt_low = "Ti tgt low (degC)"
+"""Detail heder item: Ti TARGET lower limit designated by the process owner."""
+hedr_uo_tempr_ctrl_Ti_tgt_high = "Ti tgt high (degC)"
+"""Detail heder item: Ti TARGET higher limit designated by the process owner."""
+hedr_uo_tempr_ctrl_Tj_sp = "Tj set point (degC)"
+"""Detail heder item: Tj set point for Tj mode"""
+hedr_uo_tempr_ctrl_Tj_low = "Tj min (degC)"
+"""Detail heder item: Tj min for Tj, Ti/Tj mode."""
+hedr_uo_tempr_ctrl_Tj_high = "Tj max (degC)"
+"""Detail heder item: Tj max for Tj, Ti/Tj mode"""
+#hedr_uo_tempr_ctrl_Ti_tgt_ini = "Ti target ini (degC)"
+hedr_uo_tempr_ctrl_prog_Ti_sp_end = "Prog. Ti end (degC)"
+"""Detail heder item: Ti end target for ramp mode"""
+hedr_uo_tempr_ctrl_prog_time_val = "Prog. time value"
+"""Detail heder item: Ramp up/down time value"""
+hedr_uo_tempr_ctrl_prog_time_unit = "Prog. time unit"
+"""Detail heder item: Ramp up/down time unit"""
+hedr_uo_tempr_ctrl_check = "Check end point?"
+"""Detail heder item: need for heating/cooling end point check."""
+
+list_hedr_uo_tempr_ctrl = [hedr_uo_tempr_ctrl_mode,
+                           hedr_uo_tempr_ctrl_Ti_sp,
+                           hedr_uo_tempr_ctrl_Ti_low,
+                           hedr_uo_tempr_ctrl_Ti_high,
+                           hedr_uo_tempr_ctrl_Ti_tgt_low,
+                           hedr_uo_tempr_ctrl_Ti_tgt_high,
+                           hedr_uo_tempr_ctrl_Tj_sp,
+                           hedr_uo_tempr_ctrl_Tj_low,
+                           hedr_uo_tempr_ctrl_Tj_high,
+                           #hedr_uo_tempr_ctrl_Ti_tgt_ini,
+                           hedr_uo_tempr_ctrl_prog_Ti_sp_end,
+                           hedr_uo_tempr_ctrl_prog_time_val,
+                           hedr_uo_tempr_ctrl_prog_time_unit,
+                           hedr_uo_tempr_ctrl_check]
+"""List of header items for unit operation temperature controle"""
+
+
+        #>>>>>>>>>>Option items, lists, and a dictionary for drop-down list in detail input form<<<<<<<<<<<<<<
+#opt_<unit operation>_<parameter>_<option> = str
+#list_opt_<unit operation>_<parameter> = [<option_0>, <option_1>, ...]
+#dict_opt_<unit operation> = {<heder_item1> : <option_list_1), ...}
+
+#For hedr_uo_tempr_ctrl_mode
+opt_uo_tempr_ctrl_mode_TiTj = "Ti/Tj control"
+"""Option for detail table: temperature control with single point Ti and Tj range"""
+opt_uo_tempr_ctrl_mode_Tj = "Tj control"
+"""Option for detail table: temperature control on jacket temperature (single point)"""
+opt_uo_tempr_ctrl_mode_prog = "Temparature ramp"
+"""Option for detail table: temperature ramping, cooling or heating with time constraint"""
+opt_uo_tempr_ctrl_mode_Ti = "Ti control"
+"""Option for detail table: temperature control on liquid temperature (single point)"""
+
+list_opt_uo_tempr_ctrl_mode = [opt_uo_tempr_ctrl_mode_TiTj,
+                               opt_uo_tempr_ctrl_mode_Tj,
+                               opt_uo_tempr_ctrl_mode_prog,
+                               opt_uo_tempr_ctrl_mode_Ti]
+"""List of a series of temperature control options"""
+
+list_opt_uo_tempr_ctrl_check_endpoint = list_yesno
+
+dict_opt_uo_tempr_ctrl = {hedr_uo_tempr_ctrl_mode : list_opt_uo_tempr_ctrl_mode,
+                          hedr_uo_tempr_ctrl_check : list_opt_uo_tempr_ctrl_check_endpoint}
+"""Dictionary for detail input form for the unit operation uo_tempr_ctrl"""
+
+
+
+
+######################################################
 ##      <TEMPLATE> HEADER ITEMS AND OPTIONS      ##
 ######################################################
 
@@ -423,6 +505,7 @@ dict_opt_uo_innert = {hedr_uo_innert_gas : list_opt_uo_innert_gas}
 #opt_<unit operation>_<parameter>_<option> = str
 #list_opt_<unit operation>_<parameter> = [<option_0>, <option_1>, ...]
 #dict_opt_<unit operation> = {<heder_item1> : <option_list_1), ...}
+
 
 
 
@@ -638,8 +721,67 @@ dict_jp_part_flow_uo_innert = {tag_part_flow_uo_innert_gas_N2 : part_flow_uo_inn
 tag_stc_flow_uo_innert_instr = "innert replacement instruction"
 """Tag for the instruction sentence for innert gas replacement, the sentence has 3 placeholders: {press}, {gas}, {rep}"""
 stc_flow_uo_innert_instr_jp = "到達内圧目安:{press} MPaG, {gas}置換回数{rep}回"
-"""Instruction sentece for innert gas replacement"""
+"""Instruction sentence for innert gas replacement"""
 dict_jp_stcs_uo_innert = {tag_stc_flow_uo_innert_instr : stc_flow_uo_innert_instr_jp}
+
+
+
+###################################################
+#        PARTS FOR <unit operation>               #
+###################################################
+
+        #>>>>>>>>>>>>>> flowsheet compoentns in local language and tags (keys) thereof <<<<<<<<<<<<<<<<<<<
+
+#sets of:
+#tag_part_flow_<unit operation>_<sort: instr, rec, mthod, etc>_<descr> = str
+#part_flow_<unit operation>_<sort: instr, rec, mthod, etc>_<descr>_<lang> = str
+#Follwed by 
+#dict_<lang>_part_flow_<unit operation> = {<tag> : <component loc. lang>}
+
+tag_part_flow_tempr_ctrl_check_config:str = "check temp config"
+"""Tag for a flowsheet part: check-box for temperature configuration."""
+part_flow_tempr_ctrl_check_config_jp:str = "□ 設定値確認"
+"""A flow sheet part: check-box for temperature configuration."""
+tag_part_flow_tempr_ctrl_check_endpoint:str = "check temp end point"
+"""Tag for a flowsheet part: check-box for temperature end point"""
+part_flow_tempr_ctrl_check_endpoint_jp:str = "□ 温度到達確認"
+"""A flow sheet part: check-box for temperature end point (reached)."""
+dict_jp_part_flow_tempr_ctrl = {tag_part_flow_tempr_ctrl_check_config : part_flow_tempr_ctrl_check_config_jp,
+                                tag_part_flow_tempr_ctrl_check_endpoint : part_flow_tempr_ctrl_check_endpoint_jp}
+"""Japanese language dictionary for flowsheet parts for unit operation temperature control."""
+
+
+        #>>>>>>>>>>>>>> Template sentences for flow sheets in local language and tags (keys) thereof <<<<<<<<<<<<<<<<<<<
+#tag_stc_<unit operation>_<item> = tag
+#stc_stc_<unit operation>_<item>_<lang> = <str with placeholder>
+#dict_<lang>_stcs_<unit operation> = {tag : sentence}
+"""Language dictionary for instruction SENTENCES with place holders 'min' and/or 'max'. Use str.format()"""
+
+tag_stc_tempr_ctrl_Tj_sp:str = "Tj set point"
+"""Tag for an instruction sentence for temperature control. Tj set point."""
+stc_tempr_ctrl_Tj_sp_jp:str = "外温設定{Tj} ℃"
+"""Sentence template for temperature control. Tj set point. Includes placeholder{Tj}"""
+tag_stc_tempr_ctrl_Ti_Tj_config:str = "Ti/Tj control"
+"""Tag for an instruction sentence for temperature control. Ti/Tj configuration."""
+stc_tempr_ctrl_Ti_Tj_config_jp:str = "内外温制御: 内温{Ti} ℃、外温{Tj_low}～{Tj_high} ℃"
+"""Sentence template for temperature control. Ti/Tj configuraiton. Includes placeholder{Ti}, {Tj_low}, and {Tj_high}"""
+tag_stc_tempr_ctrl_Ti_range:str = "Ti range"
+"""Tag for an instruction sentence for temperature control. Ti range"""
+stc_tempr_ctrl_Ti_range_jp:str = "内温管理幅{Ti_low}～{Ti_high} ℃"
+"""Sentence template for temperature control. Ti range. includes placeholder {Ti_low} and {Ti_high}"""
+tag_stc_tempr_ctrl_Ti_tgt_range:str = "Ti tgt range"
+"""Tag for an instruction sentence for temperature control. Ti target range"""
+stc_tempr_ctrl_Ti_tgt_range_jp:str = "内温目標幅{Ti_low}～{Ti_high} ℃"
+"""Sentence template for temperature control. Ti target range. includes placeholder {Ti_low} and {Ti_high}"""
+tag_stc_tempr_ctrl_Ti_tgt_single:str = "Ti tgt sp"
+"""Tag for an instruction sentence for temperature control. Ti target single point"""
+stc_tempr_ctrl_Ti_tgt_single_jp:str = "内温目標値{Ti} ℃"
+"""Sentence template for temperature control. Ti target single point. includes placeholder {Ti}"""
+dict_jp_stcs_tempr_ctrl = {tag_stc_tempr_ctrl_Tj_sp : stc_tempr_ctrl_Tj_sp_jp,
+                           tag_stc_tempr_ctrl_Ti_Tj_config : stc_tempr_ctrl_Ti_Tj_config_jp,
+                           tag_stc_tempr_ctrl_Ti_range : stc_tempr_ctrl_Ti_range_jp,
+                           tag_stc_tempr_ctrl_Ti_tgt_range : stc_tempr_ctrl_Ti_tgt_range_jp,
+                           tag_stc_tempr_ctrl_Ti_tgt_single : stc_tempr_ctrl_Ti_tgt_single_jp}
 
 
 
@@ -661,6 +803,9 @@ dict_jp_stcs_uo_innert = {tag_stc_flow_uo_innert_instr : stc_flow_uo_innert_inst
 #stc_stc_<unit operation>_<item>_<lang> = <str with placeholder>
 #dict_<lang>_stcs_<unit operation> = {tag : sentence}
 """Language dictionary for instruction SENTENCES with place holders 'min' and/or 'max'. Use str.format()"""
+
+
+
 
 
 
