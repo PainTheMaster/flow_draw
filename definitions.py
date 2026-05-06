@@ -19,9 +19,22 @@ dflt_mats_num_rows = 100
 ###############################################
 
 #general
-tag_yes: str = 'Yes'
-tag_no: str = 'No'
-list_yesno: list[str]=[tag_no, tag_yes]
+opt_yes: str = 'Yes'
+"""An affirmative option"""
+opt_no: str = 'No'
+"""An negative option"""
+list_yesno: list[str]=[opt_no, opt_yes]
+"""List of affirmative and negative options"""
+
+#Unit
+opt_second:str = "s"
+"""Option for a time unit: second"""
+opt_minute:str = "min"
+"""Option for a time unit: minute"""
+opt_hour:str = "hr"
+"""Option for a time unit: hour"""
+list_time_unit:list[str] = [opt_second, opt_minute, opt_hour]
+"""List of time units"""
 
 #unit_operations
 tag_uo_line_clearance: str = "line_clearance"
@@ -421,9 +434,9 @@ hedr_uo_tempr_ctrl_mode = "Control Mode"
 """Detail heder item: temperature control mode (e.g. Ti, Ti/Tj, amping)"""
 hedr_uo_tempr_ctrl_Ti_sp = "Ti set point (degC)"
 """Detail heder item: Ti set point for Ti, Ti/Tj mode"""
-hedr_uo_tempr_ctrl_Ti_low = "Ti low (degC)"
+hedr_uo_tempr_ctrl_Ti_limit_low = "Ti low (degC)"
 """Detail heder item: Ti SPEC lower limit designaetd by the process owner."""
-hedr_uo_tempr_ctrl_Ti_high = "Ti high (degC)"
+hedr_uo_tempr_ctrl_Ti_limit_high = "Ti high (degC)"
 """Detail heder item: Ti SPEC upper limit designated by the process owner."""
 hedr_uo_tempr_ctrl_Ti_tgt_low = "Ti tgt low (degC)"
 """Detail heder item: Ti TARGET lower limit designated by the process owner."""
@@ -431,34 +444,34 @@ hedr_uo_tempr_ctrl_Ti_tgt_high = "Ti tgt high (degC)"
 """Detail heder item: Ti TARGET higher limit designated by the process owner."""
 hedr_uo_tempr_ctrl_Tj_sp = "Tj set point (degC)"
 """Detail heder item: Tj set point for Tj mode"""
-hedr_uo_tempr_ctrl_Tj_low = "Tj min (degC)"
-"""Detail heder item: Tj min for Tj, Ti/Tj mode."""
-hedr_uo_tempr_ctrl_Tj_high = "Tj max (degC)"
-"""Detail heder item: Tj max for Tj, Ti/Tj mode"""
+hedr_uo_tempr_ctrl_Tj_limit_low = "Tj min (degC)"
+"""Detail heder item: Tj lower limit for Tj, Ti/Tj mode."""
+hedr_uo_tempr_ctrl_Tj_limit_high = "Tj max (degC)"
+"""Detail heder item: Tj higher limit for Tj, Ti/Tj mode"""
 #hedr_uo_tempr_ctrl_Ti_tgt_ini = "Ti target ini (degC)"
-hedr_uo_tempr_ctrl_prog_Ti_sp_end = "Prog. Ti end (degC)"
-"""Detail heder item: Ti end target for ramp mode"""
+# hedr_uo_tempr_ctrl_prog_Ti_sp_end = "Prog. Ti end (degC)"
+# """Detail heder item: Ti end target for ramp mode"""
 hedr_uo_tempr_ctrl_prog_time_val = "Prog. time value"
 """Detail heder item: Ramp up/down time value"""
 hedr_uo_tempr_ctrl_prog_time_unit = "Prog. time unit"
 """Detail heder item: Ramp up/down time unit"""
-hedr_uo_tempr_ctrl_check = "Check end point?"
+hedr_uo_tempr_ctrl_endpoint_check = "Check end point?"
 """Detail heder item: need for heating/cooling end point check."""
 
 list_hedr_uo_tempr_ctrl = [hedr_uo_tempr_ctrl_mode,
                            hedr_uo_tempr_ctrl_Ti_sp,
-                           hedr_uo_tempr_ctrl_Ti_low,
-                           hedr_uo_tempr_ctrl_Ti_high,
+                           hedr_uo_tempr_ctrl_Ti_limit_low,
+                           hedr_uo_tempr_ctrl_Ti_limit_high,
                            hedr_uo_tempr_ctrl_Ti_tgt_low,
                            hedr_uo_tempr_ctrl_Ti_tgt_high,
                            hedr_uo_tempr_ctrl_Tj_sp,
-                           hedr_uo_tempr_ctrl_Tj_low,
-                           hedr_uo_tempr_ctrl_Tj_high,
+                           hedr_uo_tempr_ctrl_Tj_limit_low,
+                           hedr_uo_tempr_ctrl_Tj_limit_high,
                            #hedr_uo_tempr_ctrl_Ti_tgt_ini,
-                           hedr_uo_tempr_ctrl_prog_Ti_sp_end,
+                           #hedr_uo_tempr_ctrl_prog_Ti_sp_end,
                            hedr_uo_tempr_ctrl_prog_time_val,
                            hedr_uo_tempr_ctrl_prog_time_unit,
-                           hedr_uo_tempr_ctrl_check]
+                           hedr_uo_tempr_ctrl_endpoint_check]
 """List of header items for unit operation temperature controle"""
 
 
@@ -472,7 +485,7 @@ opt_uo_tempr_ctrl_mode_TiTj = "Ti/Tj control"
 """Option for detail table: temperature control with single point Ti and Tj range"""
 opt_uo_tempr_ctrl_mode_Tj = "Tj control"
 """Option for detail table: temperature control on jacket temperature (single point)"""
-opt_uo_tempr_ctrl_mode_prog = "Temparature ramp"
+opt_uo_tempr_ctrl_mode_prog = "Programme"
 """Option for detail table: temperature ramping, cooling or heating with time constraint"""
 opt_uo_tempr_ctrl_mode_Ti = "Ti control"
 """Option for detail table: temperature control on liquid temperature (single point)"""
@@ -484,9 +497,14 @@ list_opt_uo_tempr_ctrl_mode = [opt_uo_tempr_ctrl_mode_TiTj,
 """List of a series of temperature control options"""
 
 list_opt_uo_tempr_ctrl_check_endpoint = list_yesno
+"""Options intended to be used to opt-in/out temperature end-point check."""
+
+list_opt_uo_tempr_ctrl_time_unit = list_time_unit
+"""Options intended to be used to choose time unit (seconds, minutes, hours)"""
 
 dict_opt_uo_tempr_ctrl = {hedr_uo_tempr_ctrl_mode : list_opt_uo_tempr_ctrl_mode,
-                          hedr_uo_tempr_ctrl_check : list_opt_uo_tempr_ctrl_check_endpoint}
+                          hedr_uo_tempr_ctrl_endpoint_check : list_opt_uo_tempr_ctrl_check_endpoint,
+                          hedr_uo_tempr_ctrl_prog_time_unit : list_opt_uo_tempr_ctrl_time_unit}
 """Dictionary for detail input form for the unit operation uo_tempr_ctrl"""
 
 
@@ -521,15 +539,33 @@ dict_opt_uo_tempr_ctrl = {hedr_uo_tempr_ctrl_mode : list_opt_uo_tempr_ctrl_mode,
 ################################################################
 
 tag_flow_cmn_rec_time = "tag_flow_cmn_time"
+"""Tag for a common flowsheet component to record a point of time some action is taken."""
 part_flow_cmn_rec_time_jp = '___:___' 
 """Common flowsheet component to record a point of time some action is taken."""
 
 tag_flow_cmn_rec_sign = "tag_flow_cmn_sign"
+"""Tag for a common flowsheet component for a signature"""
 part_flow_cmn_rec_sign_jp = '   /  /  _____'
 """Common flowsheet component for a signature"""
 
+tag_flow_cmn_time_unit_second = opt_second
+"""Tag for a common flowsheet component for an unit of time: second"""
+part_flow_cmn_time_unit_second = "秒"
+"""Common flowsheet component for an unit of time: second"""
+tag_flow_cmn_time_unit_minute = opt_minute
+"""Tag for a common flowsheet component for an unit of time: minute"""
+part_flow_cmn_time_unit_minute = "分"
+"""Common flowsheet component for an unit of time: minute"""
+tag_flow_cmn_time_unit_hour = opt_hour
+"""Tag for a common flowsheet component for an unit of time: hour"""
+part_flow_cmn_time_unit_hour = "時間"
+"""Common flowsheet component for an unit of time: hour"""
+
 dict_jp_part_flow_cmn = {tag_flow_cmn_rec_time : part_flow_cmn_rec_time_jp,
-                         tag_flow_cmn_rec_sign : part_flow_cmn_rec_sign_jp}
+                         tag_flow_cmn_rec_sign : part_flow_cmn_rec_sign_jp,
+                         tag_flow_cmn_time_unit_second : part_flow_cmn_time_unit_second,
+                         tag_flow_cmn_time_unit_minute : part_flow_cmn_time_unit_minute,
+                         tag_flow_cmn_time_unit_hour : part_flow_cmn_time_unit_hour}
 
 
 ################################################################
@@ -737,17 +773,63 @@ dict_jp_stcs_uo_innert = {tag_stc_flow_uo_innert_instr : stc_flow_uo_innert_inst
 #part_flow_<unit operation>_<sort: instr, rec, mthod, etc>_<descr>_<lang> = str
 #Follwed by 
 #dict_<lang>_part_flow_<unit operation> = {<tag> : <component loc. lang>}
-
+tag_part_flow_tempr_ctrl_title_tempr_config:str = "uo title tempr config"
+"""Tag for a flowsheet component: Unit operation title for temperature configuration."""
+part_flow_tempr_ctrl_title_tempr_config_jp:str = "温調開始"
+"""A flowsheet component: Unit operation title for temperature configuration (not complete heating/cooling)."""
+tag_part_flow_tempr_ctrl_title_compl_tempr_ctrl:str = "uo title tempr compl control"
+"""Tag for a flowsheet component: Unit operation title for complete temperature control."""
+part_flow_tempr_ctrl_title_temp_config_jp:str = "温調"
+"""A flowsheet component: Unit operation title for complete temperature control."""
+# tag_part_flow_tempr_ctrl_prog_mode:str = "instruct programme temp control mode"
+# """Tag for a flowsheet component: Instruction for progremme heating/cooling mode"""
+# part_flow_tempr_ctrl_prog_mode_jp:str = "プログラム温調する"
+# """A flowsheet component: Instruction for progremme heating/cooling mode"""
+tag_part_flow_tempr_ctrl_instr_init_temp_ctrl:str = "instr init temp ctrl"
+"""Tag for a flowsheet component: Instruction to activate temperature control."""
+part_flow_tempr_ctrl_instr_init_temp_ctrl_jp:str = "温調開始"
+"""A flowsheet component: Instruction to activate temperature control."""
+tag_part_flow_tempr_ctrl_instr_compl_temp_ctrl:str = "instr complete temp ctrl"
+"""Tag for a flowsheet component: Instrction to complete the temperature control."""
+part_flow_tempr_ctrl_instr_compl_temp_ctrl_jp:str = "温調終了"
+"""A flowsheet component: Instrction to complete the temperature control."""
+tag_part_flow_tempr_ctrl_instr_check_Ti_in_range:str = "instr check temp in range"
+"""Tag for a flowsheet component: Instrction to check if the Ti is in range."""
+part_flow_tempr_ctrl_instr_check_Ti_in_range_jp:str = "内温管理範囲内確認"
+"""A flowsheet component: Instrction to check if the Ti is in range."""
 tag_part_flow_tempr_ctrl_check_config:str = "check temp config"
 """Tag for a flowsheet part: check-box for temperature configuration."""
 part_flow_tempr_ctrl_check_config_jp:str = "□ 設定値確認"
 """A flow sheet part: check-box for temperature configuration."""
+tag_part_flow_tempr_ctrl_check_activate:str = "check temp control activated"
+"""Tag for a flowsheet part: check-box for activation of temperature control."""
+part_flow_tempr_ctrl_check_activate_jp:str = "□ 温調開始"
+"""A flow sheet part: check-box for activation of temperature control."""
 tag_part_flow_tempr_ctrl_check_endpoint:str = "check temp end point"
 """Tag for a flowsheet part: check-box for temperature end point"""
 part_flow_tempr_ctrl_check_endpoint_jp:str = "□ 温度到達確認"
 """A flow sheet part: check-box for temperature end point (reached)."""
-dict_jp_part_flow_tempr_ctrl = {tag_part_flow_tempr_ctrl_check_config : part_flow_tempr_ctrl_check_config_jp,
-                                tag_part_flow_tempr_ctrl_check_endpoint : part_flow_tempr_ctrl_check_endpoint_jp}
+tag_part_flow_tempr_ctrl_rec_Ti_ini:str = "rec Ti_ini"
+"""Tag for a flowsheet part: recrd field for initial Ti"""
+part_flow_tempr_ctrl_Ti_ini_jp:str = "温調開始時内温_______℃"
+"""A flow sheet part: recrd field for initial Ti"""
+tag_part_flow_tempr_ctrl_rec_Ti_end:str = "rec Ti_end"
+"""Tag for a flowsheet part: recrd field for end Ti"""
+part_flow_tempr_ctrl_Ti_end_jp:str = "温調完了時内温_______℃"
+"""A flow sheet part: recrd field for end Ti"""
+
+
+dict_jp_part_flow_tempr_ctrl = {tag_part_flow_tempr_ctrl_title_tempr_config : part_flow_tempr_ctrl_title_tempr_config_jp,
+                                tag_part_flow_tempr_ctrl_title_compl_tempr_ctrl : part_flow_tempr_ctrl_title_temp_config_jp,
+                                # tag_part_flow_tempr_ctrl_prog_mode : part_flow_tempr_ctrl_prog_mode_jp,
+                                tag_part_flow_tempr_ctrl_instr_init_temp_ctrl : part_flow_tempr_ctrl_instr_init_temp_ctrl_jp,
+                                tag_part_flow_tempr_ctrl_instr_compl_temp_ctrl : part_flow_tempr_ctrl_instr_compl_temp_ctrl_jp,
+                                tag_part_flow_tempr_ctrl_instr_check_Ti_in_range : part_flow_tempr_ctrl_instr_check_Ti_in_range_jp,
+                                tag_part_flow_tempr_ctrl_check_config : part_flow_tempr_ctrl_check_config_jp,
+                                tag_part_flow_tempr_ctrl_check_activate : part_flow_tempr_ctrl_check_activate_jp,
+                                tag_part_flow_tempr_ctrl_check_endpoint : part_flow_tempr_ctrl_check_endpoint_jp,
+                                tag_part_flow_tempr_ctrl_rec_Ti_ini : part_flow_tempr_ctrl_Ti_ini_jp,
+                                tag_part_flow_tempr_ctrl_rec_Ti_end : part_flow_tempr_ctrl_Ti_end_jp}
 """Japanese language dictionary for flowsheet parts for unit operation temperature control."""
 
 
@@ -763,12 +845,32 @@ stc_tempr_ctrl_Tj_sp_jp:str = "外温設定{Tj} ℃"
 """Sentence template for temperature control. Tj set point. Includes placeholder{Tj}"""
 tag_stc_tempr_ctrl_Ti_Tj_config:str = "Ti/Tj control"
 """Tag for an instruction sentence for temperature control. Ti/Tj configuration."""
-stc_tempr_ctrl_Ti_Tj_config_jp:str = "内外温制御: 内温{Ti} ℃、外温{Tj_low}～{Tj_high} ℃"
+stc_tempr_ctrl_Ti_Tj_config_jp:str = "内外温制御: 内温設定{Ti} ℃、外温範囲{Tj_low}～{Tj_high} ℃"
 """Sentence template for temperature control. Ti/Tj configuraiton. Includes placeholder{Ti}, {Tj_low}, and {Tj_high}"""
+tag_stc_tempr_ctrl_prog_mode:str = "configure programme mode"
+"""Tag for an instruction sentence for temperature control. Programme mode. Includes placeholder{Ti}, {Tj_low}, and {Tj_high}"""
+stc_tempr_ctrl_prog_mode_jp:str = "プログラム温調: 内温設定{Ti} ℃、外温範囲{Tj_low}～{Tj_high} ℃"
+"""Sentence template for temperature control. Programme mode. Includes placeholder{Ti}, {Tj_low}, and {Tj_high}"""
+tag_stc_tempr_ctrl_prog_duration_minimum:str = "minimum duration programme mode"
+"""Sentence template for temperature control. Time requirement for programme heating/cooling mode. Includes  placeholders {time_min} and {time_unit}."""
+stc_tempr_ctrl_prog_duration_minimum_jp:str = "温調時間: {time_min} {time_unit}以上"
+"""Sentence template for temperature control. Time requirement for programme heating/cooling mode. Includes  placeholders {time_min} and {time_unit}."""
 tag_stc_tempr_ctrl_Ti_range:str = "Ti range"
-"""Tag for an instruction sentence for temperature control. Ti range"""
+"""Tag for an instruction sentence for temperature control. Ti range. Includes placeholder {Ti_low} and {Ti_high}"""
 stc_tempr_ctrl_Ti_range_jp:str = "内温管理幅{Ti_low}～{Ti_high} ℃"
 """Sentence template for temperature control. Ti range. includes placeholder {Ti_low} and {Ti_high}"""
+tag_stc_tempr_ctrl_prog_term_Ti_range:str = "Programme mode terminal Ti range"
+"""Tag for an instruction sentence for temperature control. Programme mode terminal Ti range. Includes placeholder {Ti_low} and {Ti_high}"""
+stc_tempr_ctrl_prog_term_Ti_range_jp:str = "終点内温範囲{Ti_low}～{Ti_high} ℃"
+"""Sentence template for temperature control. Programme mode terminal Ti range. includes placeholder {Ti_low} and {Ti_high}"""
+tag_stc_tempr_ctrl_Ti_high_limit_only:str = "Ti upper limit only"
+"""Tag for an instruction sentence for temperature control. Ti upper limit only"""
+stc_tempr_ctrl_Ti_uo_limit_only_jp:str = "内温管理{Ti_high} ℃以下"
+"""Sentence template for temperature control. Ti upper limit only. includes placeholder {Ti_high}"""
+tag_stc_tempr_ctrl_Ti_low_limit_only:str = "Ti lower limit only"
+"""Tag for an instruction sentence for temperature control. Ti lower limit only"""
+stc_tempr_ctrl_Ti_low_limit_only_jp:str = "内温管理{Ti_low} ℃以下"
+"""Sentence template for temperature control. Ti lower limit only. includes placeholder {Ti_low}"""
 tag_stc_tempr_ctrl_Ti_tgt_range:str = "Ti tgt range"
 """Tag for an instruction sentence for temperature control. Ti target range"""
 stc_tempr_ctrl_Ti_tgt_range_jp:str = "内温目標幅{Ti_low}～{Ti_high} ℃"
@@ -777,11 +879,26 @@ tag_stc_tempr_ctrl_Ti_tgt_single:str = "Ti tgt sp"
 """Tag for an instruction sentence for temperature control. Ti target single point"""
 stc_tempr_ctrl_Ti_tgt_single_jp:str = "内温目標値{Ti} ℃"
 """Sentence template for temperature control. Ti target single point. includes placeholder {Ti}"""
+tag_stc_tempr_ctrl_Ti_spec_sp_single:str = "Ti spec sp"
+"""Tag for an instruction sentence for temperature control. Ti specification single point for Ti mode. Includes placeholder {Ti}"""
+stc_tempr_ctrl_Ti_spec_sp_single_jp:str = "内温設定値{Ti} ℃"
+"""Sentence template for temperature control. Ti specification single point for Ti mode. Includes placeholder {Ti}"""
+tag_stc_flow_tempr_ctrl_result_duration:str = "duration for temp control (result)"
+"""Tag for a record field for temperature control (cooling/heating) duration in a specic time unit. Includes a placeholder {time_unit}"""
+stc_flow_tempr_ctrl_result_duration:str = "温調時間_________{time_unit}"
+"""Sentence teomplate for a record field for temperature control (cooling/heating) duration in a specic time unit. Includes a placeholder {time_unit}"""
 dict_jp_stcs_tempr_ctrl = {tag_stc_tempr_ctrl_Tj_sp : stc_tempr_ctrl_Tj_sp_jp,
                            tag_stc_tempr_ctrl_Ti_Tj_config : stc_tempr_ctrl_Ti_Tj_config_jp,
+                           tag_stc_tempr_ctrl_prog_mode : stc_tempr_ctrl_prog_mode_jp,
+                           tag_stc_tempr_ctrl_prog_duration_minimum : stc_tempr_ctrl_prog_duration_minimum_jp,
+                           tag_stc_tempr_ctrl_prog_term_Ti_range : stc_tempr_ctrl_prog_term_Ti_range_jp,
                            tag_stc_tempr_ctrl_Ti_range : stc_tempr_ctrl_Ti_range_jp,
+                           tag_stc_tempr_ctrl_Ti_high_limit_only : stc_tempr_ctrl_Ti_uo_limit_only_jp,
+                           tag_stc_tempr_ctrl_Ti_low_limit_only : stc_tempr_ctrl_Ti_low_limit_only_jp,
                            tag_stc_tempr_ctrl_Ti_tgt_range : stc_tempr_ctrl_Ti_tgt_range_jp,
-                           tag_stc_tempr_ctrl_Ti_tgt_single : stc_tempr_ctrl_Ti_tgt_single_jp}
+                           tag_stc_tempr_ctrl_Ti_tgt_single : stc_tempr_ctrl_Ti_tgt_single_jp,
+                           tag_stc_tempr_ctrl_Ti_spec_sp_single : stc_tempr_ctrl_Ti_spec_sp_single_jp,
+                           tag_stc_flow_tempr_ctrl_result_duration : stc_flow_tempr_ctrl_result_duration}
 
 
 

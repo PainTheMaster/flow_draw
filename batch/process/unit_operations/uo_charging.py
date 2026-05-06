@@ -342,7 +342,7 @@ class Input:
             print(str(idx)+': '+defs.list_yesno[idx])
         print("> ", end='')
         specif_yesno = int(input())
-        if defs.list_yesno[specif_yesno] == defs.tag_yes:
+        if defs.list_yesno[specif_yesno] == defs.opt_yes:
             for idx in range(len(list_charging_method)):
                 print(str(idx)+': '+list_charging_method[idx])
             print("> ", end='')
