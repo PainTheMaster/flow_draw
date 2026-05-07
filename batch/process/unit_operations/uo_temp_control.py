@@ -65,7 +65,8 @@ hedr_Tj_limit_low:str = defs.hedr_uo_tempr_ctrl_Tj_limit_low
 """Detail heder item: Tj lower limit for Tj, Ti/Tj mode."""
 hedr_Tj_lmit_high:str = defs.hedr_uo_tempr_ctrl_Tj_limit_high
 """Detail heder item: Tj higher limit for Tj, Ti/Tj mode"""
-hedr_Ti_prog_sp_end:str = defs.hedr_uo_tempr_ctrl_prog_Ti_sp_end
+#hedr_Ti_prog_sp_end:str = defs.hedr_uo_tempr_ctrl_prog_Ti_sp_end
+#hedr_Ti_prog_sp_end:str = defs.hedr_uo_tempr_ctrl_Ti_sp #TODO check if this is needed. Now, programme mode uses just Ti_sp
 """Detail heder item: Ti end target for ramp mode"""
 hedr_prog_time_val:str = defs.hedr_uo_tempr_ctrl_prog_time_val
 """Detail heder item: Ramp up/down time value"""
@@ -152,7 +153,7 @@ tag_part_flow_instr_init_temp_ctrl:str = defs.tag_part_flow_tempr_ctrl_instr_ini
 """Tag for a flowsheet component: Instruction to activate temperature control."""
 tag_part_flow_instr_compl_temp_ctrl:str = defs.tag_part_flow_tempr_ctrl_instr_compl_temp_ctrl
 """Tag for a flowsheet component: Instrction to complete the temperature control."""
-tag_part_flow_instr_check_Ti_in_range:str = defs.tag_part_flow_tempr_ctrl_instfr_check_Ti_in_range
+tag_part_flow_instr_check_Ti_in_range:str = defs.tag_part_flow_tempr_ctrl_instr_check_Ti_in_range
 """Tag for a flowsheet component: Instrction to check if the Ti is in range."""
 tag_part_flow_check_config:str = defs.tag_part_flow_tempr_ctrl_check_config
 """Tag for a flowsheet part: check-box for temperature configuration."""

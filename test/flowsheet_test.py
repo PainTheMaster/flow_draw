@@ -7,6 +7,7 @@ import flow_draw.batch.process.unit_operations.uo_charging as chgng
 import flow_draw.batch.process.unit_operations.uo_placeholder as plchldr
 import flow_draw.batch.process.unit_operations.uo_line_clearance as lnclnc
 import flow_draw.batch.process.unit_operations.uo_innert_replacement as innert
+import flow_draw.batch.process.unit_operations.uo_temp_control as tempr
 import flow_draw.data_io.flowsheet  as fsht
 import flow_draw.materials.materials as mats
 import os
@@ -172,6 +173,23 @@ class UnitOperationOutputTest(unittest.TestCase):
         sheet.save(filename='Test1003_flowsheet_out.xlsx')
         self.assertTrue(True)
 
+    def test_1004_temp_ctrl(self):
+        sheet = fsht.Flowsheet()
+        uo_instance = tempr.TempControl(flowsheet=sheet, operation_seq=1)
+        uo_instance.ctrl_mode = tempr.opt_mode_prog
+        uo_instance.Ti_sp = 10.0
+        uo_instance.time_val_prog = 1.0
+        uo_instance.time_unit_prog = defs.tag_flow_cmn_time_unit_hour
+        uo_instance.Ti_limit_low = 5.0
+        uo_instance.Ti_limit_high = 15.0
+        uo_instance.Tj_limit_high = 30.0
+        uo_instance.Tj_limit_low = 0.0
+
+        uo_instance.output_unit_operation()
+        sheet.save(filename="Test1004_temp_prog_mode.xlsx")
+        self.assertTrue(True)
+        
+
 
 
 
@@ -182,7 +200,7 @@ def suite():
     suite = unittest.TestSuite()
     # suite.addTest(UnitOperationOutputTest("test_1001_placeholder"))
     #For the 2nd and likewise.... suite.addTest("something here")
-    suite.addTest(UnitOperationOutputTest("test_1003_innert_replace"))
+    suite.addTest(UnitOperationOutputTest("test_1004_temp_ctrl"))
     return suite
 
 
