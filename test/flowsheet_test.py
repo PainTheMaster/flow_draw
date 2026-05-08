@@ -3,6 +3,7 @@ import pandas as pd
 import flow_draw.definitions as defs
 import flow_draw.batch.batch as batch
 import flow_draw.batch.process.process as proc
+import flow_draw.batch.process.unit_operations.unit_operation as uo_module
 import flow_draw.batch.process.unit_operations.uo_charging as chgng
 import flow_draw.batch.process.unit_operations.uo_placeholder as plchldr
 import flow_draw.batch.process.unit_operations.uo_line_clearance as lnclnc
@@ -188,6 +189,30 @@ class UnitOperationOutputTest(unittest.TestCase):
         uo_instance.output_unit_operation()
         sheet.save(filename="Test1004_temp_prog_mode.xlsx")
         self.assertTrue(True)
+
+    def test_1005_temp_ctrl(self):
+        sheet = fsht.Flowsheet()
+        uo_instance = tempr.TempControl(flowsheet=sheet, operation_seq=1)
+        uo_instance.ctrl_mode = tempr.opt_mode_TiTj
+        uo_instance.pre_comment = "Pre-comment line-1\nPreComment line-2"
+        uo_instance.Ti_sp = 30.0
+
+        uo_instance.Tj_limit_low = 20.0
+        uo_instance.Tj_limit_high = 35.0
+        
+        uo_instance.Ti_limit_low = 25.0
+        uo_instance.Ti_limit_high = 35.0
+        
+        uo_instance.Ti_tgt_low = 27.5
+        uo_instance.Ti_tgt_high = 32.5
+
+        #uo_instance.endpoint_check = True
+
+        print(uo_module.list_unit_ops)
+
+        uo_instance.output_unit_operation()
+        sheet.save(filename="Test1005_temp_prog_mode.xlsx")
+        self.assertTrue(True)
         
 
 
@@ -200,7 +225,7 @@ def suite():
     suite = unittest.TestSuite()
     # suite.addTest(UnitOperationOutputTest("test_1001_placeholder"))
     #For the 2nd and likewise.... suite.addTest("something here")
-    suite.addTest(UnitOperationOutputTest("test_1004_temp_ctrl"))
+    suite.addTest(UnitOperationOutputTest("test_1005_temp_ctrl"))
     return suite
 
 
