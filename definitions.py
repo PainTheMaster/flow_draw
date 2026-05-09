@@ -515,7 +515,76 @@ dict_opt_uo_tempr_ctrl = {hedr_uo_tempr_ctrl_mode : list_opt_uo_tempr_ctrl_mode,
 ######################################################
 
                         #>>>>>>>>>>Detail table header items and list thereof <<<<<<<<<<<<<<
-#hedr_<unit operation>_<parameter> = str
+#hedr_<unit operation>_<parameter> = <str>
+#list_heder_<unit operation> = [<header item 0>,<header item 1>,...]
+
+hedr_uo_agitation_spec = "Specification"
+"""header item for the unit operation Agitation, the way the rotation rate is specified: specific rpm, guidance rpm, or discretion"""
+hedr_uo_agitation_rpm = "Rotation (rpm)"
+"""header item for the unit operation Agitation, specific rotation rate"""
+hedr_uo_agitation_Ti_min = "Ti_min (deg-C)"
+"""header item for the unit operation Agitation, specific Ti_min during agitation, optional"""
+hedr_uo_agitation_Ti_max= "Ti_max (deg-C)"
+"""header item for the unit operation Agitation, specific Ti_min during agitation, optional"""
+hedr_uo_agitation_time_min = "Minimum time"
+"""header item for the unit operation Agitation, minimum agitation time, optional"""
+hedr_uo_agitation_time_max = "Maximum time"
+"""header item for the unit operation Agitation, maximum agitation time, optional"""
+hedr_uo_agitation_time_unit = "Time unit"
+"""header item for the unit operation Agitation, second, minute, hour, day"""
+hedr_uo_agitation_dissolution_check = "Dissolution check"
+"""header item for the unit operation Agitation, need for dissolution check. bool"""
+
+list_hedr_uo_agitation = [hedr_uo_agitation_spec,
+                          hedr_uo_agitation_rpm,
+                          hedr_uo_agitation_Ti_min,
+                          hedr_uo_agitation_Ti_max,
+                          hedr_uo_agitation_time_min,
+                          hedr_uo_agitation_time_max,
+                          hedr_uo_agitation_time_unit,
+                          hedr_uo_agitation_dissolution_check]
+"""List of uo-specific heder items for the unit operation Agitation"""
+
+
+
+
+
+
+        #>>>>>>>>>>Option items, lists, and a dictionary for drop-down list in detail input form<<<<<<<<<<<<<<
+#opt_<unit operation>_<parameter>_<option> = str
+#list_opt_<unit operation>_<parameter> = [<option_0>, <option_1>, ...]
+#dict_opt_<unit operation> = {<heder_item1> : <option_list_1), ...}
+
+
+opt_uo_agitation_spec_specif = "Specific RPM"
+"""option for the header item 'spec'. Specifi RPM is provided by the user."""
+opt_uo_agitation_spec_guide = "Guidance RPM"
+"""option for the header item 'spec'. A guidance RPM is provided by the user."""
+opt_uo_agitation_spec_arbitrary = "arbitrary"
+"""option for the header item 'spec'. Agitation rate is adjuested on the shop floor at the operator's discretion."""
+list_opt_uo_agitation_spec = [opt_uo_agitation_spec_specif,
+                              opt_uo_agitation_spec_guide,
+                              opt_uo_agitation_spec_arbitrary]
+"""List of options for the header item agitation_spec"""
+
+list_opt_uo_agitation_time_unit = list_time_unit
+"""List of options for the header item agitation_time_unit"""
+
+list_opt_uo_agitation_dissolution_check = list_yesno
+"""List of options for the header item agitation_dissolution_check"""
+
+
+dict_opt_uo_agitation = {hedr_uo_agitation_spec : list_opt_uo_agitation_spec,
+                         hedr_uo_agitation_time_unit : list_opt_uo_agitation_time_unit,
+                         hedr_uo_agitation_dissolution_check : list_opt_uo_agitation_dissolution_check}
+
+
+######################################################
+##      <TEMPLATE> HEADER ITEMS AND OPTIONS      ##
+######################################################
+
+                        #>>>>>>>>>>Detail table header items and list thereof <<<<<<<<<<<<<<
+#hedr_<unit operation>_<parameter> = <str>
 #list_heder_<unit operation> = [<header item 0>,<header item 1>,...]
 
 
@@ -523,6 +592,7 @@ dict_opt_uo_tempr_ctrl = {hedr_uo_tempr_ctrl_mode : list_opt_uo_tempr_ctrl_mode,
 #opt_<unit operation>_<parameter>_<option> = str
 #list_opt_<unit operation>_<parameter> = [<option_0>, <option_1>, ...]
 #dict_opt_<unit operation> = {<heder_item1> : <option_list_1), ...}
+
 
 
 
@@ -913,6 +983,98 @@ dict_jp_stcs_tempr_ctrl = {tag_stc_tempr_ctrl_Tj_sp : stc_tempr_ctrl_Tj_sp_jp,
 #part_flow_<unit operation>_<sort: instr, rec, mthod, etc>_<descr>_<lang> = str
 #Follwed by 
 #dict_<lang>_part_flow_<unit operation> = {<tag> : <component loc. lang>}
+tag_part_flow_uo_agitation_title_disslnck:str = "agit dissolution check"
+"""Tag for a flowsheet component for uo_agitation: title for combined agitation and dissoltion check operation"""
+part_flow_uo_agitation_title_disslnck_jp:str = "攪拌・溶解確認"
+"""A flowsheet component for uo_agitation: title for combined agitation and dissoltion check operation"""
+tag_part_flow_uo_agitation_instr_rpm_arbitrary:str = "rpm_arbitrary"
+"""Tag for a flowsheet component for uo_agitation: instruction for totally arbitrary agitation rate"""
+part_flow_uo_agitation_instr_rpm_arbitrary_jp:str = "回転数: 現場調整"
+"""A flowsheet component for uo_agitation: instruction for totally arbitrary agitation rate"""
+tag_part_flow_uo_agitation_rec_chk_dissoln:str = "dissolution check"
+"""Tag for a flowsheet component for uo_agitation: check box for dissolution"""
+part_flow_uo_agitation_rec_chk_dissoln_jp:str = "□ 溶解確認"
+"""A flowsheet component for uo_agitation: check box for dissolution"""
+tag_part_flow_uo_agitation_rec_dissoln_Tj:str = "Tj at complete dissolution"
+"""Tag for a flowsheet component for uo_agitation: recording field for Tj at the time of dissolution"""
+part_flow_uo_agitation_rec_dissoln_Tj_jp:str = "溶解確認時外温:_________℃"
+"""A flowsheet component for uo_agitation: recording field for Tj at the time of dissolution"""
+tag_part_flow_uo_agitation_rec_dissoln_Ti:str = "Ti at complete dissolution"
+"""Tag for a flowsheet component for uo_agitation: recording field for Ti at the time of dissolution"""
+part_flow_uo_agitation_rec_dissoln_Ti_jp:str = "溶解確認時内温:_________℃"
+"""A flowsheet component for uo_agitation: recording field for Ti at the time of dissolution"""
+tag_part_flow_uo_agitation_rec_chk_agit_compl:str = "agit completed"
+"""Tag for a flowsheet component for uo_agitation: check box for agitation completion"""
+part_flow_uo_agitation_rec_chk_agit_compl_jp:str = "□ 攪拌完了"
+"""A flowsheet component for uo_agitation: check box for agitation completion"""
+dict_part_flow_uo_agitation_jp = {tag_part_flow_uo_agitation_title_disslnck : part_flow_uo_agitation_title_disslnck_jp,
+                                  tag_part_flow_uo_agitation_instr_rpm_arbitrary : part_flow_uo_agitation_instr_rpm_arbitrary_jp,
+                                  tag_part_flow_uo_agitation_rec_chk_dissoln : part_flow_uo_agitation_rec_chk_dissoln_jp,
+                                  tag_part_flow_uo_agitation_rec_dissoln_Tj : part_flow_uo_agitation_rec_dissoln_Tj_jp,
+                                  tag_part_flow_uo_agitation_rec_dissoln_Ti : part_flow_uo_agitation_rec_dissoln_Ti_jp,
+                                  tag_part_flow_uo_agitation_rec_chk_agit_compl : part_flow_uo_agitation_rec_chk_agit_compl_jp}
+"""Japanese lanugae dictionary for flowsheet part for the unit operation Agitation"""
+
+        #>>>>>>>>>>>>>> Template sentences for flow sheets in local language and tags (keys) thereof <<<<<<<<<<<<<<<<<<<
+#tag_stc_<unit operation>_<item> = tag
+#stc_<unit operation>_<item>_<lang> = <str with placeholder>
+#dict_<lang>_stcs_<unit operation> = {tag : sentence}
+"""Language dictionary for instruction SENTENCES with place holders 'min' and/or 'max'. Use str.format()"""
+
+tag_stc_flow_uo_agitation_rpm_spec :str = "component_tag_rpm_spec"
+"""Tag for a sentence for the unit operation Agitation: instruction for agitation at an specified agitation rate, includes a placeholder {rpm}"""
+stc_flow_uo_agitation_rpm_spec_jp :str = "攪拌速度: {rpm}rpm"
+"""Sentence for the unit operation Agitation: instruction for agitation at an specified agitation rate, includes a placeholder {rpm}"""
+tag_stc_flow_uo_agitation_rpm_guidance :str = "component_tag_rpm_guidance"
+"""Tag for a sentence for the unit operation Agitation: instruction for agitation with a guideline rate, includes a placeholder {rpm}"""
+stc_flow_uo_agitation_rpm_guidance_jp :str = "攪拌速度: 現場調整(目安{rpm}rpm)"
+"""Sentence for the unit operation Agitation: instruction for agitation with a guideline rate, includes a placeholder {rpm}"""
+tag_stc_flow_uo_agitation_temp_range :str = "agitation Ti range"
+"""Tag for a sentence for the unit operation Agitation: Instrction on temperature range. Includes placeholders {Ti_min} and {Ti_max}"""
+stc_flow_uo_agitation_temp_range_jp :str = "内温範囲:{Ti_min}～{Ti_max}℃"
+"""Sentence for the unit operation Agitation: Instrction on temperature range. Includes placeholders {Ti_min} and {Ti_max}"""
+tag_stc_flow_uo_agitation_temp_min :str = "agigation Ti minimum" 
+"""Tag for a sentence for the unit operation Agitation: Instruction on minimum temperature. Includes placeholder {Ti_min}"""
+stc_flow_uo_agitation_temmp_min_jp :str = "内温{Ti_min}以上"
+"""Sentence for the unit operation Agitation: Instruction on minimum temperature. Includes placeholder {Ti_min}"""
+tag_stc_flow_uo_agitation_temp_max :str = "agitation Ti max"
+"""Tag for a sentence for the unit operation Agitation: Instruction on maximum temperature. Includes placeholder {Ti_max}"""
+stc_flow_uo_agitation_temp_max_jp :str = "内温{Ti_min}以下"
+"""Sentence for the unit operation Agitation: """
+tag_stc_flow_uo_agitation_time_range :str = "agitation time range"
+"""Tag for a sentence for the unit operation Agitation: Instruction on agitation time range. Includes placeholders {time_min}, {time_max} , and {time_unit}"""
+stc_flow_uo_agitation_time_range_jp :str = "攪拌継続{time_min}～{time_max} {time_unit}"
+"""Sentence for the unit operation Agitation: Instruction on agitation time range. Includes placeholders {time_min}, {time_max}, and {time_unit}"""
+tag_stc_flow_uo_agitation_time_min :str = "agitation minimum time"
+"""Tag for a sentence for the unit operation Agitation: Instruction on minimum agitation time. Includes placeholders {time_min} and {time_unit}"""
+stc_flow_uo_agitation_time_min_jp :str = "攪拌継続{time_min} {time_unit}以上"
+"""Sentence for the unit operation Agitation: Instruction on minimum agitation time. Includes {time_min} and {time_unit}"""
+tag_stc_flow_uo_agitation_time_max :str = "agitation maximum time"
+"""Tag for a sentence for the unit operation Agitation: Instruction on maximum agitation time. Includes {time_max} and {time_unit}"""
+stc_flow_uo_agitation_time_max_jp :str = "攪拌継続{time_max} {time_unit}以下"
+"""Sentence for the unit operation Agitation:  Instruction on maximum agitation time. Includes {time_max} and {time_unit}"""
+
+dict_jp_stcs_uo_agitation = {tag_stc_flow_uo_agitation_rpm_spec : stc_flow_uo_agitation_rpm_spec_jp,
+                             tag_stc_flow_uo_agitation_rpm_guidance : stc_flow_uo_agitation_rpm_guidance_jp,
+                             tag_stc_flow_uo_agitation_temp_range : stc_flow_uo_agitation_temp_range_jp,
+                             tag_stc_flow_uo_agitation_temp_min : stc_flow_uo_agitation_temmp_min_jp,
+                             tag_stc_flow_uo_agitation_temp_max : stc_flow_uo_agitation_temp_max_jp,
+                             tag_stc_flow_uo_agitation_time_range : stc_flow_uo_agitation_time_range_jp,
+                             tag_stc_flow_uo_agitation_time_min : stc_flow_uo_agitation_time_min_jp,
+                             tag_stc_flow_uo_agitation_time_max : stc_flow_uo_agitation_time_max_jp}
+"""Japanese language dictionary for sentences for flowsheet for the unit operation Agitation"""
+
+###################################################
+#        PARTS FOR <unit operation>               #
+###################################################
+
+        #>>>>>>>>>>>>>> flowsheet compoentns in local language and tags (keys) thereof <<<<<<<<<<<<<<<<<<<
+
+#sets of:
+#tag_part_flow_<unit operation>_<sort: instr, rec, mthod, etc>_<descr> = str
+#part_flow_<unit operation>_<sort: instr, rec, mthod, etc>_<descr>_<lang> = str
+#Follwed by 
+#dict_<lang>_part_flow_<unit operation> = {<tag> : <component loc. lang>}
 
 
         #>>>>>>>>>>>>>> Template sentences for flow sheets in local language and tags (keys) thereof <<<<<<<<<<<<<<<<<<<
@@ -920,7 +1082,6 @@ dict_jp_stcs_tempr_ctrl = {tag_stc_tempr_ctrl_Tj_sp : stc_tempr_ctrl_Tj_sp_jp,
 #stc_stc_<unit operation>_<item>_<lang> = <str with placeholder>
 #dict_<lang>_stcs_<unit operation> = {tag : sentence}
 """Language dictionary for instruction SENTENCES with place holders 'min' and/or 'max'. Use str.format()"""
-
 
 
 

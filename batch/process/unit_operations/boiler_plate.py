@@ -16,9 +16,23 @@ from flow_draw.trait_def import trait_def as trdef
 #########################################################
 # Common items: headers etc
 #########################################################
-header_precomment = defs.hedr_cmn_io_dtil_precmnt #Don't include this in the specific header list!!!
-header_postcomment = defs.hedr_cmn_io_dtil_postcmnt #Don't include this in the specific header list!!!
+hedr_precomment:str = defs.hedr_cmn_io_dtil_precmnt #Don't include this in the specific header list!!!
+"""A common header item: header for unit operation precomment"""
+hedr_postcomment:str = defs.hedr_cmn_io_dtil_postcmnt #Don't include this in the specific header list!!!
+"""A common header item: header for unit operation postcomment"""
 
+        #### Common option items for the detail input table #####
+opt_yes:str = defs.opt_yes
+"""Affirmative option for various user choice."""
+opt_no: str = defs.opt_no
+"""Negative option for various user coice"""
+
+opt_time_unit_second:str = defs.tag_flow_cmn_time_unit_second
+"""Tag for a common flowsheet component for an unit of time: second"""
+opt_time_unit_minute:str = defs.tag_flow_cmn_time_unit_minute
+"""Tag for a common flowsheet component for an unit of time: minute"""
+opt_time_unit_hour:str = defs.tag_flow_cmn_time_unit_hour
+"""Tag for a common flowsheet component for an unit of time: hour"""
 
 #########################################################
 # UO-specific hader items and list thereof
