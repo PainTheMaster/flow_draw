@@ -511,7 +511,7 @@ dict_opt_uo_tempr_ctrl = {hedr_uo_tempr_ctrl_mode : list_opt_uo_tempr_ctrl_mode,
 
 
 ######################################################
-##      <TEMPLATE> HEADER ITEMS AND OPTIONS      ##
+##      UO_AGITATION HEADER ITEMS AND OPTIONS      ##
 ######################################################
 
                         #>>>>>>>>>>Detail table header items and list thereof <<<<<<<<<<<<<<

@@ -54,23 +54,29 @@ opt_time_unit_hour:str = defs.tag_flow_cmn_time_unit_hour
 #########################################################
 # signal -> local language dictionary and tags for it
 #########################################################
-#lang_dict_uo_titles = defs.dict_jp_part_uo_titles
+lang_dict_uo_titles = defs.dict_jp_part_uo_titles
 
 
-#Tags (keys) for translation of common parts 
-tag_flow_cmn_rec_time = defs.tag_flow_cmn_rec_time
+        ##### Tags (keys) for translation of common parts ####
+tag_flow_cmn_rec_time:str = defs.tag_flow_cmn_rec_time
 """The key to the time-recording field for the flowsheet, a common item."""
-tag_flow_cmn_rec_sign = defs.tag_flow_cmn_rec_sign
+tag_flow_cmn_rec_sign:str = defs.tag_flow_cmn_rec_sign
 """The key to the ignature field for the flowsheet, a common item."""
-lang_dict_cmn = defs.dict_jp_part_flow_cmn
+tag_flow_cmn_time_unit_second = opt_time_unit_second
+"""Tag for a common flowsheet component for an unit of time: second"""
+tag_flow_cmn_time_unit_minute = opt_time_unit_minute
+"""Tag for a common flowsheet component for an unit of time: minute"""
+tag_flow_cmn_time_unit_hour = opt_time_unit_hour
+"""Tag for a common flowsheet component for an unit of time: hour"""
+lang_dict_cmn:dict[str, str] = defs.dict_jp_part_flow_cmn
 """
 Language dictionary for common parts.
     tag_flow_cmn_rec_time : part_flow_cmn_rec_time_jp,
     tag_flow_cmn_rec_sign : part_flow_cmn_rec_sign_jp
+    tag_flow_cmn_time_unit_second : part_flow_cmn_time_unit_second,
+    tag_flow_cmn_time_unit_minute : part_flow_cmn_time_unit_minute,
+    tag_flow_cmn_time_unit_hour : part_flow_cmn_time_unit_hour
 """
-
-#lang_dict_<this unit operation> = defs.dict_jp_part_<this unit operation>
-
 
 #########################################################
 # Class (uo.UnitOperation, uo_tag=defs.tag_uo_<UO_NAME>)
@@ -98,10 +104,10 @@ Language dictionary for common parts.
         """
 
         first_row = df.iloc[0]
-        if not pd.isna(first_row[header_precomment]):
-            self.pre_comment = first_row[header_precomment]
-        if not pd.isna(first_row[header_postcomment]):
-            self.post_comment = first_row[header_postcomment]
+        if not pd.isna(first_row[hedr_precomment]):
+            self.pre_comment = first_row[hedr_precomment]
+        if not pd.isna(first_row[hedr_postcomment]):
+            self.post_comment = first_row[hedr_postcomment]
         for _, subitem in df.iterrows():
             #<uo-specific process>
 
