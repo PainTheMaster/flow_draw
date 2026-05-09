@@ -174,7 +174,7 @@ class UnitOperationOutputTest(unittest.TestCase):
         sheet.save(filename='Test1003_flowsheet_out.xlsx')
         self.assertTrue(True)
 
-    def test_1004_temp_ctrl(self):
+    def test_1004_temp_ctrl_prog_mode(self):
         sheet = fsht.Flowsheet()
         uo_instance = tempr.TempControl(flowsheet=sheet, operation_seq=1)
         uo_instance.ctrl_mode = tempr.opt_mode_prog
@@ -190,13 +190,13 @@ class UnitOperationOutputTest(unittest.TestCase):
         sheet.save(filename="Test1004_temp_prog_mode.xlsx")
         self.assertTrue(True)
 
-    def test_1005_temp_ctrl(self):
+    def test_1005_temp_ctrl_TiTj_mode(self):
         sheet = fsht.Flowsheet()
         uo_instance = tempr.TempControl(flowsheet=sheet, operation_seq=1)
         uo_instance.ctrl_mode = tempr.opt_mode_TiTj
         uo_instance.pre_comment = "Pre-comment line-1\nPreComment line-2"
         uo_instance.Ti_sp = 30.0
-
+        uo_instance.time_unit_prog = defs.tag_flow_cmn_time_unit_hour
         uo_instance.Tj_limit_low = 20.0
         uo_instance.Tj_limit_high = 35.0
         
@@ -206,18 +206,60 @@ class UnitOperationOutputTest(unittest.TestCase):
         uo_instance.Ti_tgt_low = 27.5
         uo_instance.Ti_tgt_high = 32.5
 
-        #uo_instance.endpoint_check = True
+        uo_instance.endpoint_check = True
 
         print(uo_module.list_unit_ops)
 
         uo_instance.output_unit_operation()
-        sheet.save(filename="Test1005_temp_prog_mode.xlsx")
+        sheet.save(filename="Test1005_temp_TiTj_mode.xlsx")
         self.assertTrue(True)
         
+    def test_1006_temp_ctrl_Tj_mode(self):
+        sheet = fsht.Flowsheet()
+        uo_instance = tempr.TempControl(flowsheet=sheet, operation_seq=1)
+        uo_instance.ctrl_mode = tempr.opt_mode_Tj
+        uo_instance.pre_comment = "Pre-comment line-1\nPreComment line-2"
+        uo_instance.Ti_sp = 30.0
+
+        uo_instance.Tj_sp = 30.0
+        
+        # uo_instance.Ti_limit_low = 25.0
+        # uo_instance.Ti_limit_high = 35.0
+        
+        # uo_instance.Ti_tgt_low = 27.5
+        # uo_instance.Ti_tgt_high = 30.0
+
+        uo_instance.endpoint_check = True
+
+        # print(uo_module.list_unit_ops)
+
+        uo_instance.output_unit_operation()
+        sheet.save(filename="Test1006_tempr_Tj_mode.xlsx")
+        self.assertTrue(True)
 
 
+    def test_1007_temp_ctrl_Ti_mode(self):
+        sheet = fsht.Flowsheet()
+        uo_instance = tempr.TempControl(flowsheet=sheet, operation_seq=1)
+        uo_instance.ctrl_mode = tempr.opt_mode_Ti
+        uo_instance.pre_comment = "Pre-comment line-1\nPreComment line-2"
+        uo_instance.Ti_sp = 40.0
 
+        uo_instance.Tj_sp = 30.0
+        
+        uo_instance.Ti_limit_low = 35.0
+        uo_instance.Ti_limit_high = 45.0
+        
+        uo_instance.Ti_tgt_low = 37.5
+        uo_instance.Ti_tgt_high = 42.5
 
+        uo_instance.endpoint_check = True
+
+        # print(uo_module.list_unit_ops)
+
+        uo_instance.output_unit_operation()
+        sheet.save(filename="Test1007_tempr_Ti_mode.xlsx")
+        self.assertTrue(True)
 
 
 
@@ -225,7 +267,10 @@ def suite():
     suite = unittest.TestSuite()
     # suite.addTest(UnitOperationOutputTest("test_1001_placeholder"))
     #For the 2nd and likewise.... suite.addTest("something here")
-    suite.addTest(UnitOperationOutputTest("test_1005_temp_ctrl"))
+    suite.addTest(UnitOperationOutputTest("test_1004_temp_ctrl_prog_mode"))
+    suite.addTest(UnitOperationOutputTest("test_1005_temp_ctrl_TiTj_mode"))
+    suite.addTest(UnitOperationOutputTest("test_1006_temp_ctrl_Tj_mode"))
+    suite.addTest(UnitOperationOutputTest("test_1007_temp_ctrl_Ti_mode"))
     return suite
 
 

@@ -313,7 +313,6 @@ class TempControl(uo.UnitOperation, uo_tag=defs.tag_uo_tempr_ctrl):
 
 
     def __put_TiTj_mode(self):
-
         stc_spec:str = None
         if self.Ti_limit_low is None and self.Ti_limit_high is None:
             raise ValueError(f"{self.__class__.__name__}: Op. Seq. {self.operation_seq} Ti limit not specified in the input form for Ti/Tj control mode.")
@@ -336,43 +335,84 @@ class TempControl(uo.UnitOperation, uo_tag=defs.tag_uo_tempr_ctrl):
         else:
             stc_target = lang_dict_stcs[tag_stc_Ti_tgt_range].format(Ti_low=self.Ti_tgt_low , Ti_high=self.Ti_tgt_high)
         
-        stc_concat:str = None
+        stc_concat_ranges:str = None
         if stc_target is None:
-            stc_concat = stc_spec
+            stc_concat_ranges = stc_spec
         else:
-            stc_concat = stc_spec+" ("+stc_target+")"
+            stc_concat_ranges = stc_spec+" ("+stc_target+")"
 
 
         self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
+                                method=lang_dict_parts_flow[tag_part_flow_instr_init_temp_ctrl],
                                 content=lang_dict_stcs[tag_stc_Ti_Tj_config].format(Ti=self.Ti_sp, Tj_low=self.Tj_limit_low, Tj_high=self.Tj_limit_high),
                                 record=lang_dict_parts_flow[tag_part_flow_check_config],
                                 operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
                                 witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
-        self.flowsheet.put_line(content=stc_concat,
+        self.flowsheet.put_line(content=stc_concat_ranges,
                                 record=lang_dict_parts_flow[tag_part_flow_rec_Ti_ini])
-        
-        if self.endpoint_check:
-            self.flowsheet.linefeed()
-            self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
-                                    content=lang_dict_parts_flow[tag_part_flow_instr_check_Ti_in_range],
-                                    record=lang_dict_parts_flow[tag_part_flow_check_endpoint],
-                                    operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
-                                    witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
+        self.flowsheet.linefeed()
+        # if self.endpoint_check:
+        #     self.flowsheet.linefeed()
+        #     self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
+        #                             content=lang_dict_parts_flow[tag_part_flow_instr_check_Ti_in_range],
+        #                             record=lang_dict_parts_flow[tag_part_flow_check_endpoint],
+        #                             operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
+        #                             witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
 
     def __put_Tj_mode(self):
-        sentence:str = None
+        sentence_Tj:str = None
         if self.Tj_sp is None:
             raise ValueError(f"{self.__class__.__name__}: Op. Seq. {self.operation_seq} Tj not specified in the input form for Tj control mode.")
         else:
-            sentence = lang_dict_stcs[tag_stc_Tj_sp].format(Tj=self.Tj_sp)
+            sentence_Tj = lang_dict_stcs[tag_stc_Tj_sp].format(Tj=self.Tj_sp)
+        
+        stc_spec_Ti:str = None
+        if self.Ti_limit_low is None and self.Ti_limit_high is None:
+            pass
+        elif self.Ti_limit_low is not None and self.Ti_limit_high is None:
+            stc_spec_Ti = lang_dict_stcs[tag_stc_Ti_low_limit_only].format(Ti_low=self.Ti_limit_low)
+        elif self.Ti_limit_low is None and self.Ti_limit_high is not None:
+            stc_spec_Ti = lang_dict_stcs[tag_stc_Ti_high_limit_only].format(Ti_high=self.Ti_limit_high)
+        else:
+            stc_spec_Ti = lang_dict_stcs[tag_stc_Ti_range].format(Ti_low=self.Ti_limit_low, Ti_high=self.Ti_limit_high)
+
+        stc_target_Ti:str = None        
+        if self.Ti_tgt_low is None and self.Ti_tgt_high is None:
+            pass
+        elif self.Ti_tgt_low is not None and self.Ti_tgt_high is None:
+            stc_target_Ti = lang_dict_stcs[tag_stc_Ti_tgt_single].format(Ti=self.Ti_tgt_low)
+        elif self.Ti_tgt_low is None and self.Ti_tgt_high is not None:
+            stc_target_Ti = lang_dict_stcs[tag_stc_Ti_tgt_single].format(Ti=self.Ti_tgt_high)
+        elif self.Ti_tgt_low == self.Ti_tgt_high:
+            stc_target_Ti = lang_dict_stcs[tag_stc_Ti_tgt_single].format(Ti=self.Ti_tgt_high)
+        else:
+            stc_target_Ti = lang_dict_stcs[tag_stc_Ti_tgt_range].format(Ti_low=self.Ti_tgt_low , Ti_high=self.Ti_tgt_high)
+        
+        stc_concat_Ti_ranges:str = None
+        if stc_spec_Ti is None and stc_target_Ti is None:
+            pass
+        elif stc_spec_Ti is not None and stc_target_Ti is None:
+            stc_concat_Ti_ranges = stc_spec_Ti
+        elif stc_spec_Ti is None and stc_target_Ti is not None:
+            stc_concat_Ti_ranges = stc_target_Ti
+        else:
+            stc_concat_Ti_ranges = stc_spec_Ti+" ("+stc_target_Ti+")"
+        
         self.flowsheet.put_line(time = lang_dict_cmn[tag_flow_cmn_rec_time],
-                                content=sentence,
+                                method=lang_dict_parts_flow[tag_part_flow_instr_init_temp_ctrl],
+                                content=sentence_Tj,
                                 record=lang_dict_parts_flow[tag_part_flow_check_config],
                                 operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
                                 witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
+        if stc_concat_Ti_ranges is None:
+            self.flowsheet.put_line(record=lang_dict_parts_flow[tag_part_flow_rec_Ti_ini])
+        else:
+            self.flowsheet.put_line(content=stc_concat_Ti_ranges,
+                                    record=lang_dict_parts_flow[tag_part_flow_rec_Ti_ini])
         self.flowsheet.linefeed()
 
     def __put_programme_mode(self):
+        self.endpoint_check = True
         instr_main_sentence:str = None
         if self.Ti_sp is None:
             raise ValueError(f"{self.__class__.__name__}: Op. Seq. {self.operation_seq} Ti set point not specified in the input form for programme temperature control mode.")
@@ -389,7 +429,7 @@ class TempControl(uo.UnitOperation, uo_tag=defs.tag_uo_tempr_ctrl):
         elif self.time_unit_prog is None:
             raise ValueError(f"{self.__class__.__name__}: Op. Seq. {self.operation_seq} ramp time unit for temperature control not specified in the input form for programme control mode.")
         else:
-            instr_ramp_time_sentence = lang_dict_stcs[tag_stc_prog_duration_minimum].format(time_min=self.time_val_prog, time_unit=self.time_unit_prog)
+            instr_ramp_time_sentence = lang_dict_stcs[tag_stc_prog_duration_minimum].format(time_min=self.time_val_prog, time_unit=lang_dict_cmn[self.time_unit_prog])
         
         instr_Ti_range:str = None
         if self.Ti_limit_low is None:
@@ -407,32 +447,72 @@ class TempControl(uo.UnitOperation, uo_tag=defs.tag_uo_tempr_ctrl):
                                 witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
         self.flowsheet.put_line(content=instr_ramp_time_sentence,
                                 record=lang_dict_parts_flow[tag_part_flow_check_activate])
-        self.flowsheet.put_line(content=instr_Ti_range)
-        self.flowsheet.put_line(record=lang_dict_parts_flow[tag_part_flow_rec_Ti_ini])
+        self.flowsheet.put_line(content=instr_Ti_range,
+                                record=lang_dict_parts_flow[tag_part_flow_rec_Ti_ini])
+        # self.flowsheet.put_line(record=lang_dict_parts_flow[tag_part_flow_rec_Ti_ini])
         self.flowsheet.linefeed()
-        self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
-                                method=lang_dict_parts_flow[tag_part_flow_instr_compl_temp_ctrl],
-                                content=lang_dict_parts_flow[tag_part_flow_instr_check_Ti_in_range],
-                                record=lang_dict_parts_flow[tag_part_flow_check_endpoint],
-                                operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
-                                witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
-        self.flowsheet.put_line(record=lang_dict_stcs[tag_stc_duration].format(time_unit=self.time_unit_prog))
-        self.flowsheet.put_line(record=lang_dict_parts_flow[tag_part_flow_rec_Ti_end])
+        # self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
+        #                         method=lang_dict_parts_flow[tag_part_flow_instr_compl_temp_ctrl],
+        #                         content=lang_dict_parts_flow[tag_part_flow_instr_check_Ti_in_range],
+        #                         record=lang_dict_parts_flow[tag_part_flow_check_endpoint],
+        #                         operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
+        #                         witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
+        # self.flowsheet.put_line(record=lang_dict_stcs[tag_stc_duration].format(time_unit=self.time_unit_prog))
+        # self.flowsheet.put_line(record=lang_dict_parts_flow[tag_part_flow_rec_Ti_end])
 
 
 
 
     def __put_Ti_mode(self):
-        sentence:str = None
+        sentence_sp_Ti:str = None
         if self.Ti_sp is None:
             raise ValueError(f"{self.__class__.__name__}: Op. Seq. {self.operation_seq} Ti not specified in the input form for Ti control mode.")
         else:
-            sentence = lang_dict_stcs[tag_stc_Ti_spec_sp_single].format(Ti=self.Ti_sp)
+            sentence_sp_Ti = lang_dict_stcs[tag_stc_Ti_spec_sp_single].format(Ti=self.Ti_sp)
+        
+        stc_spec_Ti:str = None
+        if self.Ti_limit_low is None and self.Ti_limit_high is None:
+            pass
+        elif self.Ti_limit_low is not None and self.Ti_limit_high is None:
+            stc_spec_Ti = lang_dict_stcs[tag_stc_Ti_low_limit_only].format(Ti_low=self.Ti_limit_low)
+        elif self.Ti_limit_low is None and self.Ti_limit_high is not None:
+            stc_spec_Ti = lang_dict_stcs[tag_stc_Ti_high_limit_only].format(Ti_high=self.Ti_limit_high)
+        else:
+            stc_spec_Ti = lang_dict_stcs[tag_stc_Ti_range].format(Ti_low=self.Ti_limit_low, Ti_high=self.Ti_limit_high)
+
+        stc_target_Ti:str = None        
+        if self.Ti_tgt_low is None and self.Ti_tgt_high is None:
+            pass
+        elif self.Ti_tgt_low is not None and self.Ti_tgt_high is None:
+            stc_target_Ti = lang_dict_stcs[tag_stc_Ti_tgt_single].format(Ti=self.Ti_tgt_low)
+        elif self.Ti_tgt_low is None and self.Ti_tgt_high is not None:
+            stc_target_Ti = lang_dict_stcs[tag_stc_Ti_tgt_single].format(Ti=self.Ti_tgt_high)
+        elif self.Ti_tgt_low == self.Ti_tgt_high:
+            stc_target_Ti = lang_dict_stcs[tag_stc_Ti_tgt_single].format(Ti=self.Ti_tgt_high)
+        else:
+            stc_target_Ti = lang_dict_stcs[tag_stc_Ti_tgt_range].format(Ti_low=self.Ti_tgt_low , Ti_high=self.Ti_tgt_high)
+        
+        stc_concat_Ti_ranges:str = None
+        if stc_spec_Ti is None and stc_target_Ti is None:
+            pass
+        elif stc_spec_Ti is not None and stc_target_Ti is None:
+            stc_concat_Ti_ranges = stc_spec_Ti
+        elif stc_spec_Ti is None and stc_target_Ti is not None:
+            stc_concat_Ti_ranges = stc_target_Ti
+        else:
+            stc_concat_Ti_ranges = stc_spec_Ti+" ("+stc_target_Ti+")"
+
         self.flowsheet.put_line(time = lang_dict_cmn[tag_flow_cmn_rec_time],
-                                content=sentence,
+                                method=lang_dict_parts_flow[tag_part_flow_instr_init_temp_ctrl],
+                                content=sentence_sp_Ti,
                                 record=lang_dict_parts_flow[tag_part_flow_check_config],
                                 operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
                                 witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
+        if stc_concat_Ti_ranges is None:
+            self.flowsheet.put_line(record=lang_dict_parts_flow[tag_part_flow_rec_Ti_ini])
+        else:
+            self.flowsheet.put_line(content=stc_concat_Ti_ranges,
+                                    record=lang_dict_parts_flow[tag_part_flow_rec_Ti_ini])
         self.flowsheet.linefeed()
 
     def get_detail_header(self) -> list[str]:
@@ -462,6 +542,20 @@ class TempControl(uo.UnitOperation, uo_tag=defs.tag_uo_tempr_ctrl):
         elif self.ctrl_mode == opt_mode_Ti:
             self.__put_Ti_mode()
 
+        if self.endpoint_check:
+            self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
+                                    method=lang_dict_parts_flow[tag_part_flow_instr_compl_temp_ctrl],
+                                    content=lang_dict_parts_flow[tag_part_flow_instr_check_Ti_in_range],
+                                    record=lang_dict_parts_flow[tag_part_flow_check_endpoint],
+                                    operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
+                                    witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
+            if self.time_unit_prog is not None:
+                self.flowsheet.put_line(record=lang_dict_stcs[tag_stc_duration].format(time_unit=lang_dict_cmn[self.time_unit_prog]))
+            else:
+                self.flowsheet.put_line(record=lang_dict_stcs[tag_stc_duration].format(time_unit=lang_dict_cmn[opt_time_unit_minute]))
+            self.flowsheet.put_line(record=lang_dict_parts_flow[tag_part_flow_rec_Ti_end])
+            self.flowsheet.linefeed()
+                        
         if not (self.post_comment == None or self.post_comment == ''):
             self.flowsheet.put_body_comments(self.post_comment)
             self.flowsheet.linefeed()
