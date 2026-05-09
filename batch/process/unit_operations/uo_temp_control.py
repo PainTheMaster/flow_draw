@@ -331,6 +331,8 @@ class TempControl(uo.UnitOperation, uo_tag=defs.tag_uo_tempr_ctrl):
             stc_target = lang_dict_stcs[tag_stc_Ti_tgt_single].format(Ti=self.Ti_tgt_low)
         elif self.Ti_tgt_low is None and self.Ti_tgt_high is not None:
             stc_target = lang_dict_stcs[tag_stc_Ti_tgt_single].format(Ti=self.Ti_tgt_high)
+        elif self.Ti_tgt_low == self.Ti_tgt_high:
+            stc_target = lang_dict_stcs[tag_stc_Ti_tgt_single].format(Ti=self.Ti_tgt_high)
         else:
             stc_target = lang_dict_stcs[tag_stc_Ti_tgt_range].format(Ti_low=self.Ti_tgt_low , Ti_high=self.Ti_tgt_high)
         
@@ -441,7 +443,7 @@ class TempControl(uo.UnitOperation, uo_tag=defs.tag_uo_tempr_ctrl):
     
     def output_unit_operation(self):
         uo_title: str = None
-        if self.endpoint_check:
+        if self.endpoint_check or self.ctrl_mode == opt_mode_prog:
             uo_title = lang_dict_parts_flow[tag_part_flow_title_compl_tempr_ctrl]
         else:
             uo_title = lang_dict_parts_flow[tag_part_flow_title_tempr_config]
