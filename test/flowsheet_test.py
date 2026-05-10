@@ -10,6 +10,7 @@ import flow_draw.batch.process.unit_operations.uo_line_clearance as lnclnc
 import flow_draw.batch.process.unit_operations.uo_innert_replacement as innert
 import flow_draw.batch.process.unit_operations.uo_temp_control as tempr
 import flow_draw.batch.process.unit_operations.uo_agitation as agit
+import flow_draw.batch.process.unit_operations.uo_settling as stlng
 import flow_draw.data_io.flowsheet  as fsht
 import flow_draw.materials.materials as mats
 import os
@@ -293,6 +294,31 @@ class UnitOperationOutputTest(unittest.TestCase):
         self.assertTrue(True)
 
 
+    def test_1010_settling_full(self):
+        sheet = fsht.Flowsheet()
+        uo_instance = stlng.Settling(flowsheet=sheet, operation_seq=1)
+        uo_instance.time_min = 1.0
+        uo_instance.time_max = 1.0
+        uo_instance.time_unit = stlng.opt_time_unit_second
+        uo_instance.Ti_min = 20.0
+        uo_instance.Ti_max = 30.0
+
+        print(uo_module.list_unit_ops)
+
+        uo_instance.output_unit_operation()
+        sheet.save(filename="Test1010_settling_full.xlsx")
+        self.assertTrue(True)
+
+    def test_1011_settling_minimal(self):
+        sheet = fsht.Flowsheet()
+        uo_instance = stlng.Settling(flowsheet=sheet, operation_seq=1)
+
+        print(uo_module.list_unit_ops)
+
+        uo_instance.output_unit_operation()
+        sheet.save(filename="Test1011_settling_minimal.xlsx")
+        self.assertTrue(True)
+
 
 
 def suite():
@@ -304,7 +330,8 @@ def suite():
     # suite.addTest(UnitOperationOutputTest("test_1006_temp_ctrl_Tj_mode"))
     # suite.addTest(UnitOperationOutputTest("test_1007_temp_ctrl_Ti_mode"))
     suite.addTest(UnitOperationOutputTest("test_1008_agit_full"))
-    suite.addTest(UnitOperationOutputTest("test_1009_agit_minimal"))
+    suite.addTest(UnitOperationOutputTest("test_1010_settling_full"))
+    suite.addTest(UnitOperationOutputTest("test_1011_settling_minimal"))
     return suite
 
 

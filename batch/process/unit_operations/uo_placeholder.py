@@ -67,7 +67,7 @@ class Placeholder(uo.UnitOperation, uo_tag=defs.tag_uo_placeholder):
                  operation_seq:int = None,
                  num_subitems:int = None,
                  edit_comment:str = None):
-        super().__init__(caller=caller, flowsheet=flowsheet, operation_seq=operation_seq, num_subitems=num_subitems, edit_comment=edit_comment)
+        super().__init__(caller=caller, flowsheet=flowsheet, operation_seq=operation_seq, num_subitems=1, edit_comment=edit_comment)
         self.num_lines: int = 0
 
     def get_detail_header(self) -> list[str]:

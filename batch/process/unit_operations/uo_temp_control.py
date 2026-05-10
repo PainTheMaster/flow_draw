@@ -223,7 +223,7 @@ class TempControl(uo.UnitOperation, uo_tag=defs.tag_uo_tempr_ctrl):
                  operation_seq:int = None,
                  num_subitems:int = None,
                  edit_comment:str = None):
-        super().__init__(caller=caller, flowsheet=flowsheet, operation_seq=operation_seq, num_subitems=num_subitems, edit_comment=edit_comment)
+        super().__init__(caller=caller, flowsheet=flowsheet, operation_seq=operation_seq, num_subitems=1, edit_comment=edit_comment)
         self.ctrl_mode:str = None
         """Temperature control mode: Ti/Tj, Tj, programme, Ti"""
         self.Ti_sp:float = None

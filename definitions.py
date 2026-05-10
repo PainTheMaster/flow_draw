@@ -393,8 +393,7 @@ list_hedr_uo_lnclrnc = [hedr_uo_lnclrnc_sop]
 ######################################################
 
                         #>>>>>>>>>>Detail table header items and list thereof <<<<<<<<<<<<<<
-#hedr_<unit operation>_<parameter> = str
-#list_heder_<unit operation> = [<header item 0>,<header item 1>,...]
+
 hedr_uo_innert_gas = "Innert Gas"
 """Detail header item: Innert gas used for replacement"""
 hedr_uo_innert_neg_press = "Negative Press (MPaG)"
@@ -406,9 +405,7 @@ list_hedr_uo_innert = [hedr_uo_innert_gas, hedr_uo_innert_neg_press, hedr_uo_inn
 
 
         #>>>>>>>>>>Option items, lists, and a dictionary for drop-down list in detail input form<<<<<<<<<<<<<<
-#opt_<unit operation>_<parameter>_<option> = str
-#list_opt_<unit operation>_<parameter> = [<option_0>, <option_1>, ...]
-#dict_opt_<unit operation> = {<heder_item1> : <option_list_1), ...}
+
 opt_uo_innert_gas_N2 = "N2"
 """Drop-down option item: choice of gas for innertization. Nitrogen gas"""
 opt_uo_innert_gas_Ar = "Ar"
@@ -448,9 +445,6 @@ hedr_uo_tempr_ctrl_Tj_limit_low = "Tj min (degC)"
 """Detail heder item: Tj lower limit for Tj, Ti/Tj mode."""
 hedr_uo_tempr_ctrl_Tj_limit_high = "Tj max (degC)"
 """Detail heder item: Tj higher limit for Tj, Ti/Tj mode"""
-#hedr_uo_tempr_ctrl_Ti_tgt_ini = "Ti target ini (degC)"
-# hedr_uo_tempr_ctrl_prog_Ti_sp_end = "Prog. Ti end (degC)"
-# """Detail heder item: Ti end target for ramp mode"""
 hedr_uo_tempr_ctrl_prog_time_val = "Prog. time value"
 """Detail heder item: Ramp up/down time value"""
 hedr_uo_tempr_ctrl_prog_time_unit = "Prog. time unit"
@@ -476,9 +470,6 @@ list_hedr_uo_tempr_ctrl = [hedr_uo_tempr_ctrl_mode,
 
 
         #>>>>>>>>>>Option items, lists, and a dictionary for drop-down list in detail input form<<<<<<<<<<<<<<
-#opt_<unit operation>_<parameter>_<option> = str
-#list_opt_<unit operation>_<parameter> = [<option_0>, <option_1>, ...]
-#dict_opt_<unit operation> = {<heder_item1> : <option_list_1), ...}
 
 #For hedr_uo_tempr_ctrl_mode
 opt_uo_tempr_ctrl_mode_TiTj = "Ti/Tj control"
@@ -515,8 +506,6 @@ dict_opt_uo_tempr_ctrl = {hedr_uo_tempr_ctrl_mode : list_opt_uo_tempr_ctrl_mode,
 ######################################################
 
                         #>>>>>>>>>>Detail table header items and list thereof <<<<<<<<<<<<<<
-#hedr_<unit operation>_<parameter> = <str>
-#list_heder_<unit operation> = [<header item 0>,<header item 1>,...]
 
 hedr_uo_agitation_spec = "Specification"
 """header item for the unit operation Agitation, the way the rotation rate is specified: specific rpm, guidance rpm, or discretion"""
@@ -546,16 +535,7 @@ list_hedr_uo_agitation = [hedr_uo_agitation_spec,
 """List of uo-specific heder items for the unit operation Agitation"""
 
 
-
-
-
-
         #>>>>>>>>>>Option items, lists, and a dictionary for drop-down list in detail input form<<<<<<<<<<<<<<
-#opt_<unit operation>_<parameter>_<option> = str
-#list_opt_<unit operation>_<parameter> = [<option_0>, <option_1>, ...]
-#dict_opt_<unit operation> = {<heder_item1> : <option_list_1), ...}
-
-
 opt_uo_agitation_spec_specif = "Specific RPM"
 """option for the header item 'spec'. Specifi RPM is provided by the user."""
 opt_uo_agitation_spec_guide = "Guidance RPM"
@@ -586,6 +566,22 @@ dict_opt_uo_agitation = {hedr_uo_agitation_spec : list_opt_uo_agitation_spec,
                         #>>>>>>>>>>Detail table header items and list thereof <<<<<<<<<<<<<<
 #hedr_<unit operation>_<parameter> = <str>
 #list_heder_<unit operation> = [<header item 0>,<header item 1>,...]
+hedr_uo_settling_time_min:str = "minimum settling time"
+"""header for the unit operation settling: Minimum settling time"""
+hedr_uo_settling_time_max:str = "maximum settling time"
+"""header for the unit operation settling: Maximum settling time"""
+hedr_uo_settling_time_unit:str = "time unit"
+"""header for the unit operation settling: Time unit"""
+hedr_uo_settling_Ti_min:str = "Ti_min (deg-C)"
+"""header for the unit operation settling: Ti min"""
+hedr_uo_settling_Ti_max:str = "Ti_max (deg-C)"
+"""header for the unit operation settling: Ti max"""
+list_hedr_uo_settling: list[str] = [hedr_uo_settling_time_min,
+                                    hedr_uo_settling_time_max,
+                                    hedr_uo_settling_time_unit,
+                                    hedr_uo_settling_Ti_min,
+                                    hedr_uo_settling_Ti_max]
+"""list of header items for the unit operation settling"""
 
 
         #>>>>>>>>>>Option items, lists, and a dictionary for drop-down list in detail input form<<<<<<<<<<<<<<
@@ -593,7 +589,22 @@ dict_opt_uo_agitation = {hedr_uo_agitation_spec : list_opt_uo_agitation_spec,
 #list_opt_<unit operation>_<parameter> = [<option_0>, <option_1>, ...]
 #dict_opt_<unit operation> = {<heder_item1> : <option_list_1), ...}
 
+dict_opt_uo_settling = {hedr_uo_settling_time_unit : list_time_unit}
+"""dict of options for heaader items for the unit operation settling"""
 
+######################################################
+##      <TEMPLATE> HEADER ITEMS AND OPTIONS      ##
+######################################################
+
+                        #>>>>>>>>>>Detail table header items and list thereof <<<<<<<<<<<<<<
+#hedr_<unit operation>_<parameter> = <str>
+#list_heder_<unit operation> = [<header item 0>,<header item 1>,...]
+
+
+        #>>>>>>>>>>Option items, lists, and a dictionary for drop-down list in detail input form<<<<<<<<<<<<<<
+#opt_<unit operation>_<parameter>_<option> = str
+#list_opt_<unit operation>_<parameter> = [<option_0>, <option_1>, ...]
+#dict_opt_<unit operation> = {<heder_item1> : <option_list_1), ...}
 
 
 
@@ -1111,6 +1122,104 @@ dict_jp_stcs_uo_agitation = {tag_stc_flow_uo_agitation_rpm_spec : stc_flow_uo_ag
                              tag_stc_flow_uo_agitation_time_single_point : stc_flow_uo_agitation_time_single_point_jp,
                              tag_stc_flow_uo_agitation_rec_duration : stc_flow_uo_agitation_rec_duration_jp}
 """Japanese language dictionary for sentences for flowsheet for the unit operation Agitation"""
+
+###################################################
+#        PARTS FOR SETTLING               #
+###################################################
+
+        #>>>>>>>>>>>>>> flowsheet compoentns in local language and tags (keys) thereof <<<<<<<<<<<<<<<<<<<
+
+#sets of:
+#tag_part_flow_<unit operation>_<sort: instr, rec, mthod, etc>_<descr> = str
+#part_flow_<unit operation>_<sort: instr, rec, mthod, etc>_<descr>_<lang> = str
+#Follwed by 
+#dict_<lang>_part_flow_<unit operation> = {<tag> : <component loc. lang>}
+tag_part_uo_settling_init_settling = "instr init settling" 
+"""Tag for a flowsheet component for the unit operation settling: """
+part_uo_settling_init_settling_jp = "静置開始"
+"""A flowsheet component for the unit operation settling: """
+tag_part_uo_settling_rec_chk_agitator_stop = "check-box agit stop"
+"""Tag for a flowsheet component for the unit operation settling: cutting off agitation for settling"""
+part_uo_settling_rec_chk_agitator_stop_jp = "□ 攪拌停止" 
+"""A flowsheet component for the unit operation settling:cutting off agitation for settling """
+tag_part_uo_settling_rec_Tj_ini = "record Tj ini" 
+"""Tag for a flowsheet component for the unit operation settling: record field for the initial Tj"""
+part_uo_settling_rec_Tj_ini_jp = "静置開始時外温_________℃"
+"""A flowsheet component for the unit operation settling: """
+tag_part_uo_settling_rec_Ti_ini = "recort Ti ini"
+"""Tag for a flowsheet component for the unit operation settling: recorod field for the initial Ti"""
+part_uo_settling_rec_Ti_ini_jp =  "静置開始時内温_________℃"
+"""A flowsheet component for the unit operation settling: end of settling field for the initial Ti"""
+tag_part_uo_settling_end_settling = "instr end settling"
+"""Tag for a flowsheet component for the unit operation settling: end of settling"""
+part_uo_settling_end_settling = "静置終了" 
+"""A flowsheet component for the unit operation settling: end of settling"""
+tag_part_uo_settling_Tj_end = "record Tj end"
+"""Tag for a flowsheet component for the unit operation settling: Recording field for Tj at the end of settling"""
+part_uo_settling_Tj_end_jp = "静置終了時外温_________℃"
+"""A flowsheet component for the unit operation settling: Recording field for Tj at the end of settling"""
+tag_part_uo_settling_Ti_end = "record Ti end"
+"""Tag for a flowsheet component for the unit operation settling:Recording field for Ti at the end of settling """
+part_uo_settling_Ti_end_jp = "静置終了時内_________℃"
+"""A flowsheet component for the unit operation settling: Recording field for Ti at the end of settling"""
+
+dict_jp_part_flow_uo_settling = {tag_part_uo_settling_init_settling : part_uo_settling_init_settling_jp,
+                                tag_part_uo_settling_rec_chk_agitator_stop : part_uo_settling_rec_chk_agitator_stop_jp,
+                                tag_part_uo_settling_rec_Tj_ini : part_uo_settling_rec_Tj_ini_jp,
+                                tag_part_uo_settling_rec_Ti_ini : part_uo_settling_rec_Ti_ini_jp,
+                                tag_part_uo_settling_end_settling : part_uo_settling_end_settling,
+                                tag_part_uo_settling_Tj_end : part_uo_settling_Tj_end_jp,
+                                tag_part_uo_settling_Ti_end : part_uo_settling_Ti_end_jp}
+"""language dictionary for flowsheet components for the unit opeataion settling"""
+
+
+        #>>>>>>>>>>>>>> Template sentences for flow sheets in local language and tags (keys) thereof <<<<<<<<<<<<<<<<<<<
+#tag_stc_<unit operation>_<item> = tag
+#stc_stc_<unit operation>_<item>_<lang> = <str with placeholder>
+#dict_<lang>_stcs_<unit operation> = {tag : sentence}
+"""Japanese language dictionary for instruction SENTENCES with place holders 'min' and/or 'max'. Use str.format()"""
+
+tag_stc_uo_settling_time_min = "sentence minimum sttling time" 
+"""Tag for a flowsheet sentence for the unit operation settling: minimum settling time. contains placeholders {time_min} and {time_unit}"""
+part_uo_settling_time_min_jp = "静置時間:{time_min} {time_unit}以上"
+"""A flowsheet component for the unit operation settling: minimum settling time. contains placeholders {time_min} and {time_unit}"""
+tag_stc_uo_settling_time_max = "sentence maximum sttling time" 
+"""Tag for a flowsheet sentence for the unit operation settling: maximum settling time. contains placeholders {time_max} and {time_unit}"""
+part_uo_settling_time_max_jp = "静置時間:{time_max} {time_unit}以下"
+"""A flowsheet component for the unit operation settling: maximum settling time. contains placeholders {time_max} and {time_unit}"""
+tag_stc_uo_settling_time_range = "sentence sttling time range" 
+"""Tag for a flowsheet sentence for the unit operation settling: settling time range. contains placeholders {time_min}, {time_max}, and {time_unit}"""
+part_uo_settling_time_range_jp = "静置時間:{time_min}～{time_max} {time_unit}"
+"""A flowsheet component for the unit operation settling: settling time range. contains placeholders {time_min}, {time_max}, and {time_unit}"""
+tag_stc_uo_settling_time_single_point = "sentence sttling single point" 
+"""Tag for a flowsheet sentence for the unit operation settling: settling time single point. contains placeholders {time} and {time_unit}"""
+part_uo_settling_time_single_point_jp = "静置時間:{time} {time_unit}"
+"""A flowsheet component for the unit operation settling:  settling time single point. contains placeholders {time} and {time_unit}"""
+tag_stc_uo_settling_Ti_min = "settling Ti min" 
+"""Tag for a flowsheet sentence for the unit operation settling: Minimum Ti for settling. contains placeholders {Ti_min}"""
+part_uo_settling_Ti_min_jp = "静置時内温:{Ti_min} ℃以上"
+"""A flowsheet component for the unit operation settling: Minimum Ti for settling. contains placeholders {Ti_min}"""
+tag_stc_uo_settling_Ti_max = "settling Ti max" 
+"""Tag for a flowsheet sentence for the unit operation settling: Maximum Ti for settling. contains placeholders {Ti_max}"""
+part_uo_settling_Ti_max_jp = "静置時内温:{Ti_max} ℃以下"
+"""A flowsheet component for the unit operation settling: Maximum Ti for settling. contains placeholders {Ti_max}"""
+tag_stc_uo_settling_Ti_range = "settling Ti range" 
+"""Tag for a flowsheet sentence for the unit operation settling: Ti range for settling. contains placeholders {Ti_min} and {Ti_max}"""
+part_uo_settling_Ti_range_jp = "静置時内温:{Ti_min}～{Ti_max}℃"
+"""A flowsheet component for the unit operation settling: Ti range for settling. contains placeholders {Ti_min} and {Ti_max}"""
+tag_stc_uo_settling_rec_duration = "record field settling duration" 
+"""Tag for a flowsheet sentence for the unit operation settling: record field for setting duration. contains placeholders {time_unit}"""
+part_uo_settling_duration_jp = "静置時間_________{time_unit}"
+"""A flowsheet component for the unit operation settling: record field for setting duration. contains placeholders {time_unit}"""
+dict_jp_stcs_uo_settling = {tag_stc_uo_settling_time_min : part_uo_settling_time_min_jp,
+                            tag_stc_uo_settling_time_max : part_uo_settling_time_max_jp,
+                            tag_stc_uo_settling_time_range : part_uo_settling_time_range_jp,
+                            tag_stc_uo_settling_time_single_point : part_uo_settling_time_single_point_jp,
+                            tag_stc_uo_settling_Ti_min : part_uo_settling_Ti_min_jp,
+                            tag_stc_uo_settling_Ti_max : part_uo_settling_Ti_max_jp,
+                            tag_stc_uo_settling_Ti_range : part_uo_settling_Ti_range_jp,
+                            tag_stc_uo_settling_rec_duration : part_uo_settling_duration_jp}
+"""Japanese language dictionary for senteces in flowsheets for the unit operation settling"""
 
 ###################################################
 #        PARTS FOR <unit operation>               #

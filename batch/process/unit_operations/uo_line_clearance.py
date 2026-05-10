@@ -90,7 +90,7 @@ class LineClearance(uo.UnitOperation, uo_tag=defs.tag_uo_line_clearance):
                  operation_seq:int = None,
                  num_subitems:int = None,
                  edit_comment:str = None):
-        super().__init__(caller=caller, flowsheet=flowsheet, operation_seq=operation_seq, num_subitems=num_subitems, edit_comment=edit_comment)
+        super().__init__(caller=caller, flowsheet=flowsheet, operation_seq=operation_seq, num_subitems=1, edit_comment=edit_comment)
         self.sop:str = None
 
     def load_params_from_df(self, df: pd.DataFrame):

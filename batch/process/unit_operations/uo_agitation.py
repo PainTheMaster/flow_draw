@@ -182,7 +182,7 @@ class Agitation(uo.UnitOperation, uo_tag=defs.tag_uo_agitation):
                  operation_seq:int = None,
                  num_subitems: int = None,
                  edit_comment:str = None):
-        super().__init__(caller=caller, flowsheet=flowsheet, operation_seq=operation_seq, num_subitems=num_subitems, edit_comment=edit_comment)
+        super().__init__(caller=caller, flowsheet=flowsheet, operation_seq=operation_seq, num_subitems=1, edit_comment=edit_comment)
         self.spec_agit: str = None
         self.rpm: float = None
         self.Ti_min: float = None
@@ -294,13 +294,13 @@ class Agitation(uo.UnitOperation, uo_tag=defs.tag_uo_agitation):
         stc_time_ctrl:str = None
         if self.time_min is not None and self.time_max is not None:
             if self.time_min != self.time_max:
-                stc_time_ctrl = dict_stcs[tag_stc_flow_time_range].format(time_min=self.time_min, time_max=self.time_max, time_unit=self.time_unit)
+                stc_time_ctrl = dict_stcs[tag_stc_flow_time_range].format(time_min=self.time_min, time_max=self.time_max, time_unit=lang_dict_cmn[self.time_unit])
             else:
-                stc_time_ctrl = dict_stcs[tag_stc_flow_time_single_point].format(time=self.time_min, time_unit=self.time_unit)
+                stc_time_ctrl = dict_stcs[tag_stc_flow_time_single_point].format(time=self.time_min, time_unit=lang_dict_cmn[self.time_unit])
         elif self.time_min is not None:
-            stc_time_ctrl = dict_stcs[tag_stc_flow_time_min].format(time_min=self.time_min, time_unit=self.time_unit)
+            stc_time_ctrl = dict_stcs[tag_stc_flow_time_min].format(time_min=self.time_min, time_unit=lang_dict_cmn[self.time_unit])
         elif self.time_max is not None:
-            stc_time_ctrl = dict_stcs[tag_stc_flow_time_max].format(time_max=self.time_max, time_unit=self.time_unit)
+            stc_time_ctrl = dict_stcs[tag_stc_flow_time_max].format(time_max=self.time_max, time_unit=lang_dict_cmn[self.time_unit])
         else:
             raise RuntimeWarning(f"{__class__.__name__}: Wrong call for __put_time_control() in Op. Seq. {self.operation_seq}.")
         self.flowsheet.put_line(content=stc_time_ctrl)
@@ -329,7 +329,7 @@ class Agitation(uo.UnitOperation, uo_tag=defs.tag_uo_agitation):
                                     operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
                                     witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
             if self.time_min is not None or self.time_max is not None:
-                self.flowsheet.put_line(record=dict_stcs[tag_stc_flow_rec_duration].format(time_unit=self.time_unit))
+                self.flowsheet.put_line(record=dict_stcs[tag_stc_flow_rec_duration].format(time_unit=lang_dict_cmn[self.time_unit]))
             self.flowsheet.put_line(record=dict_part_flow[tag_part_flow_rec_dissoln_Tj])
             self.flowsheet.put_line(record=dict_part_flow[tag_part_flow_rec_dissoln_Ti])
         elif self.Ti_min is not None or self.Ti_max is not None:
@@ -340,13 +340,13 @@ class Agitation(uo.UnitOperation, uo_tag=defs.tag_uo_agitation):
             self.flowsheet.put_line(record=dict_part_flow[tag_part_flow_rec_final_Tj])
             self.flowsheet.put_line(record=dict_part_flow[tag_part_flow_rec_final_Ti])
             if self.time_min is not None or self.time_max is not None:
-                self.flowsheet.put_line(record=dict_stcs[tag_stc_flow_rec_duration].format(time_unit=self.time_unit))
+                self.flowsheet.put_line(record=dict_stcs[tag_stc_flow_rec_duration].format(time_unit=lang_dict_cmn[self.time_unit]))
         else:
             self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
                                     record=dict_part_flow[tag_part_flow_rec_chk_agit_compl],
                                     operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
                                     witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
             if self.time_min is not None or self.time_max is not None:
-                self.flowsheet.put_line(record=dict_stcs[tag_stc_flow_rec_duration].format(time_unit=self.time_unit))
+                self.flowsheet.put_line(record=dict_stcs[tag_stc_flow_rec_duration].format(time_unit=lang_dict_cmn[self.time_unit]))
 
             

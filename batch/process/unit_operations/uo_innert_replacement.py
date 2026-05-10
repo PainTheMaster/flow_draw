@@ -116,7 +116,7 @@ class InnertReplacement(uo.UnitOperation, uo_tag=defs.tag_uo_innert_replace):
                  operation_seq:int = None,
                  num_subitems:int = None,
                  edit_comment:str = None):
-        super().__init__(caller, flowsheet, operation_seq, num_subitems, edit_comment)
+        super().__init__(caller=caller, flowsheet=flowsheet, operation_seq=operation_seq, num_subitems=1, edit_comment=edit_comment)
         self.innert_gas:str = None
         self.neg_pressure:float = None
         self.num_repeat:int = None
