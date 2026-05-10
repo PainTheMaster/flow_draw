@@ -67,10 +67,10 @@ tag_uo_settling: str = "settling"
 part_uo_title_settling_jp = "静置"
 """JP expression of settling"""
 
-tag_uo_aq_discard: str = "aq_discard"
-"""Tag for an unit operation discarding aqueous phase"""
-part_uo_title_aq_discard_jp = "水層排出"
-"""JP expression of discarding aqueous phase"""
+tag_uo_phase_disch: str = "phase_discharge"
+"""Tag for an unit operation discharging the lower phase"""
+part_uo_title_phase_disch_jp = "下層排出"
+"""JP expression of discharging the lower phase"""
 
 tag_uo_evap: str = "evaporation"
 """Tag for an unit operation dietillation"""
@@ -133,7 +133,7 @@ dict_jp_part_uo_titles = {tag_uo_line_clearance : part_uo_title_clearance_jp,
                           tag_uo_charging : part_uo_title_charging_jp,
                           tag_uo_agitation : part_uo_title_agitation_jp,
                           tag_uo_settling : part_uo_title_settling_jp,
-                          tag_uo_aq_discard : part_uo_title_aq_discard_jp,
+                          tag_uo_phase_disch : part_uo_title_phase_disch_jp,
                           tag_uo_evap : part_uo_title_evap_jp,
                           tag_uo_cip : part_uo_title_cip_jp,
                           tag_uo_transfer : part_uo_title_transfer_jp,
@@ -599,6 +599,17 @@ dict_opt_uo_settling = {hedr_uo_settling_time_unit : list_time_unit}
                         #>>>>>>>>>>Detail table header items and list thereof <<<<<<<<<<<<<<
 #hedr_<unit operation>_<parameter> = <str>
 #list_heder_<unit operation> = [<header item 0>,<header item 1>,...]
+hedr_uo_phasedisch_origin = "origin"
+"""Header item for uo_phase_discharge: origin of the discarded lower phase, e.g., reaction vessel, etc."""
+hedr_uo_phasedisch_via = "via"
+"""Header item for uo_phase_discharge: way point of the discarded lower phase, e.g., multiplexker, etc"""
+hedr_uo_phasedisch_destin = "destination"
+"""Header item for uo_phase_discharge: destination of the discarded lower phase, e.g., wate liqour tank, etc"""
+
+list_hedr_uo_phasedich = [hedr_uo_phasedisch_origin,
+                          hedr_uo_phasedisch_via,
+                          hedr_uo_phasedisch_destin]
+"""list of  hader fields for the unit operation phase discharge"""
 
 
         #>>>>>>>>>>Option items, lists, and a dictionary for drop-down list in detail input form<<<<<<<<<<<<<<
@@ -607,6 +618,23 @@ dict_opt_uo_settling = {hedr_uo_settling_time_unit : list_time_unit}
 #dict_opt_<unit operation> = {<heder_item1> : <option_list_1), ...}
 
 
+
+
+
+
+######################################################
+##      <TEMPLATE> HEADER ITEMS AND OPTIONS      ##
+######################################################
+
+                        #>>>>>>>>>>Detail table header items and list thereof <<<<<<<<<<<<<<
+#hedr_<unit operation>_<parameter> = <str>
+#list_heder_<unit operation> = [<header item 0>,<header item 1>,...]
+
+
+        #>>>>>>>>>>Option items, lists, and a dictionary for drop-down list in detail input form<<<<<<<<<<<<<<
+#opt_<unit operation>_<parameter>_<option> = str
+#list_opt_<unit operation>_<parameter> = [<option_0>, <option_1>, ...]
+#dict_opt_<unit operation> = {<heder_item1> : <option_list_1), ...}
 
 
 
@@ -1220,6 +1248,71 @@ dict_jp_stcs_uo_settling = {tag_stc_uo_settling_time_min : part_uo_settling_time
                             tag_stc_uo_settling_Ti_range : part_uo_settling_Ti_range_jp,
                             tag_stc_uo_settling_rec_duration : part_uo_settling_duration_jp}
 """Japanese language dictionary for senteces in flowsheets for the unit operation settling"""
+
+###################################################
+#        PARTS FOR <unit operation>               #
+###################################################
+
+        #>>>>>>>>>>>>>> flowsheet compoentns in local language and tags (keys) thereof <<<<<<<<<<<<<<<<<<<
+
+#sets of:
+#tag_part_flow_<unit operation>_<sort: instr, rec, mthod, etc>_<descr> = str
+#part_flow_<unit operation>_<sort: instr, rec, mthod, etc>_<descr>_<lang> = str
+#Follwed by 
+#dict_<lang>_part_flow_<unit operation> = {<tag> : <component loc. lang>}
+tag_part_flow_uo_phasedisch_method_connection = "line connection"
+"""Tag for a flowsheet component for a unit operation phase discharging: Discharging line connection"""
+part_flow_uo_phasedisch_method_connection_jp = "ライン構築"
+"""A flowsheet component for a unit operation phase discharging: Discharging line connection"""
+
+tag_part_flow_uo_phasedisch_chk_connected = "check box line connected"
+"""Tag for a flowsheet component for a unit operation phase discharging: check box for phase discharging line connected"""
+part_flow_uo_phasedisch_chk_connected_jp = "□ ライン構築確認"
+"""A flowsheet component for a unit operation phase discharging: check box for phase discharging line connected"""
+
+tag_part_flow_uo_phasedisch_method_disch = "instr (method col) disch"
+"""Tag for a flowsheet component for a unit operation phase discharging: Instruction (method colum) for discharging."""
+part_flow_uo_phasedisch_method_disch_jp = "下層排出"
+"""A flowsheet component for a unit operation phase discharging: Instruction (method colum) for discharging."""
+
+tag_part_flow_uo_phasedisch_content_disch = "action (content col) disch"
+"""Tag for a flowsheet component for a unit operation phase discharging: Description of action (content column) for discharging"""
+part_flow_uo_phasedisch_content_disch_jp = "排出実施"
+"""A flowsheet component for a unit operation phase discharging: Description of action (content column) for discharging"""
+
+tag_part_flow_uo_phasedisch_chk_discharged = "check box phase discharged"
+"""Tag for a flowsheet component for a unit operation phase discharging: check box for the completion of the phase discharging"""
+part_flow_uo_phasedisch_chk_discharged_jp = "□ 実施確認"
+"""A flowsheet component for a unit operation phase discharging: check box for the completion of the phase discharging"""
+
+
+
+        #>>>>>>>>>>>>>> Template sentences for flow sheets in local language and tags (keys) thereof <<<<<<<<<<<<<<<<<<<
+#tag_stc_<unit operation>_<item> = tag
+#stc_stc_<unit operation>_<item>_<lang> = <str with placeholder>
+#dict_<lang>_stcs_<unit operation> = {tag : sentence}
+"""Language dictionary for instruction SENTENCES with place holders 'min' and/or 'max'. Use str.format()"""
+
+tag_stc_uo_phasedisch_origin = "sentence origin"
+"""A tag for an instruction sentence for a unit operation phase discharging: sentence to designate the origon vessel of the discharged phase, includes placeholder {origin}"""
+stc_uo_phasedisch_origin_jp = "移送元: {origin}"
+"""A instruction sentence for a unit operation phase discharging: sentence to designate the origon vessel of the discharged phase, includes placeholder {origin}"""
+tag_stc_uo_phasedisch_via = "sentence vis"
+"""A tag for an instruction sentence for a unit operation phase discharging: sentence to designate the way point, e.g., multiplexer, includes placeholder {via}"""
+stc_uo_phasedisch_via_jp = "経由: {via}"
+"""A instruction sentence for a unit operation phase discharging: sentence to designate the way point, e.g., multiplexer, includes placeholder {via}"""
+
+tag_stc_uo_phasedisch_destin_single = "sentence single destination"
+"""A tag for an instruction sentence for a unit operation phase discharging: sentence to designate the destination, includes placeholder {destination}"""
+stc_uo_phasedisch_destin_single_jp = "移送先: {destination}"
+"""A instruction sentence for a unit operation phase discharging: sentence to designate the destination, includes placeholder {destination}"""
+
+tag_stc_uo_phasedisch_destin_multi = "sentence multiple destination"
+"""A tag for an instruction sentence for a unit operation phase discharging: sentence to designate multiple destinations, includes placeholder {destination}, singular!"""
+stc_uo_phasedisch__jp = "移送先: {destination} (使用したものを〇)"
+"""A instruction sentence for a unit operation phase discharging: sentence to designate multiple destinations, includes placeholder {destination}, singular!"""
+
+
 
 ###################################################
 #        PARTS FOR <unit operation>               #
