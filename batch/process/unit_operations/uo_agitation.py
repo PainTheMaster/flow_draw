@@ -109,26 +109,41 @@ tag_part_flow_title_disslnck = defs.tag_part_flow_uo_agitation_title_disslnck
 """Tag for a flowsheet component for uo_agitation: title for combined agitation and dissoltion check operation"""
 tag_part_flow_instr_rpm_arbitrary = defs.tag_part_flow_uo_agitation_instr_rpm_arbitrary
 """Tag for a flowsheet component for uo_agitation: instruction for totally arbitrary agitation rate"""
+tag_part_flow_rec_rpm_act = defs.tag_part_flow_uo_agitation_rec_rpm_act
+"""Tag for a flowsheet component for uo_agitation: record field for agitation rate"""
+tag_part_flow_rec_chk_agit_ini = defs.tag_part_flow_uo_agitation_rec_chk_agit_ini
+"""Tag for a flowsheet component for uo_agitation: check box for agitation initiation"""
+tag_part_flow_rec_Tj_ini = defs.tag_part_flow_uo_agitation_rec_Tj_ini
+"""Tag for a flowsheet component for uo_agitation: recording field for initial Tj"""
+tag_part_flow_rec_Ti_ini = defs.tag_part_flow_uo_agitation_rec_Ti_ini
+"""Tag for a flowsheet component for uo_agitation: recording field for initial Ti"""
+tag_part_flow_instr_dissoln_check_visual = defs.tag_part_flow_uo_agitation_instr_dissoln_check_visual
+"""Tag for a flowsheet component for uo_agitation: instruction for dissolution chec by visual"""
 tag_part_flow_rec_chk_dissoln = defs.tag_part_flow_uo_agitation_rec_chk_dissoln
 """Tag for a flowsheet component for uo_agitation: check box for dissolution"""
+tag_part_flow_rec_final_Tj = defs.tag_part_flow_uo_agitation_rec_final_Tj
+"""Tag for a flowsheet component for uo_agitation: recording field for final Tj"""
+tag_part_flow_rec_final_Ti = defs.tag_part_flow_uo_agitation_rec_final_Ti
+"""Tag for a flowsheet component for uo_agitation: recording field for final Ti"""
 tag_part_flow_rec_dissoln_Tj = defs.tag_part_flow_uo_agitation_rec_dissoln_Tj
 """Tag for a flowsheet component for uo_agitation: recording field for Tj at the time of dissolution"""
 tag_part_flow_rec_dissoln_Ti = defs.tag_part_flow_uo_agitation_rec_dissoln_Ti
 """Tag for a flowsheet component for uo_agitation: recording field for Ti at the time of dissolution"""
 tag_part_flow_rec_chk_agit_compl = defs.tag_part_flow_uo_agitation_rec_chk_agit_compl
 """Tag for a flowsheet component for uo_agitation: check box for agitation completion"""
-dict_part_flow_jp = defs.dict_part_flow_uo_agitation_jp
+dict_part_flow = defs.dict_part_flow_uo_agitation_jp
 """Japanese lanugae dictionary for flowsheet part for the unit operation Agitation"""
+
 
 tag_stc_flow_rpm_spec = defs.tag_stc_flow_uo_agitation_rpm_spec
 """Tag for a sentence for the unit operation Agitation: instruction for agitation at an specified agitation rate, includes a placeholder {rpm}"""
 tag_stc_flow_rpm_guidance = defs.tag_stc_flow_uo_agitation_rpm_guidance
 """Tag for a sentence for the unit operation Agitation: instruction for agitation with a guideline rate, includes a placeholder {rpm}"""
-tag_stc_flow_temp_range = defs.tag_stc_flow_uo_agitation_temp_range
+tag_stc_flow_Ti_range = defs.tag_stc_flow_uo_agitation_Ti_range
 """Tag for a sentence for the unit operation Agitation: Instrction on temperature range. Includes placeholders {Ti_min} and {Ti_max}"""
-tag_stc_flow_temp_min = defs.tag_stc_flow_uo_agitation_temp_min
+tag_stc_flow_Ti_min = defs.tag_stc_flow_uo_agitation_Ti_min
 """Tag for a sentence for the unit operation Agitation: Instruction on minimum temperature. Includes placeholder {Ti_min}"""
-tag_stc_flow_temp_max = defs.tag_stc_flow_uo_agitation_temp_max
+tag_stc_flow_Ti_max = defs.tag_stc_flow_uo_agitation_Ti_max
 """Tag for a sentence for the unit operation Agitation: Instruction on maximum temperature. Includes placeholder {Ti_max}"""
 tag_stc_flow_time_range = defs.tag_stc_flow_uo_agitation_time_range
 """Tag for a sentence for the unit operation Agitation: Instruction on agitation time range. Includes placeholders {time_min}, {time_max} , and {time_unit}"""
@@ -136,7 +151,11 @@ tag_stc_flow_time_min = defs.tag_stc_flow_uo_agitation_time_min
 """Tag for a sentence for the unit operation Agitation: Instruction on minimum agitation time. Includes placeholders {time_min} and {time_unit}"""
 tag_stc_flow_time_max = defs.tag_stc_flow_uo_agitation_time_max
 """Tag for a sentence for the unit operation Agitation: Instruction on maximum agitation time. Includes {time_max} and {time_unit}"""
-dict_jp_stcs = defs.dict_jp_stcs_uo_agitation
+tag_stc_flow_time_single_point = defs.tag_stc_flow_uo_agitation_time_single_point
+"""Tag for a sentence for the unit operation Agitation: Instruction on agitation time (single point). Includes a placeholder {time} and {time_unit}"""
+tag_stc_flow_rec_duration = defs.tag_stc_flow_uo_agitation_rec_duration
+"""Tag for a sentence for the unit operation Agitation: Record field for agitation duration, includes a placeholder {time_unit}"""
+dict_stcs = defs.dict_jp_stcs_uo_agitation
 """Japanese language dictionary for sentences for flowsheet for the unit operation Agitation"""
 
 #########################################################
@@ -194,7 +213,7 @@ class Agitation(uo.UnitOperation, uo_tag=defs.tag_uo_agitation):
             raise RuntimeError(f"{self.__class__.__name__}: \"{hedr_spec_agit}\" not specified in the detail input worksheet \
                                for Op. Seq. {self.operation_seq}.")
         
-        if self.spec_agit == opt_spec_specif:
+        if self.spec_agit == opt_spec_specif or self.spec_agit == opt_spec_guide:
             if not pd.isna(first_row[hedr_rpm]):
                 self.rpm = first_row[hedr_rpm]
             else:
@@ -221,9 +240,10 @@ class Agitation(uo.UnitOperation, uo_tag=defs.tag_uo_agitation):
             if not pd.isna(first_row[hedr_time_unit]):
                 self.time_unit = first_row[hedr_time_unit]
             else:
+                self.time_unit = lang_dict_cmn[opt_time_unit_minute]
                 raise RuntimeWarning(f"{self.__class__.__name__}: \"{hedr_time_unit}\" not selected in the detail input worksheet \
                                      for Op. Seq. {self.operation_seq} although minimum and/or maximum agitation time has benn provided \
-                                     in the worksheet.")
+                                     in the worksheet. Time unit of \"min\" is used to keep the ball rolling.")
         
         if first_row[hedr_dissolution_check] == opt_yes:
             self.dissolution_check = True
@@ -241,8 +261,92 @@ class Agitation(uo.UnitOperation, uo_tag=defs.tag_uo_agitation):
             self.flowsheet.put_body_comments(self.pre_comment)
             self.flowsheet.linefeed()        
 
-        #<Operation-specific processes here>
+        self.__put_rpm_control()
+        if self.time_min is not None or self.time_max is not None:
+            self.__put_time_control()
+        if self.Ti_min is not None or self.Ti_max is not None:
+            self.__put_temp_control()
+        self.flowsheet.linefeed()
+
+        self.__put_final_check()
+        self.flowsheet.linefeed()
 
         if not (self.post_comment == None or self.post_comment == ''):
             self.flowsheet.put_body_comments(self.post_comment)
             self.flowsheet.linefeed()
+    
+
+    def __put_rpm_control(self):
+        stc_rpm_ctrl: str = None
+        if self.spec_agit==opt_spec_specif:
+            stc_rpm_ctrl = dict_stcs[tag_stc_flow_rpm_spec].format(rpm=self.rpm)
+        elif self.spec_agit==opt_spec_guide:
+            stc_rpm_ctrl = dict_stcs[tag_stc_flow_rpm_guidance].format(rpm=self.rpm)
+        else:
+            stc_rpm_ctrl = dict_part_flow[tag_part_flow_instr_rpm_arbitrary]
+        self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
+                                content=stc_rpm_ctrl,
+                                record=dict_part_flow[tag_part_flow_rec_rpm_act],
+                                operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
+                                witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
+
+    def __put_time_control(self):
+        stc_time_ctrl:str = None
+        if self.time_min is not None and self.time_max is not None:
+            if self.time_min != self.time_max:
+                stc_time_ctrl = dict_stcs[tag_stc_flow_time_range].format(time_min=self.time_min, time_max=self.time_max, time_unit=self.time_unit)
+            else:
+                stc_time_ctrl = dict_stcs[tag_stc_flow_time_single_point].format(time=self.time_min, time_unit=self.time_unit)
+        elif self.time_min is not None:
+            stc_time_ctrl = dict_stcs[tag_stc_flow_time_min].format(time_min=self.time_min, time_unit=self.time_unit)
+        elif self.time_max is not None:
+            stc_time_ctrl = dict_stcs[tag_stc_flow_time_max].format(time_max=self.time_max, time_unit=self.time_unit)
+        else:
+            raise RuntimeWarning(f"{__class__.__name__}: Wrong call for __put_time_control() in Op. Seq. {self.operation_seq}.")
+        self.flowsheet.put_line(content=stc_time_ctrl)
+    
+    def __put_temp_control(self):
+        stc_temp_ctrl:str = None
+        if self.Ti_min is not None and self.Ti_max is not None:
+            stc_temp_ctrl = dict_stcs[tag_stc_flow_Ti_range].format(Ti_min=self.Ti_min, Ti_max=self.Ti_max)
+        elif self.Ti_min is not None:
+            stc_temp_ctrl = dict_stcs[tag_stc_flow_Ti_min].format(Ti_min=self.Ti_min)
+        elif self.Ti_max is not None:
+            stc_temp_ctrl = dict_stcs[tag_stc_flow_Ti_max].format(Ti_min=self.Ti_max)
+        else:
+            raise RuntimeWarning(f"{__class__.__name__}: Wrong call for __put_temp_control() in Op. Seq. {self.operation_seq}.")
+
+        self.flowsheet.put_line(content=stc_temp_ctrl,
+                                record=dict_part_flow[tag_part_flow_rec_Tj_ini])
+        self.flowsheet.put_line(record=dict_part_flow[tag_part_flow_rec_Ti_ini])       
+
+
+    def __put_final_check(self):
+        if self.dissolution_check:
+            self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
+                                    content=dict_part_flow[tag_part_flow_instr_dissoln_check_visual],
+                                    record=dict_part_flow[tag_part_flow_rec_chk_dissoln],
+                                    operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
+                                    witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
+            if self.time_min is not None or self.time_max is not None:
+                self.flowsheet.put_line(record=dict_stcs[tag_stc_flow_rec_duration].format(time_unit=self.time_unit))
+            self.flowsheet.put_line(record=dict_part_flow[tag_part_flow_rec_dissoln_Tj])
+            self.flowsheet.put_line(record=dict_part_flow[tag_part_flow_rec_dissoln_Ti])
+        elif self.Ti_min is not None or self.Ti_max is not None:
+            self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
+                                    record=dict_part_flow[tag_part_flow_rec_chk_agit_compl],
+                                    operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
+                                    witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
+            self.flowsheet.put_line(record=dict_part_flow[tag_part_flow_rec_final_Tj])
+            self.flowsheet.put_line(record=dict_part_flow[tag_part_flow_rec_final_Ti])
+            if self.time_min is not None or self.time_max is not None:
+                self.flowsheet.put_line(record=dict_stcs[tag_stc_flow_rec_duration].format(time_unit=self.time_unit))
+        else:
+            self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
+                                    record=dict_part_flow[tag_part_flow_rec_chk_agit_compl],
+                                    operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
+                                    witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
+            if self.time_min is not None or self.time_max is not None:
+                self.flowsheet.put_line(record=dict_stcs[tag_stc_flow_rec_duration].format(time_unit=self.time_unit))
+
+            

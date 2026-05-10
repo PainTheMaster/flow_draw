@@ -9,6 +9,7 @@ import flow_draw.batch.process.unit_operations.uo_placeholder as plchldr
 import flow_draw.batch.process.unit_operations.uo_line_clearance as lnclnc
 import flow_draw.batch.process.unit_operations.uo_innert_replacement as innert
 import flow_draw.batch.process.unit_operations.uo_temp_control as tempr
+import flow_draw.batch.process.unit_operations.uo_agitation as agit
 import flow_draw.data_io.flowsheet  as fsht
 import flow_draw.materials.materials as mats
 import os
@@ -261,16 +262,49 @@ class UnitOperationOutputTest(unittest.TestCase):
         sheet.save(filename="Test1007_tempr_Ti_mode.xlsx")
         self.assertTrue(True)
 
+    def test_1008_agit_full(self):
+        sheet = fsht.Flowsheet()
+        uo_instance = agit.Agitation(flowsheet=sheet, operation_seq=1)
+        uo_instance.time_min = 1.0
+        uo_instance.time_max = 1.0
+        uo_instance.time_unit = agit.tag_flow_cmn_time_unit_hour
+        uo_instance.Ti_min = 35.0 
+        uo_instance.Ti_max = 45.0
+        uo_instance.spec_agit = agit.opt_spec_guide
+        uo_instance.rpm = 80.0
+        uo_instance.dissolution_check = True
+
+        print(uo_module.list_unit_ops)
+
+        uo_instance.output_unit_operation()
+        sheet.save(filename="Test1008_agitation_full.xlsx")
+        self.assertTrue(True)
+
+    def test_1009_agit_minimal(self):
+        sheet = fsht.Flowsheet()
+        uo_instance = agit.Agitation(flowsheet=sheet, operation_seq=1)
+        uo_instance.spec_agit = agit.opt_spec_guide
+        uo_instance.rpm = 80.0
+
+        print(uo_module.list_unit_ops)
+
+        uo_instance.output_unit_operation()
+        sheet.save(filename="Test1009_agitation_minimal.xlsx")
+        self.assertTrue(True)
+
+
 
 
 def suite():
     suite = unittest.TestSuite()
     # suite.addTest(UnitOperationOutputTest("test_1001_placeholder"))
     #For the 2nd and likewise.... suite.addTest("something here")
-    suite.addTest(UnitOperationOutputTest("test_1004_temp_ctrl_prog_mode"))
-    suite.addTest(UnitOperationOutputTest("test_1005_temp_ctrl_TiTj_mode"))
-    suite.addTest(UnitOperationOutputTest("test_1006_temp_ctrl_Tj_mode"))
-    suite.addTest(UnitOperationOutputTest("test_1007_temp_ctrl_Ti_mode"))
+    # suite.addTest(UnitOperationOutputTest("test_1004_temp_ctrl_prog_mode"))
+    # suite.addTest(UnitOperationOutputTest("test_1005_temp_ctrl_TiTj_mode"))
+    # suite.addTest(UnitOperationOutputTest("test_1006_temp_ctrl_Tj_mode"))
+    # suite.addTest(UnitOperationOutputTest("test_1007_temp_ctrl_Ti_mode"))
+    suite.addTest(UnitOperationOutputTest("test_1008_agit_full"))
+    suite.addTest(UnitOperationOutputTest("test_1009_agit_minimal"))
     return suite
 
 

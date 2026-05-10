@@ -991,15 +991,45 @@ tag_part_flow_uo_agitation_instr_rpm_arbitrary:str = "rpm_arbitrary"
 """Tag for a flowsheet component for uo_agitation: instruction for totally arbitrary agitation rate"""
 part_flow_uo_agitation_instr_rpm_arbitrary_jp:str = "回転数: 現場調整"
 """A flowsheet component for uo_agitation: instruction for totally arbitrary agitation rate"""
-tag_part_flow_uo_agitation_rec_chk_dissoln:str = "dissolution check"
+
+tag_part_flow_uo_agitation_rec_rpm_act:str = "rpm_record_act"
+"""Tag for a flowsheet component for uo_agitation: record field for agitation rate"""
+part_flow_uo_agitation_rec_rpm_act_jp:str = "回転数:_________rpm"
+"""A flowsheet component for uo_agitation: record field for agitation rate"""
+
+tag_part_flow_uo_agitation_rec_chk_agit_ini:str = "agit ini"
+"""Tag for a flowsheet component for uo_agitation: check box for agitation initiation"""
+part_flow_uo_agitation_rec_chk_agit_ini_jp:str = "□ 攪拌開始"
+"""A flowsheet component for uo_agitation: check box for agitation initiation"""
+tag_part_flow_uo_agitation_rec_Tj_ini:str = "rec Tj ini"
+"""Tag for a flowsheet component for uo_agitation: recording field for initial Tj"""
+part_flow_uo_agitation_rec_Tj_ini_jp:str = "開始時外温:_________℃"
+"""A flowsheet component for uo_agitation: recording field for initial Tj"""
+tag_part_flow_uo_agitation_rec_Ti_ini:str = "rec Ti ini"
+"""Tag for a flowsheet component for uo_agitation: recording field for initial Ti"""
+part_flow_uo_agitation_rec_Ti_ini_jp:str = "開始時内温:_________℃"
+"""A flowsheet component for uo_agitation: recording field for initial Ti"""
+tag_part_flow_uo_agitation_instr_dissoln_check_visual:str = "instruction dissolution check by visual"
+"""Tag for a flowsheet component for uo_agitation: instruction for dissolution chec by visual"""
+part_flow_uo_agitation_instr_dissoln_check_visual_jp:str = "溶解確認:目視"
+"""A flowsheet component for uo_agitation: instruction for dissolution chec by visual"""
+tag_part_flow_uo_agitation_rec_chk_dissoln:str = "check box dissolution"
 """Tag for a flowsheet component for uo_agitation: check box for dissolution"""
 part_flow_uo_agitation_rec_chk_dissoln_jp:str = "□ 溶解確認"
 """A flowsheet component for uo_agitation: check box for dissolution"""
-tag_part_flow_uo_agitation_rec_dissoln_Tj:str = "Tj at complete dissolution"
+tag_part_flow_uo_agitation_rec_final_Tj:str = "rec Tj agitation end"
+"""Tag for a flowsheet component for uo_agitation: recording field for final Tj"""
+part_flow_uo_agitation_rec_final_Tj_jp:str = "攪拌終了時外温:_________℃"
+"""A flowsheet component for uo_agitation: recording field for final Tj"""
+tag_part_flow_uo_agitation_rec_final_Ti:str = "rec Ti agitation end"
+"""Tag for a flowsheet component for uo_agitation: recording field for final Ti"""
+part_flow_uo_agitation_rec_final_Ti_jp:str = "攪拌終了時内温:_________℃"
+"""A flowsheet component for uo_agitation: recording field for final Ti"""
+tag_part_flow_uo_agitation_rec_dissoln_Tj:str = "rec Tj at complete dissolution"
 """Tag for a flowsheet component for uo_agitation: recording field for Tj at the time of dissolution"""
 part_flow_uo_agitation_rec_dissoln_Tj_jp:str = "溶解確認時外温:_________℃"
 """A flowsheet component for uo_agitation: recording field for Tj at the time of dissolution"""
-tag_part_flow_uo_agitation_rec_dissoln_Ti:str = "Ti at complete dissolution"
+tag_part_flow_uo_agitation_rec_dissoln_Ti:str = "rec Ti at complete dissolution"
 """Tag for a flowsheet component for uo_agitation: recording field for Ti at the time of dissolution"""
 part_flow_uo_agitation_rec_dissoln_Ti_jp:str = "溶解確認時内温:_________℃"
 """A flowsheet component for uo_agitation: recording field for Ti at the time of dissolution"""
@@ -1007,9 +1037,17 @@ tag_part_flow_uo_agitation_rec_chk_agit_compl:str = "agit completed"
 """Tag for a flowsheet component for uo_agitation: check box for agitation completion"""
 part_flow_uo_agitation_rec_chk_agit_compl_jp:str = "□ 攪拌完了"
 """A flowsheet component for uo_agitation: check box for agitation completion"""
+
 dict_part_flow_uo_agitation_jp = {tag_part_flow_uo_agitation_title_disslnck : part_flow_uo_agitation_title_disslnck_jp,
                                   tag_part_flow_uo_agitation_instr_rpm_arbitrary : part_flow_uo_agitation_instr_rpm_arbitrary_jp,
+                                  tag_part_flow_uo_agitation_rec_rpm_act : part_flow_uo_agitation_rec_rpm_act_jp,
+                                  tag_part_flow_uo_agitation_rec_chk_agit_ini : part_flow_uo_agitation_rec_chk_agit_ini_jp,
+                                  tag_part_flow_uo_agitation_rec_Tj_ini : part_flow_uo_agitation_rec_Tj_ini_jp,
+                                  tag_part_flow_uo_agitation_rec_Ti_ini : part_flow_uo_agitation_rec_Ti_ini_jp,
+                                  tag_part_flow_uo_agitation_instr_dissoln_check_visual : part_flow_uo_agitation_instr_dissoln_check_visual_jp,
                                   tag_part_flow_uo_agitation_rec_chk_dissoln : part_flow_uo_agitation_rec_chk_dissoln_jp,
+                                  tag_part_flow_uo_agitation_rec_final_Tj : part_flow_uo_agitation_rec_final_Tj_jp,
+                                  tag_part_flow_uo_agitation_rec_final_Ti : part_flow_uo_agitation_rec_final_Ti_jp,
                                   tag_part_flow_uo_agitation_rec_dissoln_Tj : part_flow_uo_agitation_rec_dissoln_Tj_jp,
                                   tag_part_flow_uo_agitation_rec_dissoln_Ti : part_flow_uo_agitation_rec_dissoln_Ti_jp,
                                   tag_part_flow_uo_agitation_rec_chk_agit_compl : part_flow_uo_agitation_rec_chk_agit_compl_jp}
@@ -1023,45 +1061,55 @@ dict_part_flow_uo_agitation_jp = {tag_part_flow_uo_agitation_title_disslnck : pa
 
 tag_stc_flow_uo_agitation_rpm_spec :str = "component_tag_rpm_spec"
 """Tag for a sentence for the unit operation Agitation: instruction for agitation at an specified agitation rate, includes a placeholder {rpm}"""
-stc_flow_uo_agitation_rpm_spec_jp :str = "攪拌速度: {rpm}rpm"
+stc_flow_uo_agitation_rpm_spec_jp :str = "攪拌速度:{rpm}rpm"
 """Sentence for the unit operation Agitation: instruction for agitation at an specified agitation rate, includes a placeholder {rpm}"""
 tag_stc_flow_uo_agitation_rpm_guidance :str = "component_tag_rpm_guidance"
 """Tag for a sentence for the unit operation Agitation: instruction for agitation with a guideline rate, includes a placeholder {rpm}"""
-stc_flow_uo_agitation_rpm_guidance_jp :str = "攪拌速度: 現場調整(目安{rpm}rpm)"
+stc_flow_uo_agitation_rpm_guidance_jp :str = "攪拌速度:現場調整(目安{rpm}rpm)"
 """Sentence for the unit operation Agitation: instruction for agitation with a guideline rate, includes a placeholder {rpm}"""
-tag_stc_flow_uo_agitation_temp_range :str = "agitation Ti range"
+tag_stc_flow_uo_agitation_Ti_range :str = "agitation Ti range"
 """Tag for a sentence for the unit operation Agitation: Instrction on temperature range. Includes placeholders {Ti_min} and {Ti_max}"""
 stc_flow_uo_agitation_temp_range_jp :str = "内温範囲:{Ti_min}～{Ti_max}℃"
 """Sentence for the unit operation Agitation: Instrction on temperature range. Includes placeholders {Ti_min} and {Ti_max}"""
-tag_stc_flow_uo_agitation_temp_min :str = "agigation Ti minimum" 
+tag_stc_flow_uo_agitation_Ti_min :str = "agigation Ti minimum" 
 """Tag for a sentence for the unit operation Agitation: Instruction on minimum temperature. Includes placeholder {Ti_min}"""
 stc_flow_uo_agitation_temmp_min_jp :str = "内温{Ti_min}以上"
 """Sentence for the unit operation Agitation: Instruction on minimum temperature. Includes placeholder {Ti_min}"""
-tag_stc_flow_uo_agitation_temp_max :str = "agitation Ti max"
+tag_stc_flow_uo_agitation_Ti_max :str = "agitation Ti max"
 """Tag for a sentence for the unit operation Agitation: Instruction on maximum temperature. Includes placeholder {Ti_max}"""
 stc_flow_uo_agitation_temp_max_jp :str = "内温{Ti_min}以下"
 """Sentence for the unit operation Agitation: """
 tag_stc_flow_uo_agitation_time_range :str = "agitation time range"
 """Tag for a sentence for the unit operation Agitation: Instruction on agitation time range. Includes placeholders {time_min}, {time_max} , and {time_unit}"""
-stc_flow_uo_agitation_time_range_jp :str = "攪拌継続{time_min}～{time_max} {time_unit}"
+stc_flow_uo_agitation_time_range_jp :str = "攪拌継続:{time_min}～{time_max} {time_unit}"
 """Sentence for the unit operation Agitation: Instruction on agitation time range. Includes placeholders {time_min}, {time_max}, and {time_unit}"""
 tag_stc_flow_uo_agitation_time_min :str = "agitation minimum time"
 """Tag for a sentence for the unit operation Agitation: Instruction on minimum agitation time. Includes placeholders {time_min} and {time_unit}"""
-stc_flow_uo_agitation_time_min_jp :str = "攪拌継続{time_min} {time_unit}以上"
+stc_flow_uo_agitation_time_min_jp :str = "攪拌継続:{time_min} {time_unit}以上"
 """Sentence for the unit operation Agitation: Instruction on minimum agitation time. Includes {time_min} and {time_unit}"""
 tag_stc_flow_uo_agitation_time_max :str = "agitation maximum time"
 """Tag for a sentence for the unit operation Agitation: Instruction on maximum agitation time. Includes {time_max} and {time_unit}"""
-stc_flow_uo_agitation_time_max_jp :str = "攪拌継続{time_max} {time_unit}以下"
+stc_flow_uo_agitation_time_max_jp :str = "攪拌継続:{time_max} {time_unit}以下"
 """Sentence for the unit operation Agitation:  Instruction on maximum agitation time. Includes {time_max} and {time_unit}"""
+tag_stc_flow_uo_agitation_time_single_point:str = "agitation time single point"
+"""Tag for a sentence for the unit operation Agitation: Instruction on agitation time (single point). Includes a placeholder {time} and {time_unit}"""
+stc_flow_uo_agitation_time_single_point_jp :str = "攪拌時間:{time} {time_unit}"
+"""Sentence for the unit operation Agitation:  Instruction on maximum agitation time. Includes a placeholder {time} and {time_unit}"""
+tag_stc_flow_uo_agitation_rec_duration:str = "record agitation duration"
+"""Tag for a sentence for the unit operation Agitation: Record field for agitation duration, includes a placeholder {time_unit}"""
+stc_flow_uo_agitation_rec_duration_jp :str = "攪拌時間:_________{time_unit}"
+"""Sentence for the unit operation Agitation: Record field for agitation duration, includes a placeholder {time_unit}"""
 
 dict_jp_stcs_uo_agitation = {tag_stc_flow_uo_agitation_rpm_spec : stc_flow_uo_agitation_rpm_spec_jp,
                              tag_stc_flow_uo_agitation_rpm_guidance : stc_flow_uo_agitation_rpm_guidance_jp,
-                             tag_stc_flow_uo_agitation_temp_range : stc_flow_uo_agitation_temp_range_jp,
-                             tag_stc_flow_uo_agitation_temp_min : stc_flow_uo_agitation_temmp_min_jp,
-                             tag_stc_flow_uo_agitation_temp_max : stc_flow_uo_agitation_temp_max_jp,
+                             tag_stc_flow_uo_agitation_Ti_range : stc_flow_uo_agitation_temp_range_jp,
+                             tag_stc_flow_uo_agitation_Ti_min : stc_flow_uo_agitation_temmp_min_jp,
+                             tag_stc_flow_uo_agitation_Ti_max : stc_flow_uo_agitation_temp_max_jp,
                              tag_stc_flow_uo_agitation_time_range : stc_flow_uo_agitation_time_range_jp,
                              tag_stc_flow_uo_agitation_time_min : stc_flow_uo_agitation_time_min_jp,
-                             tag_stc_flow_uo_agitation_time_max : stc_flow_uo_agitation_time_max_jp}
+                             tag_stc_flow_uo_agitation_time_max : stc_flow_uo_agitation_time_max_jp,
+                             tag_stc_flow_uo_agitation_time_single_point : stc_flow_uo_agitation_time_single_point_jp,
+                             tag_stc_flow_uo_agitation_rec_duration : stc_flow_uo_agitation_rec_duration_jp}
 """Japanese language dictionary for sentences for flowsheet for the unit operation Agitation"""
 
 ###################################################
