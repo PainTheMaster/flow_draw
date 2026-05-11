@@ -620,6 +620,70 @@ list_hedr_uo_phasedich = [hedr_uo_phasedisch_origin,
 
 
 
+######################################################
+##     HEADER ITEMS AND OPTIONS FOR EVAPORATION     ##
+######################################################
+
+                        #>>>>>>>>>>Detail table header items and list thereof <<<<<<<<<<<<<<
+#hedr_<unit operation>_<parameter> = <str>
+#list_heder_<unit operation> = [<header item 0>,<header item 1>,...]
+hedr_uo_evap_Tj_min = "Tj_min"
+"""header item for the unit operation evaporation: Tj lower limit for evaporation"""
+hedr_uo_evap_Tj_max = "Tj_max"
+"""header item for the unit operation evaporation: Tj higher limit for evaporation"""
+hedr_uo_evap_T_brine_condenser = "Condenser brine temp"
+"""header item for the unit operation evaporation: brine temperature for cndenser"""
+hedr_uo_evap_press_spec = "Pressure spec"
+"""header item for the unit operation evaporation: pressure specification; arbitrary or specific"""
+hedr_uo_evap_press_min = "Press_min"
+"""header item for the unit operation evaporation: lower limit for the evaporation pressure"""
+hedr_uo_evap_press_max = "Press max"
+"""header item for the unit operation evaporation: upper limit for the evaporation pressure"""
+hedr_uo_evap_press_unit = "Press unit"
+"""header item for the unit operation evaporation: pressure unit for the evaporation"""
+hedr_uo_evap_val_endpoint = "End point value"
+"""header item for the unit operation evaporation: value for the evaporation end point"""
+hedr_uo_evap_unit_endpoint = "End point unit"
+"""header item for the unit operation evaporation: unit for the evaporation endpoint"""
+
+        #>>>>>>>>>>Option items, lists, and a dictionary for drop-down list in detail input form<<<<<<<<<<<<<<
+#opt_<unit operation>_<parameter>_<option> = str
+#list_opt_<unit operation>_<parameter> = [<option_0>, <option_1>, ...]
+#dict_opt_<unit operation> = {<heder_item1> : <option_list_1), ...}
+
+opt_uo_evap_press_spec_specific = "Specific pressure"
+"""option item for the attribute paress_spec_ for uo_evap: Specific pressure value"""
+opt_uo_evap_press_spec_arbitrary = "Arbitrary with optional values"
+"""option item for the attribute press_spec for uo_evap: Arbitrary with optional values"""
+list_opt_uo_evap_press_spec = [opt_uo_evap_press_spec_specific,
+                               opt_uo_evap_press_spec_arbitrary]
+"""List of options for the parameter press_spec for the unit operation evap"""
+
+opt_uo_evap_press_unit_MPaA = "MPaA"
+"""option item for the attribute press_unit for uo_evap: MPaA"""
+opt_uo_evap_press_unit_kPaA = "kPaA"
+"""option item for the attribute press_unit for uo_evap: kPaA"""
+opt_uo_evap_press_unit_MPaG = "MPaG"
+"""option item for the attribute press_unit for uo_evap: MPaG"""
+opt_uo_evap_press_unit_kPaG = "kPaG"
+"""option item for the attribute press_unit for uo_evap: kPaG"""
+list_opt_uo_evap_press_unit = [opt_uo_evap_press_unit_MPaA,
+                               opt_uo_evap_press_unit_kPaA,
+                               opt_uo_evap_press_unit_MPaG,
+                               opt_uo_evap_press_unit_kPaG]
+"""list of options for the parameter press_unit for uo_evap"""
+
+opt_uo_evap_endpoint_unit_L = "L"
+"""option item for the attribute endpoint_unit for uo_evap: litre"""
+opt_uo_evap_endpoint_unit_vw = "v/w"
+"""option item for the attribute endpoint_unit for uo_evap: v/w"""
+list_opt_up_evap_endpoint_unit = [opt_uo_evap_endpoint_unit_L,
+                                  opt_uo_evap_endpoint_unit_vw]
+"""list of options for the parameter endpoint_unit for uo_evap"""
+
+dict_opt_uo_evap = {hedr_uo_evap_press_spec : list_opt_uo_evap_press_spec,
+                    hedr_uo_evap_press_unit : list_opt_uo_evap_press_unit,
+                    hedr_uo_evap_unit_endpoint : list_opt_up_evap_endpoint_unit}
 
 
 ######################################################
@@ -1285,13 +1349,19 @@ tag_part_flow_uo_phasedisch_chk_discharged = "check box phase discharged"
 part_flow_uo_phasedisch_chk_discharged_jp = "□ 実施確認"
 """A flowsheet component for a unit operation phase discharging: check box for the completion of the phase discharging"""
 
+dict_jp_part_flow_uo_phasedisch = {tag_part_flow_uo_phasedisch_method_connection : part_flow_uo_phasedisch_method_connection_jp,
+                                   tag_part_flow_uo_phasedisch_chk_connected : part_flow_uo_phasedisch_chk_connected_jp,
+                                   tag_part_flow_uo_phasedisch_method_disch : part_flow_uo_phasedisch_method_disch_jp,
+                                   tag_part_flow_uo_phasedisch_content_disch : part_flow_uo_phasedisch_content_disch_jp,
+                                   tag_part_flow_uo_phasedisch_chk_discharged : part_flow_uo_phasedisch_chk_discharged_jp}
+"""Language dictionary for flowsheet parts for the unit operation phase discharging"""
 
 
         #>>>>>>>>>>>>>> Template sentences for flow sheets in local language and tags (keys) thereof <<<<<<<<<<<<<<<<<<<
 #tag_stc_<unit operation>_<item> = tag
 #stc_stc_<unit operation>_<item>_<lang> = <str with placeholder>
 #dict_<lang>_stcs_<unit operation> = {tag : sentence}
-"""Language dictionary for instruction SENTENCES with place holders 'min' and/or 'max'. Use str.format()"""
+"""Japanese language dictionary for instruction SENTENCES with place holders 'min' and/or 'max'. Use str.format()"""
 
 tag_stc_uo_phasedisch_origin = "sentence origin"
 """A tag for an instruction sentence for a unit operation phase discharging: sentence to designate the origon vessel of the discharged phase, includes placeholder {origin}"""
@@ -1301,16 +1371,84 @@ tag_stc_uo_phasedisch_via = "sentence vis"
 """A tag for an instruction sentence for a unit operation phase discharging: sentence to designate the way point, e.g., multiplexer, includes placeholder {via}"""
 stc_uo_phasedisch_via_jp = "経由: {via}"
 """A instruction sentence for a unit operation phase discharging: sentence to designate the way point, e.g., multiplexer, includes placeholder {via}"""
-
 tag_stc_uo_phasedisch_destin_single = "sentence single destination"
 """A tag for an instruction sentence for a unit operation phase discharging: sentence to designate the destination, includes placeholder {destination}"""
 stc_uo_phasedisch_destin_single_jp = "移送先: {destination}"
 """A instruction sentence for a unit operation phase discharging: sentence to designate the destination, includes placeholder {destination}"""
-
 tag_stc_uo_phasedisch_destin_multi = "sentence multiple destination"
-"""A tag for an instruction sentence for a unit operation phase discharging: sentence to designate multiple destinations, includes placeholder {destination}, singular!"""
-stc_uo_phasedisch__jp = "移送先: {destination} (使用したものを〇)"
-"""A instruction sentence for a unit operation phase discharging: sentence to designate multiple destinations, includes placeholder {destination}, singular!"""
+"""A tag for an instruction sentence for a unit operation phase discharging: sentence to designate multiple destinations, includes placeholder {destination}--singular!"""
+stc_uo_phasedisch_destin_multi_jp = "移送先: {destination} (使用したものを〇)"
+"""A instruction sentence for a unit operation phase discharging: sentence to designate multiple destinations, includes placeholder {destination}--singular!"""
+dict_jp_stcs_uo_phasedisch = {tag_stc_uo_phasedisch_origin : stc_uo_phasedisch_origin_jp,
+                              tag_stc_uo_phasedisch_via : stc_uo_phasedisch_via_jp,
+                              tag_stc_uo_phasedisch_destin_single : stc_uo_phasedisch_destin_single_jp,
+                              tag_stc_uo_phasedisch_destin_multi : stc_uo_phasedisch_destin_multi_jp}
+"""Japanese language dictionary for instruction sentences for the unit operation phase discharging"""
+
+###################################################
+#        PARTS FOR <unit operation>               #
+###################################################
+
+        #>>>>>>>>>>>>>> flowsheet compoentns in local language and tags (keys) thereof <<<<<<<<<<<<<<<<<<<
+
+#sets of:
+#tag_part_flow_<unit operation>_<sort: instr, rec, mthod, etc>_<descr> = str
+#part_flow_<unit operation>_<sort: instr, rec, mthod, etc>_<descr>_<lang> = str
+#Follwed by 
+#dict_<lang>_part_flow_<unit operation> = {<tag> : <component loc. lang>}
+
+tag_part_flow_uo_evap_method_ini = "method col init evap"
+"""the tag for a flowhsheet component for uo_evap: a sub title to commense evaporation in the method column"""
+part_flow_uo_evap_method_ini_jp = "濃縮開始"
+"""A flowhsheet component for uo_evap: a sub title to commense evaporation in the method column"""
+
+tag_part_flow_uo_evap_instr_chronol_rec = "instr chronological record"
+"""the tag for a flowhsheet component for uo_evap: instruction to take a chronological record"""
+part_flow_uo_evap_instr_chronol_rec_jp = "*詳細記録は経時的な作業記録書に記載する。"
+"""A flowhsheet component for uo_evap: instruction to take a chronological record"""
+
+tag_part_flow_uo_evap_ = ""
+"""the tag for a flowhsheet component for uo_evap: """
+part_flow_uo_evap__jpi = ""
+"""A flowhsheet component for uo_evap: """
+
+tag_part_flow_uo_evap_ = ""
+"""the tag for a flowhsheet component for uo_evap: """
+part_flow_uo_evap__jpi = ""
+"""A flowhsheet component for uo_evap: """
+
+tag_part_flow_uo_evap_ = ""
+"""the tag for a flowhsheet component for uo_evap: """
+part_flow_uo_evap__jpi = ""
+"""A flowhsheet component for uo_evap: """
+
+tag_part_flow_uo_evap_ = ""
+"""the tag for a flowhsheet component for uo_evap: """
+part_flow_uo_evap__jpi = ""
+"""A flowhsheet component for uo_evap: """
+
+
+
+        #>>>>>>>>>>>>>> Template sentences for flow sheets in local language and tags (keys) thereof <<<<<<<<<<<<<<<<<<<
+#tag_stc_<unit operation>_<item> = tag
+#stc_stc_<unit operation>_<item>_<lang> = <str with placeholder>
+#dict_<lang>_stcs_<unit operation> = {tag : sentence}
+"""Language dictionary for instruction SENTENCES with place holders 'min' and/or 'max'. Use str.format()"""
+
+tag_stc_flow_uo_evap_ = ""
+"""the tag for a sentence for component for uo_evap: """
+stc_flow_uo_evap__jp = ""
+"""A sentence for uo_evap: ; includes placeholders {}"""
+
+tag_stc_flow_uo_evap_ = ""
+"""the tag for a sentence for component for uo_evap: """
+stc_flow_uo_evap__jp = ""
+"""A sentence for uo_evap: ; includes placeholders {}"""
+
+tag_stc_flow_uo_evap_ = ""
+"""the tag for a sentence for component for uo_evap: """
+stc_flow_uo_evap__jp = ""
+"""A sentence for uo_evap: ; includes placeholders {}"""
 
 
 
@@ -1332,8 +1470,6 @@ stc_uo_phasedisch__jp = "移送先: {destination} (使用したものを〇)"
 #stc_stc_<unit operation>_<item>_<lang> = <str with placeholder>
 #dict_<lang>_stcs_<unit operation> = {tag : sentence}
 """Language dictionary for instruction SENTENCES with place holders 'min' and/or 'max'. Use str.format()"""
-
-
 
 
 
