@@ -319,26 +319,27 @@ class ProcessIO:
         num_sub_items = self.df_summary[self.df_summary[header_summary_sequence]==seq][header_summary_num_subitems].item()
 
         #perhaps users will omit specifying sub-item numbers if it is 1.
-        if math.isnan(num_sub_items):
+        if pd.isna(num_sub_items):
             num_sub_items = 1
         else:
             num_sub_items = int(num_sub_items)
         menu_dict_local: dict[str, DataValidation] = {}
-        for key in menu_dict:
-            options = '"'
-            #note that menu_dict[key] is a list[str]
-            for item in menu_dict[key]:
-                options += (item+',')
-            #A "," at the end is not needed.
-            options = options[:-1]
-            options += '"'
-            dv_unitops = DataValidation(
-                type='list',
-                formula1=options,
-                allow_blank=True
-            )
-            menu_dict_local[key]=dv_unitops
-            self.detail_ws.add_data_validation(dv_unitops)
+        if menu_dict is not None:
+            for key in menu_dict:
+                options = '"'
+                #note that menu_dict[key] is a list[str]
+                for item in menu_dict[key]:
+                    options += (item+',')
+                #A "," at the end is not needed.
+                options = options[:-1]
+                options += '"'
+                dv_unitops = DataValidation(
+                    type='list',
+                    formula1=options,
+                    allow_blank=True
+                )
+                menu_dict_local[key]=dv_unitops
+                self.detail_ws.add_data_validation(dv_unitops)
 
         #Note: header[0] == None to align with Excel
         header = [None]+common_header_detail+specif_header

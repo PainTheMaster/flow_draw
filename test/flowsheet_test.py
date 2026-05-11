@@ -11,6 +11,7 @@ import flow_draw.batch.process.unit_operations.uo_innert_replacement as innert
 import flow_draw.batch.process.unit_operations.uo_temp_control as tempr
 import flow_draw.batch.process.unit_operations.uo_agitation as agit
 import flow_draw.batch.process.unit_operations.uo_settling as stlng
+import flow_draw.batch.process.unit_operations.uo_phase_discharge as phdisch
 import flow_draw.data_io.flowsheet  as fsht
 import flow_draw.materials.materials as mats
 import os
@@ -318,6 +319,47 @@ class UnitOperationOutputTest(unittest.TestCase):
         uo_instance.output_unit_operation()
         sheet.save(filename="Test1011_settling_minimal.xlsx")
         self.assertTrue(True)
+    
+    def test_1012_phase_disch_full(self):
+        sheet = fsht.Flowsheet()
+        uo_instance = phdisch.PhaseDisch(flowsheet=sheet, operation_seq=10)
+        uo_instance.pre_comment = "Pre-comment-1\nPre-comment-2"
+        uo_instance.post_comment = "Post comennt"
+        uo_instance.origin = 'RV_ORIG'
+        uo_instance.via = 'Multiplexer'
+        uo_instance.destin.append('Destin tank 1')
+        uo_instance.destin.append('Destin tank 2')
+
+        print(uo_module.list_unit_ops)
+
+        uo_instance.output_unit_operation()
+        sheet.save(filename="Test1012_phase_disch_full.xlsx")
+        self.assertTrue(True)
+
+
+    def test_1013_phase_disch_med(self):
+        sheet = fsht.Flowsheet()
+        uo_instance = phdisch.PhaseDisch(flowsheet=sheet, operation_seq=11)
+
+        uo_instance.destin.append('Destin tank')
+
+
+        print(uo_module.list_unit_ops)
+
+        uo_instance.output_unit_operation()
+        sheet.save(filename="Test1013_phase_disch_med.xlsx")
+        self.assertTrue(True)
+
+
+    def test_1014_phase_disch_minimal(self):
+        sheet = fsht.Flowsheet()
+        uo_instance = phdisch.PhaseDisch(flowsheet=sheet, operation_seq=11)
+
+        print(uo_module.list_unit_ops)
+
+        uo_instance.output_unit_operation()
+        sheet.save(filename="Test1014_phase_disch_minimal.xlsx")
+        self.assertTrue(True)
 
 
 
@@ -329,9 +371,13 @@ def suite():
     # suite.addTest(UnitOperationOutputTest("test_1005_temp_ctrl_TiTj_mode"))
     # suite.addTest(UnitOperationOutputTest("test_1006_temp_ctrl_Tj_mode"))
     # suite.addTest(UnitOperationOutputTest("test_1007_temp_ctrl_Ti_mode"))
-    suite.addTest(UnitOperationOutputTest("test_1008_agit_full"))
-    suite.addTest(UnitOperationOutputTest("test_1010_settling_full"))
-    suite.addTest(UnitOperationOutputTest("test_1011_settling_minimal"))
+    # suite.addTest(UnitOperationOutputTest("test_1008_agit_full"))
+    # suite.addTest(UnitOperationOutputTest("test_1010_settling_full"))
+    # suite.addTest(UnitOperationOutputTest("test_1011_settling_minimal"))
+    # suite.addTest(UnitOperationOutputTest("test_1012_phase_disch_full"))
+    suite.addTest(UnitOperationOutputTest("test_1013_phase_disch_med"))
+    suite.addTest(UnitOperationOutputTest("test_1014_phase_disch_minimal"))
+
     return suite
 
 

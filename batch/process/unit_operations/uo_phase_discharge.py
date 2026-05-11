@@ -98,7 +98,7 @@ tag_part_flow_content_disch = defs.tag_part_flow_uo_phasedisch_content_disch
 """Tag for a flowsheet component for a unit operation phase discharging: Description of action (content column) for discharging"""
 tag_part_flow_chk_discharged = defs.tag_part_flow_uo_phasedisch_chk_discharged
 """Tag for a flowsheet component for a unit operation phase discharging: check box for the completion of the phase discharging"""
-dict_jp_part_flow = defs.dict_jp_part_flow_uo_phasedisch
+dict_part_flow = defs.dict_jp_part_flow_uo_phasedisch
 """Language dictionary for flowsheet parts for the unit operation phase discharging"""
 
                     #>>>>>>>>>>>>> Sentences <<<<<<<<<<<<<<<<<<<<<<<<<
@@ -111,7 +111,7 @@ tag_stc_destin_single = defs.tag_stc_uo_phasedisch_destin_single
 """A tag for an instruction sentence for a unit operation phase discharging: sentence to designate the destination, includes placeholder {destination}"""
 tag_stc_destin_multi = defs.tag_stc_uo_phasedisch_destin_multi
 """A tag for an instruction sentence for a unit operation phase discharging: sentence to designate multiple destinations, includes placeholder {destination}--singular!"""
-dict_jp_stcs = defs.dict_jp_stcs_uo_phasedisch
+dict_stcs = defs.dict_jp_stcs_uo_phasedisch
 """Japanese language dictionary for instruction sentences for the unit operation phase discharging"""
 
 #########################################################
@@ -169,19 +169,66 @@ class PhaseDisch(uo.UnitOperation, uo_tag=defs.tag_uo_phase_disch):
 
 
     def get_detail_header(self) -> list[str]:
-        pass
+        return list_hedr
 
     def get_detail_option_menu(self) -> Optional[dict[str, list[str]]]:
-        pass
+        return None
     
     def output_unit_operation(self):
         self.flowsheet.header_organizer(op_nr=self.operation_seq, title=lang_dict_uo_titles[self.uo_tag])
         if not (self.pre_comment == None or self.pre_comment == ''):
             self.flowsheet.put_body_comments(self.pre_comment)
             self.flowsheet.linefeed()        
-
-        #<Operation-specific processes here>
+        if len(self.destin) >= 1:
+            self.__put_line_connection()
+            self.flowsheet.linefeed()
+        
+        self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
+                                method=dict_part_flow[tag_part_flow_method_disch],
+                                content=dict_part_flow[tag_part_flow_content_disch],
+                                record=dict_part_flow[tag_part_flow_chk_discharged],
+                                operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
+                                witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
+        self.flowsheet.linefeed()
 
         if not (self.post_comment == None or self.post_comment == ''):
             self.flowsheet.put_body_comments(self.post_comment)
             self.flowsheet.linefeed()
+
+    def __put_line_connection(self):
+        stc_destin:str = ''
+        if len(self.destin) == 1:
+            stc_destin = dict_stcs[tag_stc_destin_single].format(destination=self.destin[0])
+        else:
+            destin_combi:str = ''
+            for single_destin in self.destin:
+                destin_combi += (single_destin+'/')
+            destin_combi = destin_combi.removesuffix('/')
+            stc_destin = dict_stcs[tag_stc_destin_multi].format(destination=destin_combi)
+        
+        if self.origin is not None:
+            self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
+                                    method=dict_part_flow[tag_part_flow_method_connection],
+                                    content=dict_stcs[tag_stc_origin].format(origin=self.origin),
+                                    record=dict_part_flow[tag_part_flow_chk_connected],
+                                    operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
+                                    witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
+            if self.via is not None:
+                self.flowsheet.put_line(content=dict_stcs[tag_stc_via].format(via=self.via))
+            self.flowsheet.put_line(content=stc_destin)
+        elif self.via is not None:
+            self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
+                                    method=dict_part_flow[tag_part_flow_method_connection],
+                                    content=dict_stcs[tag_stc_via].format(via=self.via),
+                                    record=dict_part_flow[tag_part_flow_chk_connected],
+                                    operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
+                                    witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
+            self.flowsheet.put_line(content=stc_destin)
+        else:
+            self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
+                                    method=dict_part_flow[tag_part_flow_method_connection],
+                                    content=stc_destin,
+                                    record=dict_part_flow[tag_part_flow_chk_connected],
+                                    operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
+                                    witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
+                
