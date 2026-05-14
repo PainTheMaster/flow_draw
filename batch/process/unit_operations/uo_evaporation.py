@@ -44,9 +44,11 @@ hedr_Tj_min = defs.hedr_uo_evap_Tj_min
 """header item for the unit operation evaporation: Tj lower limit for evaporation"""
 hedr_Tj_max = defs.hedr_uo_evap_Tj_max
 """header item for the unit operation evaporation: Tj higher limit for evaporation"""
-hedr_T_brine_condenser = defs.hedr_uo_evap_T_brine_condenser
-"""header item for the unit operation evaporation: brine temperature for cndenser"""
-hedr_press_spec = defs.hedr_uo_evap_press_spec
+hedr_T_brine_cond_min = defs.hedr_uo_evap_T_brine_cond_min
+"""header item for the unit operation evaporation: lower limit of brine temperature for cndenser"""
+hedr_T_brine_cond_max = defs.hedr_uo_evap_T_brine_cond_max
+"""header item for the unit operation evaporation: upper limit of brine temperature for cndenser"""
+hedr_press_ctrl = defs.hedr_uo_evap_press_ctrl
 """header item for the unit operation evaporation: pressure specification; arbitrary or specific"""
 hedr_press_min = defs.hedr_uo_evap_press_min
 """header item for the unit operation evaporation: lower limit for the evaporation pressure"""
@@ -54,6 +56,8 @@ hedr_press_max = defs.hedr_uo_evap_press_max
 """header item for the unit operation evaporation: upper limit for the evaporation pressure"""
 hedr_press_unit = defs.hedr_uo_evap_press_unit
 """header item for the unit operation evaporation: pressure unit for the evaporation"""
+hedr_agitation = defs.hedr_uo_evap_agitation
+"""header item for the unit operation evaporation: agitation rate"""
 hedr_val_endpoint_spec_min = defs.hedr_uo_evap_val_endpoint_spec_min
 """header item for the unit operation evaporation: minimum spec value for the evaporation end point"""
 hedr_val_endpoint_spec_max = defs.hedr_uo_evap_val_endpoint_spec_max
@@ -70,13 +74,13 @@ list_hedr = defs.list_hedr_uo_evap
 # UO-specific options, list, header_item: list dictionry thereof (for data input and internalsignaling)
 #########################################################
 
-opt_press_spec_specific = defs.opt_uo_evap_press_spec_specific
+opt_press_ctrl_specific = defs.opt_uo_evap_press_ctrl_specific
 """option item for the attribute paress_spec_ for uo_evap: Specific pressure value"""
-opt_press_spec_arbitrary_with_guide = defs.opt_uo_evap_press_spec_arbitrary_with_guide
+opt_press_ctrl_arbitrary_with_guide = defs.opt_uo_evap_press_ctrl_arbitrary_with_guide
 """option item for the attribute press_spec for uo_evap: Arbitrary with optional guideline"""
-opt_press_spec_arbitrary = defs.opt_uo_evap_press_spec_arbitrary
+opt_press_ctrl_arbitrary = defs.opt_uo_evap_press_ctrl_arbitrary
 """option item for the attribute press_spec for uo_evap: Arbitrary without a guieline"""
-opt_press_spec_full_vac = defs.opt_uo_evap_press_spec_full_vac
+opt_press_ctrl_full_vac = defs.opt_uo_evap_press_ctrl_full_vac
 """list of options for the parameter press_unit for uo_evap"""
 
 opt_press_unit_MPaA = defs.opt_uo_evap_press_unit_MPaA
@@ -88,6 +92,9 @@ opt_press_unit_MPaG = defs.opt_uo_evap_press_unit_MPaG
 opt_press_unit_kPaG = defs.opt_uo_evap_press_unit_kPaG
 """option item for the attribute press_unit for uo_evap: kPaG"""
 
+
+dict_opt = defs.dict_opt_uo_evap
+"""Dictionary of <header item>:<drop-down options>"""
 
 
 #########################################################
@@ -121,25 +128,27 @@ Language dictionary for common parts.
                 #>>>>>>>>>>>>>>>>Tags for flowsheet components <<<<<<<<<<<<<<<<<<<<<<<<<
 
 tag_part_flow_method_ini = defs.tag_part_flow_uo_evap_method_ini
-"""the tag for a flowhsheet component for uo_evap: a sub title to commense evaporation in the method column"""
+"""the tag for a flowsheet component for uo_evap: a sub title to commense evaporation in the method column"""
 tag_part_flow_instr_chronol_rec = defs.tag_part_flow_uo_evap_instr_chronol_rec
-"""the tag for a flowhsheet component for uo_evap: instruction to take a chronological record"""
+"""the tag for a flowsheet component for uo_evap: instruction to take a chronological record"""
 tag_part_flow_pres_arbitrary = defs.tag_part_flow_uo_evap_pres_arbitrary
-"""the tag for a flowhsheet component for uo_evap: instruction for arbitrary pressure for evaporation"""
+"""the tag for a flowsheet component for uo_evap: instruction for arbitrary pressure for evaporation"""
+tag_part_flow_pres_full_vac = defs.tag_part_flow_uo_evap_pres_full_vac
+"""the tag for a flowhsheet component for uo_evap: instruction for full vacuume for evaporation"""
 tag_part_flow_agitation_arbitray = defs.tag_part_flow_uo_evap_agitation_arbitray
-"""the tag for a flowhsheet component for uo_evap: agitation at an arbitrary rotation"""
+"""the tag for a flowsheet component for uo_evap: agitation at an arbitrary rotation"""
 tag_part_flow_method_end = defs.tag_part_flow_uo_evap_method_end
-"""the tag for a flowhsheet component for uo_evap: end of evaporation"""
+"""the tag for a flowsheet component for uo_evap: end of evaporation"""
 tag_part_flow_rec_Tj_sp = defs.tag_part_flow_uo_evap_rec_Tj_sp
-"""the tag for a flowhsheet component for uo_evap: record field for Tj"""
+"""the tag for a flowsheet component for uo_evap: record field for Tj"""
 tag_part_flow_rec_T_brine_sp = defs.tag_part_flow_uo_evap_rec_T_brine_sp
-"""the tag for a flowhsheet component for uo_evap: record field for brine temperature"""
+"""the tag for a flowsheet component for uo_evap: record field for brine temperature"""
 tag_part_flow_rec_rpm = defs.tag_part_flow_uo_evap_rec_rpm
-"""the tag for a flowhsheet component for uo_evap: record field for agitation rate"""
+"""the tag for a flowsheet component for uo_evap: record field for agitation rate"""
 tag_part_flow_rec_Ti_ini = defs.tag_part_flow_uo_evap_rec_Ti_ini
-"""the tag for a flowhsheet component for uo_evap: recorod field for Ti at the beginning of evaporation"""
+"""the tag for a flowsheet component for uo_evap: recorod field for Ti at the beginning of evaporation"""
 tag_part_flow_rec_Ti_max = defs.tag_part_flow_uo_evap_rec_Ti_max
-"""the tag for a flowhsheet component for uo_evap: record field for the maximum Ti during evaporation"""
+"""the tag for a flowsheet component for uo_evap: record field for the maximum Ti during evaporation"""
 
 dict_part_flow = defs.dict_jp_part_flow_uo_evap
 """Language dictionary for flowsheet components"""
@@ -215,7 +224,30 @@ dict_stcs_flow = defs.dict_jp_stcs_flow_uo_evap
 #
 #########################################################
 
-    load_params_from_df(self, df: pd.DataFrame):
+class Evaporation(uo.UnitOperation, uo_tag=defs.tag_uo_evap):
+    def __init__(self,
+                 caller: trdef.GetMats =None,
+                 flowsheet:fsht.Flowsheet=None,
+                 operation_seq: int=None,
+                 num_subitems: int = None,
+                 edit_comment:str=None):
+        super().__init__(caller=caller, flowsheet=flowsheet, operation_seq=operation_seq, num_subitems=num_subitems, edit_comment=edit_comment)
+        self.materials: mats.Materials = self.caller.get_mats()
+        self.Tj_min = None
+        self.Tj_max = None
+        self.Tbr_min = None
+        self.Tbr_max:float = None
+        self.P_ctrl:str = None
+        self.P_min:float = None
+        self.P_max:float = None
+        self.P_unit:str = None
+        self.agitation:float = None
+        self.end_vw_spec_min:float = None
+        self.end_vw_spec_max:float = None
+        self.end_vw_guide_min:float = None
+        self.end_vw_guide_max:float = None
+
+    def load_params_from_df(self, df: pd.DataFrame):
         """
         Loads necessary parameters from a DataFrame object.
         The header items must be in line with the definition the class Charging.
@@ -228,16 +260,52 @@ dict_stcs_flow = defs.dict_jp_stcs_flow_uo_evap
             self.pre_comment = first_row[hedr_precomment]
         if not pd.isna(first_row[hedr_postcomment]):
             self.post_comment = first_row[hedr_postcomment]
-        for _, subitem in df.iterrows():
+        # for _, subitem in df.iterrows():
             #<uo-specific process>
-
-
+        if not pd.isna(first_row[hedr_Tj_min]):
+            self.Tj_min = first_row[hedr_Tj_min]
+        if not pd.isna(first_row[hedr_Tj_max]):
+            self.Tj_max = first_row[hedr_Tj_max]
+        if not pd.isna(first_row[hedr_T_brine_cond_min]):
+            self.Tbr_min = first_row[hedr_T_brine_cond_min]
+        if not pd.isna(first_row[hedr_T_brine_cond_max]):
+            self.Tbr_max = first_row[hedr_T_brine_cond_max]
+        if not pd.isna(first_row[hedr_press_min]):
+            self.P_min = first_row[hedr_press_min]
+        if not pd.isna(first_row[hedr_press_max]):
+            self.P_max = first_row[hedr_press_max]
+        if not pd.isna(first_row[hedr_press_unit]):
+            self.P_unit = first_row[hedr_press_unit]
+        elif self.P_min is not None or self.P_max is not None:
+            raise ValueError(f"{self.__class__.__name__}: Pressure unit not specified for Op. Seq. {self.operation_seq} although min and/or max pressure is provided.")
+        if not pd.isna(first_row[hedr_press_ctrl]):
+            if self.P_min is not None or self.P_max is not None: #if press_ctrl is defined and P_min and/or P_max are provided.
+                self.P_ctrl = first_row[hedr_press_ctrl]
+            elif first_row[hedr_press_ctrl] == opt_press_ctrl_arbitrary or first_row[hedr_press_ctrl] == opt_press_ctrl_full_vac: #if press_ctrl is arbitrary and P_min or P_max are not provided.
+                self.P_ctrl = first_row[hedr_press_ctrl]
+            else: #if press_ctrl is not arbitrary and P_min or P_max are not provided.
+                raise ValueError(f"{self.__class__.__name__}: No of of Press_min and Press_max is provided for Op. Seq. {self.operation_seq}\
+                                  although \"specific pressure\" or \"full vacuum\" is selectd for pressure control method.")
+        elif self.P_min is None and self.P_max is None: #pressure control method not specified and pressure limits not provided -> arbitrary
+            self.P_ctrl = opt_press_ctrl_arbitrary
+        else: #pressure control method not speficied, but pressure lmit(s) provided -> value error
+            raise ValueError(f"{self.__class__.__name__}: Pressure control method not specified for Op. Seq. {self.operation_seq} although min and/or max pressure is provided.")
+        if not pd.isna(first_row[hedr_agitation]):
+            self.agitation = first_row[hedr_agitation]
+        if not pd.isna(first_row[hedr_val_endpoint_spec_min]):
+            self.end_vw_spec_min = first_row[hedr_val_endpoint_spec_min]
+        if not pd.isna(first_row[hedr_val_endpoint_spec_max]):
+            self.end_vw_spec_max = first_row[hedr_val_endpoint_spec_max]
+        if not pd.isna(first_row[hedr_val_endpoint_guide_min]):
+            self.end_vw_guide_min = first_row[hedr_val_endpoint_guide_min]
+        if not pd.isna(first_row[hedr_val_endpoint_guide_max]):
+            self.end_vw_guide_max = first_row[hedr_val_endpoint_guide_max]
 
     def get_detail_header(self) -> list[str]:
-        pass
+        return list_hedr
 
     def get_detail_option_menu(self) -> Optional[dict[str, list[str]]]:
-        pass
+        return dict_opt
     
     def output_unit_operation(self):
         self.flowsheet.header_organizer(op_nr=self.operation_seq, title=lang_dict_uo_titles[self.uo_tag])
@@ -250,3 +318,12 @@ dict_stcs_flow = defs.dict_jp_stcs_flow_uo_evap
         if not (self.post_comment == None or self.post_comment == ''):
             self.flowsheet.put_body_comments(self.post_comment)
             self.flowsheet.linefeed()
+    
+    def __put_Tj(self):
+        pass
+
+    def __put_vac(self):
+        pass
+
+    def __put_endpoint(self):
+        pass

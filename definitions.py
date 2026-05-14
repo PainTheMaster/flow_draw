@@ -631,16 +631,20 @@ hedr_uo_evap_Tj_min = "Tj_min"
 """header item for the unit operation evaporation: Tj lower limit for evaporation"""
 hedr_uo_evap_Tj_max = "Tj_max"
 """header item for the unit operation evaporation: Tj higher limit for evaporation"""
-hedr_uo_evap_T_brine_condenser = "Condenser brine temp"
-"""header item for the unit operation evaporation: brine temperature for cndenser"""
-hedr_uo_evap_press_spec = "Pressure spec"
+hedr_uo_evap_T_brine_cond_min = "Condenser brine temp min"
+"""header item for the unit operation evaporation: lower limit of brine temperature for cndenser"""
+hedr_uo_evap_T_brine_cond_max = "Condenser brine temp max"
+"""header item for the unit operation evaporation: upper limit of brine temperature for cndenser"""
+hedr_uo_evap_press_ctrl = "Pressure control"
 """header item for the unit operation evaporation: pressure specification; arbitrary or specific"""
 hedr_uo_evap_press_min = "Press_min"
 """header item for the unit operation evaporation: lower limit for the evaporation pressure"""
-hedr_uo_evap_press_max = "Press max"
+hedr_uo_evap_press_max = "Press_max"
 """header item for the unit operation evaporation: upper limit for the evaporation pressure"""
 hedr_uo_evap_press_unit = "Press unit"
 """header item for the unit operation evaporation: pressure unit for the evaporation"""
+hedr_uo_evap_agitation = "Agitation (rpm)"
+"""header item for the unit operation evaporation: agitation rate"""
 hedr_uo_evap_val_endpoint_spec_min = "End spec min v/w"
 """header item for the unit operation evaporation: minimum spec value for the evaporation end point"""
 hedr_uo_evap_val_endpoint_spec_max = "End spec max v/w"
@@ -652,11 +656,13 @@ hedr_uo_evap_val_endpoint_guide_max = "End guideline max v/w"
 
 list_hedr_uo_evap = [hedr_uo_evap_Tj_min,
                      hedr_uo_evap_Tj_max,
-                     hedr_uo_evap_T_brine_condenser,
-                     hedr_uo_evap_press_spec,
+                     hedr_uo_evap_T_brine_cond_min,
+                     hedr_uo_evap_T_brine_cond_max,
+                     hedr_uo_evap_press_ctrl,
                      hedr_uo_evap_press_min,
                      hedr_uo_evap_press_max,
                      hedr_uo_evap_press_unit,
+                     hedr_uo_evap_agitation,
                      hedr_uo_evap_val_endpoint_spec_min,
                      hedr_uo_evap_val_endpoint_spec_max,
                      hedr_uo_evap_val_endpoint_guide_min,
@@ -672,18 +678,18 @@ list_hedr_uo_evap = [hedr_uo_evap_Tj_min,
 #list_opt_<unit operation>_<parameter> = [<option_0>, <option_1>, ...]
 #dict_opt_<unit operation> = {<heder_item1> : <option_list_1), ...}
 
-opt_uo_evap_press_spec_specific = "Specific pressure"
+opt_uo_evap_press_ctrl_specific = "Specific pressure"
 """option item for the attribute paress_spec_ for uo_evap: Specific pressure value"""
-opt_uo_evap_press_spec_arbitrary_with_guide = "Arbitrary with optional guideline"
+opt_uo_evap_press_ctrl_arbitrary_with_guide = "Arbitrary with optional guideline"
 """option item for the attribute press_spec for uo_evap: Arbitrary with optional guideline"""
-opt_uo_evap_press_spec_arbitrary = "Arbitrary"
+opt_uo_evap_press_ctrl_arbitrary = "Arbitrary"
 """option item for the attribute press_spec for uo_evap: Arbitrary without a guieline"""
-opt_uo_evap_press_spec_full_vac = "Full vacuum (FV)"
+opt_uo_evap_press_ctrl_full_vac = "Full vacuum (FV)"
 """option item for the attribute press_spec for uo_evap: Full vacuum."""
-list_opt_uo_evap_press_spec = [opt_uo_evap_press_spec_specific,
-                               opt_uo_evap_press_spec_arbitrary_with_guide,
-                               opt_uo_evap_press_spec_arbitrary,
-                               opt_uo_evap_press_spec_full_vac]
+list_opt_uo_evap_press_ctrl = [opt_uo_evap_press_ctrl_specific,
+                               opt_uo_evap_press_ctrl_arbitrary_with_guide,
+                               opt_uo_evap_press_ctrl_arbitrary,
+                               opt_uo_evap_press_ctrl_full_vac]
 """List of options for the parameter press_spec for the unit operation evap"""
 
 opt_uo_evap_press_unit_MPaA = "MPaA"
@@ -708,7 +714,7 @@ list_opt_uo_evap_press_unit = [opt_uo_evap_press_unit_MPaA,
 #                                   opt_uo_evap_endpoint_unit_vw]
 # """list of options for the parameter endpoint_unit for uo_evap"""
 
-dict_opt_uo_evap = {hedr_uo_evap_press_spec : list_opt_uo_evap_press_spec,
+dict_opt_uo_evap = {hedr_uo_evap_press_ctrl : list_opt_uo_evap_press_ctrl,
                     hedr_uo_evap_press_unit : list_opt_uo_evap_press_unit}
 
 
@@ -1440,6 +1446,11 @@ tag_part_flow_uo_evap_pres_arbitrary = "evap vacuum arbitrary"
 part_flow_uo_evap_pres_arbitrary_jp = "真空度:現場調整"
 """A flowhsheet component for uo_evap: instruction for arbitrary pressure for evaporation"""
 
+tag_part_flow_uo_evap_pres_full_vac = "evap full vacuum"
+"""the tag for a flowhsheet component for uo_evap: instruction for full vacuume for evaporation"""
+part_flow_uo_evap_pres_full_vac_jp = "真空度: FV"
+"""A flowhsheet component for uo_evap: instruction for full vacuume for evaporation"""
+
 tag_part_flow_uo_evap_agitation_arbitray = "evap agitation arbitrary"
 """the tag for a flowhsheet component for uo_evap: agitation at an arbitrary rotation"""
 part_flow_uo_evap_agitation_arbitrary_jp = "攪拌数:現場調整"
@@ -1479,6 +1490,7 @@ dict_jp_part_flow_uo_evap = {tag_part_flow_uo_evap_method_ini : part_flow_uo_eva
                              tag_part_flow_uo_evap_instr_chronol_rec : part_flow_uo_evap_instr_chronol_rec_jp,
                              tag_part_flow_uo_evap_pres_arbitrary : part_flow_uo_evap_pres_arbitrary_jp,
                              tag_part_flow_uo_evap_agitation_arbitray : part_flow_uo_evap_agitation_arbitrary_jp,
+                             tag_part_flow_uo_evap_pres_full_vac : part_flow_uo_evap_pres_full_vac_jp,
                              tag_part_flow_uo_evap_method_end : part_flow_uo_evap_method_end_jp,
                              tag_part_flow_uo_evap_rec_Tj_sp : part_flow_uo_evap_rec_Tj_sp_jp,
                              tag_part_flow_uo_evap_rec_T_brine_sp : part_flow_uo_evap_rec_T_brine_sp_jp,
