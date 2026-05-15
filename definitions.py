@@ -1603,7 +1603,7 @@ tag_stc_flow_uo_evap_endpoint_guide_max = "evap endpoint guideline max"
 stc_flow_uo_evap_endpoint_guide_max_jp = "終点目安:{L_max} L以下 ({vol_max} v/w)"
 """A sentence for uo_evap: instruction for maximum guideline endpoint; includes placeholders {L_max}, {vol_max}"""
 
-tag_stc_flow_uo_evap_rec_vacuum = "record field for evaporation pressure/vacuum"
+tag_stc_flow_uo_evap_rec_press = "record field for evaporation pressure/vacuum"
 """the tag for a sentence for component for uo_evap: recording field for vacuum; includes placeholders {P_unit}"""
 stc_flow_uo_evap_rec_vacuum_jp = "真空度__________{P_unit}"
 """A sentence for uo_evap: recording field for vacuum; includes placeholders {P_unit}"""
@@ -1630,7 +1630,7 @@ dict_jp_stcs_flow_uo_evap = {tag_stc_flow_uo_evap_Tj_range : stc_flow_uo_evap_Tj
                                 tag_stc_flow_uo_evap_endpoint_guide_single : stc_flow_uo_evap_endpoint_guide_single_jp,
                                 tag_stc_flow_uo_evap_endpoint_guide_min : stc_flow_uo_evap_endpoint_guide_min_jp,
                                 tag_stc_flow_uo_evap_endpoint_guide_max : stc_flow_uo_evap_endpoint_guide_max_jp,
-                                tag_stc_flow_uo_evap_rec_vacuum : stc_flow_uo_evap_rec_vacuum_jp}
+                                tag_stc_flow_uo_evap_rec_press : stc_flow_uo_evap_rec_vacuum_jp}
 """Japanese language dictionary for sentences for the unit operation evaporation"""
 
 ###################################################

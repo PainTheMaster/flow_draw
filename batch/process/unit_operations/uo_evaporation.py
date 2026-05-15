@@ -200,7 +200,7 @@ tag_stc_flow_endpoint_guide_min = defs.tag_stc_flow_uo_evap_endpoint_guide_min
 """the tag for a sentence for component for uo_evap: instruction for minimum guideline endpoint; includes placeholders {L_min}, {vol_min}"""
 tag_stc_flow_endpoint_guide_max = defs.tag_stc_flow_uo_evap_endpoint_guide_max
 """the tag for a sentence for component for uo_evap: instruction for maximum guideline endpoint; includes placeholders {L_max}, {vol_max}"""
-tag_stc_flow_rec_vacuum = defs.tag_stc_flow_uo_evap_rec_vacuum
+tag_stc_flow_rec_press = defs.tag_stc_flow_uo_evap_rec_press
 """the tag for a sentence for component for uo_evap: recording field for vacuum; includes placeholders {P_unit}"""
 
 dict_stcs_flow = defs.dict_jp_stcs_flow_uo_evap
@@ -274,20 +274,27 @@ class Evaporation(uo.UnitOperation, uo_tag=defs.tag_uo_evap):
             self.P_min = first_row[hedr_press_min]
         if not pd.isna(first_row[hedr_press_max]):
             self.P_max = first_row[hedr_press_max]
-        if not pd.isna(first_row[hedr_press_unit]):
+
+        if not pd.isna(first_row[hedr_press_unit]): #no pressure value, no pressure unit -> Ok; pressure value provided, no pressure unit -> error
             self.P_unit = first_row[hedr_press_unit]
-        elif self.P_min is not None or self.P_max is not None:
+        elif self.P_min is not None or self.P_max is not None: #No pressure unit but some pressure value
             raise ValueError(f"{self.__class__.__name__}: Pressure unit not specified for Op. Seq. {self.operation_seq} although min and/or max pressure is provided.")
+
         if not pd.isna(first_row[hedr_press_ctrl]):
-            if self.P_min is not None or self.P_max is not None: #if press_ctrl is defined and P_min and/or P_max are provided.
+            # press_ctrl defined and P_min and/or P_max are provided. OK
+            if self.P_min is not None or self.P_max is not None:
                 self.P_ctrl = first_row[hedr_press_ctrl]
+            # press ctrl is arbit or FV, in the meantime,  both P_min and P_max empty -> also OK
             elif first_row[hedr_press_ctrl] == opt_press_ctrl_arbitrary or first_row[hedr_press_ctrl] == opt_press_ctrl_full_vac: #if press_ctrl is arbitrary and P_min or P_max are not provided.
                 self.P_ctrl = first_row[hedr_press_ctrl]
+            #Pressure ctrl needs sonme specifi value, but not provided -> error
             else: #if press_ctrl is not arbitrary and P_min or P_max are not provided.
                 raise ValueError(f"{self.__class__.__name__}: No of of Press_min and Press_max is provided for Op. Seq. {self.operation_seq}\
                                   although \"specific pressure\" or \"full vacuum\" is selectd for pressure control method.")
+        #pressure control not defined, values not provided -> control on the shopfloor.
         elif self.P_min is None and self.P_max is None: #pressure control method not specified and pressure limits not provided -> arbitrary
             self.P_ctrl = opt_press_ctrl_arbitrary
+        #pressure control not defined, but some pressure values are provided -> Not definitive=error
         else: #pressure control method not speficied, but pressure lmit(s) provided -> value error
             raise ValueError(f"{self.__class__.__name__}: Pressure control method not specified for Op. Seq. {self.operation_seq} although min and/or max pressure is provided.")
         if not pd.isna(first_row[hedr_agitation]):
@@ -322,8 +329,60 @@ class Evaporation(uo.UnitOperation, uo_tag=defs.tag_uo_evap):
     def __put_Tj(self):
         pass
 
-    def __put_vac(self):
-        pass
+    def __put_press(self):
+        """
+        Compatible with all cases. If information, e.g., min/max press or control method, is provided, put the necessary items on the flowsheet.
+        Otherwise, put nothing on the flowsheet. Safe to incorporate in any case.
+        """
+        #Pressure control method specif and P_min and/or P_max
+        sentence:str = None
+        if self.P_ctrl == opt_press_ctrl_specific:
+            if self.P_min is not None and self.P_max is not None:
+                sentence = dict_stcs_flow[tag_stc_flow_press_spec_range].format(P_min=self.P_min, P_max=self.P_max, P_unit=self.P_unit)
+            elif self.P_min is not None:
+                sentence = dict_stcs_flow[tag_stc_flow_press_spec_min].format(P_min=self.P_min, P_unit=self.P_unit)
+            elif self.P_max is not None:
+                sentence = dict_stcs_flow[tag_stc_flow_press_spec_max].format(P_min=self.P_max, P_unit=self.P_unit)
+            else:
+                raise RuntimeError(f"{self.__class__.__name__}.__put_press(): This branch is not supposed to be reached.\
+                                   This runtime error is raised for the sake of debug.\
+                                   P_ctrol==opt_press_ctrl_specific; P_min is None; P_max is None.")
+            self.flowsheet.put_line(content=sentence,
+                                    record=dict_stcs_flow[tag_stc_flow_rec_press].format(P_unit=self.P_unit))
+        elif self.P_ctrl == opt_press_ctrl_arbitrary_with_guide:
+            if self.P_min is not None and self.P_max is not None:
+                sentence = dict_stcs_flow[tag_stc_flow_press_guide_range].format(P_min=self.P_min, P_max=self.P_max, P_unit=self.P_unit)
+            elif self.P_min is not None:
+                sentence = dict_stcs_flow[tag_stc_flow_press_guide_min].format(P_min=self.P_min, P_unit=self.P_unit)
+            elif self.P_max is not None:
+                sentence = dict_stcs_flow[tag_stc_flow_press_guide_max].format(P_min=self.P_max, P_unit=self.P_unit)
+            else:
+                raise RuntimeError(f"{self.__class__.__name__}__put_press(): This branch is not supposed to be reached.\
+                                   This runtime error is raised for the sake of debug. \
+                                   P_ctrol==opt_press_ctrl_arbitrary_with_guide; P_min is None; P_max is None.")
+            self.flowsheet.put_line(content=sentence,
+                                    record=dict_stcs_flow[tag_stc_flow_rec_press].format(P_unit=self.P_unit))
+        elif self.P_ctrl == opt_press_ctrl_arbitrary:
+            sentence = dict_part_flow[tag_part_flow_pres_arbitrary]
+            temp_P_unit:str = None
+            if self.P_unit is not None:
+                temp_P_unit = self.P_unit
+            else:
+                temp_P_unit = opt_press_unit_MPaG
+            self.flowsheet.put_line(content=sentence,
+                                    record=dict_stcs_flow[tag_stc_flow_rec_press].format(P_unit=temp_P_unit))            
+        elif self.P_ctrl == opt_press_ctrl_full_vac:
+            sentence = dict_part_flow[tag_part_flow_pres_full_vac]
+            temp_P_unit:str = None
+            if self.P_unit is not None:
+                temp_P_unit = self.P_unit
+            else:
+                temp_P_unit = opt_press_unit_MPaG
+            self.flowsheet.put_line(content=sentence,
+                                    record=dict_stcs_flow[tag_stc_flow_rec_press].format(P_unit=temp_P_unit))                                   
+        else:
+            sentence = ""
+
 
     def __put_endpoint(self):
         pass
