@@ -381,8 +381,9 @@ class Evaporation(uo.UnitOperation, uo_tag=defs.tag_uo_evap):
             self.flowsheet.put_line(content=sentence,
                                     record=dict_stcs_flow[tag_stc_flow_rec_press].format(P_unit=temp_P_unit))                                   
         else:
-            sentence = ""
-
+            raise RuntimeError(f"{self.__class__.__name__}__put_press(): This branch is not supposed to be reached.\
+                                This runtime error is raised for the sake of debug. \
+                                P_ctrol==None")
 
     def __put_endpoint(self):
         pass
