@@ -371,12 +371,28 @@ class Evaporation(uo.UnitOperation, uo_tag=defs.tag_uo_evap):
             self.flowsheet.linefeed()        
 
         #<Operation-specific processes here>
+        self.__put_Tj()
+        self.__put_Tbr()
+        self.__put_press()
+        self.__put_agitaion()
+        self.flowsheet.put_line(record=dict_part_flow[tag_part_flow_rec_Ti_ini])
+        self.flowsheet.linefeed()
+        self.__put_endpoint()
 
         if not (self.post_comment == None or self.post_comment == ''):
             self.flowsheet.put_body_comments(self.post_comment)
             self.flowsheet.linefeed()
     
-    def __put_Tj(self):
+    def __put_Tj(self)->None:
+        """
+        Puts Tj confgiguration. Compatible with all Tj configuration pattern. Safe to place any case.
+        Both Tj_min and Tj_max provided => Tj range
+        Tj_min only or Tj_max only => TJ lower or upper limint only
+        No value provided => arbitrary.
+        This it the top component in the unit operation, just below the uo header. Therefore, places time recordl field,
+        instruction to commense, temperature cofinguration record field, signature fields,
+        together with the temeperature configuration instruction.
+        """
         sentence:str = None
         if self.Tj_min is not None and self.Tj_max is not None:
             sentence = dict_stcs_flow[tag_stc_flow_Tj_range].format(Tj_min=self.Tj_min, Tj_max=self.Tj_max)
@@ -394,7 +410,11 @@ class Evaporation(uo.UnitOperation, uo_tag=defs.tag_uo_evap):
                                 witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
 
 
-    def __put_Tbr(self):
+    def __put_Tbr(self) -> None:
+        """
+        Put brine temeperature configuration instruction.
+        Compatible with all instruction pattern. If no value is provided, instruction for arbitrary temperature control is put.
+        """
         sentence:str = None
         if self.Tbr_min is not None and self.Tbr_max is not None:
             sentence = dict_stcs_flow[tag_stc_flow_T_brine_range].format(Tbr_min=self.Tbr_min, Tbr_max=self.Tbr_max)
@@ -407,7 +427,7 @@ class Evaporation(uo.UnitOperation, uo_tag=defs.tag_uo_evap):
         self.flowsheet.put_line(content=sentence,
                                 record=dict_part_flow[tag_part_flow_rec_T_brine_sp])
 
-    def __put_press(self):
+    def __put_press(self)->None:
         """
         Compatible with all cases. If information, e.g., min/max press or control method, is provided, put the necessary items on the flowsheet.
         Otherwise, put nothing on the flowsheet. Safe to incorporate in any case.
@@ -465,8 +485,29 @@ class Evaporation(uo.UnitOperation, uo_tag=defs.tag_uo_evap):
             raise RuntimeError(f"{self.__class__.__name__}__put_press(): This branch is not supposed to be reached.\
                                 This runtime error is raised for the sake of debug. \
                                 P_ctrol doesn't match any given option for Op. Seq. {self.operation_seq}.")
-
-    def __put_endpoint(self):
+        
+    def __put_agitaion(self)->None:
+        """
+        Compatible with all instruction/input pattern. If no value is provided, puts sentence for arbitrary agitation rate.
+        Safe for all cases.
+        """
+        sentence:str = None
+        if self.agit_spec == opt_agit_spec_specif:
+            sentence = dict_stcs_flow[tag_stc_flow_agitation_spec].format(rpm=self.agit_rpm)
+        elif self.agit_spec == opt_agit_spec_guide:
+            sentence = dict_stcs_flow[tag_stc_flow_agitation_arbitrary_with_guide].format(rpm=self.agit_rpm)
+        else:
+            sentence = dict_part_flow[tag_part_flow_agitation_arbitray]
+        self.flowsheet.put_line(content=sentence,
+                                record=dict_part_flow[tag_part_flow_rec_rpm])
+        
+    def __put_endpoint(self)->None:
+        """
+        Compatible with all (decent) instruction patterns: Both spec and guideline, spec only, guideline only.
+        If neither is provided, raises a ValueError.
+        Together with the endpoint volume-related instruction and record fields, instruction to termination,
+        Ti at the end, Ti_max, and signature fields are put on the flowsheet.
+        """
         sentence_spec:str = None
         if self.end_vw_spec_min is not None and self.end_vw_spec_max is not None:
             sentence_spec = dict_stcs_flow[tag_stc_flow_endpoint_spec_range].format(L_min=self.end_volume_spec_min,
@@ -508,7 +549,8 @@ class Evaporation(uo.UnitOperation, uo_tag=defs.tag_uo_evap):
                                     operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
                                     witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
             self.flowsheet.put_line(content=sentence_guide,
-                                    record=dict_part_flow[tag_part_flow_rec_Ti_end])
+                                    record=dict_part_flow[tag_part_flow_rec_Ti_max])
+            self.flowsheet.put_line(record=dict_part_flow[tag_part_flow_rec_Ti_end])
         elif sentence_spec is not None:
             self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
                                     method=dict_part_flow[tag_part_flow_method_end],
@@ -516,24 +558,19 @@ class Evaporation(uo.UnitOperation, uo_tag=defs.tag_uo_evap):
                                     record=dict_part_flow[tag_part_flow_rec_vol_end],
                                     operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
                                     witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
-            self.flowsheet.put_line(record=dict_part_flow[tag_part_flow_rec_Ti_end])     
-        else:
+            self.flowsheet.put_line(record=dict_part_flow[tag_part_flow_rec_Ti_max])
+            self.flowsheet.put_line(record=dict_part_flow[tag_part_flow_rec_Ti_end])
+        else: #Only guide line value(s) is provided.
             self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
                                     method=dict_part_flow[tag_part_flow_method_end],
                                     content=sentence_guide,
                                     record=dict_part_flow[tag_part_flow_rec_vol_end],
                                     operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
                                     witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
-            self.flowsheet.put_line(record=dict_part_flow[tag_part_flow_rec_Ti_end])     
+            self.flowsheet.put_line(record=dict_part_flow[tag_part_flow_rec_Ti_max])
+            self.flowsheet.put_line(record=dict_part_flow[tag_part_flow_rec_Ti_end])
 
-    def __put_agitaion(self):
-        sentence:str = None
-        if self.agit_spec == opt_agit_spec_specif:
-            sentence = dict_stcs_flow[tag_stc_flow_agitation_spec].format(rpm=self.agit_rpm)
-        elif self.agit_spec == opt_agit_spec_guide:
-            sentence = dict_stcs_flow[tag_stc_flow_agitation_arbitrary_with_guide].format(rpm=self.agit_rpm)
-        else:
-            sentence = dict_part_flow[tag_part_flow_agitation_arbitray]
-        self.flowsheet.put_line(content=sentence,
-                                record=dict_part_flow[tag_part_flow_rec_rpm])
+
+
+
 
