@@ -537,7 +537,7 @@ list_hedr_uo_agitation = [hedr_uo_agitation_spec,
 
         #>>>>>>>>>>Option items, lists, and a dictionary for drop-down list in detail input form<<<<<<<<<<<<<<
 opt_uo_agitation_spec_specif = "Specific RPM"
-"""option for the header item 'spec'. Specifi RPM is provided by the user."""
+"""option for the header item 'spec'. Specific RPM is provided by the user."""
 opt_uo_agitation_spec_guide = "Guidance RPM"
 """option for the header item 'spec'. A guidance RPM is provided by the user."""
 opt_uo_agitation_spec_arbitrary = "arbitrary"
@@ -643,7 +643,9 @@ hedr_uo_evap_press_max = "Press_max"
 """header item for the unit operation evaporation: upper limit for the evaporation pressure"""
 hedr_uo_evap_press_unit = "Press unit"
 """header item for the unit operation evaporation: pressure unit for the evaporation"""
-hedr_uo_evap_agitation = "Agitation (rpm)"
+hedr_uo_evap_agit_spec = "Agitation spec"
+"""header item for the unit operation evaporation: agitation specification; Specific RPM/Guidance RPM/arbitrary"""
+hedr_uo_evap_agit_rpm = "Agitation (rpm)"
 """header item for the unit operation evaporation: agitation rate"""
 hedr_uo_evap_val_endpoint_spec_min = "End spec min v/w"
 """header item for the unit operation evaporation: minimum spec value for the evaporation end point"""
@@ -662,7 +664,7 @@ list_hedr_uo_evap = [hedr_uo_evap_Tj_min,
                      hedr_uo_evap_press_min,
                      hedr_uo_evap_press_max,
                      hedr_uo_evap_press_unit,
-                     hedr_uo_evap_agitation,
+                     hedr_uo_evap_agit_rpm,
                      hedr_uo_evap_val_endpoint_spec_min,
                      hedr_uo_evap_val_endpoint_spec_max,
                      hedr_uo_evap_val_endpoint_guide_min,
@@ -704,6 +706,19 @@ list_opt_uo_evap_press_unit = [opt_uo_evap_press_unit_MPaA,
                                opt_uo_evap_press_unit_kPaA,
                                opt_uo_evap_press_unit_MPaG,
                                opt_uo_evap_press_unit_kPaG]
+
+opt_uo_evap_agit_spec_specif = "Specific RPM"
+"""option item for the attribute agitation spec for uo_evap: A specific RPM is provided by the user"""
+opt_uo_evap_agit_spec_guide = "Guidance RPM"
+"""option item for the attribute agitation spec for uo_evap: A guidance RPM is provided by the user"""
+opt_uo_evap_agit_spec_arbitrary = "arbitrary RPM"
+"""option item for the attribute agitation spec for uo_evap: Totally discretional RPM for evaporation"""
+list_opt_uo_evap_agit_spec = [opt_uo_evap_agit_spec_specif,
+                              opt_uo_evap_agit_spec_guide,
+                              opt_uo_evap_agit_spec_arbitrary]
+"""list of option items for agitation for up evap"""
+
+
 """list of options for the parameter press_unit for uo_evap"""
 
 # opt_uo_evap_endpoint_unit_L = "L"
@@ -715,7 +730,8 @@ list_opt_uo_evap_press_unit = [opt_uo_evap_press_unit_MPaA,
 # """list of options for the parameter endpoint_unit for uo_evap"""
 
 dict_opt_uo_evap = {hedr_uo_evap_press_ctrl : list_opt_uo_evap_press_ctrl,
-                    hedr_uo_evap_press_unit : list_opt_uo_evap_press_unit}
+                    hedr_uo_evap_press_unit : list_opt_uo_evap_press_unit,
+                    hedr_uo_evap_agit_spec : list_opt_uo_evap_agit_spec}
 
 
 ######################################################
@@ -1441,6 +1457,16 @@ tag_part_flow_uo_evap_instr_chronol_rec = "instr chronological record"
 part_flow_uo_evap_instr_chronol_rec_jp = "*詳細記録は経時的な作業記録書に記載する。"
 """A flowhsheet component for uo_evap: instruction to take a chronological record"""
 
+tag_part_flow_uo_evap_Tj_artibrary = "evap Tj arbitrary"
+"""the tag for a flowhsheet component for uo_evap: instruction for arbitrary Tj for evaporation"""
+part_flow_uo_evap_Tj_artibrary_jp = "外温設定: 現場調整"
+"""A flowhsheet component for uo_evap: instruction for arbitrary Tj for evaporation"""
+
+tag_part_flow_uo_evap_T_brine_artibrary = "evap brine temp arbitrary"
+"""the tag for a flowhsheet component for uo_evap: instruction for arbitrary brine temperature for evaporation"""
+part_flow_uo_evap_T_brine_artibrary_jp = "冷却用ブライン: 現場調整"
+"""A flowhsheet component for uo_evap: instruction for arbitrary brine temperature for evaporation"""
+
 tag_part_flow_uo_evap_pres_arbitrary = "evap vacuum arbitrary"
 """the tag for a flowhsheet component for uo_evap: instruction for arbitrary pressure for evaporation"""
 part_flow_uo_evap_pres_arbitrary_jp = "真空度:現場調整"
@@ -1486,8 +1512,20 @@ tag_part_flow_uo_evap_rec_Ti_max = "record Ti max"
 part_flow_uo_evap_rec_Ti_max_jp = "濃縮時最高内温__________℃"
 """A flowhsheet component for uo_evap: record field for the maximum Ti during evaporation"""
 
+tag_part_flow_uo_evap_rec_Ti_end = "record Ti end"
+"""the tag for a flowhsheet component for uo_evap: record field for the Ti at the end"""
+part_flow_uo_evap_rec_Ti_end_jp = "濃縮終了時内温__________℃"
+"""A flowhsheet component for uo_evap: record field for the Ti at the end"""
+
+tag_part_flow_uo_evap_rec_vol_end = "record vol end"
+"""the tag for a flowhsheet component for uo_evap: record field for the volume (L) at the end"""
+part_flow_uo_evap_rec_vol_end_jp = "濃縮終了時液量:約__________L"
+"""A flowhsheet component for uo_evap: record field for the volume (L) at the end"""
+
 dict_jp_part_flow_uo_evap = {tag_part_flow_uo_evap_method_ini : part_flow_uo_evap_method_ini_jp,
                              tag_part_flow_uo_evap_instr_chronol_rec : part_flow_uo_evap_instr_chronol_rec_jp,
+                             tag_part_flow_uo_evap_Tj_artibrary : part_flow_uo_evap_Tj_artibrary_jp,
+                             tag_part_flow_uo_evap_T_brine_artibrary : part_flow_uo_evap_T_brine_artibrary_jp,
                              tag_part_flow_uo_evap_pres_arbitrary : part_flow_uo_evap_pres_arbitrary_jp,
                              tag_part_flow_uo_evap_agitation_arbitray : part_flow_uo_evap_agitation_arbitrary_jp,
                              tag_part_flow_uo_evap_pres_full_vac : part_flow_uo_evap_pres_full_vac_jp,
@@ -1496,7 +1534,9 @@ dict_jp_part_flow_uo_evap = {tag_part_flow_uo_evap_method_ini : part_flow_uo_eva
                              tag_part_flow_uo_evap_rec_T_brine_sp : part_flow_uo_evap_rec_T_brine_sp_jp,
                              tag_part_flow_uo_evap_rec_rpm : part_flow_uo_evap_rec_rpm_jp,
                              tag_part_flow_uo_evap_rec_Ti_ini : part_flow_uo_evap_rec_Ti_ini_jp,
-                             tag_part_flow_uo_evap_rec_Ti_max : part_flow_uo_evap_rec_Ti_max_jp}
+                             tag_part_flow_uo_evap_rec_Ti_max : part_flow_uo_evap_rec_Ti_max_jp,
+                             tag_part_flow_uo_evap_rec_Ti_end : part_flow_uo_evap_rec_Ti_end_jp,
+                             tag_part_flow_uo_evap_rec_vol_end : part_flow_uo_evap_rec_vol_end_jp}
 """Japanese language dictionary for flowsheet components for the unit operation evaporation"""
 
 
@@ -1574,34 +1614,34 @@ stc_flow_uo_evap_agitation_arbitrary_with_guide_jp = "攪拌速度:現場調整(
 """A sentence for uo_evap: agitation at a specific agitation rate; includes placeholders {rpm}"""
 
 tag_stc_flow_uo_evap_endpoint_spec_range = "evap endpoint spec range"
-"""the tag for a sentence for component for uo_evap: instruction for the evaporation endpoint; includes placeholders {L_min}, {L_max}, {vol_min}, {vol_max}"""
-stc_flow_uo_evap_endpoint_spec_range_jp = "終点:{L_min}～{L_max} L ({vol_min}～{vol_max} v/w)"
-"""A sentence for uo_evap: instruction for the evaporation endpoint; includes placeholders {L_min}, {L_max}, {vol_min}, {vol_max}"""
+"""the tag for a sentence for component for uo_evap: instruction for the evaporation endpoint; includes placeholders {L_min}, {L_max}, {vw_min}, {vw_max}"""
+stc_flow_uo_evap_endpoint_spec_range_jp = "終点:{L_min}～{L_max} L ({vw_min}～{vw_max} v/w)"
+"""A sentence for uo_evap: instruction for the evaporation endpoint; includes placeholders {L_min}, {L_max}, {vw_min}, {vw_max}"""
 tag_stc_flow_uo_evap_endpoint_spec_min = "evap endpoint spec min"
-"""the tag for a sentence for component for uo_evap: instruction for minimum spec endpoint; includes placeholders {L_min}, {vol_min}"""
-stc_flow_uo_evap_endpoint_spec_min_jp = "終点:{L_min} L以上 ({vol_min} v/w)"
-"""A sentence for uo_evap: instruction for minimum spec endpoint; includes placeholders {L_min}, {vol_min}"""
+"""the tag for a sentence for component for uo_evap: instruction for minimum spec endpoint; includes placeholders {L_min}, {vw_min}"""
+stc_flow_uo_evap_endpoint_spec_min_jp = "終点:{L_min} L以上 ({vw_min} v/w)"
+"""A sentence for uo_evap: instruction for minimum spec endpoint; includes placeholders {L_min}, {vw_min}"""
 tag_stc_flow_uo_evap_endpoint_spec_max = "evap endpoint spec max"
-"""the tag for a sentence for component for uo_evap: instruction for maximum spec endpoint; includes placeholders {L_max}, {vol_max}"""
-stc_flow_uo_evap_endpoint_spec_max_jp = "終点:{L_max} L以下 ({vol_max} v/w)"
-"""A sentence for uo_evap: instruction for maximum spec endpoint; includes placeholders {L_max}, {vol_max}"""
+"""the tag for a sentence for component for uo_evap: instruction for maximum spec endpoint; includes placeholders {L_max}, {vw_max}"""
+stc_flow_uo_evap_endpoint_spec_max_jp = "終点:{L_max} L以下 ({vw_max} v/w)"
+"""A sentence for uo_evap: instruction for maximum spec endpoint; includes placeholders {L_max}, {vw_max}"""
 
 tag_stc_flow_uo_evap_endpoint_guide_range = "evap endpoint guideline range"
-"""the tag for a sentence for component for uo_evap: instruction for the evaporation endpoint; includes placeholders {L_min}, {L_max}, {vol_min}, {vol_max}"""
-stc_flow_uo_evap_endpoint_guide_range_jp = "終点目安:{L_min}～{L_max} L ({vol_min}～{vol_max} v/w)"
-"""A sentence for uo_evap: instruction for the evaporation endpoint; includes placeholders {L_min}, {L_max}, {vol_min}, {vol_max}"""
+"""the tag for a sentence for component for uo_evap: instruction for the evaporation endpoint; includes placeholders {L_min}, {L_max}, {vw_min}, {vw_max}"""
+stc_flow_uo_evap_endpoint_guide_range_jp = "終点目安:{L_min}～{L_max} L ({vw_min}～{vw_max} v/w)"
+"""A sentence for uo_evap: instruction for the evaporation endpoint; includes placeholders {L_min}, {L_max}, {vw_min}, {vw_max}"""
 tag_stc_flow_uo_evap_endpoint_guide_single = "evap endpoint guideline single point"
-"""the tag for a sentence for component for uo_evap: instruction for the evaporation single point endpoint; includes placeholders {L_single}, {vol_single}"""
-stc_flow_uo_evap_endpoint_guide_single_jp = "終点目安:{L_single} L ({vol_single} v/w)"
-"""A sentence for uo_evap: instruction for the evaporation single point endpoint; includes placeholders {L_min}, {L_max}, {vol_min}, {vol_max}"""
+"""the tag for a sentence for component for uo_evap: instruction for the evaporation single point endpoint; includes placeholders {L_single}, {vw_single}"""
+stc_flow_uo_evap_endpoint_guide_single_jp = "終点目安:{L_single} L ({vw_single} v/w)"
+"""A sentence for uo_evap: instruction for the evaporation single point endpoint; includes placeholders {L_min}, {L_max}, {vw_min}, {vw_max}"""
 tag_stc_flow_uo_evap_endpoint_guide_min = "evap endpoint guideline min"
-"""the tag for a sentence for component for uo_evap: instruction for minimum guideline endpoint; includes placeholders {L_min}, {vol_min}"""
-stc_flow_uo_evap_endpoint_guide_min_jp = "終点目安:{L_min} L以上 ({vol_min} v/w)"
-"""A sentence for uo_evap: instruction for minimum guideline endpoint; includes placeholders {L_min}, {vol_min}"""
+"""the tag for a sentence for component for uo_evap: instruction for minimum guideline endpoint; includes placeholders {L_min}, {vw_min}"""
+stc_flow_uo_evap_endpoint_guide_min_jp = "終点目安:{L_min} L以上 ({vw_min} v/w)"
+"""A sentence for uo_evap: instruction for minimum guideline endpoint; includes placeholders {L_min}, {vw_min}"""
 tag_stc_flow_uo_evap_endpoint_guide_max = "evap endpoint guideline max"
-"""the tag for a sentence for component for uo_evap: instruction for maximum guideline endpoint; includes placeholders {L_max}, {vol_max}"""
-stc_flow_uo_evap_endpoint_guide_max_jp = "終点目安:{L_max} L以下 ({vol_max} v/w)"
-"""A sentence for uo_evap: instruction for maximum guideline endpoint; includes placeholders {L_max}, {vol_max}"""
+"""the tag for a sentence for component for uo_evap: instruction for maximum guideline endpoint; includes placeholders {L_max}, {vw_max}"""
+stc_flow_uo_evap_endpoint_guide_max_jp = "終点目安:{L_max} L以下 ({vw_max} v/w)"
+"""A sentence for uo_evap: instruction for maximum guideline endpoint; includes placeholders {L_max}, {vw_max}"""
 
 tag_stc_flow_uo_evap_rec_press = "record field for evaporation pressure/vacuum"
 """the tag for a sentence for component for uo_evap: recording field for vacuum; includes placeholders {P_unit}"""

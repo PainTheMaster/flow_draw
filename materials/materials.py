@@ -42,8 +42,8 @@ class Materials:
             The data frame must have a header aligned with the class materials.Materials.
         """
         self.df_mats: pd.DataFrame= df_mats
-        self.kg_main_mat = 0.0
-        self.mol_main_mat = 0.0
+        self.kg_main_mat:float = None
+        self.mol_main_mat:float = None
         
         if df_mats is not None:
             self.__load_df_mats()
@@ -161,5 +161,17 @@ class Materials:
             raise ValueError(f"{self.__class__.__name__}.to_kilogram(): Both equiv:float and vol_per_weight:folat arguments are \"None\". Either must be given.")
         
         return kg_this
+
+    def to_litre(self, vol_per_weight:float = None) -> float:
+        litre:float = None
+        if self.kg_main_mat is None:
+            raise ValueError(f"{self.__class__.__name__}.to_litre(): the weigt (kg) of the main material has not been assigned.")
+        elif vol_per_weight is None:
+            raise ValueError(f"{self.__class__.__name__}.to_litre(): the argument vol_per_weight:float is not put.")
+        else:
+            litre = self.kg_main_mat * vol_per_weight
+        return litre
+
+
 
 
