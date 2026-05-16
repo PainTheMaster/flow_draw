@@ -56,7 +56,9 @@ hedr_press_max = defs.hedr_uo_evap_press_max
 """header item for the unit operation evaporation: upper limit for the evaporation pressure"""
 hedr_press_unit = defs.hedr_uo_evap_press_unit
 """header item for the unit operation evaporation: pressure unit for the evaporation"""
-hedr_agitation = defs.hedr_uo_evap_agitation
+hedr_agit_spec = defs.hedr_uo_evap_agit_spec
+"""header item for the unit operation evaporation: agitation specification; Specific RPM/Guidance RPM/arbitrary"""
+hedr_agit_rpm = defs.hedr_uo_evap_agit_rpm
 """header item for the unit operation evaporation: agitation rate"""
 hedr_val_endpoint_spec_min = defs.hedr_uo_evap_val_endpoint_spec_min
 """header item for the unit operation evaporation: minimum spec value for the evaporation end point"""
@@ -73,6 +75,9 @@ list_hedr = defs.list_hedr_uo_evap
 #########################################################
 # UO-specific options, list, header_item: list dictionry thereof (for data input and internalsignaling)
 #########################################################
+
+
+
 
 opt_press_ctrl_specific = defs.opt_uo_evap_press_ctrl_specific
 """option item for the attribute paress_spec_ for uo_evap: Specific pressure value"""
@@ -91,6 +96,14 @@ opt_press_unit_MPaG = defs.opt_uo_evap_press_unit_MPaG
 """option item for the attribute press_unit for uo_evap: MPaG"""
 opt_press_unit_kPaG = defs.opt_uo_evap_press_unit_kPaG
 """option item for the attribute press_unit for uo_evap: kPaG"""
+
+
+opt_agit_spec_specif = defs.opt_uo_evap_agit_spec_specif
+"""option item for the attribute agitation spec for uo_evap: A specific RPM is provided by the user"""
+opt_agit_spec_guide = defs.opt_uo_evap_agit_spec_guide
+"""option item for the attribute agitation spec for uo_evap: A guidance RPM is provided by the user"""
+opt_agit_spec_arbitrary = defs.opt_uo_evap_agit_spec_arbitrary
+"""option item for the attribute agitation spec for uo_evap: Totally discretional RPM for evaporation"""
 
 
 dict_opt = defs.dict_opt_uo_evap
@@ -131,6 +144,10 @@ tag_part_flow_method_ini = defs.tag_part_flow_uo_evap_method_ini
 """the tag for a flowsheet component for uo_evap: a sub title to commense evaporation in the method column"""
 tag_part_flow_instr_chronol_rec = defs.tag_part_flow_uo_evap_instr_chronol_rec
 """the tag for a flowsheet component for uo_evap: instruction to take a chronological record"""
+tag_part_flow_Tj_artibrary = defs.tag_part_flow_uo_evap_Tj_artibrary
+"""the tag for a flowhsheet component for uo_evap: instruction for arbitrary Tj for evaporation"""
+tag_part_flow_T_brine_artibrary = defs.tag_part_flow_uo_evap_T_brine_artibrary
+"""the tag for a flowhsheet component for uo_evap: instruction for arbitrary brine temperature for evaporation"""
 tag_part_flow_pres_arbitrary = defs.tag_part_flow_uo_evap_pres_arbitrary
 """the tag for a flowsheet component for uo_evap: instruction for arbitrary pressure for evaporation"""
 tag_part_flow_pres_full_vac = defs.tag_part_flow_uo_evap_pres_full_vac
@@ -149,6 +166,10 @@ tag_part_flow_rec_Ti_ini = defs.tag_part_flow_uo_evap_rec_Ti_ini
 """the tag for a flowsheet component for uo_evap: recorod field for Ti at the beginning of evaporation"""
 tag_part_flow_rec_Ti_max = defs.tag_part_flow_uo_evap_rec_Ti_max
 """the tag for a flowsheet component for uo_evap: record field for the maximum Ti during evaporation"""
+tag_part_flow_rec_Ti_end = defs.tag_part_flow_uo_evap_rec_Ti_end
+"""the tag for a flowhsheet component for uo_evap: record field for the Ti at the end"""
+tag_part_flow_rec_vol_end = defs.tag_part_flow_uo_evap_rec_vol_end
+"""the tag for a flowhsheet component for uo_evap: record field for the volume (L) at the end"""
 
 dict_part_flow = defs.dict_jp_part_flow_uo_evap
 """Language dictionary for flowsheet components"""
@@ -187,19 +208,19 @@ tag_stc_flow_agitation_spec = defs.tag_stc_flow_uo_evap_agitation_spec
 tag_stc_flow_agitation_arbitrary_with_guide = defs.tag_stc_flow_uo_evap_agitation_arbitrary_with_guide
 """the tag for a sentence for component for uo_evap: agitation at a specific agitation rate; includes placeholders {rpm}"""
 tag_stc_flow_endpoint_spec_range = defs.tag_stc_flow_uo_evap_endpoint_spec_range
-"""the tag for a sentence for component for uo_evap: instruction for the evaporation endpoint; includes placeholders {L_min}, {L_max}, {vol_min}, {vol_max}"""
+"""the tag for a sentence for component for uo_evap: instruction for the evaporation endpoint; includes placeholders {L_min}, {L_max}, {vw_min}, {vw_max}"""
 tag_stc_flow_endpoint_spec_min = defs.tag_stc_flow_uo_evap_endpoint_spec_min
-"""the tag for a sentence for component for uo_evap: instruction for minimum spec endpoint; includes placeholders {L_min}, {vol_min}"""
+"""the tag for a sentence for component for uo_evap: instruction for minimum spec endpoint; includes placeholders {L_min}, {vw_min}"""
 tag_stc_flow_endpoint_spec_max = defs.tag_stc_flow_uo_evap_endpoint_spec_max
-"""the tag for a sentence for component for uo_evap: instruction for maximum spec endpoint; includes placeholders {L_max}, {vol_max}"""
+"""the tag for a sentence for component for uo_evap: instruction for maximum spec endpoint; includes placeholders {L_max}, {vw_max}"""
 tag_stc_flow_endpoint_guide_range = defs.tag_stc_flow_uo_evap_endpoint_guide_range
-"""the tag for a sentence for component for uo_evap: instruction for the evaporation endpoint; includes placeholders {L_min}, {L_max}, {vol_min}, {vol_max}"""
+"""the tag for a sentence for component for uo_evap: instruction for the evaporation endpoint; includes placeholders {L_min}, {L_max}, {vw_min}, {vw_max}"""
 tag_stc_flow_endpoint_guide_single = defs.tag_stc_flow_uo_evap_endpoint_guide_single
-"""the tag for a sentence for component for uo_evap: instruction for the evaporation single point endpoint; includes placeholders {L_single}, {vol_single}"""
+"""the tag for a sentence for component for uo_evap: instruction for the evaporation single point endpoint; includes placeholders {L_single}, {vw_single}"""
 tag_stc_flow_endpoint_guide_min = defs.tag_stc_flow_uo_evap_endpoint_guide_min
-"""the tag for a sentence for component for uo_evap: instruction for minimum guideline endpoint; includes placeholders {L_min}, {vol_min}"""
+"""the tag for a sentence for component for uo_evap: instruction for minimum guideline endpoint; includes placeholders {L_min}, {vw_min}"""
 tag_stc_flow_endpoint_guide_max = defs.tag_stc_flow_uo_evap_endpoint_guide_max
-"""the tag for a sentence for component for uo_evap: instruction for maximum guideline endpoint; includes placeholders {L_max}, {vol_max}"""
+"""the tag for a sentence for component for uo_evap: instruction for maximum guideline endpoint; includes placeholders {L_max}, {vw_max}"""
 tag_stc_flow_rec_press = defs.tag_stc_flow_uo_evap_rec_press
 """the tag for a sentence for component for uo_evap: recording field for vacuum; includes placeholders {P_unit}"""
 
@@ -233,19 +254,24 @@ class Evaporation(uo.UnitOperation, uo_tag=defs.tag_uo_evap):
                  edit_comment:str=None):
         super().__init__(caller=caller, flowsheet=flowsheet, operation_seq=operation_seq, num_subitems=num_subitems, edit_comment=edit_comment)
         self.materials: mats.Materials = self.caller.get_mats()
-        self.Tj_min = None
-        self.Tj_max = None
-        self.Tbr_min = None
+        self.Tj_min:float = None
+        self.Tj_max:float = None
+        self.Tbr_min:float = None
         self.Tbr_max:float = None
         self.P_ctrl:str = None
         self.P_min:float = None
         self.P_max:float = None
         self.P_unit:str = None
-        self.agitation:float = None
+        self.agit_spec:str = None
+        self.agit_rpm:float = None
         self.end_vw_spec_min:float = None
+        self.end_volume_spec_min:float = None
         self.end_vw_spec_max:float = None
+        self.end_volume_spec_max:float = None
         self.end_vw_guide_min:float = None
+        self.end_volume_guide_min:float = None
         self.end_vw_guide_max:float = None
+        self.end_volume_guide_max:float = None
 
     def load_params_from_df(self, df: pd.DataFrame):
         """
@@ -278,7 +304,8 @@ class Evaporation(uo.UnitOperation, uo_tag=defs.tag_uo_evap):
         if not pd.isna(first_row[hedr_press_unit]): #no pressure value, no pressure unit -> Ok; pressure value provided, no pressure unit -> error
             self.P_unit = first_row[hedr_press_unit]
         elif self.P_min is not None or self.P_max is not None: #No pressure unit but some pressure value
-            raise ValueError(f"{self.__class__.__name__}: Pressure unit not specified for Op. Seq. {self.operation_seq} although min and/or max pressure is provided.")
+            raise ValueError(f"{self.__class__.__name__}: Pressure unit not specified for Op. Seq. {self.operation_seq} \
+                             although min and/or max pressure is provided.")
 
         if not pd.isna(first_row[hedr_press_ctrl]):
             # press_ctrl defined and P_min and/or P_max are provided. OK
@@ -296,17 +323,40 @@ class Evaporation(uo.UnitOperation, uo_tag=defs.tag_uo_evap):
             self.P_ctrl = opt_press_ctrl_arbitrary
         #pressure control not defined, but some pressure values are provided -> Not definitive=error
         else: #pressure control method not speficied, but pressure lmit(s) provided -> value error
-            raise ValueError(f"{self.__class__.__name__}: Pressure control method not specified for Op. Seq. {self.operation_seq} although min and/or max pressure is provided.")
-        if not pd.isna(first_row[hedr_agitation]):
-            self.agitation = first_row[hedr_agitation]
+            raise ValueError(f"{self.__class__.__name__}: Pressure control method not specified for Op. Seq. {self.operation_seq} \
+                             although min and/or max pressure is provided.")
+
+        if not pd.isna(first_row[hedr_agit_spec]):
+            self.agit_spec = first_row[hedr_agit_spec]
+
+        if not pd.isna(first_row[hedr_agit_rpm]):
+            #rpm value provided, agitation specification selected -> OK
+            if self.agit_spec == opt_agit_spec_specif or self.agit_spec == opt_agit_spec_guide:
+                self.agit_rpm = first_row[hedr_agit_rpm]
+            #rpm value provided, agitation specification not selected -> NOK
+            else:
+                raise ValueError(f"{self.__class__.__name__}: Agitation specification (specific rpm or guideline rpm) not selected \
+                                 for Op. Seq. {self.operation_seq} although an agitation rpm value is provided.")                
+
+        #No rpm value provided in the mean time the agitation spec requires some rpm value -> error
+        elif self.agit_spec != opt_agit_spec_arbitrary or self.agit_spec is not None:
+            raise ValueError(f"{self.__class__.__name__}: Agitation rate (rpm) not provided for Op. Seq. {self.operation_seq} \
+                             although the user's selectio for the agitation spec requires a specification or guidance value.")
+        else:
+            self.agit_spec = opt_agit_spec_arbitrary
+
         if not pd.isna(first_row[hedr_val_endpoint_spec_min]):
             self.end_vw_spec_min = first_row[hedr_val_endpoint_spec_min]
+            self.end_volume_spec_min = self.materials.to_litre(self.end_vw_spec_min)
         if not pd.isna(first_row[hedr_val_endpoint_spec_max]):
             self.end_vw_spec_max = first_row[hedr_val_endpoint_spec_max]
+            self.end_volume_spec_max = self.materials.to_litre(self.end_vw_spec_max)
         if not pd.isna(first_row[hedr_val_endpoint_guide_min]):
             self.end_vw_guide_min = first_row[hedr_val_endpoint_guide_min]
+            self.end_volume_guide_min = self.materials.to_litre(self.end_vw_guide_min)
         if not pd.isna(first_row[hedr_val_endpoint_guide_max]):
             self.end_vw_guide_max = first_row[hedr_val_endpoint_guide_max]
+            self.end_volume_guide_max = self.materials.to_litre(self.end_vw_guide_max)
 
     def get_detail_header(self) -> list[str]:
         return list_hedr
@@ -327,15 +377,43 @@ class Evaporation(uo.UnitOperation, uo_tag=defs.tag_uo_evap):
             self.flowsheet.linefeed()
     
     def __put_Tj(self):
-        pass
+        sentence:str = None
+        if self.Tj_min is not None and self.Tj_max is not None:
+            sentence = dict_stcs_flow[tag_stc_flow_Tj_range].format(Tj_min=self.Tj_min, Tj_max=self.Tj_max)
+        elif self.Tj_min is not None:
+            sentence = dict_stcs_flow[tag_stc_flow_Tj_min].format(Tj_min=self.Tj_min)
+        elif self.Tj_max is not None:
+            sentence = dict_stcs_flow[tag_stc_flow_Tj_max].format(Tj_max=self.Tj_max)
+        else:
+            sentence = dict_part_flow[tag_part_flow_Tj_artibrary]
+        self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
+                                method=dict_part_flow[tag_part_flow_method_ini],
+                                content=sentence,
+                                record=dict_part_flow[tag_part_flow_rec_Tj_sp],
+                                operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
+                                witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
+
+
+    def __put_Tbr(self):
+        sentence:str = None
+        if self.Tbr_min is not None and self.Tbr_max is not None:
+            sentence = dict_stcs_flow[tag_stc_flow_T_brine_range].format(Tbr_min=self.Tbr_min, Tbr_max=self.Tbr_max)
+        elif self.Tbr_min is not None:
+            sentence = dict_stcs_flow[tag_stc_flow_T_brine_min].format(Tbr_min=self.Tbr_min)
+        elif self.Tbr_max is not None:
+            sentence = dict_stcs_flow[tag_stc_flow_T_brine_max].format(Tj_max=self.Tbr_max)
+        else:
+            sentence = dict_part_flow[tag_part_flow_T_brine_artibrary]
+        self.flowsheet.put_line(content=sentence,
+                                record=dict_part_flow[tag_part_flow_rec_T_brine_sp])
 
     def __put_press(self):
         """
         Compatible with all cases. If information, e.g., min/max press or control method, is provided, put the necessary items on the flowsheet.
         Otherwise, put nothing on the flowsheet. Safe to incorporate in any case.
         """
-        #Pressure control method specif and P_min and/or P_max
         sentence:str = None
+        #Pressure control method specif and P_min and/or P_max
         if self.P_ctrl == opt_press_ctrl_specific:
             if self.P_min is not None and self.P_max is not None:
                 sentence = dict_stcs_flow[tag_stc_flow_press_spec_range].format(P_min=self.P_min, P_max=self.P_max, P_unit=self.P_unit)
@@ -346,9 +424,10 @@ class Evaporation(uo.UnitOperation, uo_tag=defs.tag_uo_evap):
             else:
                 raise RuntimeError(f"{self.__class__.__name__}.__put_press(): This branch is not supposed to be reached.\
                                    This runtime error is raised for the sake of debug.\
-                                   P_ctrol==opt_press_ctrl_specific; P_min is None; P_max is None.")
+                                   P_ctrol==opt_press_ctrl_specific; P_min is None; P_max is None for Op. Seq. {self.operation_seq}.")
             self.flowsheet.put_line(content=sentence,
                                     record=dict_stcs_flow[tag_stc_flow_rec_press].format(P_unit=self.P_unit))
+        #Pressure control method guideline pressure only.
         elif self.P_ctrl == opt_press_ctrl_arbitrary_with_guide:
             if self.P_min is not None and self.P_max is not None:
                 sentence = dict_stcs_flow[tag_stc_flow_press_guide_range].format(P_min=self.P_min, P_max=self.P_max, P_unit=self.P_unit)
@@ -359,9 +438,10 @@ class Evaporation(uo.UnitOperation, uo_tag=defs.tag_uo_evap):
             else:
                 raise RuntimeError(f"{self.__class__.__name__}__put_press(): This branch is not supposed to be reached.\
                                    This runtime error is raised for the sake of debug. \
-                                   P_ctrol==opt_press_ctrl_arbitrary_with_guide; P_min is None; P_max is None.")
+                                   P_ctrol==opt_press_ctrl_arbitrary_with_guide; P_min is None; P_max is None for Op. Seq. {self.operation_seq}.")
             self.flowsheet.put_line(content=sentence,
                                     record=dict_stcs_flow[tag_stc_flow_rec_press].format(P_unit=self.P_unit))
+        #Pressure control method at complete discretion.
         elif self.P_ctrl == opt_press_ctrl_arbitrary:
             sentence = dict_part_flow[tag_part_flow_pres_arbitrary]
             temp_P_unit:str = None
@@ -371,6 +451,7 @@ class Evaporation(uo.UnitOperation, uo_tag=defs.tag_uo_evap):
                 temp_P_unit = opt_press_unit_MPaG
             self.flowsheet.put_line(content=sentence,
                                     record=dict_stcs_flow[tag_stc_flow_rec_press].format(P_unit=temp_P_unit))            
+        #Full vacuum.
         elif self.P_ctrl == opt_press_ctrl_full_vac:
             sentence = dict_part_flow[tag_part_flow_pres_full_vac]
             temp_P_unit:str = None
@@ -381,8 +462,78 @@ class Evaporation(uo.UnitOperation, uo_tag=defs.tag_uo_evap):
             self.flowsheet.put_line(content=sentence,
                                     record=dict_stcs_flow[tag_stc_flow_rec_press].format(P_unit=temp_P_unit))                                   
         else:
-            sentence = ""
-
+            raise RuntimeError(f"{self.__class__.__name__}__put_press(): This branch is not supposed to be reached.\
+                                This runtime error is raised for the sake of debug. \
+                                P_ctrol doesn't match any given option for Op. Seq. {self.operation_seq}.")
 
     def __put_endpoint(self):
-        pass
+        sentence_spec:str = None
+        if self.end_vw_spec_min is not None and self.end_vw_spec_max is not None:
+            sentence_spec = dict_stcs_flow[tag_stc_flow_endpoint_spec_range].format(L_min=self.end_volume_spec_min,
+                                                                                    L_max=self.end_volume_spec_max,
+                                                                                    vw_min=self.end_vw_spec_min,
+                                                                                    vwl_max=self.end_vw_spec_max)
+        elif self.end_vw_spec_min is not None:
+            sentence_spec = dict_stcs_flow[tag_stc_flow_endpoint_spec_min].format(L_min=self.end_volume_spec_min, vw_min=self.end_vw_spec_min)
+        elif self.end_vw_spec_max is not None:
+            sentence_spec = dict_stcs_flow[tag_stc_flow_endpoint_spec_max].format(L_max=self.end_volume_spec_max, vw_max=self.end_vw_spec_max)
+        else:
+            sentence_spec = None
+        
+        sentence_guide:str = None
+        if self.end_vw_guide_min is not None and self.end_vw_guide_max is not None:
+            if self.end_vw_guide_min != self.end_vw_guide_max:
+                sentence_guide = dict_stcs_flow[tag_stc_flow_endpoint_guide_range].format(L_min=self.end_volume_guide_min,
+                                                                                          L_max=self.end_volume_guide_max,
+                                                                                          vw_min=self.end_vw_guide_min,
+                                                                                          vwl_max=self.end_vw_guide_max)
+            else:
+                sentence_guide = dict_stcs_flow[tag_stc_flow_endpoint_guide_single].format(L_single=self.end_volume_guide_min,
+                                                                                           vw_single=self.end_vw_guide_min)
+        elif self.end_vw_guide_min is not None:
+            sentence_guide = dict_stcs_flow[tag_stc_flow_endpoint_guide_min].format(L_min=self.end_volume_guide_min, vw_min=self.end_vw_guide_min)
+        elif self.end_vw_guide_max is not None:
+            sentence_guide = dict_stcs_flow[tag_stc_flow_endpoint_guide_max].format(L_max=self.end_volume_guide_max, vw_max=self.end_vw_guide_max)
+        else:
+            sentence_guide = None
+
+        if sentence_spec is None and sentence_guide is None:
+            raise ValueError(f"{self.__class__.__name__}.__put_endpoint(): No one of guideline or specification lower or upper limit \
+                             for the distillation endpoint has been provided for Op. Seq. {self.operation_seq}.")
+        elif sentence_spec is not None and sentence_guide is not None:
+            self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
+                                    method=dict_part_flow[tag_part_flow_method_end],
+                                    content=sentence_spec,
+                                    record=dict_part_flow[tag_part_flow_rec_vol_end],
+                                    operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
+                                    witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
+            self.flowsheet.put_line(content=sentence_guide,
+                                    record=dict_part_flow[tag_part_flow_rec_Ti_end])
+        elif sentence_spec is not None:
+            self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
+                                    method=dict_part_flow[tag_part_flow_method_end],
+                                    content=sentence_spec,
+                                    record=dict_part_flow[tag_part_flow_rec_vol_end],
+                                    operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
+                                    witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
+            self.flowsheet.put_line(record=dict_part_flow[tag_part_flow_rec_Ti_end])     
+        else:
+            self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
+                                    method=dict_part_flow[tag_part_flow_method_end],
+                                    content=sentence_guide,
+                                    record=dict_part_flow[tag_part_flow_rec_vol_end],
+                                    operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
+                                    witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
+            self.flowsheet.put_line(record=dict_part_flow[tag_part_flow_rec_Ti_end])     
+
+    def __put_agitaion(self):
+        sentence:str = None
+        if self.agit_spec == opt_agit_spec_specif:
+            sentence = dict_stcs_flow[tag_stc_flow_agitation_spec].format(rpm=self.agit_rpm)
+        elif self.agit_spec == opt_agit_spec_guide:
+            sentence = dict_stcs_flow[tag_stc_flow_agitation_arbitrary_with_guide].format(rpm=self.agit_rpm)
+        else:
+            sentence = dict_part_flow[tag_part_flow_agitation_arbitray]
+        self.flowsheet.put_line(content=sentence,
+                                record=dict_part_flow[tag_part_flow_rec_rpm])
+
