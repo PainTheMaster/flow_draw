@@ -172,6 +172,12 @@ class Materials:
             litre = self.kg_main_mat * vol_per_weight
         return litre
     
+    def get_list_mats(self) -> list[str]:
+        mats_list = self.df_mats[header_material].to_list()
+        return mats_list
+
+
+
     @classmethod
     def generate_mats_df(cls)->pd.DataFrame:
         """
