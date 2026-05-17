@@ -12,8 +12,10 @@ import flow_draw.batch.process.unit_operations.uo_temp_control as tempr
 import flow_draw.batch.process.unit_operations.uo_agitation as agit
 import flow_draw.batch.process.unit_operations.uo_settling as stlng
 import flow_draw.batch.process.unit_operations.uo_phase_discharge as phdisch
+import flow_draw.batch.process.unit_operations.uo_evaporation as evap
 import flow_draw.data_io.flowsheet  as fsht
 import flow_draw.materials.materials as mats
+import flow_draw.trait_def.trait_def as trdef
 import os
 
 class SaltyWaterFlow(unittest.TestCase):
@@ -362,6 +364,204 @@ class UnitOperationOutputTest(unittest.TestCase):
         self.assertTrue(True)
 
 
+class AgitationTest2000(unittest.TestCase, trdef.GetMats):
+    def __init__(self, methodName = "runTest"):
+        self.mats: mats.Materials = None
+        super().__init__(methodName)
+    def setUp(self):
+        mats_df = mats.Materials.generate_mats_df()
+        mats_df = mats.Materials.add_to_mats_df(mats_df=mats_df,
+                                      material="ぎゅうにく",
+                                      main_star=True,
+                                      mw=100.0,
+                                      density=1.1,
+                                      conc_assay=90.0,
+                                      kg_main=2.0,
+                                      remark="残り10%は普通の肉が混入。何の肉かは聞いてはいけない。")
+        mats_df = mats.Materials.add_to_mats_df(mats_df=mats_df,
+                                      material="たまねぎ",
+                                      mw=50.0,
+                                      density=0.9,
+                                      conc_assay=100.0,
+                                      remark="淡路島産")
+        mats_df = mats.Materials.add_to_mats_df(mats_df=mats_df,
+                                      material="スパイス",
+                                      mw=10.0,
+                                      density=0.8,
+                                      conc_assay=100.0,
+                                      remark="これは上物のブツだぜ。")
+        print("testprint")
+        print(mats_df)       
+        self.mats = mats.Materials(df_mats = mats_df)
+        self.sheet = fsht.Flowsheet()
+
+        return super().setUp()
+    
+    def get_mats(self)-> mats.Materials:
+        return self.mats
+    
+    # def test_pretest_2000(self):
+    #     evap_instance:evap.Evaporation = evap.Evaporation(caller=self,
+    #                                                       flowsheet=self.sheet,
+    #                                                       operation_seq=1,
+    #                                                       num_subitems=1,
+    #                                                       edit_comment=None)
+    #     evap_instance.
+
+    #     self.assertTrue(True)
+
+    def test_full_dataset_2000(self):
+        test_df=evap.Evaporation.generate_test_df(precomment="precomment for test 2000",
+                                                  postcomment="postcomment for test 2000",
+                                                  Tj_min=50.0,
+                                                  Tj_max=100.0,
+                                                  Tbr_min=-25,
+                                                  Tbr_max=5,
+                                                  press_ctrl=evap.opt_press_ctrl_specific,
+                                                  press_min=0.0,
+                                                  press_max=1.0,
+                                                  unit_press=evap.opt_press_unit_kPaA,
+                                                  agit_spec=evap.opt_agit_spec_guide,
+                                                  agit_rpm=30.0,
+                                                  vw_spec_min=10,
+                                                  vw_spec_max=15.0,
+                                                  vw_guide_min=11.0,
+                                                  vw_guide_max=12.0)
+        print(test_df)
+        evap_instance:evap.Evaporation = evap.Evaporation(caller=self,
+                                                          flowsheet=self.sheet,
+                                                          operation_seq=1,
+                                                          num_subitems=1,
+                                                          edit_comment=None)
+        evap_instance.load_params_from_df(df=test_df)
+        evap_instance.output_unit_operation()
+        self.sheet.save("Test_2000_evap_flowsheet.xlsx")
+        self.assertTrue(True)
+
+
+
+    def test_2001_press_discrepancy(self):
+        test_df=evap.Evaporation.generate_test_df(precomment="precomment for test 2001",
+                                                  postcomment="postcomment for test 2001",
+                                                  Tj_min=50.0,
+                                                  Tj_max=100.0,
+                                                  Tbr_min=-25,
+                                                  Tbr_max=5,
+                                                  press_ctrl=evap.opt_press_ctrl_specific,
+                                                  #press_min=0.0,
+                                                  #press_max=1.0,
+                                                  unit_press=evap.opt_press_unit_kPaA,
+                                                  agit_spec=evap.opt_agit_spec_guide,
+                                                  agit_rpm=30.0,
+                                                  vw_spec_min=10,
+                                                  vw_spec_max=15.0,
+                                                  vw_guide_min=11.0,
+                                                  vw_guide_max=12.0)
+        print(test_df)
+        evap_instance:evap.Evaporation = evap.Evaporation(caller=self,
+                                                          flowsheet=self.sheet,
+                                                          operation_seq=1,
+                                                          num_subitems=1,
+                                                          edit_comment=None)
+        #evap_instance.load_params_from_df(df=test_df)
+        # evap_instance.output_unit_operation()
+        # self.sheet.save("Test_2001_evap_flowsheet.xlsx")
+        with self.assertRaises(expected_exception=ValueError):
+            evap_instance.load_params_from_df(df=test_df)
+    
+
+    def test_2002_no_press_unit(self):
+        test_df=evap.Evaporation.generate_test_df(precomment="precomment for test 2002",
+                                                  postcomment="postcomment for test 2002",
+                                                  Tj_min=50.0,
+                                                  Tj_max=100.0,
+                                                  Tbr_min=-25,
+                                                  Tbr_max=5,
+                                                  press_ctrl=evap.opt_press_ctrl_specific,
+                                                  press_min=0.0,
+                                                  press_max=1.0,
+                                                  #unit_press=evap.opt_press_unit_kPaA,
+                                                  agit_spec=evap.opt_agit_spec_guide,
+                                                  agit_rpm=30.0,
+                                                  vw_spec_min=10,
+                                                  vw_spec_max=15.0,
+                                                  vw_guide_min=11.0,
+                                                  vw_guide_max=12.0)
+        print(test_df)
+        evap_instance:evap.Evaporation = evap.Evaporation(caller=self,
+                                                          flowsheet=self.sheet,
+                                                          operation_seq=1,
+                                                          num_subitems=1,
+                                                          edit_comment=None)
+        #evap_instance.load_params_from_df(df=test_df)
+        # evap_instance.output_unit_operation()
+        # self.sheet.save("Test_2001_evap_flowsheet.xlsx")
+        with self.assertRaises(expected_exception=ValueError):
+            evap_instance.load_params_from_df(df=test_df)
+            
+
+    def test_2003_no_evap_endpoint(self):
+        test_df=evap.Evaporation.generate_test_df(precomment="precomment for test 2003",
+                                                  postcomment="postcomment for test 2003",
+                                                  Tj_min=50.0,
+                                                  Tj_max=100.0,
+                                                  Tbr_min=-25,
+                                                  Tbr_max=5,
+                                                  press_ctrl=evap.opt_press_ctrl_specific,
+                                                  press_min=0.0,
+                                                  press_max=1.0,
+                                                  unit_press=evap.opt_press_unit_kPaA,
+                                                  agit_spec=evap.opt_agit_spec_guide,
+                                                  agit_rpm=30.0,
+                                                  #vw_spec_min=10,
+                                                  #vw_spec_max=15.0,
+                                                  #vw_guide_min=11.0,
+                                                  #vw_guide_max=12.0
+                                                  )
+        print(test_df)
+        evap_instance:evap.Evaporation = evap.Evaporation(caller=self,
+                                                          flowsheet=self.sheet,
+                                                          operation_seq=1,
+                                                          num_subitems=1,
+                                                          edit_comment=None)
+        #evap_instance.load_params_from_df(df=test_df)
+        # evap_instance.output_unit_operation()
+        # self.sheet.save("Test_2001_evap_flowsheet.xlsx")
+        evap_instance.load_params_from_df(df=test_df)
+        with self.assertRaises(expected_exception=ValueError):
+            evap_instance.output_unit_operation()
+
+
+    def test_2004_minimum_datasets(self):
+        test_df=evap.Evaporation.generate_test_df(#precomment="precomment for test 2004",
+                                                  #postcomment="postcomment for test 2004",
+                                                  Tj_min=50.0,
+                                                  #Tj_max=100.0,
+                                                  #Tbr_min=-25,
+                                                  Tbr_max=5,
+                                                  #press_ctrl=evap.opt_press_ctrl_specific,
+                                                  #press_min=0.0,
+                                                  #press_max=1.0,
+                                                  #unit_press=evap.opt_press_unit_kPaA,
+                                                  #agit_spec=evap.opt_agit_spec_guide,
+                                                  #agit_rpm=30.0,
+                                                  #vw_spec_min=10,
+                                                  #vw_spec_max=15.0,
+                                                  #vw_guide_min=11.0,
+                                                  vw_guide_max=12.0
+                                                  )
+        print(test_df)
+        evap_instance:evap.Evaporation = evap.Evaporation(caller=self,
+                                                          flowsheet=self.sheet,
+                                                          operation_seq=1,
+                                                          num_subitems=1,
+                                                          edit_comment=None)
+        evap_instance.load_params_from_df(df=test_df)
+        evap_instance.output_unit_operation()
+        self.sheet.save("Test_2004_evap_flowsheet.xlsx")
+        self.assertTrue(True)
+
+
 
 def suite():
     suite = unittest.TestSuite()
@@ -375,8 +575,15 @@ def suite():
     # suite.addTest(UnitOperationOutputTest("test_1010_settling_full"))
     # suite.addTest(UnitOperationOutputTest("test_1011_settling_minimal"))
     # suite.addTest(UnitOperationOutputTest("test_1012_phase_disch_full"))
-    suite.addTest(UnitOperationOutputTest("test_1013_phase_disch_med"))
-    suite.addTest(UnitOperationOutputTest("test_1014_phase_disch_minimal"))
+    # suite.addTest(UnitOperationOutputTest("test_1013_phase_disch_med"))
+    # suite.addTest(UnitOperationOutputTest("test_1014_phase_disch_minimal"))
+    suite.addTest(AgitationTest2000("test_2001_press_discrepancy"))
+    suite.addTest(AgitationTest2000("test_2002_no_press_unit"))
+    suite.addTest(AgitationTest2000("test_2003_no_evap_endpoint"))
+    suite.addTest(AgitationTest2000("test_2004_minimum_datasets"))
+
+    suite.addTest
+
 
     return suite
 

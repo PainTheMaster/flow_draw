@@ -171,6 +171,58 @@ class Materials:
         else:
             litre = self.kg_main_mat * vol_per_weight
         return litre
+    
+    @classmethod
+    def generate_mats_df(cls)->pd.DataFrame:
+        """
+        DataFrame generator for test. The header items of the new df is as follows.<br>
+            defs.hedr_io_mats_mat<br>
+            defs.hedr_io_mats_main<br>
+            defs.hedr_io_mats_mw<br>
+            defs.hedr_io_mats_dnsty<br>
+            defs.hedr_io_mats_concasy<br>
+            defs.hedr_io_mats_kgmain<br>
+            defs.hedr_io_mats_remark<br>
+        """
+        hedr:list[str] = [defs.hedr_io_mats_mat,
+                          defs.hedr_io_mats_main,
+                          defs.hedr_io_mats_mw,
+                          defs.hedr_io_mats_dnsty,
+                          defs.hedr_io_mats_concasy,
+                          defs.hedr_io_mats_kgmain,
+                          defs.hedr_io_mats_remark]
+        empty_df: pd.DataFrame = pd.DataFrame(columns=hedr)
+        return empty_df
+    
+
+    @classmethod
+    def add_to_mats_df(cls,
+                       mats_df:pd.DataFrame = None,
+                       material:str = None,
+                       main_star:bool = False,
+                       mw:float = None,
+                       density:float = None,
+                       conc_assay:float=None,
+                       kg_main:float=None,
+                       remark:str=None)->pd.DataFrame:
+        star:str = None
+        if main_star:
+            star = desig_star
+        else:
+            star = None
+        s:pd.Series = pd.Series(data=[material, star, mw, density, conc_assay, kg_main, remark],
+                                index=[defs.hedr_io_mats_mat,
+                                       defs.hedr_io_mats_main,
+                                       defs.hedr_io_mats_mw,
+                                       defs.hedr_io_mats_dnsty,
+                                       defs.hedr_io_mats_concasy,
+                                       defs.hedr_io_mats_kgmain,
+                                       defs.hedr_io_mats_remark])
+        mats_df = pd.concat([mats_df, s.to_frame().T])
+        mats_df.reset_index(inplace=True, drop=True)
+        return mats_df
+        
+
 
 
 

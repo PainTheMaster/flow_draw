@@ -339,9 +339,9 @@ class Evaporation(uo.UnitOperation, uo_tag=defs.tag_uo_evap):
                                  for Op. Seq. {self.operation_seq} although an agitation rpm value is provided.")                
 
         #No rpm value provided in the mean time the agitation spec requires some rpm value -> error
-        elif self.agit_spec != opt_agit_spec_arbitrary or self.agit_spec is not None:
+        elif self.agit_spec == opt_agit_spec_specif or self.agit_spec == opt_agit_spec_guide:
             raise ValueError(f"{self.__class__.__name__}: Agitation rate (rpm) not provided for Op. Seq. {self.operation_seq} \
-                             although the user's selectio for the agitation spec requires a specification or guidance value.")
+                             although the user's selection for the agitation spec requires a specification or guidance value.")
         else:
             self.agit_spec = opt_agit_spec_arbitrary
 
@@ -421,7 +421,7 @@ class Evaporation(uo.UnitOperation, uo_tag=defs.tag_uo_evap):
         elif self.Tbr_min is not None:
             sentence = dict_stcs_flow[tag_stc_flow_T_brine_min].format(Tbr_min=self.Tbr_min)
         elif self.Tbr_max is not None:
-            sentence = dict_stcs_flow[tag_stc_flow_T_brine_max].format(Tj_max=self.Tbr_max)
+            sentence = dict_stcs_flow[tag_stc_flow_T_brine_max].format(Tbr_max=self.Tbr_max)
         else:
             sentence = dict_part_flow[tag_part_flow_T_brine_artibrary]
         self.flowsheet.put_line(content=sentence,
@@ -513,7 +513,7 @@ class Evaporation(uo.UnitOperation, uo_tag=defs.tag_uo_evap):
             sentence_spec = dict_stcs_flow[tag_stc_flow_endpoint_spec_range].format(L_min=self.end_volume_spec_min,
                                                                                     L_max=self.end_volume_spec_max,
                                                                                     vw_min=self.end_vw_spec_min,
-                                                                                    vwl_max=self.end_vw_spec_max)
+                                                                                    vw_max=self.end_vw_spec_max)
         elif self.end_vw_spec_min is not None:
             sentence_spec = dict_stcs_flow[tag_stc_flow_endpoint_spec_min].format(L_min=self.end_volume_spec_min, vw_min=self.end_vw_spec_min)
         elif self.end_vw_spec_max is not None:
@@ -527,7 +527,7 @@ class Evaporation(uo.UnitOperation, uo_tag=defs.tag_uo_evap):
                 sentence_guide = dict_stcs_flow[tag_stc_flow_endpoint_guide_range].format(L_min=self.end_volume_guide_min,
                                                                                           L_max=self.end_volume_guide_max,
                                                                                           vw_min=self.end_vw_guide_min,
-                                                                                          vwl_max=self.end_vw_guide_max)
+                                                                                          vw_max=self.end_vw_guide_max)
             else:
                 sentence_guide = dict_stcs_flow[tag_stc_flow_endpoint_guide_single].format(L_single=self.end_volume_guide_min,
                                                                                            vw_single=self.end_vw_guide_min)
@@ -570,6 +570,50 @@ class Evaporation(uo.UnitOperation, uo_tag=defs.tag_uo_evap):
             self.flowsheet.put_line(record=dict_part_flow[tag_part_flow_rec_Ti_max])
             self.flowsheet.put_line(record=dict_part_flow[tag_part_flow_rec_Ti_end])
 
+    @classmethod
+    def generate_test_df(cls,
+                         
+                         precomment:str=None,
+                         postcomment:str=None,
+                         Tj_min:float=None,
+                         Tj_max:float=None,
+                         Tbr_min:float=None,
+                         Tbr_max:float=None,
+                         press_ctrl:str=None,
+                         press_min:float=None,
+                         press_max:float=None,
+                         unit_press:str=None,
+                         agit_spec:str=None,
+                         agit_rpm:float=None,
+                         vw_spec_min:float=None,
+                         vw_spec_max:float=None,
+                         vw_guide_min:float=None,
+                         vw_guide_max:float=None)->pd.DataFrame:
+        hedr:list[str] = defs.list_hedr_cmn_io_dtil + list_hedr
+        content: list[any] = [None]*len(hedr)
+        s:pd.Series = pd.Series(data=content, index=hedr)
+        df = s.to_frame().T
+        df.at[df.index[0], hedr_precomment]=precomment
+        df.at[df.index[0], hedr_postcomment]=postcomment
+        df.at[df.index[0], hedr_Tj_min]=Tj_min
+        df.at[df.index[0], hedr_Tj_max]=Tj_max
+        df.at[df.index[0], hedr_T_brine_cond_min]=Tbr_min
+        df.at[df.index[0], hedr_T_brine_cond_max]=Tbr_max
+        df.at[df.index[0], hedr_press_ctrl]=press_ctrl
+        df.at[df.index[0], hedr_press_min]=press_min
+        df.at[df.index[0], hedr_press_max]=press_max
+        df.at[df.index[0], hedr_press_unit]=unit_press
+        df.at[df.index[0], hedr_agit_spec]=agit_spec
+        df.at[df.index[0], hedr_agit_rpm]=agit_rpm
+        df.at[df.index[0], hedr_val_endpoint_spec_min]=vw_spec_min
+        df.at[df.index[0], hedr_val_endpoint_spec_max]=vw_spec_max
+        df.at[df.index[0], hedr_val_endpoint_guide_min]=vw_guide_min
+        df.at[df.index[0], hedr_val_endpoint_guide_max]=vw_guide_max
+
+
+
+
+        return df
 
 
 

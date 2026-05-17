@@ -349,4 +349,4 @@ class Agitation(uo.UnitOperation, uo_tag=defs.tag_uo_agitation):
             if self.time_min is not None or self.time_max is not None:
                 self.flowsheet.put_line(record=dict_stcs[tag_stc_flow_rec_duration].format(time_unit=lang_dict_cmn[self.time_unit]))
 
-            
+    
