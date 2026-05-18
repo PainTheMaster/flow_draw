@@ -13,6 +13,7 @@ import flow_draw.batch.process.unit_operations.uo_agitation as agit
 import flow_draw.batch.process.unit_operations.uo_settling as stlng
 import flow_draw.batch.process.unit_operations.uo_phase_discharge as phdisch
 import flow_draw.batch.process.unit_operations.uo_evaporation as evap
+import flow_draw.batch.process.unit_operations.uo_cip as cip
 import flow_draw.data_io.flowsheet  as fsht
 import flow_draw.materials.materials as mats
 import flow_draw.trait_def.trait_def as trdef
@@ -563,6 +564,90 @@ class AgitationTest2000(unittest.TestCase, trdef.GetMats):
 
 
 
+class CIPTest3000(unittest.TestCase, trdef.GetMats):
+    def __init__(self, methodName = "runTest"):
+        self.mats: mats.Materials = None
+        super().__init__(methodName)
+    def setUp(self):
+        mats_df = mats.Materials.generate_mats_df()
+        mats_df = mats.Materials.add_to_mats_df(mats_df=mats_df,
+                                      material="ぎゅうにく",
+                                      main_star=True,
+                                      mw=100.0,
+                                      density=1.1,
+                                      conc_assay=90.0,
+                                      kg_main=2.0,
+                                      remark="残り10%は普通の肉が混入。何の肉かは聞いてはいけない。")
+        mats_df = mats.Materials.add_to_mats_df(mats_df=mats_df,
+                                      material="たまねぎ",
+                                      mw=50.0,
+                                      density=0.9,
+                                      conc_assay=100.0,
+                                      remark="淡路島産")
+        mats_df = mats.Materials.add_to_mats_df(mats_df=mats_df,
+                                      material="スパイス",
+                                      mw=10.0,
+                                      density=0.8,
+                                      conc_assay=100.0,
+                                      remark="これは上物のブツだぜ。")
+        print("testprint")
+        print(mats_df)       
+        self.mats = mats.Materials(df_mats = mats_df)
+        self.sheet = fsht.Flowsheet()
+    
+    def get_mats(self)->mats.Materials:
+        return self.mats
+
+    def test_3000_full_datasets(self):
+        test_df=cip.CIP.generate_test_df(precomment="Pre-comment for test-3000",
+                                         postcomment="Post-comment for test-3000",
+                                         cip_tgt="大きな釜",
+                                         solvent="H2O",
+                                         qty_kg=10,
+                                         via="multiplexer")
+        cip.CIP.add_to_test_df(df=test_df,
+                               cip_tgt="大きな釜",
+                               solvent="MeOH",
+                               qty_kg=15,
+                               via="multiplexer")
+                                                  
+        print(test_df)
+        cip_instance:cip.CIP = cip.CIP(caller=self,
+                                       flowsheet=self.sheet,
+                                       operation_seq=1,
+                                       num_subitems=2,
+                                       edit_comment=None)
+        cip_instance.load_params_from_df(df=test_df)
+        cip_instance.output_unit_operation()
+        self.sheet.save("Test_3000_cip_flowsheet.xlsx")
+        self.assertTrue(True)
+
+    def test_3001_minimum_datasets(self):
+        test_df=cip.CIP.generate_test_df(precomment="Pre-comment for test-3000",
+                                         postcomment="Post-comment for test-3000",
+                                         cip_tgt="大きな釜",
+                                         solvent="H2O",
+                                         qty_kg=10)
+                                         #via="multiplexer"
+        cip.CIP.add_to_test_df(df=test_df,
+                               cip_tgt="大きな釜",
+                               solvent="MeOH",
+                               qty_kg=15)
+                               #via="multiplexer")
+                                                  
+        print(test_df)
+        cip_instance:cip.CIP = cip.CIP(caller=self,
+                                       flowsheet=self.sheet,
+                                       operation_seq=1,
+                                       num_subitems=2,
+                                       edit_comment=None)
+        cip_instance.load_params_from_df(df=test_df)
+        cip_instance.output_unit_operation()
+        self.sheet.save("Test_3001_cip_flowsheet.xlsx")
+        self.assertTrue(True)
+
+
+
 def suite():
     suite = unittest.TestSuite()
     # suite.addTest(UnitOperationOutputTest("test_1001_placeholder"))
@@ -577,13 +662,12 @@ def suite():
     # suite.addTest(UnitOperationOutputTest("test_1012_phase_disch_full"))
     # suite.addTest(UnitOperationOutputTest("test_1013_phase_disch_med"))
     # suite.addTest(UnitOperationOutputTest("test_1014_phase_disch_minimal"))
-    suite.addTest(AgitationTest2000("test_2001_press_discrepancy"))
-    suite.addTest(AgitationTest2000("test_2002_no_press_unit"))
-    suite.addTest(AgitationTest2000("test_2003_no_evap_endpoint"))
-    suite.addTest(AgitationTest2000("test_2004_minimum_datasets"))
-
-    suite.addTest
-
+    # suite.addTest(AgitationTest2000("test_2001_press_discrepancy"))
+    # suite.addTest(AgitationTest2000("test_2002_no_press_unit"))
+    # suite.addTest(AgitationTest2000("test_2003_no_evap_endpoint"))
+    # suite.addTest(AgitationTest2000("test_2004_minimum_datasets"))
+    # suite.addTest(CIPTest3000("test_3000_full_datasets"))
+    suite.addTest(CIPTest3000("test_3001_minimum_datasets"))
 
     return suite
 

@@ -138,3 +138,26 @@ class ClassName(uo.UnitOperation, uo_tag=defs.tag_uo_"UO_NAME"):
         if not (self.post_comment == None or self.post_comment == ''):
             self.flowsheet.put_body_comments(self.post_comment)
             self.flowsheet.linefeed()
+    
+    @classmethod
+    def generate_test_df(cls,
+                       PARAMETER=DEFALUT_VALUE)->pd.DataFrame:
+        hedr:list[str] = defs.list_hedr_cmn_io_dtil + list_hedr
+        content: list[any] = [None]*len(hedr)
+        s:pd.Series = pd.Series(data=content, index=hedr)
+        df = s.to_frame().T
+        df.at[df.index[0], HEDR_ITEM]=PARAMETER
+        ...
+
+        return df
+    
+    @classmethod
+    def add_to_test_df(cls,
+                       df: pd.DataFrame=None,
+                       PARAMETER=DEFALUT_VALUE)->None:
+        width:int = len(df.columns)
+        new_row:list[any] = [None]*width
+        row:int = len(df)
+        df.loc[row]=new_row
+        df.at[row, HEADER_ITEM]=PARAMETER
+        ...

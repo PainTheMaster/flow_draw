@@ -47,17 +47,17 @@ hedr_cip_tgt:str = "CIP target"
 """header item: CIP target"""
 hedr_solvent:str = "Cleaning solvent"
 """header item: cleaning solvent"""
-hedr_qty_kg:float = "solvent QTY"
+hedr_qty_kg:float = "solvent QTY (kg)"
 """header item: solvent suantity"""
 hedr_via:str = "Via"
 """header item: path of the dirty solvent"""
-hedr_destination:str = "Destination"
-"""header item: destination of the dirty solvent"""
+# hedr_destination:str = "Destination"
+# """header item: destination of the dirty solvent"""
 list_hedr = [hedr_cip_tgt,
              hedr_solvent,
              hedr_qty_kg,
-             hedr_via,
-             hedr_destination]
+             hedr_via]
+            #  hedr_destination]
 """List of header items"""
 
 
@@ -100,6 +100,11 @@ tag_flow_part_rec_method_disch= "method disch"
 flow_part_rec_method_disch_jp= "廃棄"
 """A flowsheet component:  item for the method column discharge"""
 
+tag_flow_part_solv_qty_arbit="instruction for arbitray solvent quantity"
+"""Tag for a flowsheet component: instruction for an arbitrary solvent quantity"""
+flow_part_solv_qty_arbit_jp="溶媒量現場調整"
+"""A flowsheet component: instruction for an arbitrary solvent quantity"""
+
 tag_flow_part_instr_disch_direct= "instruction for direct disch"
 """Tag for a flowsheet component: instruction item in the content, direct discharge"""
 flow_part_instr_disch_direct_jp= "直接廃棄する。"
@@ -124,7 +129,7 @@ flow_part_rec_chk_compl_jp= "□ 実施確認"
 
 tag_stc_part_instr_qty= "instr stc quantity kg"
 """Tag for a sentence template: instruction for approx quantity; includes a placeholder {qty_kg}"""
-stc_instr_qty_jp= "目安 {qty_kg} kg"
+stc_instr_qty_jp= "溶媒量目安 {qty_kg} kg"
 """A sentence template: instruction for approx quantity; includes a placeholder {qty_kg}"""
 tag_stc_part_cip_tgt= "instr CIP target"
 """Tag for a sentence template: instruction CIP target; includes a placeholder {tgt}"""
@@ -137,6 +142,7 @@ stc_rec_instr_disch_via_jp= "{via}経由で廃棄する。"
 """A sentence template: instruction sentence to discharge through a specified point; includes placeholder {via}"""
 
 dict_flow_part_jp:dict[str, str] = {tag_flow_part_rec_method_disch : flow_part_rec_method_disch_jp,
+                                    tag_flow_part_solv_qty_arbit : flow_part_solv_qty_arbit_jp,
                                      tag_flow_part_instr_disch_direct : flow_part_instr_disch_direct_jp,
                                      tag_flow_part_rec_input_qty : flow_part_rec_input_qty_jp,
                                      tag_flow_part_rec_lot_nr : flow_part_rec_lot_nr_jp,
@@ -173,6 +179,7 @@ class CIP(uo.UnitOperation, uo_tag=defs.tag_uo_cip):
                  edit_comment:str=None):
         super().__init__(caller=caller, flowsheet=flowsheet, operation_seq=operation_seq, num_subitems=num_subitems, edit_comment=edit_comment)
         self.materials = caller.get_mats()
+        self.cip_operations:list[UnitCleaning]=[]
     
     def load_params_from_df(self, df: pd.DataFrame):
         """
@@ -181,15 +188,13 @@ class CIP(uo.UnitOperation, uo_tag=defs.tag_uo_cip):
         The header items can be passed from the get_detail_header() of each UnitOperation-drived class.
         This is the overriding mehtod in the class Charging..
         """
-
         first_row = df.iloc[0]
         if not pd.isna(first_row[hedr_precomment]):
             self.pre_comment = first_row[hedr_precomment]
         if not pd.isna(first_row[hedr_postcomment]):
             self.post_comment = first_row[hedr_postcomment]
         for _, subitem in df.iterrows():
-            pass#<uo-specific process>
-
+            self.cip_operations.append(UnitCleaning(caller=self, sheet=self.flowsheet, ser_cip=subitem))
 
 
     def get_detail_header(self) -> list[str]:
@@ -200,7 +205,7 @@ class CIP(uo.UnitOperation, uo_tag=defs.tag_uo_cip):
         if self.materials is not None:
             list_mats = self.materials.get_list_mats()
         else:
-            raise RuntimeError(f"{self.__class__.__name__}.get_detail_option_menu(): No material daat is provided. \
+            raise RuntimeError(f"{self.__class__.__name__}.get_detail_option_menu(): No material data is provided. \
                                The data is necessary to put the name of cleaning solvent. (Op. Nr. {self.operation_seq})")
         dict_option: dict[str, list[str]] = {hedr_solvent : list_mats}
         return dict_option
@@ -212,16 +217,113 @@ class CIP(uo.UnitOperation, uo_tag=defs.tag_uo_cip):
             self.flowsheet.put_body_comments(self.pre_comment)
             self.flowsheet.linefeed()        
 
-        #<Operation-specific processes here>
+        for unit_cln in self.cip_operations:
+            unit_cln.put_unit_cleaning()
+            self.flowsheet.linefeed()
 
         if not (self.post_comment == None or self.post_comment == ''):
             self.flowsheet.put_body_comments(self.post_comment)
             self.flowsheet.linefeed()
 
+    @classmethod
+    def generate_test_df(cls,
+                       precomment:str=None,
+                       postcomment:str=None,
+                       cip_tgt:str=None,
+                       solvent:str=None,
+                       qty_kg:float=None,
+                       via:str=None)->pd.DataFrame:
+        hedr:list[str] = defs.list_hedr_cmn_io_dtil + list_hedr
+        content: list[any] = [None]*len(hedr)
+        s:pd.Series = pd.Series(data=content, index=hedr)
+        df = s.to_frame().T
+        df.at[df.index[0], hedr_precomment]=precomment
+        df.at[df.index[0], hedr_postcomment]=postcomment
+        df.at[df.index[0], hedr_cip_tgt]=cip_tgt
+        df.at[df.index[0], hedr_solvent]=solvent
+        df.at[df.index[0], hedr_qty_kg]=qty_kg
+        df.at[df.index[0], hedr_via]=via
+
+        return df
+    
+    @classmethod
+    def add_to_test_df(cls,
+                       df: pd.DataFrame=None,
+                       precomment:str=None,
+                       postcomment:str=None,
+                       cip_tgt:str=None,
+                       solvent:str=None,
+                       qty_kg:float=None,
+                       via:str=None)->None:
+        width:int = len(df.columns)
+        new_row:list[any] = [None]*width
+        row:int = len(df)
+        df.loc[row]=new_row
+        df.at[row, hedr_precomment]=precomment
+        df.at[row, hedr_postcomment]=postcomment
+        df.at[row, hedr_cip_tgt]=cip_tgt
+        df.at[row, hedr_solvent]=solvent
+        df.at[row, hedr_qty_kg]=qty_kg
+        df.at[row, hedr_via]=via
+
+
 class UnitCleaning:
-    def __init__(self):
+    def __init__(self, caller:trdef.UniversalTrait=None, sheet:fsht.Flowsheet=None, ser_cip:pd.Series=None):
+        self.flowsheet:fsht.Flowsheet = sheet
         self.target:str = None
-        self.mat:str = None
+        self.solvent:str = None
         self.qty_kg:float = None
-        self.via:str=None
+        self.via:str = None
+        #self.destination:str = None
+
+        if not pd.isna(ser_cip[hedr_cip_tgt]):
+            self.target = ser_cip[hedr_cip_tgt]
+        else:
+            raise ValueError(f"Op. Seq. {caller.operation_seq}, {caller.__class__.__name__}: No cleaning target provided.")
+        
+        if not pd.isna(ser_cip[hedr_solvent]):
+            self.solvent = ser_cip[hedr_solvent]
+        else:
+            raise ValueError(f"Op. Seq. {caller.operation_seq}, {caller.__class__.__name__}: No cleaning solvent provided.")
+        
+        if not pd.isna(ser_cip[hedr_qty_kg]):
+            self.qty_kg = ser_cip[hedr_qty_kg]
+        
+        if not pd.isna(ser_cip[hedr_via]):
+            self.via = ser_cip[hedr_via]
+
+        # if not pd.isna(ser_cip[hedr_destination]):
+        #     self.destination = ser_cip[hedr_destination]
+    
+    def put_unit_cleaning(self):
+        self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
+                                method=self.target,
+                                content=self.solvent,
+                                record=dict_flow_parts[tag_flow_part_rec_input_qty],
+                                operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
+                                witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
+        sentence_solv:str = None
+        if self.qty_kg is not None:
+            sentence_solv = dict_flow_parts[tag_stc_part_instr_qty].format(qty_kg=self.qty_kg)
+        else:
+            sentence_solv = dict_flow_parts[tag_flow_part_solv_qty_arbit]
+        self.flowsheet.put_line(content=sentence_solv,
+                                record=dict_flow_parts[tag_flow_part_rec_lot_nr])
+        
+        sentence_tgt:str = dict_flow_parts[tag_stc_part_cip_tgt].format(tgt=self.target)
+        self.flowsheet.put_line(content=sentence_tgt,
+                                record=dict_flow_parts[tag_flow_part_rec_flexhose])
+        sentence_path:str = None
+        if self.via is not None:
+            sentence_path = dict_flow_parts[tag_stc_part_instr_disch_via].format(via=self.via)
+        else:
+            sentence_path = dict_flow_parts[tag_flow_part_instr_disch_direct]
+        self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
+                                method=dict_flow_parts[tag_flow_part_rec_method_disch],
+                                content=sentence_path,
+                                record=dict_flow_parts[tag_flow_part_rec_chk_compl],
+                                operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
+                                witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
+        
+
     

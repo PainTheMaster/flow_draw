@@ -572,7 +572,6 @@ class Evaporation(uo.UnitOperation, uo_tag=defs.tag_uo_evap):
 
     @classmethod
     def generate_test_df(cls,
-                         
                          precomment:str=None,
                          postcomment:str=None,
                          Tj_min:float=None,
@@ -609,9 +608,6 @@ class Evaporation(uo.UnitOperation, uo_tag=defs.tag_uo_evap):
         df.at[df.index[0], hedr_val_endpoint_spec_max]=vw_spec_max
         df.at[df.index[0], hedr_val_endpoint_guide_min]=vw_guide_min
         df.at[df.index[0], hedr_val_endpoint_guide_max]=vw_guide_max
-
-
-
 
         return df
 
