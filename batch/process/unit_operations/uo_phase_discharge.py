@@ -151,7 +151,6 @@ class PhaseDisch(uo.UnitOperation, uo_tag=defs.tag_uo_phase_disch):
         The header items can be passed from the get_detail_header() of each UnitOperation-drived class.
         This is the overriding mehtod in the class Charging..
         """
-
         first_row = df.iloc[0]
         if not pd.isna(first_row[hedr_precomment]):
             self.pre_comment = first_row[hedr_precomment]

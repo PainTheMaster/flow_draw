@@ -26,15 +26,35 @@ opt_no: str = 'No'
 list_yesno: list[str]=[opt_no, opt_yes]
 """List of affirmative and negative options"""
 
-#Unit
-opt_second:str = "s"
+#Units
+opt_time_second:str = "s"
 """Option for a time unit: second"""
-opt_minute:str = "min"
+opt_time_minute:str = "min"
 """Option for a time unit: minute"""
-opt_hour:str = "hr"
+opt_time_hour:str = "hr"
 """Option for a time unit: hour"""
-list_time_unit:list[str] = [opt_second, opt_minute, opt_hour]
+list_time_unit:list[str] = [opt_time_second, opt_time_minute, opt_time_hour]
 """List of time units"""
+
+opt_press_kPa = "kPa"
+"""Option for a pressure unit: kPa"""
+opt_press_MPa = "MPa"
+"""Option for a pressure unit: MPa"""
+opt_press_kPaA = "kPaA"
+"""Option for a pressure unit: kPaA"""
+opt_press_MPaA = "MPaA"
+"""Option for a pressure unit: MPaA"""
+opt_press_kPaG = "kPaG"
+"""Option for a pressure unit: kPaG"""
+opt_press_MPaG = "MPaG"
+"""Option for a pressure unit: MPaG"""
+list_press_unit = [opt_press_kPa,
+                   opt_press_MPa,
+                   opt_press_kPaA,
+                   opt_press_MPaA,
+                   opt_press_kPaG,
+                   opt_press_MPaG]
+"""List of pressure units"""
 
 #unit_operations
 tag_uo_line_clearance: str = "line_clearance"
@@ -770,15 +790,15 @@ tag_flow_cmn_rec_sign = "tag_flow_cmn_sign"
 part_flow_cmn_rec_sign_jp = '   /  /  _____'
 """Common flowsheet component for a signature"""
 
-tag_flow_cmn_time_unit_second = opt_second
+tag_flow_cmn_time_unit_second = opt_time_second
 """Tag for a common flowsheet component for an unit of time: second"""
 part_flow_cmn_time_unit_second = "秒"
 """Common flowsheet component for an unit of time: second"""
-tag_flow_cmn_time_unit_minute = opt_minute
+tag_flow_cmn_time_unit_minute = opt_time_minute
 """Tag for a common flowsheet component for an unit of time: minute"""
 part_flow_cmn_time_unit_minute = "分"
 """Common flowsheet component for an unit of time: minute"""
-tag_flow_cmn_time_unit_hour = opt_hour
+tag_flow_cmn_time_unit_hour = opt_time_hour
 """Tag for a common flowsheet component for an unit of time: hour"""
 part_flow_cmn_time_unit_hour = "時間"
 """Common flowsheet component for an unit of time: hour"""
