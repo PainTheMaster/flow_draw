@@ -52,7 +52,6 @@ hedr_filter_typ = "filter type"
 """Header item: filter type; if empty, related flowsheet components are omitted"""
 
 list_hedr = [hedr_operation,
-             hedr_via,
              hedr_origin,
              hedr_via,
              hedr_destin,
@@ -185,7 +184,7 @@ dict_component_jp = {tag_part_flow_uo_title_transfer : part_flow_uo_title_transf
                     tag_stc_destin_no_filter : stc_destin_no_filt_jp,
                     tag_stc_content_typ_filt : stc_stc_content_typ_filt_jp}
 
-dict_compnent = dict_component_jp
+dict_component = dict_component_jp
 
 
 #########################################################
@@ -204,7 +203,7 @@ dict_compnent = dict_component_jp
 # output_unit_operation(self)
 #
 #########################################################
-class ClassName(uo.UnitOperation, uo_tag=defs.tag_uo_transfer):
+class Transfer(uo.UnitOperation, uo_tag=defs.tag_uo_transfer):
     def __init__(self,
                  caller: type[trdef.UniversalTrait] =None,
                  flowsheet:fsht.Flowsheet=None,
@@ -237,7 +236,7 @@ class ClassName(uo.UnitOperation, uo_tag=defs.tag_uo_transfer):
                              {opt_operation_setup} or {opt_operation_transfer}, selected in the flow detail form.")
         if not pd.isna(first_row[hedr_origin]):
             self.origin = first_row[hedr_origin]
-        if not pd.isna(first_row[hedr_origin]):
+        if not pd.isna(first_row[hedr_via]):
             self.via = first_row[hedr_via]
         if not pd.isna(first_row[hedr_destin]):
             self.destination = first_row[hedr_destin]
@@ -253,17 +252,60 @@ class ClassName(uo.UnitOperation, uo_tag=defs.tag_uo_transfer):
         return dict_drop_down
     
     def output_unit_operation(self):
-        self.flowsheet.header_organizer(op_nr=self.operation_seq, title=lang_dict_uo_titles[self.uo_tag])
+        custom_uo_title:str = None
+        if self.operation == opt_operation_transfer:
+            custom_uo_title = dict_component[tag_part_flow_uo_title_transfer]
+        elif self.operation == opt_operation_setup:
+            custom_uo_title = dict_component[tag_part_flow_uo_title_setup]
+        self.flowsheet.header_organizer(op_nr=self.operation_seq, title=custom_uo_title)
         if not (self.pre_comment == None or self.pre_comment == ''):
             self.flowsheet.put_body_comments(self.pre_comment)
             self.flowsheet.linefeed()        
-
-        #<Operation-specific processes here>
+            
+        self.put_setup()
 
         if not (self.post_comment == None or self.post_comment == ''):
             self.flowsheet.put_body_comments(self.post_comment)
             self.flowsheet.linefeed()
     
+    def put_setup(self):
+        col_content:list[str] = []
+        use_filter:bool = (self.typ_filter is not None)
+        col_rec:list[str] = [None]
+
+        if self.origin is not None:
+            col_content.append(dict_component[tag_stc_origin].format(origin=self.origin))
+        if self.via is not None:
+            col_content.append(dict_component[tag_stc_via].format(via=self.via))
+        if use_filter:
+            col_content.append(dict_component[tag_stc_destin_with_filter].format(destin=self.destination))
+            col_content.append(dict_component[tag_stc_content_typ_filt].format(typ_filt = self.typ_filter))
+            col_rec.append(dict_component[tag_part_flow_rec_typ_filter])
+            col_rec.append(dict_component[tag_part_flow_rec_lot_filter])
+        else:
+            col_content.append(dict_component[tag_stc_destin_no_filter].format(destin=self.destination))
+
+        
+        #1st line in the segment
+        self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
+                                method=dict_component[tag_part_flow_method_instr_line_setup],
+                                content= col_content[0],
+                                record=dict_component[tag_part_flow_chk_setup],
+                                operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
+                                witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
+        #2nd line in the segment
+        if len(col_content) > len(col_rec):
+            col_rec += [None]*(len(col_content)-len(col_rec))
+        elif len(col_content) < len(col_rec):
+            col_content += [None]*(len(col_rec)-len(col_content))
+        
+        for i in range(1,len(col_content)):
+            self.flowsheet.put_line(content=col_content[i],
+                                    record=col_rec[i])
+        
+        self.flowsheet.linefeed()
+                               
+
     @classmethod
     def generate_test_df(cls,
                        operation:str = None,

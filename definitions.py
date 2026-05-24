@@ -82,6 +82,11 @@ tag_uo_agitation: str = "agitation"
 part_uo_title_agitation_jp = "攪拌"
 """JP expression of agitation"""
 
+tag_uo_sampling: str = "sampling"
+"""Tag for an unit operation sampling"""
+part_uo_title_sampling_jp = "サンプリング"
+"""JP expression of sampling"""
+
 tag_uo_settling: str = "settling"
 """Tag for an unit operation settling"""
 part_uo_title_settling_jp = "静置"
@@ -152,6 +157,7 @@ dict_jp_part_uo_titles = {tag_uo_line_clearance : part_uo_title_clearance_jp,
                           tag_uo_tempr_ctrl : part_uo_title_tempr_ctrl_jp,
                           tag_uo_charging : part_uo_title_charging_jp,
                           tag_uo_agitation : part_uo_title_agitation_jp,
+                          tag_uo_sampling : part_uo_title_sampling_jp,
                           tag_uo_settling : part_uo_title_settling_jp,
                           tag_uo_phase_disch : part_uo_title_phase_disch_jp,
                           tag_uo_evap : part_uo_title_evap_jp,

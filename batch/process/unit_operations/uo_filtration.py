@@ -150,6 +150,11 @@ tag_part_flow_rec_cake_height = "rec cake height"
 part_flow_rec_cake_height_jp="ケーク高さ:____________cm"
 """a flowsheet component: record field for the filter cake height"""
 
+tag_stc_flow_instr_equipment = "stc instr equip"
+"""tag for an instruction sentence template: instruction to use a specific equipment; includes a placeholder {equipment}"""
+stc_flow_instr_equipment_jp = "機器:{equipment}"
+"""an instruction sentence template: instruction to use a specific equipment; includes a placeholder {equipment}"""
+
 tag_stc_flow_instr_Tj_setpoint = "stc instr filt Tj"
 """tag for an instruction sentence template: instruction to set Tj; includes a placeholder {Tj}"""
 stc_flow_instr_Tj_setpoint_jp = "外温設定:{Tj}℃"
@@ -182,7 +187,7 @@ stc_flow_press_max_jp = "圧力:{P_max} {P_unit}以上"
 
 tag_stc_flow_rec_pres = "rec filt press"
 """tag for a sentence template: record field for filtration pressure; includes placeholders {P_unit}"""
-stc_flow_rec_press_jp = "圧力:____________{P_unit}"
+stc_flow_rec_press_jp = "圧力:__________{P_unit}"
 """a sentence template: record field for filtration pressure; includes placeholders {P_unit}"""
 
 dict_flowsheet_comp_jp = {tag_part_flow_method_integ_test : part_flow_method_integ_test_jp,
@@ -193,6 +198,7 @@ dict_flowsheet_comp_jp = {tag_part_flow_method_integ_test : part_flow_method_int
                           tag_part_flow_method_instr_end : part_flow_method_instr_end_jp,
                           tag_part_flow_press_arbitrary : part_flow_press_arbitrary_jp,
                           tag_part_flow_rec_cake_height : part_flow_rec_cake_height_jp,
+                          tag_stc_flow_instr_equipment : stc_flow_instr_equipment_jp,
                           tag_stc_flow_instr_Tj_setpoint : stc_flow_instr_Tj_setpoint_jp,
                           tag_stc_flow_content_instr_integ_test_1 : stc_flow_content_instr_integ_test_1_jp,
                           tag_stc_flow_press_range : stc_flow_press_range_jp,
@@ -219,7 +225,7 @@ dict_flowsheet_comp = dict_flowsheet_comp_jp
 # output_unit_operation(self)
 #
 #########################################################
-class ClassName(uo.UnitOperation, uo_tag=defs.tag_uo_filt):
+class Filtration(uo.UnitOperation, uo_tag=defs.tag_uo_filt):
     def __init__(self,
                  caller: type[trdef.UniversalTrait] =None,
                  flowsheet:fsht.Flowsheet=None,
@@ -251,6 +257,8 @@ class ClassName(uo.UnitOperation, uo_tag=defs.tag_uo_filt):
             self.equipment = first_row[hedr_equip]
         else:
             raise ValueError(f"{self.__class__.__name__} Op. Seq. {self.operation_seq}: No filtration equipment specified in the process detail form.")
+        if not pd.isna(first_row[hedr_Tj_setpoint]):
+            self.Tj_setpoint = first_row[hedr_Tj_setpoint]
         if not pd.isna(first_row[hedr_press_min]):
             self.press_min = first_row[hedr_press_min]
         if not pd.isna(first_row[hedr_press_max]):
@@ -259,7 +267,7 @@ class ClassName(uo.UnitOperation, uo_tag=defs.tag_uo_filt):
             self.unit_press = first_row[hedr_unit_press]
         elif self.press_min is not None or self.press_max is not None:
             raise ValueError(f"{self.__class__.__name__} Op. Seq. {self.operation_seq}: No filtration pressure unit is provided although P_min and/or P_max are specified.")
-        if pd.isna(first_row[hedr_integ_test])==opt_yes:
+        if first_row[hedr_integ_test]==opt_yes:
             self.integ_test = True
 
     def get_detail_header(self) -> list[str]:
@@ -274,9 +282,10 @@ class ClassName(uo.UnitOperation, uo_tag=defs.tag_uo_filt):
             self.flowsheet.put_body_comments(self.pre_comment)
             self.flowsheet.linefeed()        
 
-        self.flowsheet.put_line(content=self.equipment)
+        self.flowsheet.put_line(content=dict_flowsheet_comp[tag_stc_flow_instr_equipment].format(equipment = self.equipment))
         if self.Tj_setpoint is not None:
-            self.flowsheet.put_line(content=dict_flowsheet_comp[tag_stc_flow_instr_Tj_setpoint].format(Tj=self.Tj_setpoint),
+            self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
+                                    content=dict_flowsheet_comp[tag_stc_flow_instr_Tj_setpoint].format(Tj=self.Tj_setpoint),
                                     record=dict_flowsheet_comp[tag_part_flow_chk_Tj_setpoint],
                                     operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
                                     witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
@@ -301,12 +310,12 @@ class ClassName(uo.UnitOperation, uo_tag=defs.tag_uo_filt):
         elif self.press_min is not None:
             stc_pres = dict_flowsheet_comp[tag_stc_flow_press_min].format(P_min=self.press_min, P_unit=self.unit_press)
         elif self.press_max is not None:
-            stc_pres = dict_flowsheet_comp[tag_stc_flow_press_max].format(P_max=self.press_min, P_unit=self.unit_press)
+            stc_pres = dict_flowsheet_comp[tag_stc_flow_press_max].format(P_max=self.press_max, P_unit=self.unit_press)
         else:
             stc_pres = dict_flowsheet_comp[tag_part_flow_press_arbitrary]
         
         temp_press_unit:str = None
-        if self.unit_press is None:
+        if self.unit_press is not None:
             temp_press_unit = self.unit_press
         else:
             temp_press_unit = opt_hedr_press_MPa

@@ -14,6 +14,8 @@ import flow_draw.batch.process.unit_operations.uo_settling as stlng
 import flow_draw.batch.process.unit_operations.uo_phase_discharge as phdisch
 import flow_draw.batch.process.unit_operations.uo_evaporation as evap
 import flow_draw.batch.process.unit_operations.uo_cip as cip
+import flow_draw.batch.process.unit_operations.uo_transfer as trsf
+import flow_draw.batch.process.unit_operations.uo_filtration as filt
 import flow_draw.data_io.flowsheet  as fsht
 import flow_draw.materials.materials as mats
 import flow_draw.trait_def.trait_def as trdef
@@ -647,6 +649,224 @@ class CIPTest3000(unittest.TestCase, trdef.GetMats):
         self.assertTrue(True)
 
 
+class TransfTest4100(unittest.TestCase, trdef.UniversalTrait):
+    def __init__(self, methodName = "runTest"):
+        super().__init__(methodName)
+
+    def setUp(self):
+        self.flowsheet = fsht.Flowsheet()
+
+    def test_4100_fullset(self):
+        test_inst_1=trsf.Transfer(caller=self,
+                                  flowsheet=self.flowsheet,
+                                  operation_seq=1,
+                                  num_subitems=1)
+        test_df_1 = trsf.Transfer.generate_test_df(operation=trsf.opt_operation_setup,
+                                                 origin="Setup test origin",
+                                                 via="Setup test waypoint",
+                                                 destination="Setup test destination",
+                                                 filter="Setup test filter")
+        test_inst_1.load_params_from_df(test_df_1)
+
+        test_inst_2 = trsf.Transfer(caller=self,
+                                    flowsheet=self.flowsheet,
+                                    operation_seq=2,
+                                    num_subitems=1)
+        test_df_2 = trsf.Transfer.generate_test_df(operation=trsf.opt_operation_transfer,
+                                                   origin="Transf test origin",
+                                                   via="Transf test waypoint",
+                                                   destination="Transf test destination",
+                                                   filter="Transf test filt")
+        test_inst_2.load_params_from_df(test_df_2)
+
+        test_inst_1.output_unit_operation()
+        test_inst_2.output_unit_operation()
+        self.flowsheet.save("Test_4100_setup_transf_fullset.xlsx")
+        self.assertTrue(True)
+    
+    def test_4101_no_via(self):
+        test_inst_1=trsf.Transfer(caller=self,
+                                  flowsheet=self.flowsheet,
+                                  operation_seq=1,
+                                  num_subitems=1)
+        test_df_1 = trsf.Transfer.generate_test_df(operation=trsf.opt_operation_setup,
+                                                 origin="Setup test origin",
+                                                 #via="Setup test waypoint",
+                                                 destination="Setup test destination",
+                                                 filter="Setup test filter")
+        test_inst_1.load_params_from_df(test_df_1)
+
+        test_inst_2 = trsf.Transfer(caller=self,
+                                    flowsheet=self.flowsheet,
+                                    operation_seq=2,
+                                    num_subitems=1)
+        test_df_2 = trsf.Transfer.generate_test_df(operation=trsf.opt_operation_transfer,
+                                                   origin="Transf test origin",
+                                                   #via="Transf test waypoint",
+                                                   destination="Transf test destination",
+                                                   filter="Transf test filt")
+        test_inst_2.load_params_from_df(test_df_2)
+
+        test_inst_1.output_unit_operation()
+        test_inst_2.output_unit_operation()
+        self.flowsheet.save("Test_4101_setup_transf_no_via.xlsx")
+        self.assertTrue(True)
+
+       
+    def test_4102_minimum(self):
+        test_inst_1=trsf.Transfer(caller=self,
+                                  flowsheet=self.flowsheet,
+                                  operation_seq=1,
+                                  num_subitems=1)
+        test_df_1 = trsf.Transfer.generate_test_df(operation=trsf.opt_operation_setup,
+                                                #  origin="Setup test origin",
+                                                #  via="Setup test waypoint",
+                                                 destination="Setup test destination"
+                                                #  filter="Setup test filter"
+                                                 )
+        test_inst_1.load_params_from_df(test_df_1)
+
+        test_inst_2 = trsf.Transfer(caller=self,
+                                    flowsheet=self.flowsheet,
+                                    operation_seq=2,
+                                    num_subitems=1)
+        test_df_2 = trsf.Transfer.generate_test_df(operation=trsf.opt_operation_transfer,
+                                                #    origin="Transf test origin",
+                                                #    via="Transf test waypoint",
+                                                   destination="Transf test destination"
+                                                #    filter="Transf test filt"
+                                                )
+        test_inst_2.load_params_from_df(test_df_2)
+
+        test_inst_1.output_unit_operation()
+        test_inst_2.output_unit_operation()
+        self.flowsheet.save("Test_4102_setup_transf_minimum.xlsx")
+        self.assertTrue(True)
+
+    def test_4103_err_no_operation(self):
+        test_inst_1=trsf.Transfer(caller=self,
+                                flowsheet=self.flowsheet,
+                                operation_seq=1,
+                                num_subitems=1)
+        test_df_1 = trsf.Transfer.generate_test_df(#operation=trsf.opt_operation_setup
+                                                #  origin="Setup test origin",
+                                                #  via="Setup test waypoint",
+                                                destination="Setup test destination"
+                                                #  filter="Setup test filter"
+                                                )
+        
+        with self.assertRaises(expected_exception=ValueError):
+            test_inst_1.load_params_from_df(test_df_1)
+    
+    def test_4104_err_no_destin(self):
+        test_inst_1=trsf.Transfer(caller=self,
+                                flowsheet=self.flowsheet,
+                                operation_seq=1,
+                                num_subitems=1)
+        test_df_1 = trsf.Transfer.generate_test_df(#operation=trsf.opt_operation_setup
+                                                #  origin="Setup test origin",
+                                                #  via="Setup test waypoint",
+                                                destination="Setup test destination"
+                                                #  filter="Setup test filter"
+                                                )       
+        
+        with self.assertRaises(expected_exception=ValueError):
+            test_inst_1.load_params_from_df(test_df_1)
+    
+
+
+        # with self.assertRaises(expected_exception=ValueError):
+        #     evap_instance.output_unit_operation()
+
+class FiltTest4200(unittest.TestCase, trdef.UniversalTrait):
+    def __init__(self, methodName = "runTest"):
+        super().__init__(methodName)
+
+    def setUp(self):
+        self.flowsheet = fsht.Flowsheet()
+    
+    def test_4201_filt_full(self):
+        test_inst = filt.Filtration(caller=self,
+                                    flowsheet=self.flowsheet,
+                                    operation_seq=1,
+                                    num_subitems=1)
+        df = filt.Filtration.generate_test_df(equipment="test_4201_FD",
+                                              Tj=25,
+                                              P_min=100,
+                                              P_max=100,
+                                              P_unit=filt.opt_hedr_press_kPa,
+                                              integ_test=filt.opt_integ_test_yes)
+        test_inst.load_params_from_df(df)
+        test_inst.output_unit_operation()
+        self.flowsheet.save("Test_4201_filt_full.xlsx")
+        self.assertTrue(True)
+
+    def test_4202_filt_p_max(self):
+        test_inst = filt.Filtration(caller=self,
+                                    flowsheet=self.flowsheet,
+                                    operation_seq=1,
+                                    num_subitems=1)
+        df = filt.Filtration.generate_test_df(equipment="test_4210_FD",
+                                              Tj=25,
+                                            #   P_min=100,
+                                              P_max=100,
+                                              P_unit=filt.opt_hedr_press_kPa,
+                                              integ_test=filt.opt_integ_test_yes)
+        test_inst.load_params_from_df(df)
+        test_inst.output_unit_operation()
+        self.flowsheet.save("Test_4202_filt_p_max.xlsx")
+        self.assertTrue(True)
+
+    def test_4203_filt_min(self):
+        test_inst = filt.Filtration(caller=self,
+                                    flowsheet=self.flowsheet,
+                                    operation_seq=1,
+                                    num_subitems=1)
+        df = filt.Filtration.generate_test_df(equipment="test_4210_FD")
+                                            #   Tj=25,
+                                            #   P_min=100,
+                                            #   P_max=100,
+                                            #   P_unit=filt.opt_hedr_press_kPa,
+                                            #   integ_test=filt.opt_integ_test_yes)
+        test_inst.load_params_from_df(df)
+        test_inst.output_unit_operation()
+        self.flowsheet.save("Test_4203_filt_minimum.xlsx")
+        self.assertTrue(True)
+
+    
+    def test_4204_no_equip(self):
+        test_inst = filt.Filtration(caller=self,
+                                    flowsheet=self.flowsheet,
+                                    operation_seq=1,
+                                    num_subitems=1)
+        df = filt.Filtration.generate_test_df(#equipment="test_4210_FD"
+                                              Tj=25,
+                                              P_min=100,
+                                              P_max=100,
+                                              P_unit=filt.opt_hedr_press_kPa,
+                                              integ_test=filt.opt_integ_test_yes)
+        
+        with self.assertRaises(expected_exception=ValueError):
+            test_inst.load_params_from_df(df)
+    
+    def test_4205_no_p_unit(self):
+        test_inst = filt.Filtration(caller=self,
+                                    flowsheet=self.flowsheet,
+                                    operation_seq=1,
+                                    num_subitems=1)
+        df = filt.Filtration.generate_test_df(equipment="test_4210_FD",
+                                              Tj=25,
+                                              P_min=100,
+                                              P_max=100,
+                                            #   P_unit=filt.opt_hedr_press_kPa,
+                                              integ_test=filt.opt_integ_test_yes)
+        
+        with self.assertRaises(expected_exception=ValueError):
+            test_inst.load_params_from_df(df)
+
+
+
+
 
 def suite():
     suite = unittest.TestSuite()
@@ -667,7 +887,17 @@ def suite():
     # suite.addTest(AgitationTest2000("test_2003_no_evap_endpoint"))
     # suite.addTest(AgitationTest2000("test_2004_minimum_datasets"))
     # suite.addTest(CIPTest3000("test_3000_full_datasets"))
-    suite.addTest(CIPTest3000("test_3001_minimum_datasets"))
+    # suite.addTest(CIPTest3000("test_3001_minimum_datasets"))
+    # suite.addTest(TransfTest4100("test_4100_fullset"))
+    # suite.addTest(TransfTest4100("test_4101_no_via"))
+    # suite.addTest(TransfTest4100("test_4102_minimum"))
+    # suite.addTest(TransfTest4100("test_4103_err_no_operation"))
+    # suite.addTest(TransfTest4100("test_4104_err_no_destin"))
+    suite.addTest(FiltTest4200("test_4201_filt_full"))
+    suite.addTest(FiltTest4200("test_4202_filt_p_max"))
+    suite.addTest(FiltTest4200("test_4203_filt_min"))
+    suite.addTest(FiltTest4200("test_4204_no_equip"))
+    suite.addTest(FiltTest4200("test_4205_no_p_unit"))
 
     return suite
 
