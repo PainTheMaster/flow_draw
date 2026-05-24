@@ -77,11 +77,11 @@ opt_sampling_cat_ipc:str="IPC"
 """Option for the header item sampling_categoy: IPC"""
 opt_sampling_cat_monit:str="Monitoring"
 """Option for the header item sampling_categoy: Monitoring"""
-opt_sampling_cat_ipc:str="Both"
+opt_sampling_cat_both:str="Both"
 """Option for the header item sampling_categoy: Both"""
 list_opt_sampling_cat:list[str]=[opt_sampling_cat_ipc,
                                  opt_sampling_cat_monit,
-                                 opt_sampling_cat_ipc]
+                                 opt_sampling_cat_both]
 """List of options for sampling_cat"""
 
 dict_dropdown: dict[str, str] = {hedr_sampling_cat : list_opt_sampling_cat}
@@ -138,6 +138,7 @@ class Sampling(uo.UnitOperation, uo_tag=defs.tag_uo_sampling):
                  num_subitems: int = None,
                  edit_comment:str=None):
         super().__init__(caller=caller, flowsheet=flowsheet, operation_seq=operation_seq, num_subitems=num_subitems, edit_comment=edit_comment)
+        self.list_samples:list[SingleSample] = []
     
     def load_params_from_df(self, df: pd.DataFrame):
         """
@@ -152,11 +153,15 @@ class Sampling(uo.UnitOperation, uo_tag=defs.tag_uo_sampling):
             self.pre_comment = first_row[hedr_precomment]
         if not pd.isna(first_row[hedr_postcomment]):
             self.post_comment = first_row[hedr_postcomment]
-        for _, subitem in df.iterrows():
-            #<uo-specific process>
+        for sample_seq, subitem in df.iterrows():
+            temp_sample = SingleSample()
+            temp_sample.load_from_series(caller=self, sample_seq=sample_seq, ser=subitem)
+            self.list_samples.append(temp_sample)
 
 
-
+    def get_seq(self)-> int:
+        return self.operation_seq
+    
     def get_detail_header(self) -> list[str]:
         return list_hedr
 
@@ -198,13 +203,38 @@ class Sampling(uo.UnitOperation, uo_tag=defs.tag_uo_sampling):
         df.at[row, HEADER_ITEM]=PARAMETER
         ...
 
-    class SingleSample:
-        def __init__(self):
-            self.name:str = None
-            self.category:str = None
-            """IPC, monitoring, both"""
-            self.ipc_criteria:list[str] = []
-            self.monit_items:list[str] = []
-            self.ipc_item_name:list[str] = []
-            self.monit_item_name:list[str] = []
-            self.sample_comment:str = None
+class SingleSample:
+    def __init__(self):
+        self.sample_seq:int = None
+        self.name:str = None
+        self.category:str = None
+        """IPC, monitoring, both"""
+        self.ipc_criteria:list[str] = []
+        self.monit_items:list[str] = []
+        self.ipc_item_name:list[str] = []
+        self.monit_item_name:list[str] = []
+        self.sample_comment:str = None
+    
+    def load_from_series(self, caller:Sampling, sample_seq:int, ser:pd.Series):
+        self.sample_seq = sample_seq
+        if ser[hedr_sample_name] is not None:
+            self.name = ser[hedr_sample_name]
+        else:
+            raise ValueError(f"{caller.__class__.__name__} Op. Seq. {caller.get_seq}: No name provided for the {self.sample_seq+1}th sample in the detail input.")
+        
+        if ser[hedr_sampling_cat] is not None:
+            self.category = ser[hedr_sampling_cat]
+        else:
+            raise ValueError(f"{caller.__class__.__name__} Op. Seq. {caller.get_seq}: No sampling category provided for the {self.sample_seq+1}th sample in the detail input.")
+        
+        if self.category == opt_sampling_cat_ipc or self.category == opt_sampling_cat_both
+        if ser[hedr_ipc_criteria] is not None:
+            str_criteria:str = ser[hedr_ipc_criteria]
+            self.ipc_criteria = str_criteria.split("\n")
+        else:
+            raise ValueError(f"{caller.__class__.__name__} Op. Seq. {caller.get_seq}: No IPC criteria provided for the {self.sample_seq+1}th sample in the detail input although {opt_sampling_cat_ipc}/{opt_sampling_cat_both} is selected in the colum {hedr_sampling_cat}.")
+        
+        #TODO: Stab. monitoring items. Not necessariy needed.        
+
+
+        
