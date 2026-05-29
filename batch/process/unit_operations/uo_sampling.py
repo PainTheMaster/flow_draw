@@ -47,7 +47,7 @@ hedr_sampling_cat:str = "Category"
 """Header item for sampling category; IPC, Monitoring, or Both"""
 hedr_ipc_criteria:str = "IPC Criteria"
 """Header item for IPC criteria"""
-hedr_ipc_rec_items:str = "IPC Rec Titles"
+hedr_ipc_rec_titles:str = "IPC Rec Titles"
 """Header item for IPC record title for each analytical item"""
 hedr_ipc_rec_units:str = "IPC Rec Unit"
 """Header item for IPC record unit for each analytical item"""
@@ -57,15 +57,18 @@ hedr_monit_rec_items:str = "Monit Rec Titles"
 """Header item for sampling category; monitoring record title for each analytical item"""
 hedr_monit_rec_units:str = "Monit Rec Unit"
 """Header item for sampling category; monitoring record unit for each analytical item"""
+hedr_sample_comment:str = "Sample Comment"
+"""Header item for sampling category; sample comment"""
 
 list_hedr:list[str]=[hedr_sample_name,
                      hedr_sampling_cat,
                      hedr_ipc_criteria,
-                     hedr_ipc_rec_items,
+                     hedr_ipc_rec_titles,
                      hedr_ipc_rec_units,
                      hedr_monit_items,
                      hedr_monit_rec_items,
-                     hedr_monit_rec_units]
+                     hedr_monit_rec_units,
+                     hedr_sample_comment]
 """header items for the detail input form"""
 
 
@@ -182,26 +185,58 @@ class Sampling(uo.UnitOperation, uo_tag=defs.tag_uo_sampling):
     
     @classmethod
     def generate_test_df(cls,
-                       PARAMETER=DEFALUT_VALUE)->pd.DataFrame:
+                         sample_name:str = None,
+                         sampling_cat:str = None,
+                         ipc_criteria:str = None,
+                         ipc_rec_titles:str = None,
+                         ipc_rec_units:str = None,
+                         monit_items:str = None,
+                         monit_rec_items:str = None,
+                         monit_rec_units:str = None,
+                         sample_comment:str = None
+                         )->pd.DataFrame:
         hedr:list[str] = defs.list_hedr_cmn_io_dtil + list_hedr
         content: list[any] = [None]*len(hedr)
         s:pd.Series = pd.Series(data=content, index=hedr)
         df = s.to_frame().T
-        df.at[df.index[0], HEDR_ITEM]=PARAMETER
-        ...
+        df.at[df.index[0], hedr_sample_name] = sample_name
+        df.at[df.index[0], hedr_sampling_cat] = sampling_cat
+        df.at[df.index[0], hedr_ipc_criteria] = ipc_criteria
+        df.at[df.index[0], hedr_ipc_rec_titles] = ipc_rec_titles
+        df.at[df.index[0], hedr_ipc_rec_units] = ipc_rec_units
+        df.at[df.index[0], hedr_monit_items] = monit_items
+        df.at[df.index[0], hedr_monit_rec_items] = monit_rec_items
+        df.at[df.index[0], hedr_monit_rec_units] = monit_rec_units
+        df.at[df.index[0], hedr_sample_comment] = sample_comment
 
         return df
     
     @classmethod
     def add_to_test_df(cls,
                        df: pd.DataFrame=None,
-                       PARAMETER=DEFALUT_VALUE)->None:
+                       sample_name:str = None,
+                       sampling_cat:str = None,
+                       ipc_criteria:str = None,
+                       ipc_rec_titles:str = None,
+                       ipc_rec_units:str = None,
+                       monit_items:str = None,
+                       monit_rec_items:str = None,
+                       monit_rec_units:str = None,
+                       sample_comment:str = None
+                       )->None:
         width:int = len(df.columns)
         new_row:list[any] = [None]*width
         row:int = len(df)
         df.loc[row]=new_row
-        df.at[row, HEADER_ITEM]=PARAMETER
-        ...
+        df.at[row, hedr_sample_name] = sample_name
+        df.at[row, hedr_sampling_cat] = sampling_cat
+        df.at[row, hedr_ipc_criteria] = ipc_criteria
+        df.at[row, hedr_ipc_rec_titles] = ipc_rec_titles
+        df.at[row, hedr_ipc_rec_units] = ipc_rec_units
+        df.at[row, hedr_monit_items] = monit_items
+        df.at[row, hedr_monit_rec_items] = monit_rec_items
+        df.at[row, hedr_monit_rec_units] = monit_rec_units
+        df.at[row, hedr_sample_comment] = sample_comment
 
 class SingleSample:
     def __init__(self):
@@ -209,32 +244,58 @@ class SingleSample:
         self.name:str = None
         self.category:str = None
         """IPC, monitoring, both"""
-        self.ipc_criteria:list[str] = []
-        self.monit_items:list[str] = []
-        self.ipc_item_name:list[str] = []
-        self.monit_item_name:list[str] = []
+        self.content_ipc_criteria:list[str] = []
+        self.content_monit_items:list[str] = []
+        self.rec_ipc_item_name:list[str] = []
+        self.rec_ipc_unit:list[str] = []
+        self.rec_monit_item_name:list[str] = []
+        self.rec_monit_unit:list[str] = []
         self.sample_comment:str = None
     
     def load_from_series(self, caller:Sampling, sample_seq:int, ser:pd.Series):
         self.sample_seq = sample_seq
-        if ser[hedr_sample_name] is not None:
+        if not pd.isna(ser[hedr_sample_name]):
             self.name = ser[hedr_sample_name]
         else:
             raise ValueError(f"{caller.__class__.__name__} Op. Seq. {caller.get_seq}: No name provided for the {self.sample_seq+1}th sample in the detail input.")
         
-        if ser[hedr_sampling_cat] is not None:
+        if not pd.isna(ser[hedr_sampling_cat]):
             self.category = ser[hedr_sampling_cat]
         else:
             raise ValueError(f"{caller.__class__.__name__} Op. Seq. {caller.get_seq}: No sampling category provided for the {self.sample_seq+1}th sample in the detail input.")
         
-        if self.category == opt_sampling_cat_ipc or self.category == opt_sampling_cat_both
-        if ser[hedr_ipc_criteria] is not None:
-            str_criteria:str = ser[hedr_ipc_criteria]
-            self.ipc_criteria = str_criteria.split("\n")
-        else:
-            raise ValueError(f"{caller.__class__.__name__} Op. Seq. {caller.get_seq}: No IPC criteria provided for the {self.sample_seq+1}th sample in the detail input although {opt_sampling_cat_ipc}/{opt_sampling_cat_both} is selected in the colum {hedr_sampling_cat}.")
+        if self.category == opt_sampling_cat_ipc or self.category == opt_sampling_cat_both:
+            if not pd.isna(ser[hedr_ipc_criteria]):
+                str_criteria:str = ser[hedr_ipc_criteria]
+                self.content_ipc_criteria = str_criteria.split("\n")
+            else:
+                raise ValueError(f"{caller.__class__.__name__} Op. Seq. {caller.get_seq}: No IPC criteria provided for the {self.sample_seq+1}th sample in the detail input \
+                                although {opt_sampling_cat_ipc}/{opt_sampling_cat_both} is selected in the colum {hedr_sampling_cat}.")
+            if not pd.isna(ser[hedr_ipc_rec_titles]):
+                str_ipc_rec_titles:str = ser[hedr_ipc_rec_titles]
+                str_ipc_rec_units:str = ser[hedr_ipc_rec_titles]
+                self.rec_ipc_item_name = str_ipc_rec_titles.split("\n")
+                self.rec_ipc_unit = str_ipc_rec_units.split("\n")
+                if len(self.rec_ipc_item_name) != len(self.rec_ipc_unit):
+                    raise ValueError(f"{caller.__class__.__name__} Op. Seq. {caller.get_seq}: Mismatched numbers of IPC items and their units for the {self.sample_seq+1}th sample in the detail input")
+            else:
+                raise ValueError(f"{caller.__class__.__name__} Op. Seq. {caller.get_seq}: No IPC record name provided for the {self.sample_seq+1}th sample in the detail input \
+                                although {opt_sampling_cat_ipc}/{opt_sampling_cat_both} is selected in the colum {hedr_sampling_cat}.")
         
-        #TODO: Stab. monitoring items. Not necessariy needed.        
+        if self.category == opt_sampling_cat_monit or self.category == opt_sampling_cat_both:
+            if not pd.isna(ser[hedr_monit_items]):
+                str_monit_item:str = ser[hedr_monit_items]
+                self.content_monit_items = str_monit_item.split("\n")
+            if not pd.isna(ser[hedr_monit_rec_items]):
+                str_monit_rec_items =  ser[hedr_monit_rec_items]
+                str_monit_rec_units = ser[hedr_monit_rec_units]
+                self.rec_monit_item_name = str_monit_item
+                self.rec_monit_unit = str_monit_item
+                if len(self.rec_monit_item_name) != len(self.rec_monit_unit):
+                    raise ValueError(f"{caller.__class__.__name__} Op. Seq. {caller.get_seq}: Mismatched numbers of monitoring items and their units for the {self.sample_seq+1}th sample in the detail input")
+        if not pd.isna(ser[hedr_sample_comment]):
+            self.sample_comment = ser[hedr_sample_comment]
+
 
 
         
