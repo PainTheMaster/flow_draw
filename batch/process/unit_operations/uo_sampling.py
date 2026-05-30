@@ -117,6 +117,60 @@ Language dictionary for common parts.
     tag_flow_cmn_time_unit_hour : part_flow_cmn_time_unit_hour
 """
 
+tag_part_flow_mthod_instr_sampling:str = "method col sampling"
+"""Tag for a flowsheet component: sampling"""
+part_flow_mthod_instr_sampling_jp:str = "サンプリング"
+"""A flowsheet component: sampling"""
+
+tag_part_flow_rec_criterion_ok_nok:str = "ok nok"
+"""Tag for a flowsheet component: IPC criterion OK or NOK"""
+part_flow_rec_criterion_ok_nok_jp:str = "□ 適 □ 不適"
+"""A flowsheet component: IPC criterion OK or NOK"""
+
+tag_part_flow_rec_sampleID:str = "sample ID"
+"""Tag for a flowsheet component: record field for sample ID"""
+part_flow_rec_sampleID_jp:str = "サンプルID____________"
+"""A flowsheet component: record field for sample ID"""
+
+
+
+tag_stc_flow_content_sample_name = "content sample name"
+"""Tag for a sentence template: sample name field for content column; includes placeholders {sample_name}"""
+stc_flow_content_sample_name_jp = "サンプル名:{sample_name}"
+"""a sentence template: sample name template for content column; includes placeholders {sample_name}"""
+
+tag_stc_flow_ipc_criterion = "stc ipc criterion"
+"""Tag for a sentence template: ipc criteron template for content column; includes placeholders {ipc_criterion}"""
+stc_flow_ipc_criterion_jp = "IPC:{ipc_criterion}"
+"""a sentence template: ipc criteron template for content column; includes placeholders {ipc_criterion}"""
+
+tag_stc_flow_rec_ipc_result = "rec ipc result"
+"""Tag for a sentence template: record field for ipc result; includes placeholders {ipc_item} and {ipc_rec_unit}"""
+stc_flow_rec_ipc_result_jp = "{ipc_item}:__________{ipc_rec_unit}"
+"""a sentence template: record field for ipc result; includes placeholders {ipc_item} and {ipc_rec_unit}"""
+
+tag_stc_flow_monit_item = "content monitoring item"
+"""Tag for a sentence template: sentence template for monitoring item in the content column; includes placeholders {monit_item}"""
+stc_flow_monit_item_jp = "モニタリング:{monit_item}"
+"""a sentence template: sentence template for monitoring item in the content column; includes placeholders {monit_item}"""
+
+tag_stc_flow_rec_monit_result = "rec monitoring result"
+"""Tag for a sentence template: record field for monitoring result; includes placeholders {monit_item} and {monit_rec_unit}"""
+stc_flow_rec_monit_result_jp = "{monit_item}:__________{monit_rec_unit}"
+"""a sentence template: record field for monitoring result; includes placeholders {monit_item} and {monit_rec_unit}"""
+
+dict_parts_stcs_jp = {tag_part_flow_mthod_instr_sampling : part_flow_mthod_instr_sampling_jp,
+                      tag_part_flow_rec_criterion_ok_nok : part_flow_rec_criterion_ok_nok_jp,
+                      tag_part_flow_rec_sampleID : part_flow_rec_sampleID_jp,
+                      tag_stc_flow_content_sample_name : stc_flow_content_sample_name_jp,
+                      tag_stc_flow_ipc_criterion : stc_flow_ipc_criterion_jp,
+                      tag_stc_flow_rec_ipc_result : stc_flow_rec_ipc_result_jp,
+                      tag_stc_flow_monit_item : stc_flow_monit_item_jp,
+                      tag_stc_flow_rec_monit_result : stc_flow_rec_monit_result_jp}
+"""JP language dictionary for flowsheet parts and sentence templates"""
+
+dict_parts_stcs = dict_parts_stcs_jp
+
 #########################################################
 # Class (uo.UnitOperation, uo_tag=defs.tag_uo_<UO_NAME>)
 #------------------------------------------
@@ -157,7 +211,7 @@ class Sampling(uo.UnitOperation, uo_tag=defs.tag_uo_sampling):
         if not pd.isna(first_row[hedr_postcomment]):
             self.post_comment = first_row[hedr_postcomment]
         for sample_seq, subitem in df.iterrows():
-            temp_sample = SingleSample()
+            temp_sample = SingleSample(flowsheet=self.flowsheet)
             temp_sample.load_from_series(caller=self, sample_seq=sample_seq, ser=subitem)
             self.list_samples.append(temp_sample)
 
@@ -177,7 +231,9 @@ class Sampling(uo.UnitOperation, uo_tag=defs.tag_uo_sampling):
             self.flowsheet.put_body_comments(self.pre_comment)
             self.flowsheet.linefeed()        
 
-        #<Operation-specific processes here>
+        for sample in self.list_samples:
+            sample.output_single_sample()
+            self.flowsheet.linefeed()
 
         if not (self.post_comment == None or self.post_comment == ''):
             self.flowsheet.put_body_comments(self.post_comment)
@@ -239,7 +295,8 @@ class Sampling(uo.UnitOperation, uo_tag=defs.tag_uo_sampling):
         df.at[row, hedr_sample_comment] = sample_comment
 
 class SingleSample:
-    def __init__(self):
+    def __init__(self, flowsheet:fsht.Flowsheet=None):
+        self.flowsheet:fsht.Flowsheet = flowsheet
         self.sample_seq:int = None
         self.name:str = None
         self.category:str = None
@@ -262,22 +319,26 @@ class SingleSample:
         if not pd.isna(ser[hedr_sampling_cat]):
             self.category = ser[hedr_sampling_cat]
         else:
-            raise ValueError(f"{caller.__class__.__name__} Op. Seq. {caller.get_seq}: No sampling category provided for the {self.sample_seq+1}th sample in the detail input.")
+            raise ValueError(f"{caller.__class__.__name__} Op. Seq. {caller.get_seq}: No sampling category chosen for the {self.sample_seq+1}th sample in the detail input.")
         
         if self.category == opt_sampling_cat_ipc or self.category == opt_sampling_cat_both:
             if not pd.isna(ser[hedr_ipc_criteria]):
                 str_criteria:str = ser[hedr_ipc_criteria]
-                self.content_ipc_criteria = str_criteria.split("\n")
+                if not pd.isna(str_criteria):
+                    self.content_ipc_criteria = str_criteria.split("\n")
             else:
                 raise ValueError(f"{caller.__class__.__name__} Op. Seq. {caller.get_seq}: No IPC criteria provided for the {self.sample_seq+1}th sample in the detail input \
                                 although {opt_sampling_cat_ipc}/{opt_sampling_cat_both} is selected in the colum {hedr_sampling_cat}.")
             if not pd.isna(ser[hedr_ipc_rec_titles]):
                 str_ipc_rec_titles:str = ser[hedr_ipc_rec_titles]
-                str_ipc_rec_units:str = ser[hedr_ipc_rec_titles]
+                str_ipc_rec_units:str = ser[hedr_ipc_rec_units]
                 self.rec_ipc_item_name = str_ipc_rec_titles.split("\n")
-                self.rec_ipc_unit = str_ipc_rec_units.split("\n")
+                if not pd.isna(str_ipc_rec_units):
+                    self.rec_ipc_unit = str_ipc_rec_units.split("\n")
                 if len(self.rec_ipc_item_name) != len(self.rec_ipc_unit):
-                    raise ValueError(f"{caller.__class__.__name__} Op. Seq. {caller.get_seq}: Mismatched numbers of IPC items and their units for the {self.sample_seq+1}th sample in the detail input")
+                    raise ValueError(f"{caller.__class__.__name__} Op. Seq. {caller.get_seq}: Mismatched numbers of IPC items and their units for the {self.sample_seq+1}th sample in the detail input.")
+                if len(self.rec_ipc_item_name) != len(self.content_ipc_criteria):
+                    raise ValueError(f"{caller.__class__.__name__} Op. Seq. {caller.get_seq}: Mismatched numbers of IPC criteria and their units for the {self.sample_seq+1}th sample in the detail input.")
             else:
                 raise ValueError(f"{caller.__class__.__name__} Op. Seq. {caller.get_seq}: No IPC record name provided for the {self.sample_seq+1}th sample in the detail input \
                                 although {opt_sampling_cat_ipc}/{opt_sampling_cat_both} is selected in the colum {hedr_sampling_cat}.")
@@ -287,14 +348,59 @@ class SingleSample:
                 str_monit_item:str = ser[hedr_monit_items]
                 self.content_monit_items = str_monit_item.split("\n")
             if not pd.isna(ser[hedr_monit_rec_items]):
-                str_monit_rec_items =  ser[hedr_monit_rec_items]
-                str_monit_rec_units = ser[hedr_monit_rec_units]
-                self.rec_monit_item_name = str_monit_item
-                self.rec_monit_unit = str_monit_item
+                str_monit_rec_items:str =  ser[hedr_monit_rec_items]
+                str_monit_rec_units:str = ser[hedr_monit_rec_units]
+                self.rec_monit_item_name = str_monit_rec_items.split("\n")
+                if not pd.isna(str_monit_rec_units):
+                    self.rec_monit_unit = str_monit_rec_units.split("\n")
                 if len(self.rec_monit_item_name) != len(self.rec_monit_unit):
-                    raise ValueError(f"{caller.__class__.__name__} Op. Seq. {caller.get_seq}: Mismatched numbers of monitoring items and their units for the {self.sample_seq+1}th sample in the detail input")
+                    raise ValueError(f"{caller.__class__.__name__} Op. Seq. {caller.get_seq}: Mismatched numbers of monitoring items and their units for the {self.sample_seq+1}th sample in the detail input.")
         if not pd.isna(ser[hedr_sample_comment]):
             self.sample_comment = ser[hedr_sample_comment]
+
+    def output_single_sample(self):
+        self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
+                                method=dict_parts_stcs[tag_part_flow_mthod_instr_sampling],
+                                content=dict_parts_stcs[tag_stc_flow_content_sample_name].format(sample_name=self.name),
+                                record=dict_parts_stcs[tag_part_flow_rec_sampleID],
+                                operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
+                                witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
+        if self.category == opt_sampling_cat_ipc or self.category == opt_sampling_cat_both:
+            self.__output_IPC()
+        if self.category == opt_sampling_cat_monit or self.category == opt_sampling_cat_both:
+            self.__output_monit()
+        
+
+
+    def __output_IPC(self):
+        for idx in range(len(self.content_ipc_criteria)):
+            temp_ipc_criteria:str = dict_parts_stcs[tag_stc_flow_ipc_criterion].format(ipc_criterion=self.content_ipc_criteria[idx])
+            temp_ipc_rec:str = dict_parts_stcs[tag_stc_flow_rec_ipc_result].format(ipc_item=self.rec_ipc_item_name[idx], ipc_rec_unit=self.rec_ipc_unit[idx])
+            self.flowsheet.put_line(content=temp_ipc_criteria,
+                                    record=temp_ipc_rec)
+            self.flowsheet.put_line(record=dict_parts_stcs[tag_part_flow_rec_criterion_ok_nok])
+
+    def __output_monit(self):
+        idx_long:int = None
+        if len(self.content_monit_items) >= len(self.rec_monit_item_name):
+            idx_long = len(self.content_monit_items)
+        else:
+            idx_long = len(self.rec_monit_item_name)
+        
+        for idx in range(idx_long):
+            temp_content_monit_item: str = ""
+            if idx <=len(self.content_monit_items)-1:
+                temp_content_monit_item = dict_parts_stcs[tag_stc_flow_monit_item].format(monit_item=self.content_monit_items[idx])
+            temp_rec_monit_item:str = ""
+            if idx <= len(self.rec_monit_item_name)-1:
+                temp_rec_monit_item = dict_parts_stcs[tag_stc_flow_rec_monit_result].format(monit_item=self.rec_monit_item_name[idx],
+                                                                                            monit_rec_unit=self.rec_monit_unit[idx])
+            self.flowsheet.put_line(content=temp_content_monit_item,
+                                    record=temp_rec_monit_item)
+
+            
+
+
 
 
 

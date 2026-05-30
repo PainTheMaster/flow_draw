@@ -16,6 +16,7 @@ import flow_draw.batch.process.unit_operations.uo_evaporation as evap
 import flow_draw.batch.process.unit_operations.uo_cip as cip
 import flow_draw.batch.process.unit_operations.uo_transfer as trsf
 import flow_draw.batch.process.unit_operations.uo_filtration as filt
+import flow_draw.batch.process.unit_operations.uo_sampling as smplng
 import flow_draw.data_io.flowsheet  as fsht
 import flow_draw.materials.materials as mats
 import flow_draw.trait_def.trait_def as trdef
@@ -865,10 +866,146 @@ class FiltTest4200(unittest.TestCase, trdef.UniversalTrait):
             test_inst.load_params_from_df(df)
 
 
+class samplingTest4300(unittest.TestCase, trdef.UniversalTrait):
+    def __init__(self, methodName = "runTest"):
+        super().__init__(methodName)
+
+    def setUp(self):
+        self.flowsheet = fsht.Flowsheet()
+    
+    def test_4301_full(self):
+        test_inst = smplng.Sampling(caller=self,
+                                    flowsheet=self.flowsheet,
+                                    operation_seq=6,
+                                    num_subitems=2)
+        df = smplng.Sampling.generate_test_df(sample_name="test sample 1",
+                                              sampling_cat=smplng.opt_sampling_cat_both,
+                                              ipc_criteria="残原料1:≦0.5%\n残原料2≦0.5%",
+                                              ipc_rec_titles="残原料1\n残原料2",
+                                              ipc_rec_units="%\n%",
+                                              monit_items="酸性度\n結晶形",
+                                              monit_rec_items="酸性度\n結晶形",
+                                              monit_rec_units="%\n",
+                                              sample_comment="This is a comment for sample test 4301-1.")
+        smplng.Sampling.add_to_test_df(df=df,
+                                       sample_name="test sample 2",
+                                       sampling_cat=smplng.opt_sampling_cat_both,
+                                       ipc_criteria="残原料1:≦0.1%\n残原料2≦0.1%",
+                                       ipc_rec_titles="残原料1\n残原料2",
+                                       ipc_rec_units="%\n%",
+                                       monit_items="酸性度2\n結晶形2",
+                                       monit_rec_items="酸性度2\n結晶形2",
+                                       monit_rec_units="%\n",
+                                       sample_comment="This is a comment for sample test 4301-2.")
+        test_inst.load_params_from_df(df=df)
+        test_inst.output_unit_operation()
+        self.flowsheet.save("Test_4301_sampling_full.xlsx")
+        self.assertTrue(True)
+
+    def test_4302_ipc_only(self):
+        test_inst = smplng.Sampling(caller=self,
+                                    flowsheet=self.flowsheet,
+                                    operation_seq=6,
+                                    num_subitems=1)
+        df = smplng.Sampling.generate_test_df(sample_name="test sample 1",
+                                              sampling_cat=smplng.opt_sampling_cat_ipc,
+                                              ipc_criteria="残原料1:≦0.5%",
+                                              ipc_rec_titles="残原料1",
+                                              ipc_rec_units="%",
+                                              sample_comment="This is a comment for sample test 4302.")
+        test_inst.load_params_from_df(df=df)
+        test_inst.output_unit_operation()
+        self.flowsheet.save("Test_4302_ipc_only.xlsx")
+        self.assertTrue(True)
+    
+    def test_4303_monit_only(self):
+        test_inst = smplng.Sampling(caller=self,
+                                    flowsheet=self.flowsheet,
+                                    operation_seq=6,
+                                    num_subitems=2)
+        df = smplng.Sampling.generate_test_df(sample_name="test sample 1",
+                                              sampling_cat=smplng.opt_sampling_cat_monit,
+                                              monit_items="酸性度",
+                                              monit_rec_items="pH",
+                                              monit_rec_units="",
+                                              sample_comment="This is a comment for sample test 4303.")
+        test_inst.load_params_from_df(df=df)
+        test_inst.output_unit_operation()
+        self.flowsheet.save("Test_4303_monit_only.xlsx")
+        self.assertTrue(True)
+
+    def test_4304_noname_err(self):
+        test_inst = smplng.Sampling(caller=self,
+                                    flowsheet=self.flowsheet,
+                                    operation_seq=6,
+                                    num_subitems=1)
+        df = smplng.Sampling.generate_test_df(#sample_name="test sample 1",
+                                              sampling_cat=smplng.opt_sampling_cat_monit,
+                                              monit_items="酸性度",
+                                              monit_rec_items="pH",
+                                              monit_rec_units="",
+                                              sample_comment="This is a comment for sample test 4304.")
+        with self.assertRaises(expected_exception=ValueError):
+            test_inst.load_params_from_df(df=df)
+        
+    def test_4305_no_ipc_crteria(self):
+        test_inst = smplng.Sampling(caller=self,
+                                    flowsheet=self.flowsheet,
+                                    operation_seq=6,
+                                    num_subitems=1)
+        df = smplng.Sampling.generate_test_df(sample_name="test sample 1",
+                                              sampling_cat=smplng.opt_sampling_cat_ipc,
+                                              #ipc_criteria="残原料1:≦0.5%",
+                                              ipc_rec_titles="残原料1",
+                                              ipc_rec_units="%",
+                                              sample_comment="This is a comment for sample test 4305.")
+        with self.assertRaises(expected_exception=ValueError):
+            test_inst.load_params_from_df(df=df)
+
+    def test_4306_ipc_item_unit_mismatch(self):
+        test_inst = smplng.Sampling(caller=self,
+                                    flowsheet=self.flowsheet,
+                                    operation_seq=6,
+                                    num_subitems=1)
+        df = smplng.Sampling.generate_test_df(sample_name="test sample 1",
+                                              sampling_cat=smplng.opt_sampling_cat_ipc,
+                                              ipc_criteria="残原料1:≦0.5%",
+                                              ipc_rec_titles="残原料1\n残原料2",
+                                              ipc_rec_units="%",
+                                              sample_comment="This is a comment for sample test 4306.")
+        with self.assertRaises(expected_exception=ValueError):
+            test_inst.load_params_from_df(df=df)
+    
+    def test_4307_ipc_criteria_item_mismatch(self):
+        test_inst = smplng.Sampling(caller=self,
+                                    flowsheet=self.flowsheet,
+                                    operation_seq=6,
+                                    num_subitems=1)
+        df = smplng.Sampling.generate_test_df(sample_name="test sample 1",
+                                              sampling_cat=smplng.opt_sampling_cat_ipc,
+                                              ipc_criteria="残原料1:≦0.5%\n残原料2≦0.1%",
+                                              ipc_rec_titles="残原料1",
+                                              ipc_rec_units="%",
+                                              sample_comment="This is a comment for sample test 4307.")
+        with self.assertRaises(expected_exception=ValueError):
+            test_inst.load_params_from_df(df=df)
+    
+    def test_4308_monit_item_unit_mismatch(self):
+        test_inst = smplng.Sampling(caller=self,
+                                    flowsheet=self.flowsheet,
+                                    operation_seq=6,
+                                    num_subitems=1)
+        df = smplng.Sampling.generate_test_df(sample_name="test sample 1",
+                                              sampling_cat=smplng.opt_sampling_cat_monit,
+                                              monit_items="酸性度",
+                                              monit_rec_items="pH",
+                                            #   monit_rec_units="",
+                                              sample_comment="This is a comment for sample test 4308.")
+        with self.assertRaises(expected_exception=ValueError):
+            test_inst.load_params_from_df(df=df)
 
 
-
-def suite():
+def suite_0000_40000():
     suite = unittest.TestSuite()
     # suite.addTest(UnitOperationOutputTest("test_1001_placeholder"))
     #For the 2nd and likewise.... suite.addTest("something here")
@@ -893,17 +1030,26 @@ def suite():
     # suite.addTest(TransfTest4100("test_4102_minimum"))
     # suite.addTest(TransfTest4100("test_4103_err_no_operation"))
     # suite.addTest(TransfTest4100("test_4104_err_no_destin"))
-    suite.addTest(FiltTest4200("test_4201_filt_full"))
-    suite.addTest(FiltTest4200("test_4202_filt_p_max"))
-    suite.addTest(FiltTest4200("test_4203_filt_min"))
-    suite.addTest(FiltTest4200("test_4204_no_equip"))
-    suite.addTest(FiltTest4200("test_4205_no_p_unit"))
+    # suite.addTest(FiltTest4200("test_4201_filt_full"))
+    # suite.addTest(FiltTest4200("test_4202_filt_p_max"))
+    # suite.addTest(FiltTest4200("test_4203_filt_min"))
+    # suite.addTest(FiltTest4200("test_4204_no_equip"))
+    # suite.addTest(FiltTest4200("test_4205_no_p_unit"))
+    # suite.addTest(samplingTest4300("test_4301_full"))
+    suite.addTest(samplingTest4300("test_4302_ipc_only"))
+    suite.addTest(samplingTest4300("test_4303_monit_only"))
+    suite.addTest(samplingTest4300("test_4304_noname_err"))
+    suite.addTest(samplingTest4300("test_4305_no_ipc_crteria"))
+    suite.addTest(samplingTest4300("test_4306_ipc_item_unit_mismatch"))
+    suite.addTest(samplingTest4300("test_4307_ipc_criteria_item_mismatch"))
+    suite.addTest(samplingTest4300("test_4308_monit_item_unit_mismatch"))
+
 
     return suite
 
 
 if __name__=="__main__":
-    unittest.TextTestRunner(verbosity=2).run(suite())
+    unittest.TextTestRunner(verbosity=2).run(suite_0000_40000())
 
 
 
