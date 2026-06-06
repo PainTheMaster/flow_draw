@@ -1,124 +1,169 @@
+from abc import ABC, abstractmethod
+from typing import Literal
 
-
-# class JSON_property:
-#     def __init__(self):
-#         self.list_property: list[SingleProperty] = []
-    
-#     def add(self,
-#             property_name:str =None,
-#             data_type:str = None,
-#             enum_opt:list[any] = None,
-#             arr_obj : JSON_property = None,
-#             description:str = None,
-#             required:bool = None,
-#             ):
-#         new_entry = SingleProperty(property_name=property_name,
-#                                     data_type=data_type,
-#                                     enum_opt=enum_opt,
-#                                     description=description,
-#                                     required=required,
-#                                     sub_object=sub_object)
-#         self.list_property.append(new_entry)
-    
-#     def toJSON(self):
-#         json: list[str] = ""
-        
-        
-        
-
-# class SingleProperty:
-#     def __init__(self,
-#             property_name:str =None,
-#             data_type:str = None,
-#             enum_opt:list[any] = [],
-#             arr_obj : JSON_property = None,
-#             description:str = None,
-#             required:bool = None,
-#             ):
-#         self.property_name:str = property_name
-#         self.type:str = data_type
-#         self.enum_opt: list[any] = enum_opt
-#         self.description:str = description
-#         self.required:bool = required
-
-#     def toJSON(self)->list[str]:
-#         json: list[str] = []
-#         json.append(f'"{self.property_name}":{{')
-#         if self.description is not None:
-#             json.append(f'\t"description":"{self.description}",')
-#         json.append(f'\t"type":"{self.type}",')
-#         if len(self.enum_opt) > 0:
-#             temp_array:str = '"['
-#             i: int = 0
-#             for i in range(len(self.enum_opt)-1):
-#                 temp_array+='"'+self.enum_opt[i]+'"'+','
-#             temp_array+='"'+self.enum_opt[i]+'"'+']'
-#             json.append(f'\t"enum":{temp_array},')
-#         json[-1]=json[-1].removesuffix(',')
-#         json.append('}')
-#         return json
-
-
-class JSONentry:
+class JsonEntity(ABC):
+    @abstractmethod
     def __init__(self,
-            property_name:str =None,
-            data_type:str = None,
-            enum_opt:list[any] = None,
-            arr_obj : list[JSONentry] = None,
-            description:str = None,
-            required:bool = None,
-            ):
-        self.property_name:str = property_name
-        self.data_type:str = data_type
-        self.enum_opt: list[any] = enum_opt
-        self.arr_obj : list[JSONentry] = arr_obj,
-        self.description:str = description
-        self.required:bool = required
+                 key:str=None,
+                 description:str=None,
+                 required:bool=True):
+        self.key=key
+        self.description=description
+        self.required=required
 
-    def nest(self, entry):
+    @abstractmethod
+    def asType(self)->list[str]:
         pass
 
-    def toJSON(self)->list[str]:
-        json: list[str] = []
-        json.append(f'"{self.property_name}":{{')
-        if self.description is not None:
-            json.append(f' "description":"{self.description}",')
-        json.append(f' "type":"{self.data_type}",')
-        if self.enum_opt is not None:
-            temp_array:str = '['
-            i: int = 0
-            for i in range(len(self.enum_opt)-1):
-                temp_array+=f'"{self.enum_opt[i]}",'
-            temp_array+=f'"{self.enum_opt[i]}"]'
-            json.append(f' "enum":{temp_array},')
-        if self.data_type=="array" and self.arr_obj is not None:
-            json.append(' "items:{"')
-            inner_obj_lines = self.arr_obj.toJSON
-            for line in inner_obj_lines:
-                json.append('  '+line)
-            json.append(' }')
-        if self.data_type=="object":
-            json.append('"properties:{"')
-            for prop in self.arr_obj:
-                json_prop=prop.toJSON()
-                for line in json_prop:
-                    json.append(f' {line}')
-                json[-1]+=','
-            json[-1]=json[-1].removesuffix(',')
-            json.append('},')
-            required:str='"required":['
-            for prop in self.arr_obj:
-                if prop.required:
-                    required += f'"{prop.property_name}",'
-            required=required.removesuffix(',')
-            required+='],'
-            json.append(required)
-            json.append('""additionalProperties": false"')
-
+    @abstractmethod
+    def asEntity(self)->list[str]:
+        pass
             
-        json[-1]=json[-1].removesuffix(',')
-        json.append('}')
-        return json
+class Array(JsonEntity):
+    def __init__(self,
+                key:str=None,
+                content:JsonEntity | list[JsonEntity]=None,
+                description:str=None,
+                required:bool=True):
+        super().__init__(key=key, description=description, required=required)
+        self.content=content
+        if content is None:
+            raise ValueError(f'{self.__class__.__name__}: "content" not given.')
+        if isinstance(self.content, list) and len(self.content) == 0:
+            raise ValueError(f'{self.__class__.__name__}: An empty list is put in "content".')
+    
+    def asType(self)->list[str]:
+        list_json_str:list[str] = []
+        list_json_str.append('{')
+        if self.description is not None:
+            list_json_str.append(f' "description":"{self.description}",')
+        list_json_str.append(' "type":"array",')
+
+        if isinstance(self.content, JsonEntity):
+            lines:list[str] = self.content.asType()
+            lines[0] = '"items":'+lines[0]
+            for single_line in lines:
+                list_json_str.append(' '+single_line)
+        elif isinstance(self.content, list) and isinstance(self.content[0], JsonEntity):
+            list_json_str.append(' "items":{')
+            list_json_str.append('  "oneOf":[')
+            for entity in self.content:
+                for single_line in entity.asType():
+                    list_json_str.append('   '+single_line)
+                list_json_str[-1] +=','
+            list_json_str[-1]=list_json_str[-1].removesuffix(',')
+            list_json_str.append('  ]')
+            list_json_str.append(' }')
+        list_json_str.append('}')
+        return list_json_str
+    
+    def asEntity(self)->list[str]:
+        list_json_str:list[str] = self.asType()
+        list_json_str[0] =f'"{self.key}":'+list_json_str[0]
+        return list_json_str
+            
+class Objason(JsonEntity):
+    def __init__(self,
+                key:str=None,
+                props: list[JsonEntity]=None,
+                description:str=None,
+                required:bool=True):
+        super().__init__(key=key, description=description, required=required)
+        self.props=props
+        if props is None or len(props)==0:
+            raise ValueError(f'{self.__class__.__name__}: Property not given.')
+    
+    def asType(self)->list[str]:
+        list_json_str: list[str] = []
+        list_json_str.append('{')
+        if self.description is not None:
+            list_json_str.append(f' "description":"{self.description}",')
+        list_json_str.append(' "type":"object",')
+        list_json_str.append(' "properties":{')
+        required:str=''
+        for single_prop in self.props:
+            for line in single_prop.asEntity():
+                list_json_str.append('  '+line)
+            list_json_str[-1] += ','
+            if single_prop.required:
+                required += f'"{single_prop.key}",'
+        list_json_str[-1]=list_json_str[-1].removesuffix(',')
+        list_json_str.append(' }')
+
+        required=required.removesuffix(',')
+        if required != '':
+            list_json_str[-1]+=','
+            list_json_str.append(f' "required":[{required}]')
+        
+        list_json_str.append('}')
+
+        return list_json_str
+
+    def asEntity(self)->list[str]:
+        list_json_str:list[str] = self.asType()
+        list_json_str[0] =f'"{self.key}":'+list_json_str[0]
+        return list_json_str
+        
+class Primitive(JsonEntity):
+    def __init__(self,
+                 prim_type:Literal['string','integer', 'number','boolean'] = None,
+                 key:str = None,
+                 description:str = None,
+                 enum:list[str]|list[int]|list[float] = None,
+                 const:str|int|float|bool = None,
+                 required:bool = True):
+        super().__init__(key=key, description=description, required=required)
+        self.prim_type:str = prim_type
+        self.enum:list[str]|list[int]|list[float] = enum
+        self.const:str|int|float|bool = const
+        if enum is not None and const is not None:
+            raise ValueError(f'{self.__class__.__name__}: "enum" and "const" are given at the same time.')
+        if prim_type is None:
+            raise ValueError(f'{self.__class__.__name__}: Type not selected.')
+
+    
+    def asType(self)->list[str]:
+        list_json_str: list[str] = []
+        list_json_str.append('{')
+        if self.description is not None:
+            list_json_str.append(f' "description":"{self.description}",')
+        list_json_str.append(f' "type":"{self.prim_type}",')
+        if self.enum is not None:
+            str_enum:str = ' "enum":['
+            if self.prim_type != 'integer' and self.prim_type != 'number':
+                for item in self.enum:
+                    str_enum += f'"{item}",'
+            else:
+                for item in self.enum:
+                    str_enum += f'{item},'
+            str_enum = str_enum.removesuffix(',')
+            str_enum += '],'
+            list_json_str.append(str_enum)
+        if self.const is not None:
+            delim:str = ''
+            if self.prim_type != 'integer' and self.prim_type != 'number':
+                delim = '"'
+            list_json_str.append(f' "const":{delim}{self.const}{delim},')
+        
+        list_json_str[-1]=list_json_str[-1].removesuffix(',')
+        list_json_str.append('}')
+        return list_json_str
+    
+
+    def asEntity(self)->list[str]:
+        list_json_str:list[str] = self.asType()
+        list_json_str[0] =f'"{self.key}":'+list_json_str[0]
+        return list_json_str
+
+
+
+        
+
+
+
+
+
+
         
 
     
