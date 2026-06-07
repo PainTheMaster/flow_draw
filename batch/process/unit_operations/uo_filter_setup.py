@@ -42,6 +42,30 @@ opt_time_unit_hour:str = defs.tag_flow_cmn_time_unit_hour
 #list_hedr = defs.list_hedr_<list of header items for the uo>
 #dict_dtil_drpdwn = defs.dict_opt_<unit operation>
 
+hedr_equip = "Equipment"
+"""Header item for filtration equipment, e.g., filte dryer, buchner filter, etc."""
+hedr_filter = "Filter cloth type"
+"""Header item for filter cloth type"""
+hedr_num_filter = "Number of cloth"
+"""Header item for number of filter cloth"""
+hedr_bug_filter = "Bug filter type"
+"""Header item for bug filter type"""
+hedr_press_leak_test="App. press. leak test"
+"""Hedr item for applied pressure for leak test"""
+hedr_press_drop_leak_test="Permiss. press. leak test"
+"""Hedr item for permissible pressure drop during the leak test"""
+hedr_press_unit_leak_test="Duration (min) for leak test "
+"""Hedr item for duration of the leak test"""
+list_hedr:list[str]=[hedr_equip,
+                     hedr_filter,
+                     hedr_num_filter,
+                     hedr_bug_filter,
+                     hedr_press_leak_test,
+                     hedr_press_drop_leak_test,
+                     hedr_press_unit_leak_test]
+"""List of header items"""
+
+
 #########################################################
 # UO-specific options, list, header_item: list dictionry thereof (for data input and internalsignaling)
 #########################################################
