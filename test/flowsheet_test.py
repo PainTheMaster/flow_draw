@@ -866,7 +866,7 @@ class FiltTest4200(unittest.TestCase, trdef.UniversalTrait):
             test_inst.load_params_from_df(df)
 
 
-class samplingTest4300(unittest.TestCase, trdef.UniversalTrait):
+class SamplingTest4300(unittest.TestCase, trdef.UniversalTrait):
     def __init__(self, methodName = "runTest"):
         super().__init__(methodName)
 
@@ -1036,13 +1036,13 @@ def suite_0000_40000():
     # suite.addTest(FiltTest4200("test_4204_no_equip"))
     # suite.addTest(FiltTest4200("test_4205_no_p_unit"))
     # suite.addTest(samplingTest4300("test_4301_full"))
-    suite.addTest(samplingTest4300("test_4302_ipc_only"))
-    suite.addTest(samplingTest4300("test_4303_monit_only"))
-    suite.addTest(samplingTest4300("test_4304_noname_err"))
-    suite.addTest(samplingTest4300("test_4305_no_ipc_crteria"))
-    suite.addTest(samplingTest4300("test_4306_ipc_item_unit_mismatch"))
-    suite.addTest(samplingTest4300("test_4307_ipc_criteria_item_mismatch"))
-    suite.addTest(samplingTest4300("test_4308_monit_item_unit_mismatch"))
+    suite.addTest(SamplingTest4300("test_4302_ipc_only"))
+    suite.addTest(SamplingTest4300("test_4303_monit_only"))
+    suite.addTest(SamplingTest4300("test_4304_noname_err"))
+    suite.addTest(SamplingTest4300("test_4305_no_ipc_crteria"))
+    suite.addTest(SamplingTest4300("test_4306_ipc_item_unit_mismatch"))
+    suite.addTest(SamplingTest4300("test_4307_ipc_criteria_item_mismatch"))
+    suite.addTest(SamplingTest4300("test_4308_monit_item_unit_mismatch"))
 
 
     return suite

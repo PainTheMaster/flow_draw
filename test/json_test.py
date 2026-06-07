@@ -1,5 +1,6 @@
 import unittest
 import flow_draw.data_io.json_io as json_io
+import flow_draw.batch.process.unit_operations.uo_agitation as agit
 
 
 class TestIO(unittest.TestCase):
@@ -111,16 +112,21 @@ class TestIO(unittest.TestCase):
             print(line)
         print('--------------------')                        
 
-
-
-
         self.assertTrue(True)
 
+    def test_uo_agitation(self):
+        json_agit = agit.Agitation.get_json_schema()
+        for line in json_agit.asEntity():
+            print(line)
+        self.assertTrue(True)
 
         
-    
+def suite_json_test():
+    suite = unittest.TestSuite()
+    suite.addTest(TestIO('test_uo_agitation'))
+    return suite
             
 
 
 if __name__ == "__main__":
-    unittest.main()
+    unittest.TextTestRunner(verbosity=2).run(suite_json_test())

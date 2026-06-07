@@ -112,6 +112,11 @@ tag_uo_transfer: str = "transfer"
 part_uo_title_transfer_jp = "移送"
 """JP expression of liquid transfer"""
 
+tag_uo_filt_setup: str = "filter_setup"
+"""Tag for an unit operation of filter setup"""
+part_uo_title_filt_setup_jp = "ろ過器準備"
+"""JP expression of filtration"""
+
 tag_uo_filt: str = "filtration"
 """Tag for an unit operation filtration of (normally) recrystallizaion slurry"""
 part_uo_title_filt_jp = "ろ過"
@@ -296,15 +301,15 @@ itm_io_mats_desig_star:str = "*"
             ##### header items for detail worksheet######
 
 hedr_cmn_io_dtil_seq = hedr_io_sumry_seq
-"""Header item for <> in the process detail worksheet"""
+"""Common header item for the sequence number (1, 2, 3...) in a series of unit operations in the process"""
 hedr_cmn_io_dtil_uo = hedr_io_summary_uo
-"""Header item for <> in the process detail worksheet"""
+"""Common header item for the unit operation name in the process detail worksheet"""
 hedr_cmn_io_dtil_edt_cmnt = hedr_io_sumry_edt_cmnt
-"""Header item for <> in the process detail worksheet"""
+"""Common header item for edit comment in the process detail worksheet"""
 hedr_cmn_io_dtil_precmnt = 'Pre-comment'
-"""Header item for <> in the process detail worksheet"""
+"""Common header item for an optional pre-comment placed at the beggining of the instruction block for the unit operation in the process workflow"""
 hedr_cmn_io_dtil_postcmnt = 'Post-comment'
-"""Header item for <> in the process detail worksheet"""
+"""Common header item for an optional pre-comment placed at the end of the instruction block for the unit operation in the process workflow"""
 
 list_hedr_cmn_io_dtil = [
     hedr_cmn_io_dtil_seq,
@@ -315,6 +320,8 @@ list_hedr_cmn_io_dtil = [
 ]
 
 itm_cmn_io_nocmnt_instr = '(No comment here)'
+itm_cmn_io_dtil_uo_placeholder = '<uo_placeholder>'
+"""For JSON: """
 
 
 

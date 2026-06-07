@@ -8,7 +8,8 @@ from typing import Optional
 from flow_draw.batch.process.unit_operations import unit_operation as uo
 from flow_draw.data_io import process_io as procio
 from flow_draw.trait_def import trait_def as trdef
-
+from flow_draw.data_io import json_io
+from flow_draw.data_io.json_io import JsonEntity, Array, Objason, Primitive
 
 
 
@@ -32,6 +33,7 @@ opt_time_unit_minute:str = defs.tag_flow_cmn_time_unit_minute
 """Tag for a common flowsheet component for an unit of time: minute"""
 opt_time_unit_hour:str = defs.tag_flow_cmn_time_unit_hour
 """Tag for a common flowsheet component for an unit of time: hour"""
+list
 
 #########################################################
 # UO-specific hader items and list thereof
@@ -39,42 +41,57 @@ opt_time_unit_hour:str = defs.tag_flow_cmn_time_unit_hour
 #hedr_<something> = defs.hedr_<unit operation>_<specification item>
 #list_hedr = defs.list_hedr_<list of header items for the uo>
 #dict_dtil_drpdwn = defs.dict_opt_<unit operation>
-hedr_spec_agit = defs.hedr_uo_agitation_spec
+hedr_spec_agit = "Specification"
 """header item for the unit operation Agitation, the way the rotation rate is specified: specific rpm, guidance rpm, or discretion"""
-hedr_rpm = defs.hedr_uo_agitation_rpm
+hedr_rpm = "Rotation (rpm)"
 """header item for the unit operation Agitation, specific rotation rate"""
-hedr_Ti_min = defs.hedr_uo_agitation_Ti_min
+hedr_Ti_min = "Ti_min (deg-C)"
 """header item for the unit operation Agitation, specific Ti_min during agitation, optional"""
-hedr_Ti_max = defs.hedr_uo_agitation_Ti_max
+hedr_Ti_max = "Ti_max (deg-C)"
 """header item for the unit operation Agitation, specific Ti_max during agitation, optional"""
-hedr_time_min = defs.hedr_uo_agitation_time_min
+hedr_time_min = "Minimum time"
 """header item for the unit operation Agitation, minimum agitation time, optional"""
-hedr_time_max = defs.hedr_uo_agitation_time_max
+hedr_time_max = "Maximum time"
 """header item for the unit operation Agitation, maximum agitation time, optional"""
-hedr_time_unit = defs.hedr_uo_agitation_time_unit
-"""header item for the unit operation Agitation, second, minute, hour, day"""
-hedr_dissolution_check = defs.hedr_uo_agitation_dissolution_check
+hedr_time_unit = "Time unit"
+"""header item for the unit operation Agitation, second, minute, hour"""
+hedr_dissolution_check = "Dissolution check"
 """header item for the unit operation Agitation, need for dissolution check. bool"""
-list_hedr = defs.list_hedr_uo_agitation
+list_hedr = [hedr_spec_agit,
+            hedr_rpm,
+            hedr_Ti_min,
+            hedr_Ti_max,
+            hedr_time_min,
+            hedr_time_max,
+            hedr_time_unit,
+            hedr_dissolution_check]
 """List of uo-specific heder items for the unit operation Agitation"""
 
 
         ##### UO-specific option items for the detail input table #######
-opt_spec_specif = defs.opt_uo_agitation_spec_specif
+opt_spec_specif = "Specific RPM"
 """option for the header item 'spec'. Specifi RPM is provided by the user."""
-opt_spec_guide = defs.opt_uo_agitation_spec_guide
+opt_spec_guide = "Guidance RPM"
 """option for the header item 'spec'. A guidance RPM is provided by the user."""
-opt_spec_arbitrary = defs.opt_uo_agitation_spec_arbitrary
+opt_spec_arbitrary = "arbitrary"
+"""option for the header item 'spec'. Agitation rate is adjuested on the shop floor at the operator's discretion."""
+
+list_opt_spec:list[str]=[opt_spec_specif,
+                        opt_spec_guide,
+                        opt_spec_arbitrary]
+"""List of options for the agitation specification"""
+
+list_opt_uo_agitation_time_unit = defs.list_time_unit
+"""List of options for the header item agitation_time_unit"""
+
+list_opt_uo_agitation_dissolution_check = defs.list_yesno
+"""List of options for the header item agitation_dissolution_check"""
 
 
-# list_opt_spec = defs.list_opt_uo_agitation_spec
-# """List of options for the header item agitation_spec"""
-# list_opt_time_unit = defs.list_opt_uo_agitation_time_unit
-# """List of options for the header item agitation_time_unit"""
-# list_opt_dissolution_check = defs.list_opt_uo_agitation_dissolution_check
-# """List of options for the header item agitation_dissolution_check"""
-
-dict_opt = defs.dict_opt_uo_agitation
+dict_opt = {hedr_spec_agit : list_opt_spec,
+            hedr_time_unit : list_opt_uo_agitation_time_unit,
+            hedr_dissolution_check : list_opt_uo_agitation_dissolution_check}
+"""Dictionary of headear items and """
 
 
 
@@ -241,9 +258,9 @@ class Agitation(uo.UnitOperation, uo_tag=defs.tag_uo_agitation):
                 self.time_unit = first_row[hedr_time_unit]
             else:
                 self.time_unit = lang_dict_cmn[opt_time_unit_minute]
-                raise RuntimeWarning(f"{self.__class__.__name__}: \"{hedr_time_unit}\" not selected in the detail input worksheet \
-                                     for Op. Seq. {self.operation_seq} although minimum and/or maximum agitation time has benn provided \
-                                     in the worksheet. Time unit of \"min\" is used to keep the ball rolling.")
+                raise RuntimeWarning(f"{self.__class__.__name__}: \"{hedr_time_unit}\" not selected in the detail input worksheet"\
+                                     f"for Op. Seq. {self.operation_seq} although minimum and/or maximum agitation time has benn provided"\
+                                     f"in the worksheet. Time unit of \"min\" is used to keep the ball rolling.")
         
         if first_row[hedr_dissolution_check] == opt_yes:
             self.dissolution_check = True
@@ -255,6 +272,55 @@ class Agitation(uo.UnitOperation, uo_tag=defs.tag_uo_agitation):
     def get_detail_option_menu(self) -> Optional[dict[str, list[str]]]:
         return dict_opt
     
+
+    def get_json_schema()->json_io.Objason:
+        list_cmn = Agitation.json_common(arg_name_uo=Agitation.uo_tag)
+        spec_agit = Primitive(prim_type='string',
+                            key=hedr_spec_agit,
+                            enum=dict_opt[hedr_spec_agit],
+                            description="The way the rotation rate is specified: specific rpm, guidance rpm, or arbitrary",
+                            required=True)
+        rpm = Primitive(prim_type='number',
+                        key=hedr_rpm,
+                        description=f'Rotation (rpm) of agitation. If "{hedr_spec_agit}"=="{opt_spec_arbitrary}", please put 0',
+                        required=True)
+        ti_min = Primitive(prim_type='number',
+                           key=hedr_Ti_min,
+                           description="Lower limit of reactor inner temperature (Ti) during agitation. Optional. Ti_min should not exceed Ti_max.",
+                           required=False)
+        ti_max = Primitive(prim_type='number',
+                           key=hedr_Ti_max,
+                           description="Upper limit of reactor inner temperature (Ti) during agitation. Optional. Ti_max should not be lower than Ti_min",
+                           required=False)
+        time_min = Primitive(prim_type='number',
+                            key=hedr_time_min,
+                            description="Minimum required time for agitation, optional",
+                            required=False)
+        time_max = Primitive(prim_type='number',
+                            key=hedr_time_max,
+                            description="Upper limit of agitation time, optional",
+                            required=False)
+        time_unit = Primitive(prim_type='string',
+                              key=hedr_time_unit,
+                              enum=list_opt_uo_agitation_time_unit,
+                              description=f'Time unit to specify the lower/upper limits of the agitation time: second, minute, hour. If either of {hedr_time_min} or {hedr_time_max} is given, this is essential. Otherwise, please choose an arbitrary option.')
+        dissolution_check = Primitive(prim_type='string',
+                                      key=hedr_dissolution_check,
+                                      enum=list_opt_uo_agitation_dissolution_check,
+                                      description=f'Need for dissolution check. In some cases, dissolution of a solid material in the solvent has to be checked. Please make a choice from "{opt_yes}"/"{opt_no}".',
+                                      required=True)
+        json_agitation = Objason(key=defs.tag_uo_agitation,
+                                 props=list_cmn+[spec_agit, rpm, ti_min, ti_max, time_min, time_max, time_unit, dissolution_check],
+                                 description='This is the object to store information for an unit operation of "agitation" extracted form the source.'\
+                                    '"agitation" is an unit operation where a solution/reaction mixture/slurry is agitated.',
+                                 required=False)
+        return json_agitation
+        
+        
+        
+
+
+
     def output_unit_operation(self):
         self.flowsheet.header_organizer(op_nr=self.operation_seq, title=lang_dict_uo_titles[self.uo_tag])
         if not (self.pre_comment == None or self.pre_comment == ''):
@@ -348,5 +414,6 @@ class Agitation(uo.UnitOperation, uo_tag=defs.tag_uo_agitation):
                                     witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
             if self.time_min is not None or self.time_max is not None:
                 self.flowsheet.put_line(record=dict_stcs[tag_stc_flow_rec_duration].format(time_unit=lang_dict_cmn[self.time_unit]))
+
 
     

@@ -118,7 +118,7 @@ Language dictionary for common parts.
 # output_unit_operation(self)
 #
 #########################################################
-class ClassName(uo.UnitOperation, uo_tag=defs.tag_uo_"UO_NAME"):
+class ClassName(uo.UnitOperation, uo_tag=defs.tag_uo_filt_setup):
     def __init__(self,
                  caller: type[trdef.UniversalTrait] =None,
                  flowsheet:fsht.Flowsheet=None,
@@ -185,3 +185,5 @@ class ClassName(uo.UnitOperation, uo_tag=defs.tag_uo_"UO_NAME"):
         df.loc[row]=new_row
         df.at[row, HEADER_ITEM]=PARAMETER
         ...
+
+    

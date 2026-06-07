@@ -4,11 +4,11 @@ from typing import Optional
 import pandas as pd
 
 
-#from flow_draw import definitions as defs
+from flow_draw import definitions as defs
 #from flow_draw import chemistry as chem
 from flow_draw.data_io import flowsheet as fsht
 from flow_draw.trait_def import trait_def as trdef
-
+from flow_draw.data_io.json_io import JsonEntity, Array, Objason, Primitive
 
 
 #TODO please delete this list when the automatic registration by __init_subclass__() is fully fully functional
@@ -192,6 +192,35 @@ class UnitOperation(ABC):
         None    
         """
         raise NotImplementedError()
+    
+
+    def json_common(arg_name_uo:str=None)->list[Primitive]:
+        seq_uo = Primitive(prim_type="integer",
+                           key=defs.hedr_cmn_io_dtil_seq,
+                           description="Sequence number (1, 2, 3...) in a series of unit operations in the process")
+        name_uo = Primitive(prim_type="string",
+                            key=defs.hedr_cmn_io_dtil_uo,
+                            description="Unit operation name in the process detail worksheet",
+                            const=arg_name_uo,
+                            required=True)
+        edtcmnt = Primitive(prim_type="string",
+                            key=defs.hedr_cmn_io_dtil_edt_cmnt,
+                            description="An optional editorial comment. This comment will not be printed on the flowsheet.",
+                            required=False)
+        precmnt = Primitive(prim_type="string",
+                            key=defs.hedr_cmn_io_dtil_precmnt,
+                            description="An optional short instructional comment placed at the beginning of the instruction block for the unit operation in the process workflow",
+                            required=False)
+        postcmnt = Primitive(prim_type="string",
+                            key=defs.hedr_cmn_io_dtil_postcmnt,
+                            description="An optional short instructional comment placed at the end of the instruction block for the unit operation in the process workflow",
+                            required=False)
+        
+        return [seq_uo, name_uo, edtcmnt, precmnt, postcmnt]
+        
+        
+        
+
 
 
 
