@@ -217,7 +217,11 @@ class UnitOperation(ABC):
                             required=False)
         
         return [seq_uo, name_uo, edtcmnt, precmnt, postcmnt]
-        
+    
+    @abstractmethod
+    def get_json_schema()->Objason:
+        raise NotImplementedError()
+
         
         
 

@@ -42,6 +42,8 @@ class Materials:
             The data frame must have a header aligned with the class materials.Materials.
         """
         self.df_mats: pd.DataFrame= df_mats
+        self.name_main_mat:str = None
+        """The value is picked-up on the course of the process in __load_df_mats()"""
         self.kg_main_mat:float = None
         self.mol_main_mat:float = None
         
@@ -103,11 +105,12 @@ class Materials:
                 temp_assay_main_mat = 100.0
                 raise UserWarning(f"{self.__class__.__name__}: The concentration or assay for the main material is empty or zero.",
                               "For this run, 100%% is assumed.")
-            
+            self.name_main_mat = ser_main_mat[defs.hedr_io_mats_mat]
             self.mol_main_mat = (self.kg_main_mat*1000)/temp_mw_main_mat*(temp_assay_main_mat/100)
 
 
-
+    def get_main_raw_material(self)->str:
+        return self.name_main_mat
                
     def to_kilogram(self, material_name:str = None, equiv: float = None, vol_per_weight:float = None) -> float:
         """

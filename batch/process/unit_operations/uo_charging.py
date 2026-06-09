@@ -6,7 +6,7 @@ from flow_draw.data_io import process_io
 from flow_draw.materials import materials as mats
 from flow_draw.data_io.flowsheet import Flowsheet as fsht
 from flow_draw.trait_def.trait_def import GetMats
-
+from flow_draw.data_io.json_io import Objason, Primitive, Array
 
 
 header_precomment = defs.hedr_cmn_io_dtil_precmnt #Don't include this in the specific header list!!!
@@ -26,6 +26,14 @@ hedr_temp_max = defs.hedr_uo_chgng_tempmax
 #List below
 list_header_items = defs.list_hedr_uo_chgng
 
+entry_input_json = 'charging_input_entry'
+"""The key to a material input entry for JSON data exchange."""
+
+arry_inputs_json = 'arra_charging_input_entry'
+"""The key to a list of material input entries."""
+
+obj_charging_json = 'charging_stage'
+"""The key to the unit operation of charging."""
 
 method_liq = defs.opt_uo_chgng_method_liq
 method_shower = defs.opt_uo_chgng_method_shower
@@ -158,7 +166,6 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
         The header items can be passed from the get_detail_header() of each UnitOperation-derived class.
         This is the overriding mehtod in the class Charging.
         """
-        #TODO: please check if my implementation is sufficient!!!!
         first_row = df.iloc[0]
         if not pd.isna(first_row[header_precomment]):
             self.pre_comment = first_row[header_precomment]
@@ -171,6 +178,79 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
             new_input.load_params_from_series(subitem)
             self.inputs.append(new_input)
             self.input_count += 1
+
+
+    def get_json_schema(self, mats_data: mats.Materials)-> Objason:
+        list_mats=mats_data.get_list_mats()
+        common=Charging.json_common()
+        name_mats = Primitive(prim_type="string",
+                              key=hedr_material_name,
+                              enum=list_mats,
+                              description='The name of the raw material, solvent, etc., charged.')
+        qty_mats = Primitive(prim_type="number",
+                             key=hedr_metrics_value,
+                             description=f'Relative quantity of the raw material, solvent, and other materials in molar equivalent (eq) or volume/weight (v/w) vs the key raw material. '\
+                                  f'The unit is selected in another entry. The key raw material is {self.mats_data.get_main_raw_material()}')
+        unit_mats = Primitive(prim_type="string",
+                              key=hedr_metrics_unit,
+                              description=f'Unit to specify the relative quantity of the raw material, solvent, and other materials. Molar equivalent (eq) or volume/weight (v/w).'\
+                                f'This item has to be consistent with the other entry "{hedr_metrics_value}"',
+                              enum={list_metrics_unit})
+        permiss_error = Primitive(prim_type="number",
+                                  key=hedr_error,
+                                  description="Permissible error of the material quantity indicated in percent (%). If not specified in the datasurce, "\
+                                    "please use the defautl value of 1 percent for the key raw material, and 5 percent for other materials.")
+        charging_method = Primitive(prim_type='string',
+                                    key=hedr_method,
+                                    enum=list_charging_method,
+                                    escription=f"Method to charge/dose a material."\
+                                        f'"{method_liq}" is charging solvent or liquid reagent through a pipe. This method is less frequently chosen.'\
+                                        f'"{method_shower}" is charging solvents by using a showering device in the reaction vessel to clean adhered solid material on the wall.'\
+                                        f'"{method_press}" is preferred for solvents and liquid reagents. The liquid material is put in a container under a controlled pressure.'\
+                                        f'The liquid is transferred to the reaction vessel at a controlled rate.'\
+                                        f'"{method_pow}" is for solid material. A solid material is charged through an opening on the top of the reactor.'\
+                                        f'If you can\'t choose the right option, please select "{method_placeholder}"',
+                                        )
+        time_ctrl = Primitive(prim_type='string',
+                              key=hedr_time_control,
+                              enum=list_time_control,
+                              description=f'Constraint on time to dose/charge the material.'\
+                                f'"{timectrl_none}" means time control is no needed.'\
+                                f'"{timectrl_min}" should be selected when lower limit must be complied.'\
+                                f'"{timectrl_max}" should be selected when upper limit must be complied.'\
+                                f'"{timectrl_min_max}" should be selected when the event has to happen in a specific range of time.'\
+                                f'"Please select {timectrl_placeholder}" if the right option cannot be chosen from the given information.')
+        temp_min = Primitive(prim_type='number',
+                             key=hedr_temp_min,
+                             description='An optional lower limit for inner temperature during dosing/charging. Please follow the instruction on the given data source.',
+                             required=False
+                             )
+        temp_max = Primitive(prim_type='number',
+                             key=hedr_temp_max,
+                             description='An optional upper limit for inner temperature during dosing/charging. Please follow the instruction on the given data source.',
+                             required=False
+                             )
+        
+        input_entry = Objason(key=entry_input_json,
+                              props=[name_mats, qty_mats, unit_mats, permiss_error, charging_method, time_ctrl, temp_min, temp_max],
+                              description=f'Combination of material, quantity, permissible quantity error, charging method, time constraints, temperature range to define each charging/dosing operation.'
+                             )
+        arr_input = Array(key=arry_inputs_json,
+                          content=input_entry,
+                          description='A list of material input entries. A single material or more is put in the reactor vessel in a charging/dosing stage.',
+                          required=True)
+        charging_dosing = Objason(key=obj_charging_json,
+                                  props=common+[arr_input],
+                                  description='This object corresponds to a unit operation of charging/dosing which appears as a single block on the flowsheet'\
+                                    'one or more material(s) are dosed/charged into the reaction vessel.',
+                                  required=False)
+        return charging_dosing
+        
+
+
+
+
+
 
     def output_unit_operation(self):
         #TODO Leave explanatory comments here.
@@ -283,7 +363,8 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
                                     witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
 
 class Input:
-    """This class is for each material charged, each instance correspnds to each dosage in a charging operation.
+    """
+    This class is for each material charged, each instance correspnds to each dosage in a charging operation.
     """
     def __init__(self, mats_data: mats.Materials = None):
         self.mats_data: mats.Materials = mats_data
@@ -465,3 +546,5 @@ class Input:
         else:
             raise ValueError(f'{__class__.__name__}.__calc_qty(): metrics_unit (eq or v/w) for \"{self.material_name}\" not defined in the detail input worksheet.')
 
+
+    
