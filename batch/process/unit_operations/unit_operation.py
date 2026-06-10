@@ -219,7 +219,7 @@ class UnitOperation(ABC):
         return [seq_uo, name_uo, edtcmnt, precmnt, postcmnt]
     
     @abstractmethod
-    def get_json_schema()->Objason:
+    def get_json_schema(self, caller:type[trdef.UniversalTrait] = None)->Objason:
         raise NotImplementedError()
 
         

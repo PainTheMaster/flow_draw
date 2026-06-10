@@ -29,7 +29,7 @@ list_header_items = defs.list_hedr_uo_chgng
 entry_input_json = 'charging_input_entry'
 """The key to a material input entry for JSON data exchange."""
 
-arry_inputs_json = 'arra_charging_input_entry'
+arry_inputs_json = 'arr_charging_input_entry'
 """The key to a list of material input entries."""
 
 obj_charging_json = 'charging_stage'
@@ -145,7 +145,7 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
         """
         super().__init__(caller=caller, flowsheet=flow_sheet, operation_seq=operation_seq, num_subitems=num_subitems, edit_comment=edit_comment)
         # self.mats_data: mats.Materials = GetMats(self.caller).get_mats() #なんかやだからキャストする。
-        self.mats_data=None
+        self.mats_data: mats.Materials = None
         if caller is not None:
             self.mats_data = (self.caller).get_mats()
         self.input_count = 0
@@ -180,7 +180,8 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
             self.input_count += 1
 
 
-    def get_json_schema(self, mats_data: mats.Materials)-> Objason:
+    def get_json_schema(caller: GetMats=None)-> Objason:
+        mats_data: mats.Materials = caller.get_mats() 
         list_mats=mats_data.get_list_mats()
         common=Charging.json_common()
         name_mats = Primitive(prim_type="string",
@@ -190,20 +191,20 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
         qty_mats = Primitive(prim_type="number",
                              key=hedr_metrics_value,
                              description=f'Relative quantity of the raw material, solvent, and other materials in molar equivalent (eq) or volume/weight (v/w) vs the key raw material. '\
-                                  f'The unit is selected in another entry. The key raw material is {self.mats_data.get_main_raw_material()}')
+                                  f'The unit is selected in another entry. The key raw material is {mats_data.get_main_raw_material()}')
         unit_mats = Primitive(prim_type="string",
                               key=hedr_metrics_unit,
-                              description=f'Unit to specify the relative quantity of the raw material, solvent, and other materials. Molar equivalent (eq) or volume/weight (v/w).'\
+                              description=f'Unit to specify the relative quantity of the raw material, solvent, and other materials. Molar equivalent (eq) or volume/weight (v/w). '\
                                 f'This item has to be consistent with the other entry "{hedr_metrics_value}"',
-                              enum={list_metrics_unit})
+                              enum=list_metrics_unit)
         permiss_error = Primitive(prim_type="number",
                                   key=hedr_error,
-                                  description="Permissible error of the material quantity indicated in percent (%). If not specified in the datasurce, "\
+                                  description="Permissible error of the material quantity indicated in percent (%). If not specified in the data source, "\
                                     "please use the defautl value of 1 percent for the key raw material, and 5 percent for other materials.")
         charging_method = Primitive(prim_type='string',
                                     key=hedr_method,
                                     enum=list_charging_method,
-                                    escription=f"Method to charge/dose a material."\
+                                    description=f"Method to charge/dose a material."\
                                         f'"{method_liq}" is charging solvent or liquid reagent through a pipe. This method is less frequently chosen.'\
                                         f'"{method_shower}" is charging solvents by using a showering device in the reaction vessel to clean adhered solid material on the wall.'\
                                         f'"{method_press}" is preferred for solvents and liquid reagents. The liquid material is put in a container under a controlled pressure.'\
@@ -241,8 +242,8 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
                           required=True)
         charging_dosing = Objason(key=obj_charging_json,
                                   props=common+[arr_input],
-                                  description='This object corresponds to a unit operation of charging/dosing which appears as a single block on the flowsheet'\
-                                    'one or more material(s) are dosed/charged into the reaction vessel.',
+                                  description='This object corresponds to a unit operation of charging/dosing which appears as a single block on the flowsheet. '\
+                                    'One or more material(s) are dosed/charged into the reaction vessel.',
                                   required=False)
         return charging_dosing
         

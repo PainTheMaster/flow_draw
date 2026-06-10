@@ -1,55 +1,14 @@
 import unittest
 import flow_draw.data_io.json_io as json_io
+from flow_draw.data_io.json_io import Primitive, Array, Objason
 import flow_draw.batch.process.unit_operations.uo_agitation as agit
+import flow_draw.trait_def.trait_def as trdef
+import flow_draw.materials.materials as mats
+import flow_draw.batch.process.unit_operations.uo_charging as chgng
 
 
-class TestIO(unittest.TestCase):
-    # def test_singleprop(self):
-    #     print('--------------------')
-    #     inner1 = json_io.JSONentry(property_name="inner prop 1",
-    #                                   data_type="string",
-    #                                   description="this is an inner property",
-    #                                   required=True)
-    #     output=inner1.toJSON()
-    #     for line in output:
-    #         print(line)
-    #     print('--------------------')
-
-    #     inner2 = json_io.JSONentry(property_name='inner prop 2',
-    #                                data_type='integer',
-    #                                enum_opt=[1, 2, 3, 4, 5],
-    #                                description='selection from a list of option',
-    #                                required=True
-    #                                )
-    #     output = inner2.toJSON()
-    #     for line in output:
-    #         print(line)
-    #     self.assertTrue(True)
-    #     print('--------------------')
-
-    #     outer = json_io.JSONentry(property_name='outer',
-    #                               data_type='object',
-    #                               content=[inner1, inner2],
-    #                               description='outer object')
-    #     output = outer.toJSON()
-    #     for line in output:
-    #         print(line)
-    #     print('--------------------')    
-
-        
-    #     arr_obj = json_io.JSONentry(property_name='arr of objects',
-    #                                 data_type='array',
-    #                                 content=outer,
-    #                                 description='an array of objects',
-    #                                 )
-    #     output = arr_obj.toJSON()
-    #     for line in output:
-    #         print(line)
-    #     print('--------------------')
-    #     self.assertTrue(True)
-
-
-    def test_singleprop(self):
+class TestIO_00000_basic_func(unittest.TestCase):
+    def test_0000_singleprop(self):
         print('--------------------')
         inner1 = json_io.Primitive(prim_type='string',
                                    key='primitive 1',
@@ -120,10 +79,54 @@ class TestIO(unittest.TestCase):
             print(line)
         self.assertTrue(True)
 
-        
+
+
+
+class Test_10000_charging(unittest.TestCase, trdef.GetMats):
+    def setUp(self):
+        self.mats_df = mats.Materials.generate_mats_df()
+        self.mats_df = mats.Materials.add_to_mats_df(mats_df=self.mats_df,
+                                                       material="test mat 1",
+                                                       main_star=True,
+                                                       mw = 18.01,
+                                                       density=1.00,
+                                                       conc_assay=99.999,
+                                                       kg_main=2.00,
+                                                       remark="Actually, I'm water.")
+        self.mats_df = mats.Materials.add_to_mats_df(mats_df=self.mats_df,
+                                                       material="test mat 2",
+                                                       main_star=False,
+                                                       mw = 46.07,
+                                                       density=0.789,
+                                                       conc_assay=94.0,
+                                                       remark="Actually, I'm ethanol.")
+        self.mats_inst = mats.Materials(self.mats_df)
+        return super().setUp()
+    
+    def get_mats(self) -> mats.Materials:
+        return self.mats_inst
+    
+    def test_10000_charging_json(self):
+        test_json:Objason = chgng.Charging.get_json_schema(caller=self)
+        list_str_json = test_json.asType()
+        print()
+        print('----------------------')
+        for line in list_str_json:
+            print(line)
+        print('----------------------')
+        self.assertTrue(True)
+
+
+
+
+
+
+
+
 def suite_json_test():
     suite = unittest.TestSuite()
-    suite.addTest(TestIO('test_uo_agitation'))
+    # suite.addTest(TestIO_00000_basic_func('test_uo_agitation'))
+    suite.addTest(Test_10000_charging('test_10000_charging_json'))
     return suite
             
 
