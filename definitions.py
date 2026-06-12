@@ -154,7 +154,7 @@ part_uo_title_prod_weigh_jp = "秤量"
 
 tag_uo_placeholder: str = "placeholder"
 """Tag for a placeholder for an undefined unit operation..."""
-part_uo_title_placeholder = "<Op. place holder>"
+part_uo_title_placeholder = "<Op._place_holder>"
 """JP expression of place holder"""
 
 dict_jp_part_uo_titles = {tag_uo_line_clearance : part_uo_title_clearance_jp,
@@ -193,11 +193,11 @@ hedr_io_batch_item:str ='Item'
 """Header for the item column in the batch outline table"""
 hedr_io_batch_value:str='Value'
 """Header for the value column in the batch outline table"""
-item_io_batch_batch_name:str = 'Batch Name'
+item_io_batch_batch_name:str = 'Batch_Name'
 """Item for the batch name"""
-item_io_batch_batch_remark:str = 'Remark for batch'
+item_io_batch_batch_remark:str = 'Remark_for_batch'
 """Item for the batch comment"""
-item_io_batch_proc_name_stem:str = 'Name, Process-{}'
+item_io_batch_proc_name_stem:str = 'Process_Name-{}'
 """Item for the name of each process. The numbers 1, 2, 3... follow for each step."""
 item_io_batch_proc_count_uo_stem:str = 'Count Subitems, Process-{}'
 """Item stem for the count of each process sub-items. The numbers 1, 2, 3 follow for each step"""
@@ -233,13 +233,13 @@ src_io_sfx_detail_ws = "_detail"
 
         #>>>>>>>>>>> header items for summary worksheet <<<<<<<<<<<<<<#
 
-hedr_io_sumry_seq = 'Seq Nr'
+hedr_io_sumry_seq = 'Seq_Nr'
 """Header item for sequence number in the process summary worksheet"""
-hedr_io_summary_uo = 'Unit Operation'
+hedr_io_summary_uo = 'Unit_Operation'
 """Header item for unit operations in the process summary worksheet"""
-hedr_io_sumry_num_subitms = 'Number of Subitems'
+hedr_io_sumry_num_subitms = 'Number_of_Subitems'
 """Header item for number of subitems for each unit operation in the process summary worksheet"""
-hedr_io_sumry_edt_cmnt = 'Edit Comment'
+hedr_io_sumry_edt_cmnt = 'Edit_Comment'
 """Header item for edit comment in the process summary worksheet"""
 
 col_nr_io_sumry_seq = 1
@@ -261,11 +261,11 @@ hedr_io_mats_main = "Main(*)"
 """Header item for the column to identify the core raw materials"""
 hedr_io_mats_mw:str = "MW (g/mol)"
 """Header item for the column for molecular weight"""
-hedr_io_mats_dnsty:str = "Density (g/mL)"
+hedr_io_mats_dnsty:str = "Density_(g/mL)"
 """The header for the density/specific gravity of the raw material"""
 hedr_io_mats_concasy:str = "Conc/Assay(%)"
 """The header for the concentration or assay of the raw material"""
-hedr_io_mats_kgmain:str = "Weight Main (kg)"
+hedr_io_mats_kgmain:str = "Weight_Main(kg)"
 """Header item for the weight of core building block weight (kg)"""
 hedr_io_mats_remark:str = "Remark"
 """The header for optional remarks"""
@@ -328,17 +328,17 @@ itm_cmn_io_dtil_uo_placeholder = '<uo_placeholder>'
 ######################################################
 ####       CHARGING HEADER ITEMS AND OPTIONS      ####
 ######################################################
-hedr_uo_chgng_mat = 'Material Name'
-hedr_uo_chgng_mtrcs_val = 'Metrics Value'
-hedr_uo_chgng_mtrcs_unit = 'Metrics Unit'
-hedr_uo_chgng_errperm = 'Permissible Error (%)'
-hedr_uo_chgng_method = 'Charging Method'
-hedr_uo_chgng_timctrl = 'Time Control'
-hedr_uo_chgng_timmin = 'Minimum Time (min)'
-hedr_uo_chgng_timmax = 'Maximum Time (min)'
-hedr_uo_chgng_tempctrl = 'Temp Control'
-hedr_uo_chgng_tempmin = 'Minimum Temp (deg-C)'
-hedr_uo_chgng_tempmax = 'Maximum Temp (deg-C)'
+hedr_uo_chgng_mat = 'Material_Name'
+hedr_uo_chgng_mtrcs_val = 'Metrics_Value'
+hedr_uo_chgng_mtrcs_unit = 'Metrics_Unit'
+hedr_uo_chgng_errperm = 'Permissible_Error(%)'
+hedr_uo_chgng_method = 'Charging_Method'
+hedr_uo_chgng_timctrl = 'Time_Control'
+hedr_uo_chgng_timmin = 'Minimum_Time(min)'
+hedr_uo_chgng_timmax = 'Maximum_Time(min)'
+hedr_uo_chgng_tempctrl = 'Temp_Control'
+hedr_uo_chgng_tempmin = 'Minimum_Temp(deg-C)'
+hedr_uo_chgng_tempmax = 'Maximum_Temp(deg-C)'
 
 list_hedr_uo_chgng = [hedr_uo_chgng_mat,
                       hedr_uo_chgng_mtrcs_val,
@@ -370,10 +370,10 @@ list_opt_uo_chgng_method =[opt_uo_chgng_method_liq,
                            opt_uo_chgng_method_method_plchldr]
 
 
-opt_uo_chgng_timctrl_none = "No time control"
-opt_uo_chgng_timctrl_min="Time control with minimum"
-opt_uo_chgng_timctrl_max="Time control with maximum"
-opt_uo_chgng_timctrl_min_max='Time control with minimum and maximum'
+opt_uo_chgng_timctrl_none = "No_time_control"
+opt_uo_chgng_timctrl_min="Time_control_with_minimum"
+opt_uo_chgng_timctrl_max="Time_control_with_maximum"
+opt_uo_chgng_timctrl_min_max='Time_control_with_minimum and maximum'
 opt_uo_chgng_timctrl_plchldr = 'Placeholder'
 list_opt_uo_chgng_timctrl=[opt_uo_chgng_timctrl_none,
                            opt_uo_chgng_timctrl_min,
@@ -382,10 +382,10 @@ list_opt_uo_chgng_timctrl=[opt_uo_chgng_timctrl_none,
                            opt_uo_chgng_timctrl_plchldr]
 
 
-opt_uo_chgng_temprctrl_none = "No temp control"
-opt_uo_chgng_temprctrl_min="Temp control with minimum"
-opt_uo_chgng_temprctrl_max="Temp control with maximum"
-opt_uo_chgng_temprctrl_min_max='Temp control with minimum and maximum'
+opt_uo_chgng_temprctrl_none = "No_temp_control"
+opt_uo_chgng_temprctrl_min="Temp_control_with_minimum"
+opt_uo_chgng_temprctrl_max="Temp_control_with_maximum"
+opt_uo_chgng_temprctrl_min_max='Temp_control_with_minimum_and_maximum'
 opt_uo_chgng_temprctrl_plchldr = 'Placeholder'
 list_opt_uo_chgne_temprctrl = [opt_uo_chgng_temprctrl_none,
                                opt_uo_chgng_temprctrl_min,
@@ -394,7 +394,7 @@ list_opt_uo_chgne_temprctrl = [opt_uo_chgng_temprctrl_none,
                                opt_uo_chgng_temprctrl_plchldr]
 
 
-opt_uo_chgng_err_rng_plchldr='place holder'
+opt_uo_chgng_err_rng_plchldr='place_holder'
 
 
 dict_opt_uo_chgng = {hedr_uo_chgng_mtrcs_unit : list_opt_uo_chgng_mtrcs,
@@ -416,7 +416,7 @@ list_hedr_uo_plchldr = [hedr_uo_plchldr_lines]
 ######################################################
 ##      LINE_CLEARNCE HEADER ITEMS AND OPTIONS      ##
 ######################################################
-hedr_uo_lnclrnc_sop = "SOP for line-clearnce"
+hedr_uo_lnclrnc_sop = "SOP_for_line-clearnce"
 list_hedr_uo_lnclrnc = [hedr_uo_lnclrnc_sop]
 
 
@@ -427,9 +427,9 @@ list_hedr_uo_lnclrnc = [hedr_uo_lnclrnc_sop]
 
                         #>>>>>>>>>>Detail table header items and list thereof <<<<<<<<<<<<<<
 
-hedr_uo_innert_gas = "Innert Gas"
+hedr_uo_innert_gas = "Innert_Gas"
 """Detail header item: Innert gas used for replacement"""
-hedr_uo_innert_neg_press = "Negative Press (MPaG)"
+hedr_uo_innert_neg_press = "Negative_Press(MPaG)"
 """Detail header item: Negative pressure before innert gas compensation"""
 hedr_uo_innert_num_repeat = "Repetition"
 """Detail header item: Times the replacement (vaccum then compensation) repeated"""
@@ -460,29 +460,29 @@ dict_opt_uo_innert = {hedr_uo_innert_gas : list_opt_uo_innert_gas}
                         #>>>>>>>>>>Detail table header items and list thereof <<<<<<<<<<<<<<
 #hedr_<unit operation>_<parameter> = str
 #list_heder_<unit operation> = [<header item 0>,<header item 1>,...]
-hedr_uo_tempr_ctrl_mode = "Control Mode"
+hedr_uo_tempr_ctrl_mode = "Control_Mode"
 """Detail heder item: temperature control mode (e.g. Ti, Ti/Tj, amping)"""
-hedr_uo_tempr_ctrl_Ti_sp = "Ti set point (degC)"
+hedr_uo_tempr_ctrl_Ti_sp = "Ti_set_point(degC)"
 """Detail heder item: Ti set point for Ti, Ti/Tj mode"""
-hedr_uo_tempr_ctrl_Ti_limit_low = "Ti low (degC)"
+hedr_uo_tempr_ctrl_Ti_limit_low = "Ti_low(degC)"
 """Detail heder item: Ti SPEC lower limit designaetd by the process owner."""
-hedr_uo_tempr_ctrl_Ti_limit_high = "Ti high (degC)"
+hedr_uo_tempr_ctrl_Ti_limit_high = "Ti_high(degC)"
 """Detail heder item: Ti SPEC upper limit designated by the process owner."""
-hedr_uo_tempr_ctrl_Ti_tgt_low = "Ti tgt low (degC)"
+hedr_uo_tempr_ctrl_Ti_tgt_low = "Ti_tgt_low(degC)"
 """Detail heder item: Ti TARGET lower limit designated by the process owner."""
-hedr_uo_tempr_ctrl_Ti_tgt_high = "Ti tgt high (degC)"
+hedr_uo_tempr_ctrl_Ti_tgt_high = "Ti_tgt_high(degC)"
 """Detail heder item: Ti TARGET higher limit designated by the process owner."""
-hedr_uo_tempr_ctrl_Tj_sp = "Tj set point (degC)"
+hedr_uo_tempr_ctrl_Tj_sp = "Tj_set_point(degC)"
 """Detail heder item: Tj set point for Tj mode"""
-hedr_uo_tempr_ctrl_Tj_limit_low = "Tj min (degC)"
+hedr_uo_tempr_ctrl_Tj_limit_low = "Tj_min(degC)"
 """Detail heder item: Tj lower limit for Tj, Ti/Tj mode."""
-hedr_uo_tempr_ctrl_Tj_limit_high = "Tj max (degC)"
+hedr_uo_tempr_ctrl_Tj_limit_high = "Tj_max(degC)"
 """Detail heder item: Tj higher limit for Tj, Ti/Tj mode"""
-hedr_uo_tempr_ctrl_prog_time_val = "Prog. time value"
+hedr_uo_tempr_ctrl_prog_time_val = "Prog._time_value"
 """Detail heder item: Ramp up/down time value"""
-hedr_uo_tempr_ctrl_prog_time_unit = "Prog. time unit"
+hedr_uo_tempr_ctrl_prog_time_unit = "Prog._time_unit"
 """Detail heder item: Ramp up/down time unit"""
-hedr_uo_tempr_ctrl_endpoint_check = "Check end point?"
+hedr_uo_tempr_ctrl_endpoint_check = "Check_end_point?"
 """Detail heder item: need for heating/cooling end point check."""
 
 list_hedr_uo_tempr_ctrl = [hedr_uo_tempr_ctrl_mode,
@@ -507,11 +507,11 @@ list_hedr_uo_tempr_ctrl = [hedr_uo_tempr_ctrl_mode,
 #For hedr_uo_tempr_ctrl_mode
 opt_uo_tempr_ctrl_mode_TiTj = "Ti/Tj control"
 """Option for detail table: temperature control with single point Ti and Tj range"""
-opt_uo_tempr_ctrl_mode_Tj = "Tj control"
+opt_uo_tempr_ctrl_mode_Tj = "Tj_control"
 """Option for detail table: temperature control on jacket temperature (single point)"""
 opt_uo_tempr_ctrl_mode_prog = "Programme"
 """Option for detail table: temperature ramping, cooling or heating with time constraint"""
-opt_uo_tempr_ctrl_mode_Ti = "Ti control"
+opt_uo_tempr_ctrl_mode_Ti = "Ti_control"
 """Option for detail table: temperature control on liquid temperature (single point)"""
 
 list_opt_uo_tempr_ctrl_mode = [opt_uo_tempr_ctrl_mode_TiTj,
@@ -542,19 +542,19 @@ dict_opt_uo_tempr_ctrl = {hedr_uo_tempr_ctrl_mode : list_opt_uo_tempr_ctrl_mode,
 
 hedr_uo_agitation_spec = "Specification"
 """header item for the unit operation Agitation, the way the rotation rate is specified: specific rpm, guidance rpm, or discretion"""
-hedr_uo_agitation_rpm = "Rotation (rpm)"
+hedr_uo_agitation_rpm = "Rotation_(rpm)"
 """header item for the unit operation Agitation, specific rotation rate"""
-hedr_uo_agitation_Ti_min = "Ti_min (deg-C)"
+hedr_uo_agitation_Ti_min = "Ti_min(deg-C)"
 """header item for the unit operation Agitation, specific Ti_min during agitation, optional"""
-hedr_uo_agitation_Ti_max= "Ti_max (deg-C)"
+hedr_uo_agitation_Ti_max= "Ti_max(deg-C)"
 """header item for the unit operation Agitation, specific Ti_min during agitation, optional"""
-hedr_uo_agitation_time_min = "Minimum time"
+hedr_uo_agitation_time_min = "Minimum_time"
 """header item for the unit operation Agitation, minimum agitation time, optional"""
-hedr_uo_agitation_time_max = "Maximum time"
+hedr_uo_agitation_time_max = "Maximum_time"
 """header item for the unit operation Agitation, maximum agitation time, optional"""
-hedr_uo_agitation_time_unit = "Time unit"
+hedr_uo_agitation_time_unit = "Time_unit"
 """header item for the unit operation Agitation, second, minute, hour, day"""
-hedr_uo_agitation_dissolution_check = "Dissolution check"
+hedr_uo_agitation_dissolution_check = "Dissolution_check"
 """header item for the unit operation Agitation, need for dissolution check. bool"""
 
 list_hedr_uo_agitation = [hedr_uo_agitation_spec,
@@ -569,9 +569,9 @@ list_hedr_uo_agitation = [hedr_uo_agitation_spec,
 
 
         #>>>>>>>>>>Option items, lists, and a dictionary for drop-down list in detail input form<<<<<<<<<<<<<<
-opt_uo_agitation_spec_specif = "Specific RPM"
+opt_uo_agitation_spec_specif = "Specific_RPM"
 """option for the header item 'spec'. Specific RPM is provided by the user."""
-opt_uo_agitation_spec_guide = "Guidance RPM"
+opt_uo_agitation_spec_guide = "Guidance_RPM"
 """option for the header item 'spec'. A guidance RPM is provided by the user."""
 opt_uo_agitation_spec_arbitrary = "arbitrary"
 """option for the header item 'spec'. Agitation rate is adjuested on the shop floor at the operator's discretion."""
@@ -599,15 +599,15 @@ dict_opt_uo_agitation = {hedr_uo_agitation_spec : list_opt_uo_agitation_spec,
                         #>>>>>>>>>>Detail table header items and list thereof <<<<<<<<<<<<<<
 #hedr_<unit operation>_<parameter> = <str>
 #list_heder_<unit operation> = [<header item 0>,<header item 1>,...]
-hedr_uo_settling_time_min:str = "minimum settling time"
+hedr_uo_settling_time_min:str = "minimum_settling_time"
 """header for the unit operation settling: Minimum settling time"""
-hedr_uo_settling_time_max:str = "maximum settling time"
+hedr_uo_settling_time_max:str = "maximum-settling_time"
 """header for the unit operation settling: Maximum settling time"""
-hedr_uo_settling_time_unit:str = "time unit"
+hedr_uo_settling_time_unit:str = "time_unit"
 """header for the unit operation settling: Time unit"""
-hedr_uo_settling_Ti_min:str = "Ti_min (deg-C)"
+hedr_uo_settling_Ti_min:str = "Ti_min(deg-C)"
 """header for the unit operation settling: Ti min"""
-hedr_uo_settling_Ti_max:str = "Ti_max (deg-C)"
+hedr_uo_settling_Ti_max:str = "Ti_max(deg-C)"
 """header for the unit operation settling: Ti max"""
 list_hedr_uo_settling: list[str] = [hedr_uo_settling_time_min,
                                     hedr_uo_settling_time_max,
@@ -664,29 +664,29 @@ hedr_uo_evap_Tj_min = "Tj_min"
 """header item for the unit operation evaporation: Tj lower limit for evaporation"""
 hedr_uo_evap_Tj_max = "Tj_max"
 """header item for the unit operation evaporation: Tj higher limit for evaporation"""
-hedr_uo_evap_T_brine_cond_min = "Condenser brine temp min"
+hedr_uo_evap_T_brine_cond_min = "Condenser_brine_temp_min"
 """header item for the unit operation evaporation: lower limit of brine temperature for cndenser"""
-hedr_uo_evap_T_brine_cond_max = "Condenser brine temp max"
+hedr_uo_evap_T_brine_cond_max = "Condenser_brine_temp_max"
 """header item for the unit operation evaporation: upper limit of brine temperature for cndenser"""
-hedr_uo_evap_press_ctrl = "Pressure control"
+hedr_uo_evap_press_ctrl = "Pressure_control"
 """header item for the unit operation evaporation: pressure specification; arbitrary or specific"""
 hedr_uo_evap_press_min = "Press_min"
 """header item for the unit operation evaporation: lower limit for the evaporation pressure"""
 hedr_uo_evap_press_max = "Press_max"
 """header item for the unit operation evaporation: upper limit for the evaporation pressure"""
-hedr_uo_evap_press_unit = "Press unit"
+hedr_uo_evap_press_unit = "Press_unit"
 """header item for the unit operation evaporation: pressure unit for the evaporation"""
-hedr_uo_evap_agit_spec = "Agitation spec"
+hedr_uo_evap_agit_spec = "Agitation_spec"
 """header item for the unit operation evaporation: agitation specification; Specific RPM/Guidance RPM/arbitrary"""
-hedr_uo_evap_agit_rpm = "Agitation (rpm)"
+hedr_uo_evap_agit_rpm = "Agitation(rpm)"
 """header item for the unit operation evaporation: agitation rate"""
-hedr_uo_evap_val_endpoint_spec_min = "End spec min v/w"
+hedr_uo_evap_val_endpoint_spec_min = "End_spec_min(v/w)"
 """header item for the unit operation evaporation: minimum spec value for the evaporation end point"""
-hedr_uo_evap_val_endpoint_spec_max = "End spec max v/w"
+hedr_uo_evap_val_endpoint_spec_max = "End_spec_max(v/w)"
 """header item for the unit operation evaporation: maximum spec value for the evaporation end point"""
-hedr_uo_evap_val_endpoint_guide_min = "End guideline min v/w"
+hedr_uo_evap_val_endpoint_guide_min = "End_guideline_min(v/w)"
 """header item for the unit operation evaporation: minimum guideline value for the evaporation end point"""
-hedr_uo_evap_val_endpoint_guide_max = "End guideline max v/w"
+hedr_uo_evap_val_endpoint_guide_max = "End_guideline_max(v/w)"
 """header item for the unit operation evaporation: maximum guideline value for the evaporation end point"""
 
 list_hedr_uo_evap = [hedr_uo_evap_Tj_min,
@@ -714,13 +714,13 @@ list_hedr_uo_evap = [hedr_uo_evap_Tj_min,
 #list_opt_<unit operation>_<parameter> = [<option_0>, <option_1>, ...]
 #dict_opt_<unit operation> = {<heder_item1> : <option_list_1), ...}
 
-opt_uo_evap_press_ctrl_specific = "Specific pressure"
+opt_uo_evap_press_ctrl_specific = "Specific_pressure"
 """option item for the attribute paress_spec_ for uo_evap: Specific pressure value"""
-opt_uo_evap_press_ctrl_arbitrary_with_guide = "Arbitrary with optional guideline"
+opt_uo_evap_press_ctrl_arbitrary_with_guide = "Arbitrary_with_optional_guideline"
 """option item for the attribute press_spec for uo_evap: Arbitrary with optional guideline"""
 opt_uo_evap_press_ctrl_arbitrary = "Arbitrary"
 """option item for the attribute press_spec for uo_evap: Arbitrary without a guieline"""
-opt_uo_evap_press_ctrl_full_vac = "Full vacuum (FV)"
+opt_uo_evap_press_ctrl_full_vac = "Full_vacuum_(FV)"
 """option item for the attribute press_spec for uo_evap: Full vacuum."""
 list_opt_uo_evap_press_ctrl = [opt_uo_evap_press_ctrl_specific,
                                opt_uo_evap_press_ctrl_arbitrary_with_guide,
@@ -741,11 +741,11 @@ list_opt_uo_evap_press_unit = [opt_uo_evap_press_unit_MPaA,
                                opt_uo_evap_press_unit_MPaG,
                                opt_uo_evap_press_unit_kPaG]
 
-opt_uo_evap_agit_spec_specif = "Specific RPM"
+opt_uo_evap_agit_spec_specif = "Specific_RPM"
 """option item for the attribute agitation spec for uo_evap: A specific RPM is provided by the user"""
-opt_uo_evap_agit_spec_guide = "Guidance RPM"
+opt_uo_evap_agit_spec_guide = "Guidance_RPM"
 """option item for the attribute agitation spec for uo_evap: A guidance RPM is provided by the user"""
-opt_uo_evap_agit_spec_arbitrary = "arbitrary RPM"
+opt_uo_evap_agit_spec_arbitrary = "arbitrary_RPM"
 """option item for the attribute agitation spec for uo_evap: Totally discretional RPM for evaporation"""
 list_opt_uo_evap_agit_spec = [opt_uo_evap_agit_spec_specif,
                               opt_uo_evap_agit_spec_guide,

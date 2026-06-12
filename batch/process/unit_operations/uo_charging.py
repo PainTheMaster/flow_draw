@@ -12,19 +12,29 @@ from flow_draw.data_io.json_io import Objason, Primitive, Array
 header_precomment = defs.hedr_cmn_io_dtil_precmnt #Don't include this in the specific header list!!!
 header_postcomment = defs.hedr_cmn_io_dtil_postcmnt #Don't include this in the specific header list!!!
 
-hedr_material_name = defs.hedr_uo_chgng_mat
-hedr_metrics_value = defs.hedr_uo_chgng_mtrcs_val
-hedr_metrics_unit = defs.hedr_uo_chgng_mtrcs_unit
-hedr_error = defs.hedr_uo_chgng_errperm
-hedr_method = defs.hedr_uo_chgng_method
-hedr_time_control = defs.hedr_uo_chgng_timctrl
-hedr_time_min = defs.hedr_uo_chgng_timmin
-hedr_time_max = defs.hedr_uo_chgng_timmax
-hedr_temp_control = defs.hedr_uo_chgng_tempctrl
-hedr_temp_min = defs.hedr_uo_chgng_tempmin
-hedr_temp_max = defs.hedr_uo_chgng_tempmax
+hedr_material_name = 'Material_Name'
+hedr_metrics_value = 'Metrics_Value'
+hedr_metrics_unit = 'Metrics_Unit'
+hedr_error = 'Permissible_Error(%)'
+hedr_method = 'Charging_Method'
+hedr_time_control = 'Time_Control'
+hedr_time_min = 'Minimum_Time(min)'
+hedr_time_max = 'Maximum_Time(min)'
+hedr_temp_control = 'Temp_Control'
+hedr_temp_min = 'Minimum_Temp(deg-C)'
+hedr_temp_max = 'Maximum_Temp(deg-C)'
 #List below
-list_header_items = defs.list_hedr_uo_chgng
+list_header_items = [hedr_material_name,
+                     hedr_metrics_value,
+                     hedr_metrics_unit,
+                     hedr_error,
+                     hedr_method,
+                     hedr_time_control,
+                     hedr_time_min,
+                     hedr_time_max,
+                     hedr_temp_control,
+                     hedr_temp_min,
+                     hedr_temp_max]
 
 entry_input_json = 'charging_input_entry'
 """The key to a material input entry for JSON data exchange."""
@@ -35,38 +45,54 @@ arry_inputs_json = 'arr_charging_input_entry'
 obj_charging_json = 'charging_stage'
 """The key to the unit operation of charging."""
 
-method_liq = defs.opt_uo_chgng_method_liq
-method_shower = defs.opt_uo_chgng_method_shower
-method_press = defs.opt_uo_chgng_method_prssvesl
-method_pow = defs.opt_uo_chgng_method_pwdr
-method_placeholder = defs.opt_uo_chgng_method_method_plchldr
+method_liq = 'liquid_port'
+method_shower = 'shower'
+method_press = 'press_vessel'
+method_pow = 'powder_port'
+method_placeholder = 'placeholder'
 #List below
-list_charging_method =defs.list_opt_uo_chgng_method
+list_charging_method =[method_liq,
+                       method_shower,
+                       method_press,
+                       method_pow,
+                       method_placeholder]
 
-timectrl_none = defs.opt_uo_chgng_timctrl_none
-timectrl_min = defs.opt_uo_chgng_timctrl_min
-timectrl_max = defs.opt_uo_chgng_timctrl_max
-timectrl_min_max = defs.opt_uo_chgng_timctrl_min_max
-timectrl_placeholder = defs.opt_uo_chgng_timctrl_plchldr
+timectrl_none = "No_time_control"
+timectrl_min = "Time_control_with_minimum"
+timectrl_max = "Time_control_with_maximum"
+timectrl_min_max = 'Time_control_with_minimum and maximum'
+timectrl_placeholder = 'Placeholder'
 #List below
-list_time_control = defs.list_opt_uo_chgng_timctrl
+list_time_control = [timectrl_none,
+                    timectrl_min,
+                    timectrl_max,
+                    timectrl_min_max,
+                    timectrl_placeholder]
 
-temprctrl_none = defs.opt_uo_chgng_temprctrl_none
-temprctrl_min = defs.opt_uo_chgng_temprctrl_min
-temprctrl_max = defs.opt_uo_chgng_temprctrl_max
-temprctrl_min_max = defs.opt_uo_chgng_temprctrl_min_max
-temprctrl_placeholder = defs.opt_uo_chgng_temprctrl_plchldr
-list_temp_control = defs.list_opt_uo_chgne_temprctrl
+temprctrl_none = "No_temp_control"
+temprctrl_min = "Temp_control_with_minimum"
+temprctrl_max = "Temp_control_with_maximum"
+temprctrl_min_max = 'Temp_control_with_minimum_and_maximum'
+temprctrl_placeholder = 'Placeholder'
+#list below
+list_temp_control = [temprctrl_none,
+                    temprctrl_min,
+                    temprctrl_max,
+                    temprctrl_min_max]
 
 #list_metrics_unit = [defs.tag_metrics_equiv, defs.tag_metrics_vol]
-opt_mtrcs_eq = defs.opt_uo_chgng_mtrcs_eq
-opt_mtrcs_vol = defs.opt_uo_chgng_mtrcs_vol
-list_metrics_unit = defs.list_opt_uo_chgng_mtrcs
+opt_mtrcs_eq = "equiv"
+opt_mtrcs_vol = "v/w"
+#list below
+list_metrics_unit = [opt_mtrcs_eq, opt_mtrcs_vol]
 
-error_range_placeholder = defs.opt_uo_chgng_err_rng_plchldr
+error_range_placeholder = 'place_holder'
 list_error_range = [None, 1.0, None, None, None, 5.0, error_range_placeholder]
 
-dict_dtil_drpdwn = defs.dict_opt_uo_chgng
+dict_dtil_drpdwn = {hedr_metrics_unit : list_metrics_unit,
+                    hedr_method : list_charging_method,
+                    hedr_time_control : list_time_control,
+                    hedr_temp_control : list_temp_control}
 """The dict[str, list[str]] for drop-down lists for detail input"""
 
 
@@ -84,20 +110,76 @@ tag_flow_cmn_rec_sign : part_flow_cmn_rec_sign_jp
 """
 
 #Tags for translation of UO-specific parts
-tag_part_instr_ini = defs.tag_part_flow_chgng_instr_ini
-tag_part_instr_end = defs.tag_part_flow_chgng_instr_end
-tag_part_rec_input = defs.tag_part_flow_chgng_rec_input
-"""The tag for the input (QTY) record field."""
-tag_part_rec_lot = defs.tag_part_flow_chgng_rec_lot
-tag_part_rec_hose = defs.tag_part_flow_chgng_rec_hose
-tag_part_rec_temprini = defs.tag_part_flow_chgng_rec_temprini
-tag_part_rec_temprmax = defs.tag_part_flow_chgng_rec_temprmax
-tag_part_rec_temprmin = defs.tag_part_flow_chgng_rec_temprmin
-tag_part_rec_temprend = defs.tag_part_flow_chgng_rec_temprend
-tag_part_rec_cmpltd = defs.tag_part_flow_chgng_rec_cmpltd
+tag_part_instr_ini = "tag_chgng_instr_ini"
+part_instr_ini_jp = '仕込み開始'
+"""Flowseet component for class Charging. An action item of commencement of charging/dosing"""
+tag_part_instr_end = "tag_chgng_instr_end"
+part_instr_end_jp = '仕込み終了'
+"""Flowseet component for class Charging. An action item of end of charging/dosing"""
+tag_part_rec_input = "tag_chgng_rec_input"
+part_rec_input_jp = '仕込み量__________kg'
+"""Flowseet component for class Charging. A recording element for dispensed amount"""
+tag_part_rec_lot = "tag_chgng_rec_lot"
+part_rec_lot_jp = 'ロット番号__________'
+"""Flowseet component for class Charging. A recording element for the lot number of a material"""
+tag_part_rec_hose = "tag_chgng_rec_hose"
+part_rec_hose_jp ='溶媒用フレキID__________'
+"""Flowseet component for class Charging. A recording element for the ID of flexible tube for solvents"""
+tag_part_rec_temprini = "tag_chgng_rec_temprini"
+part_rec_temprini_jp = '開始時内温_______℃'
+"""Flowseet component for class Charging. A recording element for initial temperature of a certain action"""
+tag_part_rec_temprmax = "tag_chgng_rec_temprmax"
+part_temprmax_jp = '仕込み時最高内温_______℃'
+"""Flowseet component for class Charging. A recording element for the maximum temperature"""
+tag_part_rec_temprmin = "tag_chgng_rec_temprmin"
+part_temprmin_jp = '仕込み時最低内温_______℃'
+"""Flowseet component for class Charging. A recording element for the minimum"""
+tag_part_rec_temprend = "tag_chgng_rec_temprend"
+part_temprend_jp = '終了時内温_______℃'
+"""Flowseet component for class Charging. A recording element for the terminal temperature"""
+tag_part_rec_cmpltd = "tag_chgng_rec_cmpltd"
+part_cmpltd_jp ='□ 仕込み実施'
+"""Flowseet component for class Charging. A check box for complete charging/dosing"""
+
+tag_part_mthd_liq = method_liq
+part_mthd_liq_jp = "液体投入口"
+"""Flowsheet component for class Charging. Charging through liquid charging port. An ption for Liquid charging."""
+tag_part_mthd_shower = method_shower
+part_mthd_shower_jp = "常設シャワー"
+"""Flowsheet component for class Charging. Charging through the fixed shower. An ption for Liquid charging."""
+tag_part_mthd_prssvesl = method_press
+part_mthd_prssvesl_jp = "圧送容器"
+"""Flowsheet component for class Charging. Charging from a pressure vessel. An ption for Liquid charging."""
+tag_part_mthd_pwdr = method_pow
+part_mthd_pwdr_jp = "粉体投入口"
+"""Flowsheet component for class Charging. Charging through the power port. An ption for powder charging."""
+tag_part_mthd_plchldr = method_placeholder
+part_mthd_plchldr_jp = "<Placeholder: charging method>"
+"""Flowsheet component for class Charging. A place holder. An ption for Liquid charging."""
+
+
+#TODO: Charging method!!!!
+
+dict_jp_parts={tag_part_instr_ini : part_instr_ini_jp,
+                tag_part_instr_end : part_instr_end_jp,
+                tag_part_rec_input : part_rec_input_jp,
+                tag_part_rec_lot : part_rec_lot_jp,
+                tag_part_rec_hose : part_rec_hose_jp,
+                tag_part_rec_temprini : part_rec_temprini_jp,
+                tag_part_rec_temprmax : part_temprmax_jp,
+                tag_part_rec_temprmin : part_temprmin_jp,
+                tag_part_rec_temprend : part_temprend_jp,
+                tag_part_rec_cmpltd : part_cmpltd_jp,
+                tag_part_mthd_liq : part_mthd_liq_jp,
+                tag_part_mthd_shower : part_mthd_shower_jp,
+                tag_part_mthd_prssvesl : part_mthd_prssvesl_jp,
+                tag_part_mthd_pwdr : part_mthd_pwdr_jp,
+                tag_part_mthd_plchldr : part_mthd_plchldr_jp
+                }
+
 
 #Language dictionary for the unit operation
-lang_dict_chgng_specif = defs.dict_jp_part_flow_chgng
+lang_dict_chgng_specif = dict_jp_parts
 """
 tag_part_flow_chgng_title : part_flow_chgng_title_jp,
 tag_part_flow_chgng_instr_ini : part_flow_chgng_instr_ini_jp,
