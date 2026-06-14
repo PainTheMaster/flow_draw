@@ -123,11 +123,13 @@ class Primitive(JsonEntity):
                  description:str = None,
                  enum:list[str]|list[int]|list[float]|list[bool] = None,
                  const:str|int|float|bool = None,
+                 accept_null:bool=False,
                  required:bool = True):
         super().__init__(key=key, description=description, required=required)
         self.prim_type:str = prim_type
         self.enum:list[str]|list[int]|list[float]|list[bool] = enum
         self.const:str|int|float|bool = const
+        self.accept_null:bool = accept_null
         if key is None:
             raise ValueError(f'{self.__class__.__name__}: "key" not given.')  
         if enum is not None and const is not None:
@@ -145,7 +147,10 @@ class Primitive(JsonEntity):
         list_json_str.append('{')
         if self.description is not None:
             list_json_str.append(f' "description":{self.json_literal(self.description)},')
-        list_json_str.append(f' "type":"{self.prim_type}",')
+        if self.accept_null:
+            list_json_str.append(f' "type": ["{self.prim_type}", "null"],')
+        else:
+            list_json_str.append(f' "type":"{self.prim_type}",')
 
         if self.enum is not None:
             enum_values = ','.join(self.json_literal(item) for item in self.enum)
@@ -165,3 +170,47 @@ class Primitive(JsonEntity):
         return list_json_str
     
             
+
+class Tuple(JsonEntity):
+    def __init__(self,
+                 key:str = None,
+                 content:list[JsonEntity]=None,
+                 description:str = None,
+                 required = True):
+        super().__init__(key, description, required)
+        self.content:list[JsonEntity] = content
+        self.num_contet:int = len(self.content)
+        if key is None:
+            raise ValueError(f'{self.__class__.__name__}: "key" not given.')        
+        if self.content is None:
+            raise ValueError(f'{self.__class__.__name__}: "content" not given.')
+        if len(self.content) == 0:
+            raise ValueError(f'{self.__class__.__name__}: An empty list is put in "content".')
+        
+    def asType(self)->list[str]:
+        list_json_str:list[str]=[]
+        list_json_str.append('{')
+        if self.description is not None:
+            list_json_str.append(f' "description":{self.json_literal(self.description)},')
+        list_json_str.append(' "type":"array",')
+        list_json_str.append(' "prefixItems": [')
+        for entity in self.content:
+            for single_line in entity.asType():
+                list_json_str.append('  '+single_line)
+            list_json_str[-1]+=','
+        list_json_str[-1] = list_json_str[-1].removesuffix(',')
+        list_json_str.append(' ],')
+        list_json_str.append(' "items":false,')
+        list_json_str.append(f' "minItems":{self.num_contet},')
+        list_json_str.append(f' "maxItems":{self.num_contet}')
+        list_json_str.append('}')
+        return list_json_str
+    
+    def asEntity(self)->list[str]:
+        list_json_str:list[str]=self.asType()
+        list_json_str[0]=f'{self.json_literal(self.key)}:'+list_json_str[0]
+        return list_json_str
+        
+
+
+

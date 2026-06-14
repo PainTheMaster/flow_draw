@@ -193,15 +193,15 @@ class UnitOperation(ABC):
         """
         raise NotImplementedError()
     
-
-    def json_common(arg_name_uo:str=None)->list[Primitive]:
+    @classmethod
+    def json_common(cls)->list[Primitive]:
         seq_uo = Primitive(prim_type="integer",
                            key=defs.hedr_cmn_io_dtil_seq,
                            description="Sequence number (1, 2, 3...) in a series of unit operations in the process")
         name_uo = Primitive(prim_type="string",
                             key=defs.hedr_cmn_io_dtil_uo,
                             description="Unit operation name in the process detail worksheet",
-                            const=arg_name_uo,
+                            const=cls.uo_tag,
                             required=True)
         edtcmnt = Primitive(prim_type="string",
                             key=defs.hedr_cmn_io_dtil_edt_cmnt,
@@ -219,7 +219,7 @@ class UnitOperation(ABC):
         return [seq_uo, name_uo, edtcmnt, precmnt, postcmnt]
     
     @abstractmethod
-    def get_json_schema(self, caller:type[trdef.UniversalTrait] = None)->Objason:
+    def get_json_schema(caller:type[trdef.UniversalTrait] = None)->Objason:
         raise NotImplementedError()
 
         

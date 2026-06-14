@@ -10,6 +10,8 @@ from flow_draw.data_io import process_io as procio
 from flow_draw.materials import materials as mats
 from flow_draw.trait_def import trait_def as trdef
 #from flow_draw.trait_def.trait_def import GetMats
+from flow_draw.data_io.json_io import Objason, Primitive, Array, Tuple
+
 
 
 
@@ -41,23 +43,23 @@ opt_time_unit_hour:str = defs.tag_flow_cmn_time_unit_hour
 #hedr_<something> = defs.hedr_<unit operation>_<specification item>
 #list_hedr = defs.list_hedr_<list of header items for the uo>
 #dict_dtil_drpdwn = defs.dict_opt_<unit operation>
-hedr_sample_name:str = "Sample Names"
+hedr_sample_name:str = "Sample_Name"
 """Header item for sample names"""
 hedr_sampling_cat:str = "Category"
 """Header item for sampling category; IPC, Monitoring, or Both"""
-hedr_ipc_criteria:str = "IPC Criteria"
+hedr_ipc_criteria:str = "IPC_Criteria"
 """Header item for IPC criteria"""
-hedr_ipc_rec_titles:str = "IPC Rec Titles"
+hedr_ipc_rec_titles:str = "IPC_Rec_Title"
 """Header item for IPC record title for each analytical item"""
-hedr_ipc_rec_units:str = "IPC Rec Unit"
+hedr_ipc_rec_units:str = "IPC_Rec_Unit"
 """Header item for IPC record unit for each analytical item"""
-hedr_monit_items:str = "Monit. Items"
+hedr_monit_items:str = "Monit_Item"
 """Header item for sampling category; Monitoring items"""
-hedr_monit_rec_items:str = "Monit Rec Titles"
+hedr_monit_rec_items:str = "Monit_Rec_Title"
 """Header item for sampling category; monitoring record title for each analytical item"""
-hedr_monit_rec_units:str = "Monit Rec Unit"
+hedr_monit_rec_units:str = "Monit_Rec_Unit"
 """Header item for sampling category; monitoring record unit for each analytical item"""
-hedr_sample_comment:str = "Sample Comment"
+hedr_sample_comment:str = "Sample_Comment"
 """Header item for sampling category; sample comment"""
 
 list_hedr:list[str]=[hedr_sample_name,
@@ -70,6 +72,24 @@ list_hedr:list[str]=[hedr_sample_name,
                      hedr_monit_rec_units,
                      hedr_sample_comment]
 """header items for the detail input form"""
+
+key_json_arr_monit_items = 'json_array_monit_items'
+"""Key to a JSON entity: An array of monitoring items"""
+key_json_tuple_monit ='json_monitoring_pair'
+"""Key to a JSON entity: A pair (tuple) of monitoring item name and unit."""
+key_json_obj_monit = 'json_process_monitoring'
+"""Key to a JSON entity: A set of process monitoring for a sample."""
+key_json_arr_monit = 'json_arr_monitoring'
+"""key to a JSON entity: An array of monitoring items."""
+key_json_tuple_ipc = 'json_ipc_tuple'
+"""Kye to a JSON entry: A tuple of ipc item, unit, and criterion."""
+key_json_arr_ipc_items = 'json_array_ipc_items'
+"""Key to a JSON entry: an array of tuple of IPC items"""
+key_json_single_sample = "json_single_sample"
+"""Key to a JSON entry: an object for a single sample"""
+key_json_arr_samples = "json_array_samples"
+"""key to a JSON entity: an array of objects for samples"""
+key_json_sampling_stage = "sampling_stage"
 
 
 #########################################################
@@ -239,6 +259,99 @@ class Sampling(uo.UnitOperation, uo_tag=defs.tag_uo_sampling):
             self.flowsheet.put_body_comments(self.post_comment)
             self.flowsheet.linefeed()
     
+    def get_json_schema(caller = None) -> Objason:
+        common = Sampling.json_common()
+        sample_name:Primitive = Primitive(prim_type='string',
+                                          key=hedr_sample_name,
+                                          description='The name of a sample.')
+        sample_cat:Primitive=Primitive(prim_type='string',
+                                       key=hedr_sampling_cat,
+                                       description=f'Category of the sample.'\
+                                        f'"{opt_sampling_cat_ipc}" stands for in-process control with a must-satisfied criterion before moving to the next step. '\
+                                        f'"{opt_sampling_cat_monit}" is sampling for technical information. Normally, not with a criterion. '\
+                                        f'"{opt_sampling_cat_both}" is for both in-process control and monitoring. One or more analytical items are for decision making, whereas the other are just for info.',
+                                       enum=list_opt_sampling_cat
+                                       )
+        
+        #以下、モニタリング
+        monit_item_name = Primitive(prim_type='string',
+                                    key=hedr_monit_items,
+                                    description=f'A monitoring item. This items is applicable to sampling categories of "{opt_sampling_cat_monit}" and "{opt_sampling_cat_both}". '\
+                                        'This is more a high-level identifier, such as purity, residual solvent, etc. '\
+                                        'instead of concrete names such as this impurity, that impurity, or this solvent... '\
+                                        'if a right name cannot be read from the source, please put <placeholder>.')
+        monit_ietm = Primitive(prim_type='string',
+                                   key=hedr_monit_rec_items,
+                                   description=f'A lower-layer recording item belonging to a super-category "{hedr_monit_items}"'\
+                                   'a concrete analytical items such as residual solvent, impurity, assay, pH, etc.')
+        monit_unit = Primitive(prim_type='string',
+                                   key=hedr_monit_rec_units,
+                                   description=f'Unit for a monitoring item. Null is accepted.',
+                                   accept_null=True,
+                                   required=True)
+        tuple_monit = Tuple(key=key_json_tuple_monit,
+                            content=[monit_ietm, monit_unit],
+                            description='A pair of monitoring item and unit for it.')
+        arr_monit_items = Array(key=key_json_arr_monit_items,
+                                content=tuple_monit,
+                                description=f'An array of tuple of monitoring item and unit for it. This is linked to "{hedr_monit_items}".',
+                                required=False)
+        obj_monit = Objason(key=key_json_obj_monit,
+                            props=[monit_item_name, arr_monit_items],
+                            description='A set of process monitoring information linked to a sample.')
+        arr_monit = Array(key=key_json_arr_monit,
+                          content = obj_monit,
+                          description="An array of various kinds of monitoring items.",
+                          required=False)
+        
+        #IPC below
+        ipc_item = Primitive(prim_type='string',
+                             key=hedr_ipc_rec_titles,
+                             description='IPC items, such as a residual solvent, a specific impurity, conversion, etc.')
+        ipc_unit = Primitive(prim_type='string',
+                             key=hedr_ipc_rec_units,
+                             description='reporting unit for the IPC item, such as %, ppm, etc.')
+        ipc_criterion = Primitive(prim_type='string',
+                                 key=hedr_ipc_criteria,
+                                 description='IPC criterion, e.g., "conversion>99.95%"')
+        tuple_ipc = Tuple(key=key_json_tuple_ipc,
+                          content=[ipc_item, ipc_unit, ipc_criterion],
+                          description='A set (tuple) of IPC item, unit for the item, and IPC criterion for it.')
+        arr_ipc = Array(key=key_json_arr_ipc_items,
+                        content=tuple_ipc,
+                        description='A series (array) of a set of IPC items, unit for it, and criterion for one sample.',
+                        required=False)
+        
+        single_sample = Objason(key=key_json_single_sample,
+                                props=[sample_name, sample_cat, arr_monit, arr_ipc],
+                                description="Descriptor of a sample. A collection of the sample name, sampling category (monitoring and/or IPC), necessary monitoring items, IPC items, and the criteria for the IPC.")
+        
+        arr_samples = Array(key=key_json_arr_samples,
+                            content=single_sample,
+                            description="An array of samples belonging to one sampling block and the necessary monitoring and/or IPC requirements associateid with them.",
+                            required=True)
+
+        json_sampling = Objason(key=key_json_sampling_stage,
+                                props=common+[arr_samples],
+                                description='An object for a single sampling stage.')
+
+        return json_sampling 
+        
+
+        
+        
+        
+        
+
+        
+        
+        
+        
+        
+
+
+
+
     @classmethod
     def generate_test_df(cls,
                          sample_name:str = None,

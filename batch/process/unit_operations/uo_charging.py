@@ -180,34 +180,33 @@ dict_jp_parts={tag_part_instr_ini : part_instr_ini_jp,
 
 #Language dictionary for the unit operation
 lang_dict_chgng_specif = dict_jp_parts
-"""
-tag_part_flow_chgng_title : part_flow_chgng_title_jp,
-tag_part_flow_chgng_instr_ini : part_flow_chgng_instr_ini_jp,
-tag_part_flow_chgng_instr_end : part_flow_chgng_instr_end_jp,
-tag_part_flow_chgng_rec_input : part_flow_chgng_rec_input_jp,
-tag_part_flow_chgng_rec_lot : part_flow_chgng_rec_lot_jp,
-tag_part_flow_chgng_rec_hose : part_flow_chgng_rec_hose_jp,
-tag_part_flow_chgng_rec_temprini : part_flow_chgng_rec_temprini_jp,
-tag_part_flow_chgng_rec_temprmax : part_flow_chgng_temprmax_jp,
-tag_part_flow_chgng_rec_temprmin : part_flow_chgng_temprmin_jp,
-tag_part_flow_chgng_rec_temprend : part_flow_chgng_temprend_jp,
-tag_part_flow_chgng_rec_cmpltd : part_flow_chgng_cmpltd_jp
-"""
-tag_stc_qty = defs.tag_stc_flow_chgng_qty
-tag_stc_time_min = defs.tag_stc_flow_chgng_time_min
-"""Key word to retrieve a dosing instruction sentence with minimum time limit from multilingual dictionaries"""
-tag_stc_time_max = defs.tag_stc_flow_chgng_time_max
-"""Key word to retrieve a dosing instruction sentence with maximum time limit from multilingual dictionaries"""
-tag_stc_time_min_max = defs.tag_stc_flow_chgng_time_min_max
-"""Key word to retrieve a dosing instruction sentence with time limit range from multilingual dictionaries"""
-tag_stc_temp_min = defs.opt_uo_chgng_temprctrl_min
-"""Key word to retrieve a dosing instruction sentence with minimum temperature limit from multilingual dictionaries"""
-tag_stc_temp_max = defs.opt_uo_chgng_temprctrl_max
-"""Key word to retrieve a dosing instruction sentence with maximum temperature limit from multilingual dictionaries"""
-tag_stc_temp_min_max = defs.opt_uo_chgng_temprctrl_min_max
-"""Key word to retrieve a dosing instruction sentence with temperature limit range from multilingual dictionaries"""
 
-lang_dict_instr_stcs = defs.dict_jp_stcs_flow_chgng
+
+tag_stc_qty = "tag_stc_qty"
+"""Keyword to retrieve a dosing instruction sentence for dosed quantity"""
+tag_stc_time_min = timectrl_min
+"""Keyword to retrieve a dosing instruction sentence with minimum time limit from multilingual dictionaries"""
+tag_stc_time_max = timectrl_max
+"""Keyword to retrieve a dosing instruction sentence with maximum time limit from multilingual dictionaries"""
+tag_stc_time_min_max = timectrl_min_max
+"""Keyword to retrieve a dosing instruction sentence with time limit range from multilingual dictionaries"""
+tag_stc_temp_min = temprctrl_min
+"""Keyword to retrieve a dosing instruction sentence with minimum temperature limit from multilingual dictionaries"""
+tag_stc_temp_max = temprctrl_max
+"""Keyword to retrieve a dosing instruction sentence with maximum temperature limit from multilingual dictionaries"""
+tag_stc_temp_min_max = temprctrl_min_max
+"""Keyword to retrieve a dosing instruction sentence with temperature limit range from multilingual dictionaries"""
+
+
+dict_jp_stcs={tag_stc_qty : '{qty}±{err} kg',
+              tag_stc_time_min : '*滴下時間{min}以上',
+              tag_stc_time_max : '*滴下時間{max}以内',
+              tag_stc_time_min_max : '*滴下時間{min}～{max}以内',
+              tag_stc_temp_min : "仕込み中内温{min}℃以上",
+              tag_stc_temp_max : "仕込み中内温{max}℃以下",
+              tag_stc_temp_min_max : "仕込み中内温{min}～{max}℃"}
+
+lang_dict_instr_stcs = dict_jp_stcs
 """A language dictionary for a instruction sentence with time or temperature limit. Use str.format(min and/or max) to pur an appropriate parameter"""
 
 
@@ -265,7 +264,7 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
     def get_json_schema(caller: GetMats=None)-> Objason:
         mats_data: mats.Materials = caller.get_mats() 
         list_mats=mats_data.get_list_mats()
-        common=Charging.json_common()
+        common=Charging.json_common(arg_name_uo=defs.tag_uo_charging)
         name_mats = Primitive(prim_type="string",
                               key=hedr_material_name,
                               enum=list_mats,

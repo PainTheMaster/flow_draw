@@ -5,6 +5,7 @@ import flow_draw.batch.process.unit_operations.uo_agitation as agit
 import flow_draw.trait_def.trait_def as trdef
 import flow_draw.materials.materials as mats
 import flow_draw.batch.process.unit_operations.uo_charging as chgng
+import flow_draw.batch.process.unit_operations.uo_sampling as smplng
 
 
 class TestIO_00000_basic_func(unittest.TestCase):
@@ -12,7 +13,8 @@ class TestIO_00000_basic_func(unittest.TestCase):
         print('--------------------')
         inner1 = json_io.Primitive(prim_type='string',
                                    key='primitive 1',
-                                   description='description for inner 1')
+                                   description='description for inner 1',
+                                   accept_null=True)
         output = inner1.asEntity()
         for line in output:
             print(line)
@@ -69,8 +71,14 @@ class TestIO_00000_basic_func(unittest.TestCase):
         output = obj.asEntity()
         for line in output:
             print(line)
-        print('--------------------')                        
-
+        print('--------------------')           
+        obj = json_io.Tuple(key='tuple_test',
+                            content=[inner1, inner2, inner3],
+                            description='I am a tuple.')
+        output = obj.asEntity()
+        for line in output:
+            print(line)
+        print('--------------------')  
         self.assertTrue(True)
 
     def test_uo_agitation(self):
@@ -82,7 +90,9 @@ class TestIO_00000_basic_func(unittest.TestCase):
 
 
 
-class Test_10000_charging(unittest.TestCase, trdef.GetMats):
+
+
+class Test_10000_unit_ops(unittest.TestCase, trdef.GetMats):
     def setUp(self):
         self.mats_df = mats.Materials.generate_mats_df()
         self.mats_df = mats.Materials.add_to_mats_df(mats_df=self.mats_df,
@@ -116,7 +126,15 @@ class Test_10000_charging(unittest.TestCase, trdef.GetMats):
         print('----------------------')
         self.assertTrue(True)
 
-
+    def test_11000_sampling_json(self):
+        test_json:Objason = smplng.Sampling.get_json_schema(caller=self)
+        list_str_json = test_json.asType()
+        print()
+        print('----------------------')
+        for line in list_str_json:
+            print(line)
+        print('----------------------')
+        self.assertTrue(True)
 
 
 
@@ -125,8 +143,8 @@ class Test_10000_charging(unittest.TestCase, trdef.GetMats):
 
 def suite_json_test():
     suite = unittest.TestSuite()
-    # suite.addTest(TestIO_00000_basic_func('test_uo_agitation'))
-    suite.addTest(Test_10000_charging('test_10000_charging_json'))
+    #suite.addTest(TestIO_00000_basic_func('test_0000_singleprop'))
+    suite.addTest(Test_10000_unit_ops('test_11000_sampling_json'))
     return suite
             
 
