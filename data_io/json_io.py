@@ -72,6 +72,10 @@ class Array(JsonEntity):
 
             
 class Objason(JsonEntity):
+    key_prop:str='peoperty'
+    key_val:str='val'
+    key_then:str = 'then'
+    key_else:str = 'else'
     def __init__(self,
                 key:str=None,
                 props: list[JsonEntity]=None,
@@ -83,6 +87,7 @@ class Objason(JsonEntity):
         self.props=props
         if props is None or len(props)==0:
             raise ValueError(f'{self.__class__.__name__}: Property not given.')
+        self.list_cond:list[dict[str,JsonEntity]] = []
     
     def asType(self)->list[str]:
         list_json_str: list[str] = []
@@ -104,8 +109,55 @@ class Objason(JsonEntity):
         required=required.removesuffix(',')
         if required != '':
             list_json_str[-1]+=','
-            list_json_str.append(f' "required":[{required}]')
+            list_json_str.append(f' "required":[{required}],')
         
+        def then_else(is_then:bool = True, cond: dict[str, JsonEntity]=None):
+            required:str = ''
+            then_else:str = ''
+            key_then_else:str = ''
+            if is_then:
+                then_else = "then"
+                key_then_else = self.key_then
+            else:
+                then_else = "else"
+                key_then_else = self.key_else
+            list_json_str.append(f'   "{then_else}":{{')
+            list_json_str.append('    "properties":{')
+            list_prop_temp:list[JsonEntity] = cond[key_then_else]
+            for single_prop in list_prop_temp:
+                list_str = single_prop.asEntity()
+                for line in list_str:
+                    list_json_str.append('     '+line)
+                list_json_str[-1] += ','
+                if single_prop.required:
+                    required += f'{self.json_literal(single_prop.key)},'
+            list_json_str[-1] = list_json_str[-1].removesuffix(',')
+            list_json_str.append('    },')
+            required = required.removesuffix(',')
+            if required != '':
+                list_json_str.append(f'    "required":[{required}]')
+            list_json_str[-1] = list_json_str[-1].removesuffix(',')
+            list_json_str.append('   },')
+        
+        if len(self.list_cond) > 0:
+            list_json_str.append(' "allOf":[')
+            for cond in self.list_cond:
+                list_json_str.append('  {')
+                list_json_str.append('   "if":{')
+                list_json_str.append('    "properties":{')
+                list_json_str.append(f'     "{cond[self.key_prop]}":{{"const":{self.json_literal(cond[self.key_val])}}}')
+                list_json_str.append('    },')
+                list_json_str.append(f'    "required":["{cond[self.key_prop]}"]')
+                list_json_str.append('   },')
+                if cond[self.key_then] is not None:
+                    then_else(is_then=True, cond=cond)
+                if cond[self.key_else] is not None:
+                    then_else(is_then=False, cond=cond)
+                list_json_str[-1] = list_json_str[-1].removesuffix(',')
+                list_json_str.append('  },')
+            list_json_str[-1] = list_json_str[-1].removesuffix(',')
+            list_json_str.append(' ]')
+        list_json_str[-1] = list_json_str[-1].removesuffix(',')
         list_json_str.append('}')
 
         return list_json_str
@@ -114,6 +166,18 @@ class Objason(JsonEntity):
         list_json_str:list[str] = self.asType()
         list_json_str[0] =f'{self.json_literal(self.key)}:'+list_json_str[0]
         return list_json_str
+    
+    def if_then_else(self,
+                     property:str=None,
+                     val_if:any=None,
+                     props_then: list[JsonEntity]=None,
+                     props_else: list[JsonEntity]=None):
+        temp_dict = {self.key_prop:property,
+                     self.key_val:val_if,
+                     self.key_then:props_then,
+                     self.key_else:props_else}
+        self.list_cond.append(temp_dict)
+
 
         
 class Primitive(JsonEntity):

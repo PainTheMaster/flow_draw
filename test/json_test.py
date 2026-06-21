@@ -12,7 +12,7 @@ class TestIO_00000_basic_func(unittest.TestCase):
     def test_0000_singleprop(self):
         print('--------------------')
         inner1 = json_io.Primitive(prim_type='string',
-                                   key='primitive 1',
+                                   key='primitive_1',
                                    description='description for inner 1',
                                    accept_null=True)
         output = inner1.asEntity()
@@ -20,7 +20,7 @@ class TestIO_00000_basic_func(unittest.TestCase):
             print(line)
         print('--------------------')
         inner2 = json_io.Primitive(prim_type='string',
-                                   key='primitive 2',
+                                   key='primitive_2',
                                    enum=['enum1', 'enum2', 'enum3'],
                                    description='description for inner 2')
         output = inner2.asEntity()
@@ -28,7 +28,7 @@ class TestIO_00000_basic_func(unittest.TestCase):
             print(line)
         print('--------------------')
         inner3 = json_io.Primitive(prim_type="number",
-                                   key='primitive 3',
+                                   key='primitive_3',
                                    enum=[3.14, 2.718, 0.0],
                                    description='description for inner 3')
         output = inner3.asEntity()
@@ -36,7 +36,7 @@ class TestIO_00000_basic_func(unittest.TestCase):
             print(line)
         print('--------------------')
         inner4 = json_io.Primitive(prim_type='integer',
-                                   key='primitive 4',
+                                   key='primitive_4',
                                    const=5,
                                    description='description for inner 4')
         output = inner4.asEntity()
@@ -44,21 +44,21 @@ class TestIO_00000_basic_func(unittest.TestCase):
             print(line)
         print('--------------------')
         inner5 = json_io.Primitive(prim_type='string',
-                                   key='primitive 5',
+                                   key='primitive_5',
                                    const='const 5',
                                    description='description for inner 5')
         output = inner5.asEntity()
         for line in output:
             print(line)
         print('--------------------')
-        arr = json_io.Array(key='test array',
+        arr = json_io.Array(key='test_array',
                             description='array for test',
                             content=[inner1, inner2, inner3, inner4, inner5])
         output = arr.asEntity()
         for line in output:
             print(line)
         print('--------------------')
-        arr2 = json_io.Array(key='test array 2',
+        arr2 = json_io.Array(key='test_array_2',
                             description='array for test',
                             content=inner1)
         output = arr2.asEntity()
@@ -71,7 +71,23 @@ class TestIO_00000_basic_func(unittest.TestCase):
         output = obj.asEntity()
         for line in output:
             print(line)
-        print('--------------------')           
+        print('--------------------')
+        obj = json_io.Objason(key='test_if_then_else',
+                              props=[inner1],
+                              description="Test object for if-then-else")
+        obj.if_then_else(property=inner2.key,
+                         val_if='enum1',
+                         props_then=[inner3],
+                         props_else=[inner4])
+        obj.if_then_else(property=inner5.key,
+                         val_if='const 5',
+                         props_then=[arr],
+                         props_else=[arr2])
+        output = obj.asEntity()
+        for line in output:
+            print(line)
+        print('--------------------')       
+
         obj = json_io.Tuple(key='tuple_test',
                             content=[inner1, inner2, inner3],
                             description='I am a tuple.')
@@ -79,6 +95,7 @@ class TestIO_00000_basic_func(unittest.TestCase):
         for line in output:
             print(line)
         print('--------------------')  
+
         self.assertTrue(True)
 
     def test_uo_agitation(self):
@@ -143,8 +160,8 @@ class Test_10000_unit_ops(unittest.TestCase, trdef.GetMats):
 
 def suite_json_test():
     suite = unittest.TestSuite()
-    #suite.addTest(TestIO_00000_basic_func('test_0000_singleprop'))
-    suite.addTest(Test_10000_unit_ops('test_11000_sampling_json'))
+    suite.addTest(TestIO_00000_basic_func('test_0000_singleprop'))
+    #suite.addTest(Test_10000_unit_ops('test_11000_sampling_json'))
     return suite
             
 
