@@ -197,7 +197,8 @@ class UnitOperation(ABC):
     def json_common(cls)->list[Primitive]:
         seq_uo = Primitive(prim_type="integer",
                            key=defs.hedr_cmn_io_dtil_seq,
-                           description="Sequence number (1, 2, 3...) in a series of unit operations in the process")
+                           description="Sequence number (1, 2, 3...) in a series of unit operations in the process",
+                           required=True)
         name_uo = Primitive(prim_type="string",
                             key=defs.hedr_cmn_io_dtil_uo,
                             description="Unit operation name in the process detail worksheet",

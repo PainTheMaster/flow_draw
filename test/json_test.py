@@ -75,15 +75,11 @@ class TestIO_00000_basic_func(unittest.TestCase):
         obj = json_io.Objason(key='test_if_then_else',
                               props=[inner1],
                               description="Test object for if-then-else")
-        obj.if_then_else(property=inner2.key,
-                         val_if='enum1',
-                         props_then=[inner3],
-                         props_else=[inner4])
-        obj.if_then_else(property=inner5.key,
-                         val_if='const 5',
-                         props_then=[arr],
-                         props_else=[arr2])
-        output = obj.asEntity()
+        obj.if_then_else(prop=inner1.key,
+                         val_if=['にく', 'やさい'],
+                         props_then=[inner2],
+                         props_else=[inner3])
+        output = obj.asType()
         for line in output:
             print(line)
         print('--------------------')       
@@ -160,8 +156,8 @@ class Test_10000_unit_ops(unittest.TestCase, trdef.GetMats):
 
 def suite_json_test():
     suite = unittest.TestSuite()
-    suite.addTest(TestIO_00000_basic_func('test_0000_singleprop'))
-    #suite.addTest(Test_10000_unit_ops('test_11000_sampling_json'))
+    #suite.addTest(TestIO_00000_basic_func('test_0000_singleprop'))
+    suite.addTest(Test_10000_unit_ops('test_10000_charging_json'))
     return suite
             
 

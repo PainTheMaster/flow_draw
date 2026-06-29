@@ -1,4 +1,5 @@
 import pandas as pd
+import json
 import flow_draw.definitions as defs
 from typing import Optional
 from flow_draw.batch.process.unit_operations import unit_operation as uo
@@ -60,7 +61,7 @@ list_charging_method =[method_liq,
 timectrl_none = "No_time_control"
 timectrl_min = "Time_control_with_minimum"
 timectrl_max = "Time_control_with_maximum"
-timectrl_min_max = 'Time_control_with_minimum and maximum'
+timectrl_min_max = 'Time_control_with_minimum_and_maximum'
 timectrl_placeholder = 'Placeholder'
 #List below
 list_time_control = [timectrl_none,
@@ -264,7 +265,9 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
     def get_json_schema(caller: GetMats=None)-> Objason:
         mats_data: mats.Materials = caller.get_mats() 
         list_mats=mats_data.get_list_mats()
-        common=Charging.json_common(arg_name_uo=defs.tag_uo_charging)
+        #common=Charging.json_common(arg_name_uo=defs.tag_uo_charging)
+        common=Charging.json_common()
+
         name_mats = Primitive(prim_type="string",
                               key=hedr_material_name,
                               enum=list_mats,
@@ -281,7 +284,7 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
         permiss_error = Primitive(prim_type="number",
                                   key=hedr_error,
                                   description="Permissible error of the material quantity indicated in percent (%). If not specified in the data source, "\
-                                    "please use the defautl value of 1 percent for the key raw material, and 5 percent for other materials.")
+                                    "please use the default value of 1 percent for the key raw material, and 5 percent for other materials.")
         charging_method = Primitive(prim_type='string',
                                     key=hedr_method,
                                     enum=list_charging_method,
@@ -302,21 +305,62 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
                                 f'"{timectrl_max}" should be selected when upper limit must be complied.'\
                                 f'"{timectrl_min_max}" should be selected when the event has to happen in a specific range of time.'\
                                 f'"Please select {timectrl_placeholder}" if the right option cannot be chosen from the given information.')
+        
+        time_min = Primitive(prim_type="number",
+                             key=hedr_time_min,
+                             description=f'Lower limit of charging/dosing time. Necessary if "{hedr_time_control}" is "{timectrl_min}" or "{timectrl_min_max}"',
+                             required=True)
+        
+        time_max = Primitive(prim_type="number",
+                             key=hedr_time_max,
+                             description=f'Upper limit of charging/dosing time. Necessary if "{hedr_time_control}" is "{timectrl_max}" or "{timectrl_min_max}"',
+                             required=True)
+        
+        temp_ctrl = Primitive(prim_type='string',
+                              key=hedr_temp_control,
+                              enum=list_temp_control,
+                              description=f'Constraint on temperature during dosing/charging of the material.'\
+                              f'"{temprctrl_none}" means no temperature control is needed.'\
+                              f'"{temprctrl_min}" is selected when the lower limit is set for the dosing/charging.'\
+                              f'"{temprctrl_max}" is selected when the upper limit is set for the dosing/charging.'\
+                              f'"{temprctrl_min_max}" is for a case where the charging/dosing have to take place in a certain specific temperature range.',
+                              required=True
+                              )
+        
         temp_min = Primitive(prim_type='number',
                              key=hedr_temp_min,
                              description='An optional lower limit for inner temperature during dosing/charging. Please follow the instruction on the given data source.',
-                             required=False
+                             required=True
                              )
         temp_max = Primitive(prim_type='number',
                              key=hedr_temp_max,
                              description='An optional upper limit for inner temperature during dosing/charging. Please follow the instruction on the given data source.',
-                             required=False
+                             required=True
                              )
         
         input_entry = Objason(key=entry_input_json,
-                              props=[name_mats, qty_mats, unit_mats, permiss_error, charging_method, time_ctrl, temp_min, temp_max],
+                              props=[name_mats, qty_mats, unit_mats, permiss_error, charging_method, time_ctrl, temp_ctrl],
                               description=f'Combination of material, quantity, permissible quantity error, charging method, time constraints, temperature range to define each charging/dosing operation.'
                              )
+        input_entry.if_then_else(prop=time_ctrl.key,
+                                 val_if=timectrl_min,
+                                 props_then=[time_min])
+        input_entry.if_then_else(prop=time_ctrl.key,
+                                 val_if=timectrl_max,
+                                 props_then=[time_max])
+        input_entry.if_then_else(prop=time_ctrl.key,
+                                 val_if=timectrl_min_max,
+                                 props_then=[time_min, time_max])
+        input_entry.if_then_else(prop=temp_ctrl.key,
+                                 val_if=temprctrl_min,
+                                 props_then=[temp_min])
+        input_entry.if_then_else(prop=temp_ctrl.key,
+                                 val_if=temprctrl_max,
+                                 props_then=[temp_max])
+        input_entry.if_then_else(prop=temp_ctrl.key,
+                                 val_if=temprctrl_min_max,
+                                 props_then=[temp_min, temp_max])
+        
         arr_input = Array(key=arry_inputs_json,
                           content=input_entry,
                           description='A list of material input entries. A single material or more is put in the reactor vessel in a charging/dosing stage.',
@@ -329,6 +373,34 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
         return charging_dosing
         
 
+
+    def load_from_json_dict(self, json_dict: dict[str, any]):
+        self.operation_seq=json_dict[defs.hedr_cmn_io_dtil_seq]
+        if defs.hedr_cmn_io_dtil_edt_cmnt in json_dict:
+            self.edit_comment = json_dict[defs.hedr_cmn_io_dtil_edt_cmnt]
+        if defs.hedr_cmn_io_dtil_precmnt in json_dict:
+            self.pre_comment = json_dict[defs.hedr_cmn_io_dtil_precmnt]
+        if defs.hedr_cmn_io_dtil_postcmnt in json_dict:
+            self.post_comment = json_dict[defs.hedr_cmn_io_dtil_postcmnt]
+        arr_input: list[dict[str, str|float]] = json_dict[arry_inputs_json]
+        for tmp_ipt in arr_input:
+            name_mat:str = tmp_ipt[hedr_material_name]
+            #metrics value: float
+            qty_mats:float = tmp_ipt[hedr_metrics_value]
+            #metrics unit: str
+            unit_mats:str = tmp_ipt[hedr_metrics_unit]
+            #error: float percentage
+            permis_error:float = tmp_ipt[hedr_error]
+            #charging method: str
+            charging_method:str = tmp_ipt[hedr_method]
+            #time control method: str
+            tmie_ctrl:str = tmp_ipt[hedr_time_control]
+            #temp_min: float
+            tempr_min:float = tmp_ipt[hedr_temp_min]
+            #temp_max: float
+            tempr_max:float = tmp_ipt[hedr_temp_max]
+
+        #TODO 続きをかいてね。
 
 
 
