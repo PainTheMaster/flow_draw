@@ -177,15 +177,15 @@ class Objason(JsonEntity):
             list_json_str[-1] += ','
             if single_prop.required:
                 required += f'{self.json_literal(single_prop.key)},'
-        for single_dict in self.list_cond:
-            for single_prop in single_dict[self.key_then]:
-                for line in single_prop.asEntity():
-                    list_json_str.append('  '+line)
-                list_json_str[-1] += ','
-            for single_prop in single_dict[self.key_else]:
-                for line in single_prop.asEntity():
-                    list_json_str.append('  '+line)
-                list_json_str[-1] += ','
+        # for single_dict in self.list_cond:
+        #     for single_prop in single_dict[self.key_then]:
+        #         for line in single_prop.asEntity():
+        #             list_json_str.append('  '+line)
+        #         list_json_str[-1] += ','
+        #     for single_prop in single_dict[self.key_else]:
+        #         for line in single_prop.asEntity():
+        #             list_json_str.append('  '+line)
+        #         list_json_str[-1] += ','
         list_json_str[-1]=list_json_str[-1].removesuffix(',')
         list_json_str.append(' }')
 
@@ -253,8 +253,9 @@ class Objason(JsonEntity):
             list_json_str.append(f'   "{then_else}":{{')
             list_prop_temp:list[JsonEntity] = cond[key_then_else]
             for single_prop in list_prop_temp:
-                if single_prop.required:
-                    required += f'{self.json_literal(single_prop.key)},'
+                # if single_prop.required:
+                #     required += f'{self.json_literal(single_prop.key)},'
+                required += f'{self.json_literal(single_prop.key)},'
             required = required.removesuffix(',')
             if required != '':
                 list_json_str.append(f'    "required":[{required}]')
@@ -282,9 +283,9 @@ class Objason(JsonEntity):
                 list_json_str.append('    },')
                 list_json_str.append(f'    "required":["{cond[self.key_prop]}"]')
                 list_json_str.append('   },')
-            if cond[self.key_then] is not None:
+            if cond[self.key_then] is not None and len(cond[self.key_then]) != 0:
                 then_else(is_then=True, cond=cond)
-            if cond[self.key_else] is not None:
+            if cond[self.key_else] is not None and len(cond[self.key_else]) != 0:
                 then_else(is_then=False, cond=cond)
             list_json_str[-1] = list_json_str[-1].removesuffix(',')
             list_json_str.append('  },')
@@ -307,6 +308,15 @@ class Objason(JsonEntity):
                      self.key_then:props_then,
                      self.key_else:props_else}
         self.list_cond.append(temp_dict)
+        for temp_entry in (props_then+props_else):
+            included:bool = False
+            for prop_exist in self.props:
+                if prop_exist.key == temp_entry.key:
+                    included = True
+                    continue
+            if not included:
+                temp_entry.required = False
+                self.props.append(temp_entry)
 
 
         

@@ -383,24 +383,27 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
         if defs.hedr_cmn_io_dtil_postcmnt in json_dict:
             self.post_comment = json_dict[defs.hedr_cmn_io_dtil_postcmnt]
         arr_input: list[dict[str, str|float]] = json_dict[arry_inputs_json]
-        for tmp_ipt in arr_input:
-            name_mat:str = tmp_ipt[hedr_material_name]
-            #metrics value: float
-            qty_mats:float = tmp_ipt[hedr_metrics_value]
-            #metrics unit: str
-            unit_mats:str = tmp_ipt[hedr_metrics_unit]
-            #error: float percentage
-            permis_error:float = tmp_ipt[hedr_error]
-            #charging method: str
-            charging_method:str = tmp_ipt[hedr_method]
-            #time control method: str
-            tmie_ctrl:str = tmp_ipt[hedr_time_control]
-            #temp_min: float
-            tempr_min:float = tmp_ipt[hedr_temp_min]
-            #temp_max: float
-            tempr_max:float = tmp_ipt[hedr_temp_max]
+        for single_input in arr_input:
+            # name_mat:str = tmp_ipt[hedr_material_name]
+            # #metrics value: float
+            # qty_mats:float = tmp_ipt[hedr_metrics_value]
+            # #metrics unit: str
+            # unit_mats:str = tmp_ipt[hedr_metrics_unit]
+            # #error: float percentage
+            # permis_error:float = tmp_ipt[hedr_error]
+            # #charging method: str
+            # charging_method:str = tmp_ipt[hedr_method]
+            # #time control method: str
+            # tmie_ctrl:str = tmp_ipt[hedr_time_control]
+            # #temp_min: float
+            # tempr_min:float = tmp_ipt[hedr_temp_min]
+            # #temp_max: float
+            # tempr_max:float = tmp_ipt[hedr_temp_max]
+            new_input = Input(mats_data=self.mats_data)
+            new_input.load_from_json_dict(json_dict=single_input)
+            self.inputs.append(new_input)
+            self.input_count += 1
 
-        #TODO 続きをかいてね。
 
 
 
@@ -643,9 +646,31 @@ class Input:
         if self.temp_control == temprctrl_max or self.temp_control == temprctrl_min_max:
             self.temp_max = ser[hedr_temp_max]
         if self.mats_data is None:
-            raise RuntimeWarning(f"{__class__.__name}")
+            raise RuntimeWarning(f"{__class__.__name}: mats_data is None")
         else:
             self.__calc_qty()
+
+    def load_from_json_dict(self, json_dict: dict[str, any]):
+        self.material_name = json_dict[hedr_material_name]
+        self.metrics_unit = json_dict[hedr_metrics_unit]
+        self.metrics_val = json_dict[hedr_metrics_value]
+        self.method = json_dict[hedr_method]
+        self.time_control = json_dict[hedr_time_control]
+        if (self.time_control == timectrl_min or self.time_control == timectrl_min_max) and hedr_time_min in json_dict:
+            self.time_min = json_dict[hedr_time_min]
+        if (self.time_control == timectrl_max or self.time_control == timectrl_min_max) and hedr_time_max in json_dict:
+            self.time_max = json_dict[hedr_time_max]
+        self.temp_control = json_dict[hedr_temp_control]
+        if (self.temp_control == temprctrl_min or self.temp_control == temprctrl_min_max) and hedr_temp_min in json_dict:
+            self.temp_min = json_dict[hedr_temp_min]
+        if (self.temp_control == temprctrl_max or self.temp_control == temprctrl_min_max) and hedr_temp_max in json_dict:
+            self.temp_max = json_dict[hedr_temp_max]
+        if self.mats_data is None:
+            raise RuntimeWarning(f"{__class__.__name}: mats_data is None")
+        else:
+            self.__calc_qty()
+    
+    
 
     def test_data_creation1(self):
         self.material_name = 'H2O'
