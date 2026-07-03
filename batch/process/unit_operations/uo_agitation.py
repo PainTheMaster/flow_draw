@@ -43,19 +43,19 @@ list
 #dict_dtil_drpdwn = defs.dict_opt_<unit operation>
 hedr_spec_agit = "Specification"
 """header item for the unit operation Agitation, the way the rotation rate is specified: specific rpm, guidance rpm, or discretion"""
-hedr_rpm = "Rotation (rpm)"
+hedr_rpm = "Rotation_(rpm)"
 """header item for the unit operation Agitation, specific rotation rate"""
-hedr_Ti_min = "Ti_min (deg-C)"
+hedr_Ti_min = "Ti_min_(deg-C)"
 """header item for the unit operation Agitation, specific Ti_min during agitation, optional"""
-hedr_Ti_max = "Ti_max (deg-C)"
+hedr_Ti_max = "Ti_max_(deg-C)"
 """header item for the unit operation Agitation, specific Ti_max during agitation, optional"""
-hedr_time_min = "Minimum time"
+hedr_time_min = "Minimum_time"
 """header item for the unit operation Agitation, minimum agitation time, optional"""
-hedr_time_max = "Maximum time"
+hedr_time_max = "Maximum_time"
 """header item for the unit operation Agitation, maximum agitation time, optional"""
-hedr_time_unit = "Time unit"
+hedr_time_unit = "Time_unit"
 """header item for the unit operation Agitation, second, minute, hour"""
-hedr_dissolution_check = "Dissolution check"
+hedr_dissolution_check = "Dissolution_check"
 """header item for the unit operation Agitation, need for dissolution check. bool"""
 list_hedr = [hedr_spec_agit,
             hedr_rpm,
@@ -274,7 +274,8 @@ class Agitation(uo.UnitOperation, uo_tag=defs.tag_uo_agitation):
     
 
     def get_json_schema()->json_io.Objason:
-        list_cmn = Agitation.json_common(arg_name_uo=Agitation.uo_tag)
+        # list_cmn = Agitation.json_common(arg_name_uo=Agitation.uo_tag)
+        list_cmn = Agitation.json_common()
         spec_agit = Primitive(prim_type='string',
                             key=hedr_spec_agit,
                             enum=dict_opt[hedr_spec_agit],
@@ -282,15 +283,18 @@ class Agitation(uo.UnitOperation, uo_tag=defs.tag_uo_agitation):
                             required=True)
         rpm = Primitive(prim_type='number',
                         key=hedr_rpm,
-                        description=f'Rotation (rpm) of agitation. If "{hedr_spec_agit}"=="{opt_spec_arbitrary}", please put 0',
-                        required=True)
+                        description=f'Rotation (rpm) of agitation. If "{hedr_spec_agit}"=="{opt_spec_arbitrary}", this property is not required.',
+                        required=False)
         ti_min = Primitive(prim_type='number',
                            key=hedr_Ti_min,
-                           description="Lower limit of reactor inner temperature (Ti) during agitation. Optional. Ti_min should not exceed Ti_max.",
+                           description=f'Lower limit of reactor inner temperature (Ti) during agitation. Optional. Ti_min should not exceed Ti_max. '\
+                            f'If only a single point is specified on the source, please make this value equal to "{hedr_Ti_max}"',
                            required=False)
+        
         ti_max = Primitive(prim_type='number',
                            key=hedr_Ti_max,
-                           description="Upper limit of reactor inner temperature (Ti) during agitation. Optional. Ti_max should not be lower than Ti_min",
+                           description=f'Upper limit of reactor inner temperature (Ti) during agitation. Optional. Ti_max should not be lower than Ti_min. '\
+                           f'If only a single point is specified on the source, please make this value equal to "{hedr_Ti_min}"',
                            required=False)
         time_min = Primitive(prim_type='number',
                             key=hedr_time_min,
@@ -303,22 +307,57 @@ class Agitation(uo.UnitOperation, uo_tag=defs.tag_uo_agitation):
         time_unit = Primitive(prim_type='string',
                               key=hedr_time_unit,
                               enum=list_opt_uo_agitation_time_unit,
-                              description=f'Time unit to specify the lower/upper limits of the agitation time: second, minute, hour. If either of {hedr_time_min} or {hedr_time_max} is given, this is essential. Otherwise, please choose an arbitrary option.')
+                              description=f'Time unit to specify the lower/upper limits of the agitation time: second, minute, hour. If either of {hedr_time_min} or {hedr_time_max} is given, this is essential.',
+                              required=False)
         dissolution_check = Primitive(prim_type='string',
                                       key=hedr_dissolution_check,
                                       enum=list_opt_uo_agitation_dissolution_check,
                                       description=f'Need for dissolution check. In some cases, dissolution of a solid material in the solvent has to be checked. Please make a choice from "{opt_yes}"/"{opt_no}".',
                                       required=True)
         json_agitation = Objason(key=defs.tag_uo_agitation,
-                                 props=list_cmn+[spec_agit, rpm, ti_min, ti_max, time_min, time_max, time_unit, dissolution_check],
-                                 description='This is the object to store information for an unit operation of "agitation" extracted form the source.'\
+                                 props=list_cmn+[spec_agit, ti_min, ti_max, time_min, time_max, dissolution_check],
+                                 description='This is the object to store information for an unit operation of "agitation" extracted from the source.'\
                                     '"agitation" is an unit operation where a solution/reaction mixture/slurry is agitated.',
                                  required=False)
+        json_agitation.if_then_else(prop = spec_agit.key,
+                                    val_if= [opt_spec_specif, opt_spec_guide],
+                                    props_then=[rpm])
+        json_agitation.if_then_else(prop=time_min.key,
+                                    props_then=[time_unit])
+        json_agitation.if_then_else(prop=time_max.key,
+                                    props_then=[time_unit])
         return json_agitation
         
         
         
-
+    def load_from_json_dict(self, json_dict: dict[str, any]):
+        self.operation_seq=json_dict[defs.hedr_cmn_io_dtil_seq]
+        if defs.hedr_cmn_io_dtil_edt_cmnt in json_dict:
+            self.edit_comment = json_dict[defs.hedr_cmn_io_dtil_edt_cmnt]
+        if defs.hedr_cmn_io_dtil_precmnt in json_dict:
+            self.pre_comment = json_dict[defs.hedr_cmn_io_dtil_precmnt]
+        if defs.hedr_cmn_io_dtil_postcmnt in json_dict:
+            self.post_comment = json_dict[defs.hedr_cmn_io_dtil_postcmnt]
+        self.spec_agit = json_dict[hedr_spec_agit]
+        if hedr_rpm in json_dict:
+            self.rpm = json_dict[hedr_rpm]
+        if hedr_Ti_min in json_dict:
+            self.Ti_min = json_dict[hedr_Ti_min]
+        if hedr_Ti_max in json_dict:
+            self.Ti_max = json_dict[hedr_Ti_max]
+        if hedr_time_min in json_dict:
+            self.time_min = json_dict[hedr_time_min]
+        if hedr_time_max in json_dict:
+            self.time_max = json_dict[hedr_time_max]
+        if hedr_time_unit in json_dict:
+            self.time_unit = json_dict[hedr_time_unit]
+        
+        if json_dict[hedr_dissolution_check] == opt_yes:
+            self.dissolution_check = True
+        else:
+            self.dissolution_check = False
+        #TODO please continue
+        
 
 
     def output_unit_operation(self):

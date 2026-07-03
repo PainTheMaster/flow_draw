@@ -194,25 +194,25 @@ class Objason(JsonEntity):
             list_json_str[-1]+=','
             list_json_str.append(f' "required":[{required}],')
         
-        def then_else(is_then:bool = True, cond: dict[str, JsonEntity]=None):
-            required:str = ''
-            then_else:str = ''
-            key_then_else:str = ''
-            if is_then:
-                then_else = "then"
-                key_then_else = self.key_then
-            else:
-                then_else = "else"
-                key_then_else = self.key_else
-            list_json_str.append(f'   "{then_else}":{{')
-            list_prop_temp:list[JsonEntity] = cond[key_then_else]
-            for single_prop in list_prop_temp:
-                if single_prop.required:
-                    required += f'{self.json_literal(single_prop.key)},'
-            required = required.removesuffix(',')
-            if required != '':
-                list_json_str.append(f'    "required":[{required}]')
-            list_json_str.append('   },')
+        # def then_else(is_then:bool = True, cond: dict[str, JsonEntity]=None):
+        #     required:str = ''
+        #     then_else:str = ''
+        #     key_then_else:str = ''
+        #     if is_then:
+        #         then_else = "then"
+        #         key_then_else = self.key_then
+        #     else:
+        #         then_else = "else"
+        #         key_then_else = self.key_else
+        #     list_json_str.append(f'   "{then_else}":{{')
+        #     list_prop_temp:list[JsonEntity] = cond[key_then_else]
+        #     for single_prop in list_prop_temp:
+        #         if single_prop.required:
+        #             required += f'{self.json_literal(single_prop.key)},'
+        #     required = required.removesuffix(',')
+        #     if required != '':
+        #         list_json_str.append(f'    "required":[{required}]')
+        #     list_json_str.append('   },')
         
         if len(self.list_cond) > 0:
         #     list_json_str.append(' "allOf":[')
@@ -275,12 +275,17 @@ class Objason(JsonEntity):
                 list_json_str.append('    },')
                 list_json_str.append(f'    "required":["{cond[self.key_prop]}"]')
                 list_json_str.append('   },')
-            else:
+            elif cond[self.key_val] is not None:
                 list_json_str.append('  {')
                 list_json_str.append('   "if":{')
                 list_json_str.append('    "properties":{')
                 list_json_str.append(f'     "{cond[self.key_prop]}":{{"const":{self.json_literal(cond[self.key_val])}}}')
                 list_json_str.append('    },')
+                list_json_str.append(f'    "required":["{cond[self.key_prop]}"]')
+                list_json_str.append('   },')
+            else:
+                list_json_str.append('  {')
+                list_json_str.append('   "if":{')
                 list_json_str.append(f'    "required":["{cond[self.key_prop]}"]')
                 list_json_str.append('   },')
             if cond[self.key_then] is not None and len(cond[self.key_then]) != 0:

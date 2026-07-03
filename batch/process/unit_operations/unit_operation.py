@@ -223,6 +223,10 @@ class UnitOperation(ABC):
     def get_json_schema(caller:type[trdef.UniversalTrait] = None)->Objason:
         raise NotImplementedError()
 
+
+    @abstractmethod
+    def load_from_json_dict(self, json_dict: dict[str, any]):
+        raise NotImplementedError()
         
         
 

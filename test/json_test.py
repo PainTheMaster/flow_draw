@@ -156,8 +156,9 @@ class Test_10000_unit_ops(unittest.TestCase, trdef.GetMats):
 
 def suite_json_test():
     suite = unittest.TestSuite()
-    #suite.addTest(TestIO_00000_basic_func('test_0000_singleprop'))
-    suite.addTest(Test_10000_unit_ops('test_10000_charging_json'))
+    suite.addTest(TestIO_00000_basic_func('test_0000_singleprop'))
+    #suite.addTest(Test_10000_unit_ops('test_10000_charging_json'))
+    suite.addTest(TestIO_00000_basic_func('test_uo_agitation'))
     return suite
             
 
