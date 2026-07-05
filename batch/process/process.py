@@ -54,8 +54,8 @@ class Process(GetMats):
         if not(batch_name is None or process_name is None):
             self.data_input: proc_io.ProcessIO = proc_io.ProcessIO(batch_name=batch_name, process_name=process_name, num_unit_op=num_uo)
             """
-            Please note that self.data_input only has the information provided as the arguments. Don't know even the sequnce of unit operations.
-            Each unit operation differenciates when self.load_uo_summary() is called, and acquire details when load_unitop_detail() is called.
+            Please note that self.data_input has only the information provided as the arguments above (batch name, process name, and number of unit operations). The object doesn't hold even the sequnce of unit operations.
+            Hence the object is like a collection of placeholders for unit operations. A specific sequence is knwon when self.load_uo_summary() is called. The details for each unit operation is loaded when load_unitop_detail() is called.
             """
         self.mats_data: mats = None #mats_data is stored when load_materials_data() is called.
         self.list_uo: list[unitop.UnitOperation] = [] #This will be populated when self.load_uo_summary() is called.
@@ -67,7 +67,7 @@ class Process(GetMats):
     #TODO: Let the InputForm class create the summary input form.
     def generate_summary_mats_input_form(self):
         """
-        Calls methods to generage forms for process summary and material data. The forms are saved in the Excel file.
+        This function generates forms for <b>process summary</b> and <b>material data</b> by calling ProcessIO.generate_proc_summary_form() and ProcessIO.generate_mats_form(). The forms are saved as sheets in the Excel file.
         
         Parameters
         ------------
@@ -156,9 +156,9 @@ class Process(GetMats):
         """
         self.mats_data = self.data_input.load_mats()
 
-    #TODO: Create the process detail input form
+    #TODO: Create the process detail input form, for each unit operation in teh list_uo, get the uo-specific header and feed it to ProcessIO.generate_proc_detail_form()
 
-    #TODO Load the process detail\
+    #TODO: Load the process detail\
     def load_unitop_detail(self):
         """
         Expected to be triggered by the Batch class, this function loads unit operation details from self.data_input.
@@ -172,6 +172,7 @@ class Process(GetMats):
         -----------
         None
         """
+        
         df_uo_details: list[pd.DataFrame] = self.data_input.load_process_details()
         for i in range(len(self.list_uo)):
             temp_detail = df_uo_details[i]

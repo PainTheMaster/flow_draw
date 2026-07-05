@@ -70,18 +70,18 @@ class BatchIO:
             self.num_procs = dflt_num_procs
         #Header
         self.current_line_ws = row_hedr_excel
-        self.ws.cell(row=self.current_line_ws, column=col_item_excel, value=hedr_batch_item)
+        self.ws.cell(row=self.current_line_ws, column=col_item_excel, value=hedr_batch_item)    #'Item'
         self.ws.cell(row=self.current_line_ws, column=col_item_excel).border = defs.xl_border_around
-        self.ws.cell(row=self.current_line_ws, column=col_val_excel, value=hedr_batch_value)
+        self.ws.cell(row=self.current_line_ws, column=col_val_excel, value=hedr_batch_value)    #'Value'
         self.ws.cell(row=self.current_line_ws, column=col_val_excel).border = defs.xl_border_around
         self.current_line_ws += 1
 
         #Batch outline
-        self.ws.cell(row=self.current_line_ws, column=col_item_excel, value=item_batch_name)
+        self.ws.cell(row=self.current_line_ws, column=col_item_excel, value=item_batch_name)    #'Batch_Name'
         self.ws.cell(row=self.current_line_ws, column=col_item_excel).border = defs.xl_border_around
         self.ws.cell(row=self.current_line_ws, column=col_val_excel).border = defs.xl_border_around
         self.current_line_ws += 1
-        self.ws.cell(row=self.current_line_ws, column=col_item_excel, value=item_batch_remark)
+        self.ws.cell(row=self.current_line_ws, column=col_item_excel, value=item_batch_remark)  #'Remark_for_batch'
         self.ws.cell(row=self.current_line_ws, column=col_item_excel).border = defs.xl_border_around
         self.ws.cell(row=self.current_line_ws, column=col_val_excel).border = defs.xl_border_around
         self.current_line_ws += 1
@@ -90,15 +90,15 @@ class BatchIO:
             item_proc_name = item_proc_name_stem.format(i)
             item_uo_count = item_proc_count_uo_stem.format(i)
             item_proc_remark = item_proc_remark_stem.format(i)
-            self.ws.cell(row=self.current_line_ws, column=col_item_excel, value=item_proc_name)
+            self.ws.cell(row=self.current_line_ws, column=col_item_excel, value=item_proc_name)     #'Process_Name-{}'
             self.ws.cell(row=self.current_line_ws, column=col_item_excel).border = defs.xl_border_around
             self.ws.cell(row=self.current_line_ws, column=col_val_excel).border = defs.xl_border_around
             self.current_line_ws += 1
-            self.ws.cell(row=self.current_line_ws, column=col_item_excel, value=item_uo_count)
+            self.ws.cell(row=self.current_line_ws, column=col_item_excel, value=item_uo_count)      #'Count Subitems, Process-{}'
             self.ws.cell(row=self.current_line_ws, column=col_item_excel).border = defs.xl_border_around
             self.ws.cell(row=self.current_line_ws, column=col_val_excel).border = defs.xl_border_around
             self.current_line_ws += 1
-            self.ws.cell(row=self.current_line_ws, column=col_item_excel, value=item_proc_remark)
+            self.ws.cell(row=self.current_line_ws, column=col_item_excel, value=item_proc_remark)   #'Remark, Process-{}' 
             self.ws.cell(row=self.current_line_ws, column=col_item_excel).border = defs.xl_border_around
             self.ws.cell(row=self.current_line_ws, column=col_val_excel).border = defs.xl_border_around
             self.current_line_ws += 1

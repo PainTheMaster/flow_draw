@@ -93,7 +93,7 @@ class ProcessIO:
         self.batch_name:str = batch_name
         self.process_name:str = process_name
         self.num_unit_op:int = num_unit_op
-        self.file_path:str = batch_name+inputfile_base_name+'.xlsx'
+        self.file_path:str = batch_name+inputfile_base_name+'.xlsx' #inputfile_base_name == "_process_input"
         self.title_summary_ws:str = process_name+suffix_summary_input_ws
         self.summary_ws: Worksheet = None
         self.title_mats_ws:str = process_name+suffix_mats_input_ws
@@ -112,15 +112,15 @@ class ProcessIO:
     def __manage_io(self):
         """
         Creates an Open PyXL workbook for data input, and creates brank work sheets for summary and detail input, if the data input file with the intended name doesn't eixists.
-        Otherwise, the files is loaded to re-generate an Open PyXL workbook. Worksheets are created as necessary.
+        Otherwise, the files is loaded to re-generate an Open PyXL workbook. Worksheets are created as necessary and appropriate. The purpose of this function is to get those worksheets available for the functions which needs them.
         Please note this only takes care of worksheets, and doesn't handle DataFrame. It's up to other methods such as load_process_summary() or load_process_details().
         """
-        if not os.path.isfile(self.file_path):
+        if not os.path.isfile(self.file_path):  #file_path == batch_name+inputfile_base_name+'.xlsx' (inputfile_base_name == "_process_input")
             self.wb = xl.Workbook()
             self.wb.remove(worksheet=self.wb['Sheet'])
-            self.summary_ws: Worksheet = self.wb.create_sheet(title=self.title_summary_ws)
-            self.mats_ws: Worksheet = self.wb.create_sheet(title=self.title_mats_ws)
-            self.detail_ws: Worksheet = self.wb.create_sheet(title=self.title_detail_ws)
+            self.summary_ws: Worksheet = self.wb.create_sheet(title=self.title_summary_ws)  #title_summary_ws = process_name+suffix_summary_input_ws
+            self.mats_ws: Worksheet = self.wb.create_sheet(title=self.title_mats_ws)        #title_mats_ws = process_name+suffix_mats_input_ws
+            self.detail_ws: Worksheet = self.wb.create_sheet(title=self.title_detail_ws)    #title_detail_ws == process_name+suffix_detail_input_ws
         else:
             self.wb=xl.load_workbook(self.file_path)
             sheet_names = self.wb.sheetnames
@@ -293,8 +293,8 @@ class ProcessIO:
     
     def generate_proc_detail_form(self, seq: int, specif_header: list[str], menu_dict: dict[str, list[str]]):
         """
-        Makes a detail input table for one unit operation.
-        Prepares options for drop-down list(s) called "data validation".
+        The method makes a detail input table for one unit operation.
+        This prepares options for drop-down list(s) called "data validation".
         if self.df_summary, from which the unit operation corresponding to the given seq is retrieved, is empty, the method loads the DataFrame object by using self.load_process_summary().
         
         Parameters
@@ -363,7 +363,7 @@ class ProcessIO:
                     self.detail_ws.cell(row = self._current_line_detail, column = col).value = no_comment_instr
                 if header[col] in menu_dict_local:
                     temp_key = header[col]
-                    menu_dict_local[temp_key].add(self.detail_ws.cell(row = self._current_line_detail, column = col))
+                    menu_dict_local[temp_key].add(self.detail_ws.cell(row = self._current_line_detail, column = col)) #Linking the cell to the appropriate DataValidation.
             self._current_line_detail +=1
 
         self._current_line_detail +=1
