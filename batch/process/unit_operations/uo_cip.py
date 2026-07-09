@@ -11,6 +11,9 @@ from flow_draw.batch.process.unit_operations import unit_operation as uo
 from flow_draw.data_io import process_io as procio
 from flow_draw.materials import materials as mats
 from flow_draw.trait_def import trait_def as trdef
+#from flow_draw.data_io import json_io
+from flow_draw.data_io import json_io
+from flow_draw.data_io.json_io import JsonEntity, Array, Objason, Primitive
 #from flow_draw.trait_def.trait_def import GetMats
 
 
@@ -43,11 +46,11 @@ opt_time_unit_hour:str = defs.tag_flow_cmn_time_unit_hour
 #hedr_<something> = defs.hedr_<unit operation>_<specification item>
 #list_hedr = defs.list_hedr_<list of header items for the uo>
 #dict_dtil_drpdwn = defs.dict_opt_<unit operation>
-hedr_cip_tgt:str = "CIP target"
+hedr_cip_tgt:str = "CIP_target"
 """header item: CIP target"""
-hedr_solvent:str = "Cleaning solvent"
+hedr_solvent:str = "Cleaning_solvent"
 """header item: cleaning solvent"""
-hedr_qty_kg:float = "solvent QTY (kg)"
+hedr_qty_kg:float = "solvent_QTY_(kg)"
 """header item: solvent suantity"""
 hedr_via:str = "Via"
 """header item: path of the dirty solvent"""
@@ -195,6 +198,36 @@ class CIP(uo.UnitOperation, uo_tag=defs.tag_uo_cip):
             self.post_comment = first_row[hedr_postcomment]
         for _, subitem in df.iterrows():
             self.cip_operations.append(UnitCleaning(caller=self, sheet=self.flowsheet, ser_cip=subitem))
+
+
+    def get_json_schema()->json_io.Objason:
+        # list_cmn = Agitation.json_common(arg_name_uo=Agitation.uo_tag)
+        list_cmn = CIP.json_common()
+        cip_tgt = Primitive(prim_type="string",
+                            key=hedr_cip_tgt,
+                            description='Target of CIP (cleaning in place), e.g., eaction vessel, tank, filter dryer, etc.',
+                            required=True)
+        cip_solvent = Primitive(prim_type='string',
+                                key=hedr_solvent,
+                                description='Solvent for CIP.',
+                                required=True)
+        cip_qty = Primitive(prim_type="number",
+                            key=hedr_qty_kg,
+                            description='Quantity of the solvent in kg for cleaning in place.',
+                            required=False)
+        cip_via = Primitive(prim_type='string',
+                            key=hedr_via,
+                            description='Transit point of the cleaning liquid. Optional',
+                            required=False)
+        json_cip = Objason(key=defs.tag_uo_cip,
+                           props=list_cmn+[cip_tgt, cip_solvent, cip_qty, cip_via],
+                           description='This is object for cleaning in place (CIP) during the process. '\
+                            'CIP is done to carry out the process with limited number of pieces of equipment by avoiding contamination.'\
+                            'Please work with this object if the given process flow expricitly indicates the need for CIP.')
+        return json_cip
+        #TODO: please continue
+
+
 
 
     def get_detail_header(self) -> list[str]:
