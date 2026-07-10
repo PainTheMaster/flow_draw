@@ -13,6 +13,9 @@ from flow_draw.materials.materials import Materials as mats
 
 from flow_draw.trait_def.trait_def import GetMats as GetMats
 
+from flow_draw.data_io import json_io
+from flow_draw.data_io.json_io import JsonEntity, Array, Objason, Primitive
+
 class Process(GetMats):
     """
     The Process is for a process, which consists of many unit operations. The class holds a name, an instance of InputForm class, a sries of UnitOperation(s).
@@ -190,3 +193,6 @@ class Process(GetMats):
     def get_mats(self) -> mats:
         return self.mats_data
 
+
+
+        

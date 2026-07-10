@@ -227,6 +227,8 @@ class UnitOperation(ABC):
     @abstractmethod
     def load_from_json_dict(self, json_dict: dict[str, any]):
         raise NotImplementedError()
+    
+    
         
         
 

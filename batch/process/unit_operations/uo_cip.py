@@ -225,9 +225,6 @@ class CIP(uo.UnitOperation, uo_tag=defs.tag_uo_cip):
                             'CIP is done to carry out the process with limited number of pieces of equipment by avoiding contamination.'\
                             'Please work with this object if the given process flow expricitly indicates the need for CIP.')
         return json_cip
-        #TODO: please continue
-
-
 
 
     def get_detail_header(self) -> list[str]:
