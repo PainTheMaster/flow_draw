@@ -259,7 +259,7 @@ class Sampling(uo.UnitOperation, uo_tag=defs.tag_uo_sampling):
             self.flowsheet.put_body_comments(self.post_comment)
             self.flowsheet.linefeed()
     
-    def get_json_schema(caller = None) -> Objason:
+    def get_json_schema(caller:trdef.UniversalTrait = None) -> Objason:
         common = Sampling.json_common()
         sample_name:Primitive = Primitive(prim_type='string',
                                           key=hedr_sample_name,
@@ -331,7 +331,8 @@ class Sampling(uo.UnitOperation, uo_tag=defs.tag_uo_sampling):
                             description="An array of samples belonging to one sampling block and the necessary monitoring and/or IPC requirements associateid with them.",
                             required=True)
 
-        json_sampling = Objason(key=key_json_sampling_stage,
+        json_sampling = Objason(#key=key_json_sampling_stage,
+                                key=Sampling.uo_tag,
                                 props=common+[arr_samples],
                                 description='An object for a single sampling stage.')
 

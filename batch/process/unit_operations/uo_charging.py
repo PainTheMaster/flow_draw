@@ -365,7 +365,8 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
                           content=input_entry,
                           description='A list of material input entries. A single material or more is put in the reactor vessel in a charging/dosing stage.',
                           required=True)
-        charging_dosing = Objason(key=obj_charging_json,
+        charging_dosing = Objason(#key=obj_charging_json,
+                                  key=Charging.uo_tag,
                                   props=common+[arr_input],
                                   description='This object corresponds to a unit operation of charging/dosing which appears as a single block on the flowsheet. '\
                                     'One or more material(s) are dosed/charged into the reaction vessel.',

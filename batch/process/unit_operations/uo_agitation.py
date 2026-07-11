@@ -273,7 +273,7 @@ class Agitation(uo.UnitOperation, uo_tag=defs.tag_uo_agitation):
         return dict_opt
     
 
-    def get_json_schema()->json_io.Objason:
+    def get_json_schema(caller:trdef.UniversalTrait = None)->json_io.Objason:
         # list_cmn = Agitation.json_common(arg_name_uo=Agitation.uo_tag)
         list_cmn = Agitation.json_common()
         spec_agit = Primitive(prim_type='string',
@@ -314,7 +314,8 @@ class Agitation(uo.UnitOperation, uo_tag=defs.tag_uo_agitation):
                                       enum=list_opt_uo_agitation_dissolution_check,
                                       description=f'Need for dissolution check. In some cases, dissolution of a solid material in the solvent has to be checked. Please make a choice from "{opt_yes}"/"{opt_no}".',
                                       required=True)
-        json_agitation = Objason(key=defs.tag_uo_agitation,
+        json_agitation = Objason(#key=defs.tag_uo_agitation,
+                                 key=Agitation.uo_tag,
                                  props=list_cmn+[spec_agit, ti_min, ti_max, time_min, time_max, dissolution_check],
                                  description='This is the object to store information for an unit operation of "agitation" extracted from the source.'\
                                     '"agitation" is an unit operation where a solution/reaction mixture/slurry is agitated.',

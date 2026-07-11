@@ -411,39 +411,37 @@ class ProcessIO:
 
         return tables
 
-    def json_uo(caller: trdef.UniversalTrait, list_uo: list[unitop.UnitOperation])->Array:
-        list_objason: list[Objason] = []
-        for uo in list_uo:
-            objason_uo = uo.get_json_schema(caller)
-            list_objason.append(objason_uo)
-        arr_objason = Array(key='array_unit_operations',
-                            content=list_objason,
-                            description='List of unit operations. Please work with this array to put together the pieces of information for the process.')
-        return arr_objason
+    # def json_uo(caller: trdef.UniversalTrait, list_uo: list[unitop.UnitOperation])->Array:
+    #     list_objason: list[Objason] = []
+    #     for uo in list_uo:
+    #         objason_uo = uo.get_json_schema(caller)
+    #         list_objason.append(objason_uo)
+    #     arr_objason = Array(key='array_unit_operations',
+    #                         content=list_objason,
+    #                         description='List of unit operations. Please work with this array to put together the pieces of information for the process.')
+    #     return arr_objason
     
-    def json_uo2(self, caller:trdef.UniversalTrait, list_uo: list[unitop.UnitOperation])->str:
-        
+    def json_uo(self, caller:trdef.UniversalTrait, list_uo: list[type[unitop.UnitOperation]])->str:
         
         list_json_str:list[str] = []
         
         list_json_str.append('{')
         list_json_str.append(' "$schema": "https://json-schema.org/draft/2020-12/schema",')
         temp_title = f'{self.process_name}'
-        list_json_str.append(f' "title": {temp_title},')
-        temp_descr = f'Unit operation sequence for process "{self.process_name}"'
-        list_json_str.append(f' "title": {temp_descr},')
+        list_json_str.append(f' "title": "{temp_title}",')
+        temp_descr = f'Unit operation sequence for process \\\"{self.process_name}\\\"'
+        list_json_str.append(f' "description": "{temp_descr}",')
         list_json_str.append(' "type":"array",')
         list_json_str.append(' "items":{')
         list_json_str.append('  "oneOf": [')
         
-        str_path_defs:str ='#/$defs/'
         for uo in list_uo:
             temp_entry = f'   {{"$ref":"#/$defs/{uo.uo_tag}"}},'
             list_json_str.append(temp_entry)
         list_json_str[-1] = list_json_str[-1].removesuffix(',')
         
         list_json_str.append('  ]') #corresponds to "oneOf":[
-        list_json_str.appene(' },')  #corresponds to "items":{
+        list_json_str.append(' },')  #corresponds to "items":{
 
         list_json_str.append(' "$defs":{')
         for uo in list_uo:
@@ -456,6 +454,9 @@ class ProcessIO:
 
         list_json_str.append(' }') #corresponds to "$defs":{
         list_json_str.append('}')
+
+        for line in list_json_str:
+            print(line)
 
         single_str_json = '\n'.join(list_json_str)
         return single_str_json

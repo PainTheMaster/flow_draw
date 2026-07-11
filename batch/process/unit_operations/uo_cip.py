@@ -200,12 +200,12 @@ class CIP(uo.UnitOperation, uo_tag=defs.tag_uo_cip):
             self.cip_operations.append(UnitCleaning(caller=self, sheet=self.flowsheet, ser_cip=subitem))
 
 
-    def get_json_schema()->json_io.Objason:
+    def get_json_schema(caller:trdef.UniversalTrait = None)->json_io.Objason:
         # list_cmn = Agitation.json_common(arg_name_uo=Agitation.uo_tag)
         list_cmn = CIP.json_common()
         cip_tgt = Primitive(prim_type="string",
                             key=hedr_cip_tgt,
-                            description='Target of CIP (cleaning in place), e.g., eaction vessel, tank, filter dryer, etc.',
+                            description='Target of CIP (cleaning in place), e.g., reaction vessel, tank, filter dryer, etc.',
                             required=True)
         cip_solvent = Primitive(prim_type='string',
                                 key=hedr_solvent,
@@ -219,11 +219,12 @@ class CIP(uo.UnitOperation, uo_tag=defs.tag_uo_cip):
                             key=hedr_via,
                             description='Transit point of the cleaning liquid. Optional',
                             required=False)
-        json_cip = Objason(key=defs.tag_uo_cip,
+        json_cip = Objason(#key=defs.tag_uo_cip,
+                           key=CIP.uo_tag,
                            props=list_cmn+[cip_tgt, cip_solvent, cip_qty, cip_via],
                            description='This is object for cleaning in place (CIP) during the process. '\
                             'CIP is done to carry out the process with limited number of pieces of equipment by avoiding contamination.'\
-                            'Please work with this object if the given process flow expricitly indicates the need for CIP.')
+                            'Please work with this object if the given process flow explicitly indicates the need for CIP.')
         return json_cip
 
 
