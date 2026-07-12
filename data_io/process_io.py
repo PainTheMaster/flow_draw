@@ -8,10 +8,18 @@ from openpyxl.worksheet.worksheet import Worksheet
 from openpyxl.worksheet.datavalidation import DataValidation
 #from typing import List, Dict
 import flow_draw.trait_def.trait_def as trdef
-import flow_draw.batch.process.unit_operations.unit_operation as unitop
+import flow_draw.batch.process.unit_operations.unit_operation as uo
 
 from flow_draw.data_io import json_io
 from flow_draw.data_io.json_io import JsonEntity, Array, Objason, Primitive
+import base64
+from dotenv import load_dotenv
+from openai import OpenAI
+from pydantic import BaseModel
+from typing import List, Optional
+from pdf2image import convert_from_path
+from pathlib import Path
+
 
 
 inputfile_base_name = defs.src_io_filebasename
@@ -421,7 +429,7 @@ class ProcessIO:
     #                         description='List of unit operations. Please work with this array to put together the pieces of information for the process.')
     #     return arr_objason
     
-    def json_uo(self, caller:trdef.UniversalTrait, list_uo: list[type[unitop.UnitOperation]])->str:
+    def json_uo(self, caller:trdef.UniversalTrait, list_uo: list[type[uo.UnitOperation]])->str:
         
         list_json_str:list[str] = []
         

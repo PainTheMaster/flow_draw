@@ -1186,30 +1186,37 @@ tag_part_flow_uo_agitation_rec_chk_agit_ini:str = "agit ini"
 """Tag for a flowsheet component for uo_agitation: check box for agitation initiation"""
 part_flow_uo_agitation_rec_chk_agit_ini_jp:str = "□ 攪拌開始"
 """A flowsheet component for uo_agitation: check box for agitation initiation"""
+
 tag_part_flow_uo_agitation_rec_Tj_ini:str = "rec Tj ini"
 """Tag for a flowsheet component for uo_agitation: recording field for initial Tj"""
 part_flow_uo_agitation_rec_Tj_ini_jp:str = "開始時外温:_________℃"
 """A flowsheet component for uo_agitation: recording field for initial Tj"""
+
 tag_part_flow_uo_agitation_rec_Ti_ini:str = "rec Ti ini"
 """Tag for a flowsheet component for uo_agitation: recording field for initial Ti"""
 part_flow_uo_agitation_rec_Ti_ini_jp:str = "開始時内温:_________℃"
 """A flowsheet component for uo_agitation: recording field for initial Ti"""
+
 tag_part_flow_uo_agitation_instr_dissoln_check_visual:str = "instruction dissolution check by visual"
 """Tag for a flowsheet component for uo_agitation: instruction for dissolution chec by visual"""
 part_flow_uo_agitation_instr_dissoln_check_visual_jp:str = "溶解確認:目視"
 """A flowsheet component for uo_agitation: instruction for dissolution chec by visual"""
+
 tag_part_flow_uo_agitation_rec_chk_dissoln:str = "check box dissolution"
 """Tag for a flowsheet component for uo_agitation: check box for dissolution"""
 part_flow_uo_agitation_rec_chk_dissoln_jp:str = "□ 溶解確認"
 """A flowsheet component for uo_agitation: check box for dissolution"""
+
 tag_part_flow_uo_agitation_rec_final_Tj:str = "rec Tj agitation end"
 """Tag for a flowsheet component for uo_agitation: recording field for final Tj"""
 part_flow_uo_agitation_rec_final_Tj_jp:str = "攪拌終了時外温:_________℃"
 """A flowsheet component for uo_agitation: recording field for final Tj"""
+
 tag_part_flow_uo_agitation_rec_final_Ti:str = "rec Ti agitation end"
 """Tag for a flowsheet component for uo_agitation: recording field for final Ti"""
 part_flow_uo_agitation_rec_final_Ti_jp:str = "攪拌終了時内温:_________℃"
 """A flowsheet component for uo_agitation: recording field for final Ti"""
+
 tag_part_flow_uo_agitation_rec_dissoln_Tj:str = "rec Tj at complete dissolution"
 """Tag for a flowsheet component for uo_agitation: recording field for Tj at the time of dissolution"""
 part_flow_uo_agitation_rec_dissoln_Tj_jp:str = "溶解確認時外温:_________℃"

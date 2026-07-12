@@ -36,9 +36,9 @@ class SaltyWaterFlow(unittest.TestCase):
                                     operation_seq=1,
                                     num_subitems=2,
                                     edit_comment="put salt and water")
-        tst_proc.list_uo.append(tst_chgng)
-        tst_proc.list_uo[0].load_params_from_df(SetChgngForSaltWater())
-        tst_proc.list_uo[0].output_unit_operation()
+        tst_proc.seq_uo.append(tst_chgng)
+        tst_proc.seq_uo[0].load_params_from_df(SetChgngForSaltWater())
+        tst_proc.seq_uo[0].output_unit_operation()
         tst_proc.flowsheet.save("test000_SaltWaterOutputFlow.xlsx")
         self.assertTrue(True)
 
@@ -1013,7 +1013,8 @@ def suite_0000_40000():
     # suite.addTest(UnitOperationOutputTest("test_1005_temp_ctrl_TiTj_mode"))
     # suite.addTest(UnitOperationOutputTest("test_1006_temp_ctrl_Tj_mode"))
     # suite.addTest(UnitOperationOutputTest("test_1007_temp_ctrl_Ti_mode"))
-    # suite.addTest(UnitOperationOutputTest("test_1008_agit_full"))
+    suite.addTest(UnitOperationOutputTest("test_1008_agit_full"))
+    suite.addTest(UnitOperationOutputTest("test_1009_agit_minimal"))
     # suite.addTest(UnitOperationOutputTest("test_1010_settling_full"))
     # suite.addTest(UnitOperationOutputTest("test_1011_settling_minimal"))
     # suite.addTest(UnitOperationOutputTest("test_1012_phase_disch_full"))
@@ -1036,13 +1037,13 @@ def suite_0000_40000():
     # suite.addTest(FiltTest4200("test_4204_no_equip"))
     # suite.addTest(FiltTest4200("test_4205_no_p_unit"))
     # suite.addTest(samplingTest4300("test_4301_full"))
-    suite.addTest(SamplingTest4300("test_4302_ipc_only"))
-    suite.addTest(SamplingTest4300("test_4303_monit_only"))
-    suite.addTest(SamplingTest4300("test_4304_noname_err"))
-    suite.addTest(SamplingTest4300("test_4305_no_ipc_crteria"))
-    suite.addTest(SamplingTest4300("test_4306_ipc_item_unit_mismatch"))
-    suite.addTest(SamplingTest4300("test_4307_ipc_criteria_item_mismatch"))
-    suite.addTest(SamplingTest4300("test_4308_monit_item_unit_mismatch"))
+    # suite.addTest(SamplingTest4300("test_4302_ipc_only"))
+    # suite.addTest(SamplingTest4300("test_4303_monit_only"))
+    # suite.addTest(SamplingTest4300("test_4304_noname_err"))
+    # suite.addTest(SamplingTest4300("test_4305_no_ipc_crteria"))
+    # suite.addTest(SamplingTest4300("test_4306_ipc_item_unit_mismatch"))
+    # suite.addTest(SamplingTest4300("test_4307_ipc_criteria_item_mismatch"))
+    # suite.addTest(SamplingTest4300("test_4308_monit_item_unit_mismatch"))
 
 
     return suite

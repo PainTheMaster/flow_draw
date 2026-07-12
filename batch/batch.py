@@ -27,6 +27,25 @@ class Batch:
 
     #TODO Implement me!
     def generate_outline_form(self):
+        """
+        <p>Generates batch IO form. A batch IO form is to collect the following items.</p>
+        <ul>
+         <li>Batch name</li>
+         <li>Remark for batch</li>
+         <li>Process name-<i>n</i></li>
+         <li>Count of sub items-<i>n</i></li>
+         <li>Remark-<i>n</i></li>
+        </ul>
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        ----------
+        None
+
+        """
         self.btchio.generate_form()  
         self.btchio.save_wb()
 
@@ -93,8 +112,6 @@ class Batch:
             else:
                 break
         self.num_procs = len(self.list_proc)
-        
-
   
     def generate_process_summary_form(self):
         """
@@ -105,6 +122,20 @@ class Batch:
             """self.list_proc is a list of processes belonging to this batch. It has been populated when load_outline() was called."""
             proc.generate_summary_mats_input_form()
 
+    def generate_mats_form_for_ai(self):
+        """
+        The function invokes material form generation. This is intended for work with AI.
+
+        Params
+        -----------
+        None
+
+        Returns
+        -----------
+        None
+        """
+        for proc in self.list_proc:
+            proc.generate_mats_form_for_ai()
 
     def load_process_summary(self):
         """

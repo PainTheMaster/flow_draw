@@ -3,8 +3,11 @@ import pandas as pd
 import flow_draw.definitions as defs
 # from flow_draw.batch.process.unit_operations import unit_operation
 #from flow_draw.batch.process.unit_operations.unit_operation import UnitOperation as unitop
-import flow_draw.batch.process.unit_operations.unit_operation as unitop
+import flow_draw.batch.process.unit_operations.unit_operation as uo
 import flow_draw.batch.process.unit_operations.uo_charging as chgng
+import flow_draw.batch.process.unit_operations.uo_sampling as smplng
+import flow_draw.batch.process.unit_operations.uo_cip as cip
+import flow_draw.batch.process.unit_operations.uo_agitation as agit
 import flow_draw.batch.process.unit_operations.uo_placeholder as plchldr
 
 from flow_draw.data_io import process_io as proc_io
@@ -60,8 +63,11 @@ class Process(GetMats):
             Please note that self.data_input has only the information provided as the arguments above (batch name, process name, and number of unit operations). The object doesn't hold even the sequnce of unit operations.
             Hence the object is like a collection of placeholders for unit operations. A specific sequence is knwon when self.load_uo_summary() is called. The details for each unit operation is loaded when load_unitop_detail() is called.
             """
+        
+        #self.str_json_proc: str = self.data_input.json_uo(caller=self, )
         self.mats_data: mats = None #mats_data is stored when load_materials_data() is called.
-        self.list_uo: list[unitop.UnitOperation] = [] #This will be populated when self.load_uo_summary() is called.
+        self.seq_uo: list[uo.UnitOperation] = []
+        """Sequene of the constituting unit operations. This will be populated when self.load_uo_summary() is called."""
         self.flowsheet: fsht.Flowsheet = fsht.Flowsheet()
 
         
@@ -81,8 +87,26 @@ class Process(GetMats):
         None
             Returns nothing. The results are stored in self.data_input.
         """
-        self.data_input.generate_proc_summary_form(list_unit_ops=unitop.list_unit_ops)
+        self.data_input.generate_proc_summary_form(list_unit_ops=uo.list_unit_ops)
         #At the time of process summary creation, the material information should be available. Plus, it is neceesary before loading the detail.
+        self.data_input.generate_mats_form()
+        #self.data_input.save_form()
+
+
+    def generate_mats_form_for_ai(self):
+        """
+        The function invokes material form generation. This is intended for work with AI. 
+        In that case, process summary form can be skipped, whereas material form is needed.
+        
+        Params
+        -----------
+        None
+
+        Returns
+        -----------
+        None
+        
+        """
         self.data_input.generate_mats_form()
         #self.data_input.save_form()
 
@@ -103,7 +127,7 @@ class Process(GetMats):
         None
         """
         df_summary = self.data_input.load_process_summary()
-        uo_reg = unitop.registry_uo_cls
+        uo_reg = uo.registry_uo_cls
         for _, row in df_summary.iterrows():
             seq = int(row[defs.hedr_io_sumry_seq])
             uo_title = str(row[defs.hedr_io_summary_uo])
@@ -116,7 +140,7 @@ class Process(GetMats):
                                         operation_seq=seq,
                                         num_subitems=num_subitems,
                                         edit_comment=edit_comment)
-            self.list_uo.append(new_uo_inst)
+            self.seq_uo.append(new_uo_inst)
 
     # def __prep_uo(self, df_summary: pd.DataFrame):
     #     """
@@ -177,17 +201,29 @@ class Process(GetMats):
         """
         
         df_uo_details: list[pd.DataFrame] = self.data_input.load_process_details()
-        for i in range(len(self.list_uo)):
+        for i in range(len(self.seq_uo)):
             temp_detail = df_uo_details[i]
-            if self.list_uo[i].uo_tag == (temp_detail)[defs.hedr_cmn_io_dtil_uo].iloc[0]:
-                self.list_uo[i].load_params_from_df(temp_detail)
+            if self.seq_uo[i].uo_tag == (temp_detail)[defs.hedr_cmn_io_dtil_uo].iloc[0]:
+                self.seq_uo[i].load_params_from_df(temp_detail)
             else:
-                raise RuntimeError(f"{self.__class__.__name__}: Seq Nr-{self.list_uo[i].operation_seq} Unit operation name mismatch.",
-                                   f"summary table: {self.list_uo[i].uo_tag}",
+                raise RuntimeError(f"{self.__class__.__name__}: Seq Nr-{self.seq_uo[i].operation_seq} Unit operation name mismatch.",
+                                   f"summary table: {self.seq_uo[i].uo_tag}",
                                    f"detail table: {temp_detail[defs.hedr_cmn_io_dtil_uo].iloc[0]}")
                 
 
     #TODO Let's implement self.prep_uo() to create a list of unit operations to be ready to receive detail data.
+
+
+    
+
+    def ai_load_process_details(self):
+        self.load_materials_data()
+        #lit_uo = list(unitop.registry_uo_cls.values())
+        list_uo: list[type[uo.UnitOperation]] = [chgng.Charging, agit.Agitation, cip.CIP, smplng.Sampling]
+        self.data_input.ai_load_process_details()
+
+        
+
 
 
     def get_mats(self) -> mats:
