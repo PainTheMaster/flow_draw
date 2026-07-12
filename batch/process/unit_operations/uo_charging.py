@@ -1,6 +1,7 @@
 import pandas as pd
 import json
 import flow_draw.definitions as defs
+import warnings
 from typing import Optional
 from flow_draw.batch.process.unit_operations import unit_operation as uo
 from flow_draw.data_io import process_io
@@ -647,7 +648,9 @@ class Input:
         if self.temp_control == temprctrl_max or self.temp_control == temprctrl_min_max:
             self.temp_max = ser[hedr_temp_max]
         if self.mats_data is None:
-            raise RuntimeWarning(f"{__class__.__name}: mats_data is None")
+            warnings.warn(message=f"{__class__.__name}: mats_data is None",
+                          category=RuntimeWarning)
+            #raise RuntimeWarning(f"{__class__.__name}: mats_data is None")
         else:
             self.__calc_qty()
 
@@ -667,7 +670,9 @@ class Input:
         if (self.temp_control == temprctrl_max or self.temp_control == temprctrl_min_max) and hedr_temp_max in json_dict:
             self.temp_max = json_dict[hedr_temp_max]
         if self.mats_data is None:
-            raise RuntimeWarning(f"{__class__.__name}: mats_data is None")
+            warnings.warn(message=f"{__class__.__name}: mats_data is None",
+                          category=RuntimeWarning)
+            #raise RuntimeWarning(f"{__class__.__name}: mats_data is None")
         else:
             self.__calc_qty()
     

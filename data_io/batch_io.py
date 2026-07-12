@@ -70,9 +70,9 @@ class BatchIO:
             self.num_procs = dflt_num_procs
         #Header
         self.current_line_ws = row_hedr_excel
-        self.ws.cell(row=self.current_line_ws, column=col_item_excel, value=hedr_batch_item)    #'Item'
+        self.ws.cell(row=self.current_line_ws, column=col_item_excel, value=hedr_batch_item)    #colum 'Item'
         self.ws.cell(row=self.current_line_ws, column=col_item_excel).border = defs.xl_border_around
-        self.ws.cell(row=self.current_line_ws, column=col_val_excel, value=hedr_batch_value)    #'Value'
+        self.ws.cell(row=self.current_line_ws, column=col_val_excel, value=hedr_batch_value)    #colum 'Value'
         self.ws.cell(row=self.current_line_ws, column=col_val_excel).border = defs.xl_border_around
         self.current_line_ws += 1
 

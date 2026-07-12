@@ -13,11 +13,11 @@ import flow_draw.batch.process.unit_operations.unit_operation as uo
 from flow_draw.data_io import json_io
 from flow_draw.data_io.json_io import JsonEntity, Array, Objason, Primitive
 import base64
-from dotenv import load_dotenv
+import dotenv
 from openai import OpenAI
 from pydantic import BaseModel
 from typing import List, Optional
-from pdf2image import convert_from_path
+import pdf2image
 from pathlib import Path
 
 
@@ -429,6 +429,9 @@ class ProcessIO:
     #                         description='List of unit operations. Please work with this array to put together the pieces of information for the process.')
     #     return arr_objason
     
+
+
+
     def json_uo(self, caller:trdef.UniversalTrait, list_uo: list[type[uo.UnitOperation]])->str:
         
         list_json_str:list[str] = []
@@ -471,6 +474,43 @@ class ProcessIO:
 
         #array, items, oneOf, ref
         #defs
+
+    def ai_load_process_details(self, caller: trdef.GetMats=None,  list_uo: list[uo.UnitOperation]=[]):
+        str_json_uo=self.json_uo(caller=caller, list_uo=list_uo)
+        filename_input = self.process_name+'.pdf'
+
+        poppler_dir = "C:\\poppler-26.02.0\\Library\\bin"
+        os.environ["PATH"] += os.pathsep+poppler_dir
+        dotenv.load_dotenv()
+        client = OpenAI(api_key=os.getenv("OPEN_AI_KEY"))
+        print("Open AI client opened")
+        
+        os.mkdir('.\\images')
+        images = pdf2image.convert_from_path(filename_input, dpi=300)
+        image_paths:list[str] = []
+        for i, img in enumerate(images):
+            img.save(fp=f'images\\page_{i+1}.png', format='PNG')
+            image_paths.append(f'.\\images\\page_{i+1}.png')
+        
+        
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
 
 
 

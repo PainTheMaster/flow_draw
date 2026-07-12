@@ -4,6 +4,7 @@
 import pandas as pd
 import flow_draw.definitions as defs
 import flow_draw.data_io.flowsheet as fsht
+import warnings
 from typing import Optional
 from flow_draw.batch.process.unit_operations import unit_operation as uo
 from flow_draw.data_io import process_io as procio
@@ -355,9 +356,15 @@ class Agitation(uo.UnitOperation, uo_tag=defs.tag_uo_agitation):
                 self.time_unit = first_row[hedr_time_unit]
             else:
                 self.time_unit = lang_dict_cmn[opt_time_unit_minute]
-                raise RuntimeWarning(f"{self.__class__.__name__}: \"{hedr_time_unit}\" not selected in the detail input worksheet"\
-                                     f"for Op. Seq. {self.operation_seq} although minimum and/or maximum agitation time has benn provided"\
-                                     f"in the worksheet. Time unit of \"min\" is used to keep the ball rolling.")
+                warnings.warn(
+                    message=f"{self.__class__.__name__}: \"{hedr_time_unit}\" not selected in the detail input worksheet "
+                                     f"for Op. Seq. {self.operation_seq} although minimum and/or maximum agitation time has been provided "
+                                     f"in the worksheet. Time unit of \"min\" is used to keep the ball rolling.",
+                    category=RuntimeWarning)
+
+                # raise RuntimeWarning(f"{self.__class__.__name__}: \"{hedr_time_unit}\" not selected in the detail input worksheet"\
+                #                      f"for Op. Seq. {self.operation_seq} although minimum and/or maximum agitation time has benn provided"\
+                #                      f"in the worksheet. Time unit of \"min\" is used to keep the ball rolling.")
         
         if first_row[hedr_dissolution_check] == opt_yes:
             self.dissolution_check = True
@@ -505,7 +512,9 @@ class Agitation(uo.UnitOperation, uo_tag=defs.tag_uo_agitation):
         elif self.time_max is not None:
             stc_time_ctrl = dict_stcs[tag_stc_flow_time_max].format(time_max=self.time_max, time_unit=lang_dict_cmn[self.time_unit])
         else:
-            raise RuntimeWarning(f"{__class__.__name__}: Wrong call for __put_time_control() in Op. Seq. {self.operation_seq}.")
+            warnings.warn(message=f"{__class__.__name__}: Wrong call for __put_time_control() in Op. Seq. {self.operation_seq}.",
+                          category=RuntimeWarning)
+            #raise RuntimeWarning(f"{__class__.__name__}: Wrong call for __put_time_control() in Op. Seq. {self.operation_seq}.")
         self.flowsheet.put_line(content=stc_time_ctrl)
     
     def __put_temp_control(self):
@@ -517,7 +526,9 @@ class Agitation(uo.UnitOperation, uo_tag=defs.tag_uo_agitation):
         elif self.Ti_max is not None:
             stc_temp_ctrl = dict_stcs[tag_stc_flow_Ti_max].format(Ti_min=self.Ti_max)
         else:
-            raise RuntimeWarning(f"{__class__.__name__}: Wrong call for __put_temp_control() in Op. Seq. {self.operation_seq}.")
+            warnings.warn(message=f"{__class__.__name__}: Wrong call for __put_temp_control() in Op. Seq. {self.operation_seq}.",
+                          category=RuntimeWarning)
+            #raise RuntimeWarning(f"{__class__.__name__}: Wrong call for __put_temp_control() in Op. Seq. {self.operation_seq}.")
 
         self.flowsheet.put_line(content=stc_temp_ctrl,
                                 record=dict_part_flow[tag_part_flow_rec_Tj_ini])

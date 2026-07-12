@@ -5,6 +5,7 @@
 import pandas as pd
 import flow_draw.definitions as defs
 import flow_draw.data_io.flowsheet as fsht
+import warnings
 from typing import Optional
 from flow_draw.batch.process.unit_operations import unit_operation as uo
 from flow_draw.data_io import process_io as procio
@@ -188,9 +189,14 @@ class Settling(uo.UnitOperation, uo_tag=defs.tag_uo_settling):
                 self.time_unit = first_row[hedr_time_unit]
             else:
                 self.time_unit = opt_time_unit_minute
-                raise RuntimeWarning(f"{self.__class__.__name__}: No time unit is not designated for Op. Seq {self.operation_seq} \
-                                     even though the minimum and/or maximum time has been provided. Time unit of minumte is put \
-                                     just to keep the ball rolling.")
+                warnings.warn(message=f"{self.__class__.__name__}: No time unit is designated for Op. Seq {self.operation_seq} "
+                                     "even though the minimum and/or maximum time has been provided. Time unit of minute is put "
+                                     "just to keep the ball rolling.",
+                                category=RuntimeWarning)
+                # raise RuntimeWarning(f"{self.__class__.__name__}: No time unit is not designated for Op. Seq {self.operation_seq} "
+                #                      "even though the minimum and/or maximum time has been provided. Time unit of minumte is put "
+                #                      "just to keep the ball rolling.")
+            
         if not pd.isna(first_row[hedr_Ti_min]):
             self.Ti_min = first_row[hedr_Ti_min]
         if not pd.isna(first_row[hedr_Ti_max]):

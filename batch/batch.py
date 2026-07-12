@@ -124,7 +124,8 @@ class Batch:
 
     def generate_mats_form_for_ai(self):
         """
-        The function invokes material form generation. This is intended for work with AI.
+        The function invokes material form generation. This is intended for work with AI. 
+        In that case, process summary form can be skipped, whereas material form is needed.
 
         Params
         -----------
@@ -169,5 +170,10 @@ class Batch:
         ---------
         None
         """
-        for p in self.list_proc:
-            p.load_unitop_detail()
+        for proc in self.list_proc:
+            proc.load_unitop_detail()
+
+    def ai_load_process_details(self):
+        for proc in self.list_proc:
+            #proc.ai_load_process_details()
+            proc.ai_load_process_details()
