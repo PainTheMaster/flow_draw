@@ -387,32 +387,37 @@ class Agitation(uo.UnitOperation, uo_tag=defs.tag_uo_agitation):
                             required=True)
         rpm = Primitive(prim_type='number',
                         key=hedr_rpm,
-                        description=f'Rotation (rpm) of agitation. If "{hedr_spec_agit}"=="{opt_spec_arbitrary}", this property is not required.',
-                        required=False)
+                        description=f'Rotation (rpm) of agitation. If "{hedr_spec_agit}"=="{opt_spec_arbitrary}", this property shall be null.',
+                        nullable=True)
         ti_min = Primitive(prim_type='number',
                            key=hedr_Ti_min,
                            description=f'Lower limit of reactor inner temperature (Ti) during agitation. Optional. Ti_min should not exceed Ti_max. '\
                             f'If only a single point is specified on the source, please make this value equal to "{hedr_Ti_max}"',
-                           required=False)
+                           required=True,
+                           nullable=True)
         
         ti_max = Primitive(prim_type='number',
                            key=hedr_Ti_max,
                            description=f'Upper limit of reactor inner temperature (Ti) during agitation. Optional. Ti_max should not be lower than Ti_min. '\
                            f'If only a single point is specified on the source, please make this value equal to "{hedr_Ti_min}"',
-                           required=False)
+                           required=True,
+                           nullable=True)
         time_min = Primitive(prim_type='number',
                             key=hedr_time_min,
                             description="Minimum required time for agitation, optional",
-                            required=False)
+                            required=True,
+                            nullable=True)
         time_max = Primitive(prim_type='number',
                             key=hedr_time_max,
                             description="Upper limit of agitation time, optional",
-                            required=False)
+                            required=True,
+                            nullable=True)
         time_unit = Primitive(prim_type='string',
                               key=hedr_time_unit,
                               enum=list_opt_uo_agitation_time_unit,
-                              description=f'Time unit to specify the lower/upper limits of the agitation time: second, minute, hour. If either of {hedr_time_min} or {hedr_time_max} is given, this is essential.',
-                              required=False)
+                              description=f'Time unit to specify the lower/upper limits of the agitation time: second, minute, hour. '
+                               f'If either of {hedr_time_min} or {hedr_time_max} is given, this is essential. Can be null otherwise.',
+                              nullable=True)
         dissolution_check = Primitive(prim_type='string',
                                       key=hedr_dissolution_check,
                                       enum=list_opt_uo_agitation_dissolution_check,
@@ -420,17 +425,17 @@ class Agitation(uo.UnitOperation, uo_tag=defs.tag_uo_agitation):
                                       required=True)
         json_agitation = Objason(#key=defs.tag_uo_agitation,
                                  key=Agitation.uo_tag,
-                                 props=list_cmn+[spec_agit, ti_min, ti_max, time_min, time_max, dissolution_check],
+                                 props=list_cmn+[spec_agit, rpm, ti_min, ti_max, time_min, time_max, time_unit, dissolution_check],
                                  description='This is the object to store information for an unit operation of "agitation" extracted from the source.'\
                                     '"agitation" is an unit operation where a solution/reaction mixture/slurry is agitated.',
                                  required=False)
-        json_agitation.if_then_else(prop = spec_agit.key,
-                                    val_if= [opt_spec_specif, opt_spec_guide],
-                                    props_then=[rpm])
-        json_agitation.if_then_else(prop=time_min.key,
-                                    props_then=[time_unit])
-        json_agitation.if_then_else(prop=time_max.key,
-                                    props_then=[time_unit])
+        # json_agitation.if_then_else(prop = spec_agit.key,
+        #                             val_if= [opt_spec_specif, opt_spec_guide],
+        #                             props_then=[rpm])
+        # json_agitation.if_then_else(prop=time_min.key,
+        #                             props_then=[time_unit])
+        # json_agitation.if_then_else(prop=time_max.key,
+        #                             props_then=[time_unit])
         return json_agitation
         
         

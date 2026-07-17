@@ -17,7 +17,7 @@ class TestIO_00000_basic_func(unittest.TestCase):
         inner1 = json_io.Primitive(prim_type='string',
                                    key='primitive_1',
                                    description='description for inner 1',
-                                   accept_null=True)
+                                   nullable=True)
         output = inner1.asEntity()
         for line in output:
             print(line)
@@ -192,10 +192,12 @@ class Test_20000_proc_json(unittest.TestCase, trdef.GetMats):
     def test_20000_proc_comp_json(self):
         list_ops: list[type[uo.UnitOperation]] = [chgng.Charging, agit.Agitation, cip.CIP, smplng.Sampling]
         inst_pio = pio.ProcessIO(batch_name="test_batch", process_name="test_process", num_unit_op=4)
-        json_str = inst_pio.json_uo(caller=self, list_uo=list_ops)
         print()
         print("==========================")
-        print(json_str)
+        json_str = inst_pio.json_uo(caller=self, list_uo=list_ops)
+        # print()
+        # print("==========================")
+        # print(json_str)
         print("==========================")
         print(f"len(json_str)=={len(json_str)}; {json_str.count('\n')} lines")
         

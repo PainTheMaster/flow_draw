@@ -27,9 +27,11 @@ class Array(JsonEntity):
                 key:str=None,
                 content:JsonEntity | list[JsonEntity]=None,
                 description:str=None,
-                required:bool=True):
+                required:bool=True,
+                nullable:bool=None):
         super().__init__(key=key, description=description, required=required)
         self.content=content
+        self.nullable = nullable
         if key is None:
             raise ValueError(f'{self.__class__.__name__}: "key" not given.')        
         if content is None:
@@ -42,7 +44,10 @@ class Array(JsonEntity):
         list_json_str.append('{')
         if self.description is not None:
             list_json_str.append(f' "description":{self.json_literal(self.description)},')
-        list_json_str.append(' "type":"array",')
+        if self.nullable:
+            list_json_str.append(' "type":["array", "null"],')
+        else:
+            list_json_str.append(' "type":"array",')
 
         if isinstance(self.content, JsonEntity):
             lines:list[str] = self.content.asType()
@@ -80,95 +85,26 @@ class Objason(JsonEntity):
                 key:str=None,
                 props: list[JsonEntity]=None,
                 description:str=None,
-                required:bool=True):
+                required:bool=True,
+                nullable:bool=False):
         super().__init__(key=key, description=description, required=required)
+        self.nullable = nullable
         if key is None:
             raise ValueError(f'{self.__class__.__name__}: "key" not given.')  
         self.props=props
         if props is None or len(props)==0:
             raise ValueError(f'{self.__class__.__name__}: Property not given.')
         self.list_cond:list[dict[str,JsonEntity]] = []
-    
-    # def asType(self)->list[str]:
-    #     list_json_str: list[str] = []
-    #     list_json_str.append('{')
-    #     if self.description is not None:
-    #         list_json_str.append(f' "description":{self.json_literal(self.description)},')
-    #     list_json_str.append(' "type":"object",')
-    #     list_json_str.append(' "properties":{')
-    #     required:str=''
-    #     for single_prop in self.props:
-    #         for line in single_prop.asEntity():
-    #             list_json_str.append('  '+line)
-    #         list_json_str[-1] += ','
-    #         if single_prop.required:
-    #             required += f'{self.json_literal(single_prop.key)},'
-    #     list_json_str[-1]=list_json_str[-1].removesuffix(',')
-    #     list_json_str.append(' }')
-
-    #     required=required.removesuffix(',')
-    #     if required != '':
-    #         list_json_str[-1]+=','
-    #         list_json_str.append(f' "required":[{required}],')
-        
-    #     def then_else(is_then:bool = True, cond: dict[str, JsonEntity]=None):
-    #         required:str = ''
-    #         then_else:str = ''
-    #         key_then_else:str = ''
-    #         if is_then:
-    #             then_else = "then"
-    #             key_then_else = self.key_then
-    #         else:
-    #             then_else = "else"
-    #             key_then_else = self.key_else
-    #         list_json_str.append(f'   "{then_else}":{{')
-    #         list_json_str.append('    "properties":{')
-    #         list_prop_temp:list[JsonEntity] = cond[key_then_else]
-    #         for single_prop in list_prop_temp:
-    #             list_str = single_prop.asEntity()
-    #             for line in list_str:
-    #                 list_json_str.append('     '+line)
-    #             list_json_str[-1] += ','
-    #             if single_prop.required:
-    #                 required += f'{self.json_literal(single_prop.key)},'
-    #         list_json_str[-1] = list_json_str[-1].removesuffix(',')
-    #         list_json_str.append('    },')
-    #         required = required.removesuffix(',')
-    #         if required != '':
-    #             list_json_str.append(f'    "required":[{required}]')
-    #         list_json_str[-1] = list_json_str[-1].removesuffix(',')
-    #         list_json_str.append('   },')
-        
-    #     if len(self.list_cond) > 0:
-    #         list_json_str.append(' "allOf":[')
-    #         for cond in self.list_cond:
-    #             list_json_str.append('  {')
-    #             list_json_str.append('   "if":{')
-    #             list_json_str.append('    "properties":{')
-    #             list_json_str.append(f'     "{cond[self.key_prop]}":{{"const":{self.json_literal(cond[self.key_val])}}}')
-    #             list_json_str.append('    },')
-    #             list_json_str.append(f'    "required":["{cond[self.key_prop]}"]')
-    #             list_json_str.append('   },')
-    #             if cond[self.key_then] is not None:
-    #                 then_else(is_then=True, cond=cond)
-    #             if cond[self.key_else] is not None:
-    #                 then_else(is_then=False, cond=cond)
-    #             list_json_str[-1] = list_json_str[-1].removesuffix(',')
-    #             list_json_str.append('  },')
-    #         list_json_str[-1] = list_json_str[-1].removesuffix(',')
-    #         list_json_str.append(' ]')
-    #     list_json_str[-1] = list_json_str[-1].removesuffix(',')
-    #     list_json_str.append('}')
-
-    #     return list_json_str
 
     def asType(self)->list[str]:
-        #TODO: test me!
         list_json_str: list[str] = []
         list_json_str.append('{')
         if self.description is not None:
             list_json_str.append(f' "description":{self.json_literal(self.description)},')
-        list_json_str.append(' "type":"object",')
+        if self.nullable:
+            list_json_str.append(' "type":["object", "null"]')
+        else:
+            list_json_str.append(' "type":"object",')
         list_json_str.append(' "properties":{')
         required:str=''
         for single_prop in self.props:
@@ -177,15 +113,7 @@ class Objason(JsonEntity):
             list_json_str[-1] += ','
             if single_prop.required:
                 required += f'{self.json_literal(single_prop.key)},'
-        # for single_dict in self.list_cond:
-        #     for single_prop in single_dict[self.key_then]:
-        #         for line in single_prop.asEntity():
-        #             list_json_str.append('  '+line)
-        #         list_json_str[-1] += ','
-        #     for single_prop in single_dict[self.key_else]:
-        #         for line in single_prop.asEntity():
-        #             list_json_str.append('  '+line)
-        #         list_json_str[-1] += ','
+    
         list_json_str[-1]=list_json_str[-1].removesuffix(',')
         list_json_str.append(' }')
 
@@ -194,44 +122,7 @@ class Objason(JsonEntity):
             list_json_str[-1]+=','
             list_json_str.append(f' "required":[{required}],')
         
-        # def then_else(is_then:bool = True, cond: dict[str, JsonEntity]=None):
-        #     required:str = ''
-        #     then_else:str = ''
-        #     key_then_else:str = ''
-        #     if is_then:
-        #         then_else = "then"
-        #         key_then_else = self.key_then
-        #     else:
-        #         then_else = "else"
-        #         key_then_else = self.key_else
-        #     list_json_str.append(f'   "{then_else}":{{')
-        #     list_prop_temp:list[JsonEntity] = cond[key_then_else]
-        #     for single_prop in list_prop_temp:
-        #         if single_prop.required:
-        #             required += f'{self.json_literal(single_prop.key)},'
-        #     required = required.removesuffix(',')
-        #     if required != '':
-        #         list_json_str.append(f'    "required":[{required}]')
-        #     list_json_str.append('   },')
-        
         if len(self.list_cond) > 0:
-        #     list_json_str.append(' "allOf":[')
-        #     for cond in self.list_cond:
-        #         list_json_str.append('  {')
-        #         list_json_str.append('   "if":{')
-        #         list_json_str.append('    "properties":{')
-        #         list_json_str.append(f'     "{cond[self.key_prop]}":{{"const":{self.json_literal(cond[self.key_val])}}}')
-        #         list_json_str.append('    },')
-        #         list_json_str.append(f'    "required":["{cond[self.key_prop]}"]')
-        #         list_json_str.append('   },')
-        #         if cond[self.key_then] is not None:
-        #             then_else(is_then=True, cond=cond)
-        #         if cond[self.key_else] is not None:
-        #             then_else(is_then=False, cond=cond)
-        #         list_json_str[-1] = list_json_str[-1].removesuffix(',')
-        #         list_json_str.append('  },')
-        #     list_json_str[-1] = list_json_str[-1].removesuffix(',')
-        #     list_json_str.append(' ],')
             self.__put_condition(list_json_str=list_json_str)
         list_json_str.append(' "additionalProperties":false')
         list_json_str[-1] = list_json_str[-1].removesuffix(',')
@@ -332,23 +223,19 @@ class Primitive(JsonEntity):
                  description:str = None,
                  enum:list[str]|list[int]|list[float]|list[bool] = None,
                  const:str|int|float|bool = None,
-                 accept_null:bool=False,
+                 nullable:bool=False,
                  required:bool = True):
         super().__init__(key=key, description=description, required=required)
         self.prim_type:str = prim_type
         self.enum:list[str]|list[int]|list[float]|list[bool] = enum
         self.const:str|int|float|bool = const
-        self.accept_null:bool = accept_null
+        self.nullable:bool = nullable
         if key is None:
             raise ValueError(f'{self.__class__.__name__}: "key" not given.')  
         if enum is not None and const is not None:
             raise ValueError(f'{self.__class__.__name__}: "enum" and "const" are given at the same time.')
         if prim_type is None:
             raise ValueError(f'{self.__class__.__name__}: Type not selected.')
-        # if const is True:
-        #     const = 'true'
-        # elif const is False:
-        #     const = 'false'
 
     
     def asType(self)->list[str]:
@@ -356,7 +243,7 @@ class Primitive(JsonEntity):
         list_json_str.append('{')
         if self.description is not None:
             list_json_str.append(f' "description":{self.json_literal(self.description)},')
-        if self.accept_null:
+        if self.nullable:
             list_json_str.append(f' "type": ["{self.prim_type}", "null"],')
         else:
             list_json_str.append(f' "type":"{self.prim_type}",')
@@ -372,7 +259,6 @@ class Primitive(JsonEntity):
         list_json_str.append('}')
         return list_json_str
     
-
     def asEntity(self)->list[str]:
         list_json_str:list[str] = self.asType()
         list_json_str[0] =f'{self.json_literal(self.key)}:'+list_json_str[0]
@@ -420,19 +306,5 @@ class Tuple(JsonEntity):
         list_json_str[0]=f'{self.json_literal(self.key)}:'+list_json_str[0]
         return list_json_str
         
-# class IfEls:
-#     key_prop = "key_property"
-#     key_val = "key_value"
-#     key_then = "key_then"
-#     key_else = "key_else"
-#     def __init__(self,
-#                  prop:str=None,
-#                  val_if:any=None,
-#                  props_then:list[JsonEntity]|IfEls=[],
-#                  props_else:list[JsonEntity]|IfEls=[]):
-#         self.temp_dict = {self.key_prop:prop,
-#                           self.key_val:val_if,
-#                           self.key_then:props_then,
-#                           self.key_else:props_else}
 
 

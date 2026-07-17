@@ -213,6 +213,13 @@ col_io_batch_item_ouln_tab:int = 0
 col_io_batch_value_ouln_tab:int = 1
 """Column number for the items in the table"""
 
+
+#>>>>>>>>>>>>>>>>>> JSON Schema Component <<<<<<<<<<<<<<<<<<#
+json_key_arr_uo_params:str = "json_uo_param_array"
+
+
+
+
 ################################################################################################################################
 #                              PARTS FOR PROCESS DATA IO: HEADER ITEMS, DROP-DOWN OPTIONS ETC                                  #
 ################################################################################################################################

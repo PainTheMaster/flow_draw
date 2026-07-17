@@ -207,15 +207,18 @@ class UnitOperation(ABC):
         edtcmnt = Primitive(prim_type="string",
                             key=defs.hedr_cmn_io_dtil_edt_cmnt,
                             description="An optional editorial comment. This comment will not be printed on the flowsheet.",
-                            required=False)
+                            required=True,
+                            nullable=True)
         precmnt = Primitive(prim_type="string",
                             key=defs.hedr_cmn_io_dtil_precmnt,
                             description="An optional short instructional comment placed at the beginning of the instruction block for the unit operation in the process workflow",
-                            required=False)
+                            required=True,
+                            nullable=True)
         postcmnt = Primitive(prim_type="string",
                             key=defs.hedr_cmn_io_dtil_postcmnt,
                             description="An optional short instructional comment placed at the end of the instruction block for the unit operation in the process workflow",
-                            required=False)
+                            required=True,
+                            nullable=True)
         
         return [seq_uo, name_uo, edtcmnt, precmnt, postcmnt]
     

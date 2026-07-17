@@ -309,13 +309,13 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
         
         time_min = Primitive(prim_type="number",
                              key=hedr_time_min,
-                             description=f'Lower limit of charging/dosing time. Necessary if "{hedr_time_control}" is "{timectrl_min}" or "{timectrl_min_max}"',
-                             required=True)
+                             description=f'Lower limit of charging/dosing time. Necessary if "{hedr_time_control}" is "{timectrl_min}" or "{timectrl_min_max}"; nullable otherwise',
+                             nullable=True)
         
         time_max = Primitive(prim_type="number",
                              key=hedr_time_max,
                              description=f'Upper limit of charging/dosing time. Necessary if "{hedr_time_control}" is "{timectrl_max}" or "{timectrl_min_max}"',
-                             required=True)
+                             nullable=True)
         
         temp_ctrl = Primitive(prim_type='string',
                               key=hedr_temp_control,
@@ -325,42 +325,43 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
                               f'"{temprctrl_min}" is selected when the lower limit is set for the dosing/charging.'\
                               f'"{temprctrl_max}" is selected when the upper limit is set for the dosing/charging.'\
                               f'"{temprctrl_min_max}" is for a case where the charging/dosing have to take place in a certain specific temperature range.',
-                              required=True
-                              )
+                              required=True)
         
         temp_min = Primitive(prim_type='number',
                              key=hedr_temp_min,
-                             description='An optional lower limit for inner temperature during dosing/charging. Please follow the instruction on the given data source.',
-                             required=True
-                             )
+                             description= f'An optional lower limit for internal temperature during dosing/charging.'
+                             f'This is necessary if "{hedr_temp_control}" is "{temprctrl_min}" or "{temprctrl_min_max}". Nullable, otherwise.',
+                             nullable=True,
+                             required=True)
         temp_max = Primitive(prim_type='number',
                              key=hedr_temp_max,
-                             description='An optional upper limit for inner temperature during dosing/charging. Please follow the instruction on the given data source.',
-                             required=True
-                             )
+                             description=f'An optional upper limit for internal temperature during dosing/charging.'
+                             f'This is necessary if "{hedr_temp_control}" is "{temprctrl_max}" or "{temprctrl_min_max}". Nullable, otherwise.',
+                             nullable=True,
+                             required=True)
         
         input_entry = Objason(key=entry_input_json,
-                              props=[name_mats, qty_mats, unit_mats, permiss_error, charging_method, time_ctrl, temp_ctrl],
-                              description=f'Combination of material, quantity, permissible quantity error, charging method, time constraints, temperature range to define each charging/dosing operation.'
+                              props=[name_mats, qty_mats, unit_mats, permiss_error, charging_method, time_ctrl, time_min, time_max, temp_ctrl, temp_min, temp_max],
+                              description='Combination of material, quantity, permissible quantity error, charging method, time constraints, temperature range to define each charging/dosing operation.'
                              )
-        input_entry.if_then_else(prop=time_ctrl.key,
-                                 val_if=timectrl_min,
-                                 props_then=[time_min])
-        input_entry.if_then_else(prop=time_ctrl.key,
-                                 val_if=timectrl_max,
-                                 props_then=[time_max])
-        input_entry.if_then_else(prop=time_ctrl.key,
-                                 val_if=timectrl_min_max,
-                                 props_then=[time_min, time_max])
-        input_entry.if_then_else(prop=temp_ctrl.key,
-                                 val_if=temprctrl_min,
-                                 props_then=[temp_min])
-        input_entry.if_then_else(prop=temp_ctrl.key,
-                                 val_if=temprctrl_max,
-                                 props_then=[temp_max])
-        input_entry.if_then_else(prop=temp_ctrl.key,
-                                 val_if=temprctrl_min_max,
-                                 props_then=[temp_min, temp_max])
+        # input_entry.if_then_else(prop=time_ctrl.key,
+        #                          val_if=timectrl_min,
+        #                          props_then=[time_min])
+        # input_entry.if_then_else(prop=time_ctrl.key,
+        #                          val_if=timectrl_max,
+        #                          props_then=[time_max])
+        # input_entry.if_then_else(prop=time_ctrl.key,
+        #                          val_if=timectrl_min_max,
+        #                          props_then=[time_min, time_max])
+        # input_entry.if_then_else(prop=temp_ctrl.key,
+        #                          val_if=temprctrl_min,
+        #                          props_then=[temp_min])
+        # input_entry.if_then_else(prop=temp_ctrl.key,
+        #                          val_if=temprctrl_max,
+        #                          props_then=[temp_max])
+        # input_entry.if_then_else(prop=temp_ctrl.key,
+        #                          val_if=temprctrl_min_max,
+        #                          props_then=[temp_min, temp_max])
         
         arr_input = Array(key=arry_inputs_json,
                           content=input_entry,
@@ -369,7 +370,7 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
         charging_dosing = Objason(#key=obj_charging_json,
                                   key=Charging.uo_tag,
                                   props=common+[arr_input],
-                                  description='This object corresponds to a unit operation of charging/dosing which appears as a single block on the flowsheet. '\
+                                  description='This object corresponds to a unit operation of charging/dosing which appears as a single block on the flowsheet. '
                                     'One or more material(s) are dosed/charged into the reaction vessel.',
                                   required=False)
         return charging_dosing

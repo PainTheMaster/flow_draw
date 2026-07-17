@@ -214,11 +214,13 @@ class CIP(uo.UnitOperation, uo_tag=defs.tag_uo_cip):
         cip_qty = Primitive(prim_type="number",
                             key=hedr_qty_kg,
                             description='Quantity of the solvent in kg for cleaning in place.',
-                            required=False)
+                            required=True,
+                            nullable=True)
         cip_via = Primitive(prim_type='string',
                             key=hedr_via,
                             description='Transit point of the cleaning liquid. Optional',
-                            required=False)
+                            required=True,
+                            nullable=True)
         json_cip = Objason(#key=defs.tag_uo_cip,
                            key=CIP.uo_tag,
                            props=list_cmn+[cip_tgt, cip_solvent, cip_qty, cip_via],

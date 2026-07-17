@@ -53,7 +53,7 @@ hedr_ipc_rec_titles:str = "IPC_Rec_Title"
 """Header item for IPC record title for each analytical item"""
 hedr_ipc_rec_units:str = "IPC_Rec_Unit"
 """Header item for IPC record unit for each analytical item"""
-hedr_monit_items:str = "Monit_Item"
+hedr_monit_item_high:str = "Monit_Item_High_Level"
 """Header item for sampling category; Monitoring items"""
 hedr_monit_rec_items:str = "Monit_Rec_Title"
 """Header item for sampling category; monitoring record title for each analytical item"""
@@ -67,7 +67,7 @@ list_hedr:list[str]=[hedr_sample_name,
                      hedr_ipc_criteria,
                      hedr_ipc_rec_titles,
                      hedr_ipc_rec_units,
-                     hedr_monit_items,
+                     hedr_monit_item_high,
                      hedr_monit_rec_items,
                      hedr_monit_rec_units,
                      hedr_sample_comment]
@@ -75,13 +75,22 @@ list_hedr:list[str]=[hedr_sample_name,
 
 key_json_arr_monit_items = 'json_array_monit_items'
 """Key to a JSON entity: An array of monitoring items"""
-key_json_tuple_monit ='json_monitoring_pair'
-"""Key to a JSON entity: A pair (tuple) of monitoring item name and unit."""
-key_json_obj_monit = 'json_process_monitoring'
+# key_json_tuple_monit ='json_monitoring_pair'
+# """Key to a JSON entity: A pair (tuple) of monitoring item name and unit."""
+key_json_pair_monit ='json_monit_pair'
+"""Key to a JSON entity: A pair (object) of monitoring item name and unit."""
+
+key_json_monit_item_name ='json_monit_item'
+"""Key to a JSON entity: A pair (object) of monitoring item name and unit."""
+
+key_json_monit_unit ='json_monit_unit'
+"""Key to a JSON entity: A pair (object) of monitoring item name and unit."""
+
+key_json_obj_monit = 'json_proc_monit'
 """Key to a JSON entity: A set of process monitoring for a sample."""
-key_json_arr_monit = 'json_arr_monitoring'
+key_json_arr_monit = 'json_arr_monit'
 """key to a JSON entity: An array of monitoring items."""
-key_json_tuple_ipc = 'json_ipc_tuple'
+key_json_obj_ipc = 'json_obj_ipc'
 """Kye to a JSON entry: A tuple of ipc item, unit, and criterion."""
 key_json_arr_ipc_items = 'json_array_ipc_items'
 """Key to a JSON entry: an array of tuple of IPC items"""
@@ -270,39 +279,49 @@ class Sampling(uo.UnitOperation, uo_tag=defs.tag_uo_sampling):
                                         f'"{opt_sampling_cat_ipc}" stands for in-process control with a must-satisfied criterion before moving to the next step. '\
                                         f'"{opt_sampling_cat_monit}" is sampling for technical information. Normally, not with a criterion. '\
                                         f'"{opt_sampling_cat_both}" is for both in-process control and monitoring. One or more analytical items are for decision making, whereas the other are just for info.',
-                                       enum=list_opt_sampling_cat
-                                       )
+                                       enum=list_opt_sampling_cat)
         
         #以下、モニタリング
         monit_item_name = Primitive(prim_type='string',
-                                    key=hedr_monit_items,
+                                    key=hedr_monit_item_high,
                                     description=f'A monitoring item. This items is applicable to sampling categories of "{opt_sampling_cat_monit}" and "{opt_sampling_cat_both}". '\
                                         'This is more a high-level identifier, such as purity, residual solvent, etc. '\
                                         'instead of concrete names such as this impurity, that impurity, or this solvent... '\
                                         'if a right name cannot be read from the source, please put <placeholder>.')
-        monit_ietm = Primitive(prim_type='string',
+        monit_item = Primitive(prim_type='string',
                                    key=hedr_monit_rec_items,
-                                   description=f'A lower-layer recording item belonging to a super-category "{hedr_monit_items}"'\
-                                   'a concrete analytical items such as residual solvent, impurity, assay, pH, etc.')
+                                   description=f'A lower-layer recording item belonging to a super-category "{hedr_monit_item_high}"'\
+                                   'a concrete analytical items such as a specific residual solvent (e.g., EtOH, THF...), impurity-x, assay, pH, etc.')
         monit_unit = Primitive(prim_type='string',
                                    key=hedr_monit_rec_units,
                                    description=f'Unit for a monitoring item. Null is accepted.',
-                                   accept_null=True,
+                                   nullable=True,
                                    required=True)
-        tuple_monit = Tuple(key=key_json_tuple_monit,
-                            content=[monit_ietm, monit_unit],
-                            description='A pair of monitoring item and unit for it.')
+        obj_monit = Objason(key=key_json_pair_monit,
+                            props=[monit_item, monit_unit],
+                            description="A pair of monitoring item and the unit for it.")
+        
+        # tuple_monit = Tuple(key=key_json_tuple_monit,
+        #                     content=[monit_item, monit_unit],
+        #                     description='A pair of monitoring item and unit for it.')
+        # arr_monit_items = Array(key=key_json_arr_monit_items,
+        #                         content=tuple_monit,
+        #                         description=f'An array of tuple of monitoring item and unit for it. This is linked to "{hedr_monit_item_high}".',
+        #                         required=False)
+        
         arr_monit_items = Array(key=key_json_arr_monit_items,
-                                content=tuple_monit,
-                                description=f'An array of tuple of monitoring item and unit for it. This is linked to "{hedr_monit_items}".',
-                                required=False)
+                                content=obj_monit,
+                                description=f'An array of pairing object of monitoring item and unit for it. This is linked to "{hedr_monit_item_high}" elsewhere on a higher leve.',
+                                required=True,
+                                nullable=True)
         obj_monit = Objason(key=key_json_obj_monit,
                             props=[monit_item_name, arr_monit_items],
                             description='A set of process monitoring information linked to a sample.')
         arr_monit = Array(key=key_json_arr_monit,
                           content = obj_monit,
                           description="An array of various kinds of monitoring items.",
-                          required=False)
+                          required=True,
+                          nullable=True)
         
         #IPC below
         ipc_item = Primitive(prim_type='string',
@@ -310,17 +329,20 @@ class Sampling(uo.UnitOperation, uo_tag=defs.tag_uo_sampling):
                              description='IPC items, such as a residual solvent, a specific impurity, conversion, etc.')
         ipc_unit = Primitive(prim_type='string',
                              key=hedr_ipc_rec_units,
-                             description='reporting unit for the IPC item, such as %, ppm, etc.')
+                             description='reporting unit for the IPC item, such as %, ppm, etc.',
+                             nullable=True)
         ipc_criterion = Primitive(prim_type='string',
                                  key=hedr_ipc_criteria,
                                  description='IPC criterion, e.g., "conversion>99.95%"')
-        tuple_ipc = Tuple(key=key_json_tuple_ipc,
-                          content=[ipc_item, ipc_unit, ipc_criterion],
-                          description='A set (tuple) of IPC item, unit for the item, and IPC criterion for it.')
+        obj_ipc = Objason(key=key_json_obj_ipc,
+                          props=[ipc_item, ipc_unit, ipc_criterion],
+                          description='A set of IPC item, unit for the item, and the IPC criterion for it.')
+        
         arr_ipc = Array(key=key_json_arr_ipc_items,
-                        content=tuple_ipc,
+                        content=obj_ipc,
                         description='A series (array) of a set of IPC items, unit for it, and criterion for one sample.',
-                        required=False)
+                        required=True,
+                        nullable=True)
         
         single_sample = Objason(key=key_json_single_sample,
                                 props=[sample_name, sample_cat, arr_monit, arr_ipc],
@@ -329,7 +351,8 @@ class Sampling(uo.UnitOperation, uo_tag=defs.tag_uo_sampling):
         arr_samples = Array(key=key_json_arr_samples,
                             content=single_sample,
                             description="An array of samples belonging to one sampling block and the necessary monitoring and/or IPC requirements associateid with them.",
-                            required=True)
+                            required=True,
+                            nullable=True)
 
         json_sampling = Objason(#key=key_json_sampling_stage,
                                 key=Sampling.uo_tag,
@@ -374,7 +397,7 @@ class Sampling(uo.UnitOperation, uo_tag=defs.tag_uo_sampling):
         df.at[df.index[0], hedr_ipc_criteria] = ipc_criteria
         df.at[df.index[0], hedr_ipc_rec_titles] = ipc_rec_titles
         df.at[df.index[0], hedr_ipc_rec_units] = ipc_rec_units
-        df.at[df.index[0], hedr_monit_items] = monit_items
+        df.at[df.index[0], hedr_monit_item_high] = monit_items
         df.at[df.index[0], hedr_monit_rec_items] = monit_rec_items
         df.at[df.index[0], hedr_monit_rec_units] = monit_rec_units
         df.at[df.index[0], hedr_sample_comment] = sample_comment
@@ -403,7 +426,7 @@ class Sampling(uo.UnitOperation, uo_tag=defs.tag_uo_sampling):
         df.at[row, hedr_ipc_criteria] = ipc_criteria
         df.at[row, hedr_ipc_rec_titles] = ipc_rec_titles
         df.at[row, hedr_ipc_rec_units] = ipc_rec_units
-        df.at[row, hedr_monit_items] = monit_items
+        df.at[row, hedr_monit_item_high] = monit_items
         df.at[row, hedr_monit_rec_items] = monit_rec_items
         df.at[row, hedr_monit_rec_units] = monit_rec_units
         df.at[row, hedr_sample_comment] = sample_comment
@@ -458,8 +481,8 @@ class SingleSample:
                                 although {opt_sampling_cat_ipc}/{opt_sampling_cat_both} is selected in the colum {hedr_sampling_cat}.")
         
         if self.category == opt_sampling_cat_monit or self.category == opt_sampling_cat_both:
-            if not pd.isna(ser[hedr_monit_items]):
-                str_monit_item:str = ser[hedr_monit_items]
+            if not pd.isna(ser[hedr_monit_item_high]):
+                str_monit_item:str = ser[hedr_monit_item_high]
                 self.content_monit_items = str_monit_item.split("\n")
             if not pd.isna(ser[hedr_monit_rec_items]):
                 str_monit_rec_items:str =  ser[hedr_monit_rec_items]
