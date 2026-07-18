@@ -367,31 +367,10 @@ class Sampling(uo.UnitOperation, uo_tag=defs.tag_uo_sampling):
         super().load_from_json_dict(json_dict)
         arr_sample:list[dict[str,any]] = json_dict[key_json_arr_samples]
         if arr_sample is not None:
-            for sample in arr_sample:
+            for i, sample in enumerate(arr_sample):
                 single_sample=SingleSample(flowsheet=self.flowsheet)
-
-                """
-                Sample potentially contains:
-                    sample_name: non-nullable
-                    sample_cat: non-nullable
-                    arr_monit: null_able
-                    arr_ipc: nullable
-                """
-
-    
-
-
-
-        
-        
-        
-
-        
-        
-        
-        
-        
-
+                single_sample.load_from_single_sample_json(sample_seq=i+1, sample=sample)
+                self.list_samples.append(single_sample)
 
 
 
@@ -514,7 +493,7 @@ class SingleSample:
         if not pd.isna(ser[hedr_sample_comment]):
             self.sample_comment = ser[hedr_sample_comment]
 
-    def __load_from_single_sample_json(self, sample_seq:int=None, sample:dict[str,any]=None):
+    def load_from_single_sample_json(self, sample_seq:int=None, sample:dict[str,any]=None):
         self.sample_seq = sample_seq
         self.name = sample[hedr_sample_name]
         if self.name is None:
@@ -540,7 +519,10 @@ class SingleSample:
                 for ipc in arr_ipc:
                     self.content_ipc_criteria.append(ipc[hedr_ipc_criteria])
                     self.rec_ipc_item_name.append(ipc[hedr_ipc_rec_titles])
-                    self.rec_ipc_unit.append(ipc[hedr_ipc_rec_units])
+                    if ipc[hedr_ipc_rec_units] is not None:
+                        self.rec_ipc_unit.append(ipc[hedr_ipc_rec_units])
+                    else:
+                        self.rec_ipc_unit.append("")
         
         if self.category == opt_sampling_cat_monit or self.category == opt_sampling_cat_both:
             arr_monit:list[dict[str, any]] = sample[key_json_arr_monit]

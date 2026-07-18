@@ -1,6 +1,8 @@
 import unittest
+import json
 import flow_draw.data_io.json_io as json_io
 from flow_draw.data_io.json_io import Primitive, Array, Objason
+import flow_draw.data_io.flowsheet as fsht
 import flow_draw.batch.process.unit_operations.uo_agitation as agit
 import flow_draw.batch.process.unit_operations.unit_operation as uo
 import flow_draw.trait_def.trait_def as trdef
@@ -207,8 +209,115 @@ class Test_20000_proc_json(unittest.TestCase, trdef.GetMats):
 
 
 
+class Test_21000_input_json(unittest.TestCase):
+    def setUp(self):
+        flowsheet = fsht.Flowsheet()
+        self.sampling = smplng.Sampling(flowsheet=flowsheet, operation_seq=2, edit_comment="test sampling")
+        return super().setUp()
+    
+    def test_21000_sampling_json_read(self):
+        json_str:str ="""
+                    {
+                    "Seq_Nr": 3,
+                    "Unit_Operation": "sampling",
+                    "Edit_Comment": "Added IPC criterion for conversion.",
+                    "Pre-comment": "Collect samples before proceeding to the next step.",
+                    "Post-comment": "Record results in the batch record.",
+                    "json_array_samples": [
+                        {
+                        "Sample_Name": "Reaction Mixture",
+                        "Category": "Both",
+                        "json_arr_monit": [
+                            {
+                            "Monit_Item_High_Level": "Residual Solvent",
+                            "json_array_monit_items": [
+                                {
+                                "Monit_Rec_Title": "THF",
+                                "Monit_Rec_Unit": "ppm"
+                                },
+                                {
+                                "Monit_Rec_Title": "EtOH",
+                                "Monit_Rec_Unit": "ppm"
+                                }
+                            ]
+                            },
+                            {
+                            "Monit_Item_High_Level": "Purity",
+                            "json_array_monit_items": [
+                                {
+                                "Monit_Rec_Title": "HPLC Purity",
+                                "Monit_Rec_Unit": "%"
+                                }
+                            ]
+                            }
+                        ],
+                        "json_array_ipc_items": [
+                            {
+                            "IPC_Rec_Title": "Conversion",
+                            "IPC_Rec_Unit": "%",
+                            "IPC_Criteria": ">=99.5"
+                            },
+                            {
+                            "IPC_Rec_Title": "Impurity A",
+                            "IPC_Rec_Unit": "%",
+                            "IPC_Criteria": "<=0.20"
+                            }
+                        ]
+                        },
+                        {
+                        "Sample_Name": "Filtrate",
+                        "Category": "Monitoring",
+                        "json_arr_monit": [
+                            {
+                            "Monit_Item_High_Level": "Appearance",
+                            "json_array_monit_items": [
+                                {
+                                "Monit_Rec_Title": "Color",
+                                "Monit_Rec_Unit": null
+                                }
+                            ]
+                            }
+                        ],
+                        "json_array_ipc_items": null
+                        },
+                        {
+                        "Sample_Name": "Wet Cake",
+                        "Category": "IPC",
+                        "json_arr_monit": null,
+                        "json_array_ipc_items": [
+                            {
+                            "IPC_Rec_Title": "Moisture",
+                            "IPC_Rec_Unit": "%",
+                            "IPC_Criteria": "<=5.0"
+                            }
+                        ]
+                        }
+                    ]
+                    }
 
+        """
+        json_obj = json.loads(json_str)
+        print()
+        print("==================")
+        print(json_obj)
+        print("==================")
+        self.sampling.load_from_json_dict(json_obj)
+        print(f'len(self.list_samples): {len(self.sampling.list_samples)}')
+        for sample in self.sampling.list_samples:
+            print("--------------------")
+            print(f'sample_seq: {sample.sample_seq}')
+            print(f'name: {sample.name}')
+            print(f'category: {sample.category}')
+            print(f'content_ipc_criteria: {sample.content_ipc_criteria}')
+            print(f'content_monit_items: {sample.content_monit_items}')
+            print(f'rec_ipc_item_name: {sample.rec_ipc_item_name}')
+            print(f'rec_ipc_unit: {sample.rec_ipc_unit}')
+            print(f'rec_monit_item_name: {sample.rec_monit_item_name}')
+            print(f'rec_monit_unit: {sample.rec_monit_unit}')
+            print(f'sample_comment: {sample.sample_comment}')
+            print("--------------------")
 
+        self.assertTrue(True)
 
 
 def suite_json_test():
@@ -217,7 +326,9 @@ def suite_json_test():
     #suite.addTest(Test_10000_unit_ops('test_10000_charging_json'))
     #suite.addTest(TestIO_00000_basic_func('test_uo_agitation'))
     #suite.addTest(Test_10000_unit_ops("test_12000_cip_json"))
-    suite.addTest(Test_20000_proc_json("test_20000_proc_comp_json"))
+    #suite.addTest(Test_20000_proc_json("test_20000_proc_comp_json"))
+    #suite.addTest(Test_10000_unit_ops("test_11000_sampling_json"))
+    suite.addTest(Test_21000_input_json("test_21000_sampling_json_read"))
     return suite
             
 
