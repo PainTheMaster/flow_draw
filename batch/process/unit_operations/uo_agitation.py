@@ -441,33 +441,26 @@ class Agitation(uo.UnitOperation, uo_tag=defs.tag_uo_agitation):
         
         
     def load_from_json_dict(self, json_dict: dict[str, any]):
-        self.operation_seq=json_dict[defs.hedr_cmn_io_dtil_seq]
-        if defs.hedr_cmn_io_dtil_edt_cmnt in json_dict:
-            self.edit_comment = json_dict[defs.hedr_cmn_io_dtil_edt_cmnt]
-        if defs.hedr_cmn_io_dtil_precmnt in json_dict:
-            self.pre_comment = json_dict[defs.hedr_cmn_io_dtil_precmnt]
-        if defs.hedr_cmn_io_dtil_postcmnt in json_dict:
-            self.post_comment = json_dict[defs.hedr_cmn_io_dtil_postcmnt]
+        # self.operation_seq=json_dict[defs.hedr_cmn_io_dtil_seq]
+        # if defs.hedr_cmn_io_dtil_edt_cmnt in json_dict:
+        #     self.edit_comment = json_dict[defs.hedr_cmn_io_dtil_edt_cmnt]
+        # if defs.hedr_cmn_io_dtil_precmnt in json_dict:
+        #     self.pre_comment = json_dict[defs.hedr_cmn_io_dtil_precmnt]
+        # if defs.hedr_cmn_io_dtil_postcmnt in json_dict:
+        #     self.post_comment = json_dict[defs.hedr_cmn_io_dtil_postcmnt]
+        super().load_from_json_dict(json_dict=json_dict)
+
         self.spec_agit = json_dict[hedr_spec_agit]
-        if hedr_rpm in json_dict:
-            self.rpm = json_dict[hedr_rpm]
-        if hedr_Ti_min in json_dict:
-            self.Ti_min = json_dict[hedr_Ti_min]
-        if hedr_Ti_max in json_dict:
-            self.Ti_max = json_dict[hedr_Ti_max]
-        if hedr_time_min in json_dict:
-            self.time_min = json_dict[hedr_time_min]
-        if hedr_time_max in json_dict:
-            self.time_max = json_dict[hedr_time_max]
-        if hedr_time_unit in json_dict:
-            self.time_unit = json_dict[hedr_time_unit]
-        
+        self.rpm = json_dict[hedr_rpm]
+        self.Ti_min = json_dict[hedr_Ti_min]
+        self.Ti_max = json_dict[hedr_Ti_max]
+        self.time_min = json_dict[hedr_time_min]
+        self.time_max = json_dict[hedr_time_max]
+        self.time_unit = json_dict[hedr_time_unit]
         if json_dict[hedr_dissolution_check] == opt_yes:
             self.dissolution_check = True
         else:
             self.dissolution_check = False
-        #TODO please continue
-        
 
 
     def output_unit_operation(self):

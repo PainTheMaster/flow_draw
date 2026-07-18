@@ -229,8 +229,14 @@ class UnitOperation(ABC):
 
     @abstractmethod
     def load_from_json_dict(self, json_dict: dict[str, any]):
-        raise NotImplementedError()
-    
+        self.operation_seq = json_dict[defs.hedr_cmn_io_dtil_seq]
+        self.edit_comment = json_dict[defs.hedr_cmn_io_dtil_edt_cmnt]
+        self.pre_comment = json_dict[defs.hedr_cmn_io_dtil_precmnt]
+        self.post_comment = json_dict[defs.hedr_cmn_io_dtil_postcmnt]
+
+
+
+         
     
         
         

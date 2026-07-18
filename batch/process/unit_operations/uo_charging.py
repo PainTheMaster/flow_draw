@@ -378,13 +378,14 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
 
 
     def load_from_json_dict(self, json_dict: dict[str, any]):
-        self.operation_seq=json_dict[defs.hedr_cmn_io_dtil_seq]
-        if defs.hedr_cmn_io_dtil_edt_cmnt in json_dict:
-            self.edit_comment = json_dict[defs.hedr_cmn_io_dtil_edt_cmnt]
-        if defs.hedr_cmn_io_dtil_precmnt in json_dict:
-            self.pre_comment = json_dict[defs.hedr_cmn_io_dtil_precmnt]
-        if defs.hedr_cmn_io_dtil_postcmnt in json_dict:
-            self.post_comment = json_dict[defs.hedr_cmn_io_dtil_postcmnt]
+        # self.operation_seq=json_dict[defs.hedr_cmn_io_dtil_seq]
+        # if defs.hedr_cmn_io_dtil_edt_cmnt in json_dict:
+        #     self.edit_comment = json_dict[defs.hedr_cmn_io_dtil_edt_cmnt]
+        # if defs.hedr_cmn_io_dtil_precmnt in json_dict:
+        #     self.pre_comment = json_dict[defs.hedr_cmn_io_dtil_precmnt]
+        # if defs.hedr_cmn_io_dtil_postcmnt in json_dict:
+        #     self.post_comment = json_dict[defs.hedr_cmn_io_dtil_postcmnt]
+        super().load_from_json_dict(json_dict=json_dict)
         arr_input: list[dict[str, str|float]] = json_dict[arry_inputs_json]
         for single_input in arr_input:
             # name_mat:str = tmp_ipt[hedr_material_name]

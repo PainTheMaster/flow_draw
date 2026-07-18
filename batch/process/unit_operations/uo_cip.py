@@ -229,6 +229,10 @@ class CIP(uo.UnitOperation, uo_tag=defs.tag_uo_cip):
                             'Please work with this object if the given process flow explicitly indicates the need for CIP.')
         return json_cip
 
+    def load_from_json_dict(self, json_dict):
+        super().load_from_json_dict(json_dict)
+        #TODO: please continue
+
 
     def get_detail_header(self) -> list[str]:
         return list_hedr
