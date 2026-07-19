@@ -164,6 +164,16 @@ class Test_10000_unit_ops(unittest.TestCase, trdef.GetMats):
         print('----------------------')
         self.assertTrue(True)
 
+    def test_12001_agit_json(self):
+        test_json:Objason = agit.Agitation.get_json_schema(caller=self)
+        list_str_json = test_json.asType()
+        print()
+        print('----------------------')
+        for line in list_str_json:
+            print(line)
+        print('----------------------')
+        self.assertTrue(True)
+
 
     
 
@@ -213,6 +223,7 @@ class Test_21000_input_json(unittest.TestCase):
     def setUp(self):
         flowsheet = fsht.Flowsheet()
         self.sampling = smplng.Sampling(flowsheet=flowsheet, operation_seq=2, edit_comment="test sampling")
+        self.agit = agit.Agitation(flowsheet=flowsheet, operation_seq=3, edit_comment="test agit")
         return super().setUp()
     
     def test_21000_sampling_json_read(self):
@@ -302,6 +313,11 @@ class Test_21000_input_json(unittest.TestCase):
         print(json_obj)
         print("==================")
         self.sampling.load_from_json_dict(json_obj)
+        print(f'operation_seq: {self.sampling.operation_seq}')
+        print(f'edit_comment: {self.sampling.edit_comment}')
+        print(f'pre_comment: {self.sampling.pre_comment}')
+        print(f'post_comment: {self.sampling.post_comment}')
+        print("--------------------")
         print(f'len(self.list_samples): {len(self.sampling.list_samples)}')
         for sample in self.sampling.list_samples:
             print("--------------------")
@@ -320,6 +336,47 @@ class Test_21000_input_json(unittest.TestCase):
         self.assertTrue(True)
 
 
+    def test_21001_agitation_json_read(self):
+        json_str:str ="""
+            {
+                "Seq_Nr": 1,
+                "Unit_Operation": "agitation",
+                "Edit_Comment": null,
+                "Pre-comment": "Maintain homogeneous suspension.",
+                "Post-comment": "Confirm dissolution before proceeding.",
+                "Specification": "Specific RPM",
+                "Rotation_(rpm)": 250,
+                "Ti_min_(deg-C)": 20.0,
+                "Ti_max_(deg-C)": 25.0,
+                "Minimum_time": 30,
+                "Maximum_time": 60,
+                "Time_unit": "min",
+                "Dissolution_check": "Yes"
+            }
+        """
+        json_obj = json.loads(json_str)
+        print()
+        print("==================")
+        print(json_obj)
+        print("==================")
+        self.agit.load_from_json_dict(json_obj)
+        print(f'operation_seq: {self.agit.operation_seq}')
+        print(f'edit_comment: {self.agit.edit_comment}')
+        print(f'pre_comment: {self.agit.pre_comment}')
+        print(f'post_comment: {self.agit.post_comment}')
+        print()
+        print(f'spec_agit: {self.agit.spec_agit}')
+        print(f'rpm: {self.agit.rpm}')
+        print(f'Ti_min: {self.agit.Ti_min}')
+        print(f'Ti_max: {self.agit.Ti_max}')
+        print(f'time_min: {self.agit.time_min}')
+        print(f'time_max: {self.agit.time_max}')
+        print(f'time_unit: {self.agit.time_unit}')
+        print(f'dissolution_check: {self.agit.dissolution_check}')
+
+        self.assertTrue(True)
+        
+
 def suite_json_test():
     suite = unittest.TestSuite()
     #suite.addTest(TestIO_00000_basic_func('test_0000_singleprop'))
@@ -327,8 +384,9 @@ def suite_json_test():
     #suite.addTest(TestIO_00000_basic_func('test_uo_agitation'))
     #suite.addTest(Test_10000_unit_ops("test_12000_cip_json"))
     #suite.addTest(Test_20000_proc_json("test_20000_proc_comp_json"))
-    #suite.addTest(Test_10000_unit_ops("test_11000_sampling_json"))
-    suite.addTest(Test_21000_input_json("test_21000_sampling_json_read"))
+    #suite.addTest(Test_10000_unit_ops("test_12001_agit_json"))
+    # suite.addTest(Test_21000_input_json("test_21000_sampling_json_read"))
+    suite.addTest(Test_21000_input_json("test_21001_agitation_json_read"))
     return suite
             
 
