@@ -219,13 +219,43 @@ class Test_20000_proc_json(unittest.TestCase, trdef.GetMats):
 
 
 
-class Test_21000_input_json(unittest.TestCase):
+class Test_21000_input_json(unittest.TestCase, trdef.GetMats):
     def setUp(self):
         flowsheet = fsht.Flowsheet()
+
+        self.mats_df = mats.Materials.generate_mats_df()
+        self.mats_df = mats.Materials.add_to_mats_df(mats_df=self.mats_df,
+                                                       material="test mat 1",
+                                                       main_star=True,
+                                                       mw = 18.01,
+                                                       density=1.00,
+                                                       conc_assay=99.999,
+                                                       kg_main=2.00,
+                                                       remark="Actually, I'm water.")
+        self.mats_df = mats.Materials.add_to_mats_df(mats_df=self.mats_df,
+                                                       material="test mat 2",
+                                                       main_star=False,
+                                                       mw = 46.07,
+                                                       density=0.789,
+                                                       conc_assay=94.0,
+                                                       remark="Actually, I'm ethanol.")
+        self.mats_df = mats.Materials.add_to_mats_df(mats_df=self.mats_df,
+                                                     material="super cleaning solvet",
+                                                     main_star=False,
+                                                     density=0.789,
+                                                     conc_assay=100.0,
+                                                     remark="I'm a clenaing solvent")
+        self.mats_inst = mats.Materials(self.mats_df)
+
         self.sampling = smplng.Sampling(flowsheet=flowsheet, operation_seq=2, edit_comment="test sampling")
-        self.agit = agit.Agitation(flowsheet=flowsheet, operation_seq=3, edit_comment="test agit")
+        self.agit_obj = agit.Agitation(flowsheet=flowsheet, operation_seq=3, edit_comment="test agit")
+        self.chgng_obj = chgng.Charging(caller=self, flow_sheet=flowsheet, operation_seq=4, edit_comment="test charging")
+        self.cip_obj = cip.CIP(caller=self, flowsheet=flowsheet, operation_seq=5, edit_comment="Example edit comment for CIP")
         return super().setUp()
     
+    def get_mats(self) -> mats.Materials:
+        return self.mats_inst
+
     def test_21000_sampling_json_read(self):
         json_str:str ="""
                     {
@@ -359,23 +389,140 @@ class Test_21000_input_json(unittest.TestCase):
         print("==================")
         print(json_obj)
         print("==================")
-        self.agit.load_from_json_dict(json_obj)
-        print(f'operation_seq: {self.agit.operation_seq}')
-        print(f'edit_comment: {self.agit.edit_comment}')
-        print(f'pre_comment: {self.agit.pre_comment}')
-        print(f'post_comment: {self.agit.post_comment}')
+        self.agit_obj.load_from_json_dict(json_obj)
+        print(f'operation_seq: {self.agit_obj.operation_seq}')
+        print(f'edit_comment: {self.agit_obj.edit_comment}')
+        print(f'pre_comment: {self.agit_obj.pre_comment}')
+        print(f'post_comment: {self.agit_obj.post_comment}')
         print()
-        print(f'spec_agit: {self.agit.spec_agit}')
-        print(f'rpm: {self.agit.rpm}')
-        print(f'Ti_min: {self.agit.Ti_min}')
-        print(f'Ti_max: {self.agit.Ti_max}')
-        print(f'time_min: {self.agit.time_min}')
-        print(f'time_max: {self.agit.time_max}')
-        print(f'time_unit: {self.agit.time_unit}')
-        print(f'dissolution_check: {self.agit.dissolution_check}')
+        print(f'spec_agit: {self.agit_obj.spec_agit}')
+        print(f'rpm: {self.agit_obj.rpm}')
+        print(f'Ti_min: {self.agit_obj.Ti_min}')
+        print(f'Ti_max: {self.agit_obj.Ti_max}')
+        print(f'time_min: {self.agit_obj.time_min}')
+        print(f'time_max: {self.agit_obj.time_max}')
+        print(f'time_unit: {self.agit_obj.time_unit}')
+        print(f'dissolution_check: {self.agit_obj.dissolution_check}')
 
         self.assertTrue(True)
-        
+    
+    def test_21002_charging_json_read(self):
+        json_str:str ="""
+            {
+                "Seq_Nr": 2,
+                "Unit_Operation": "charging",
+                "Edit_Comment": "test all constraints",
+                "Pre-comment": "Slowly add reagent",
+                "Post-comment": "Verify temperature remains stable",
+                "arr_charging_input_entry": [
+                    {
+                    "Material_Name": "test mat 1",
+                    "Metrics_Value": 1.0,
+                    "Metrics_Unit": "equiv",
+                    "Permissible_Error(%)": 1.0,
+                    "Charging_Method": "powder_port",
+                    "Time_Control": "Time_control_with_minimum_and_maximum",
+                    "Minimum_Time(min)": 15,
+                    "Maximum_Time(min)": 30,
+                    "Temp_Control": "Temp_control_with_minimum_and_maximum",
+                    "Minimum_Temp(deg-C)": 20,
+                    "Maximum_Temp(deg-C)": 25
+                    },
+                    {
+                    "Material_Name": "test mat 2",
+                    "Metrics_Value": 2.5,
+                    "Metrics_Unit": "v/w",
+                    "Permissible_Error(%)": 5.0,
+                    "Charging_Method": "press_vessel",
+                    "Time_Control": "Time_control_with_maximum",
+                    "Minimum_Time(min)": null,
+                    "Maximum_Time(min)": 10,
+                    "Temp_Control": "Temp_control_with_maximum",
+                    "Minimum_Temp(deg-C)": null,
+                    "Maximum_Temp(deg-C)": 30
+                    }
+                ]
+            }
+        """
+        json_obj = json.loads(json_str)
+        print()
+        print("==================")
+        print(json_obj)
+        print("==================")
+        self.chgng_obj.load_from_json_dict(json_obj)
+        print(f'operation_seq: {self.chgng_obj.operation_seq}')
+        print(f'edit_comment: {self.chgng_obj.edit_comment}')
+        print(f'pre_comment: {self.chgng_obj.pre_comment}')
+        print(f'post_comment: {self.chgng_obj.post_comment}')
+        print()
+        for charging in self.chgng_obj.inputs:
+            print('---------------------')
+            print(f'material_name: {charging.material_name}')
+            print(f'metrics_unit: {charging.metrics_unit}')
+            print(f'metrics_val: {charging.metrics_val}')
+            print(f'error_pct: {charging.error_pct}')
+            print(f'qty_kg: {charging.qty_kg}')
+            print(f'error_kg: {charging.error_kg}')
+            print(f'method: {charging.method}')
+            print(f'time_control: {charging.time_control}')
+            print(f'time_min: {charging.time_min}')
+            print(f'time_max: {charging.time_max}')
+            print(f'temp_control: {charging.temp_control}')
+            print(f'temp_min: {charging.temp_min}')
+            print(f'temp_max: {charging.temp_max}')
+
+        self.assertTrue(True)
+
+    def test_21003_cip_json_out(self):
+        json_schema:Objason = cip.CIP.get_json_schema(caller=self)
+        output=json_schema.asType()
+        for line in output:
+            print(line)
+
+    def test_21004_cip_json_read(self):
+        str_json = """
+                {
+                    "Seq_Nr": 5,
+                    "Unit_Operation": "cip",
+                    "Edit_Comment": "Cleaning after batch completion",
+                    "Pre-comment": "Flush system before cleaning",
+                    "Post-comment": "Verify cleanliness before next operation",
+                    "arr_unit_cip": [
+                        {
+                        "CIP_target": "reaction vessel",
+                        "Cleaning_solvent": "super cleaning solvet",
+                        "solvent_QTY_(kg)": 250,
+                        "Via": "filter dryer"
+                        },
+                        {
+                        "CIP_target": "filter dryer",
+                        "Cleaning_solvent": "test mat 2",
+                        "solvent_QTY_(kg)": 75.5,
+                        "Via": null
+                        }
+                    ]
+                }
+                """
+        json_dict = json.loads(str_json)
+        print()
+        print("=================")
+        print(json_dict)
+        print("=================")
+
+        self.cip_obj.load_from_json_dict(json_dict=json_dict)
+        print(f'operation_seq: {self.cip_obj.operation_seq}')
+        print(f'edit_comment: {self.cip_obj.edit_comment}')
+        print(f'pre_comment: {self.cip_obj.pre_comment}')
+        print(f'post_comment: {self.cip_obj.post_comment}')
+        for unit_cp in self.cip_obj.cip_operations:
+            print('------------------')
+            print(f'target: {unit_cp.target}')
+            print(f'solvent: {unit_cp.solvent}')
+            print(f'qty_kg: {unit_cp.qty_kg}')
+            print(f'via: {unit_cp.via}')
+            print('------------------')
+
+
 
 def suite_json_test():
     suite = unittest.TestSuite()
@@ -383,10 +530,13 @@ def suite_json_test():
     #suite.addTest(Test_10000_unit_ops('test_10000_charging_json'))
     #suite.addTest(TestIO_00000_basic_func('test_uo_agitation'))
     #suite.addTest(Test_10000_unit_ops("test_12000_cip_json"))
+    #suite.addTest(Test_10000_unit_ops("test_10000_charging_json"))
     #suite.addTest(Test_20000_proc_json("test_20000_proc_comp_json"))
     #suite.addTest(Test_10000_unit_ops("test_12001_agit_json"))
     # suite.addTest(Test_21000_input_json("test_21000_sampling_json_read"))
-    suite.addTest(Test_21000_input_json("test_21001_agitation_json_read"))
+    #suite.addTest(Test_21000_input_json("test_21001_agitation_json_read"))
+    #suite.addTest(Test_21000_input_json("test_21002_charging_json_read"))
+    suite.addTest(Test_21000_input_json("test_21004_cip_json_read"))
     return suite
             
 
