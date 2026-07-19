@@ -10,6 +10,7 @@ import flow_draw.materials.materials as mats
 import flow_draw.batch.process.unit_operations.uo_charging as chgng
 import flow_draw.batch.process.unit_operations.uo_sampling as smplng
 import flow_draw.batch.process.unit_operations.uo_cip as cip
+import flow_draw.batch.process.unit_operations.uo_evaporation as evap
 import flow_draw.data_io.process_io as pio
 
 
@@ -251,6 +252,7 @@ class Test_21000_input_json(unittest.TestCase, trdef.GetMats):
         self.agit_obj = agit.Agitation(flowsheet=flowsheet, operation_seq=3, edit_comment="test agit")
         self.chgng_obj = chgng.Charging(caller=self, flow_sheet=flowsheet, operation_seq=4, edit_comment="test charging")
         self.cip_obj = cip.CIP(caller=self, flowsheet=flowsheet, operation_seq=5, edit_comment="Example edit comment for CIP")
+        self.evap_obj = evap.Evaporation(caller=self, flowsheet=flowsheet, operation_seq=6, edit_comment="test evaporation")
         return super().setUp()
     
     def get_mats(self) -> mats.Materials:
@@ -522,7 +524,52 @@ class Test_21000_input_json(unittest.TestCase, trdef.GetMats):
             print(f'via: {unit_cp.via}')
             print('------------------')
 
+    def test_21005_evaporation_json_out(self):
+        json_schema:Objason = evap.Evaporation.get_json_schema(caller=self)
+        output=json_schema.asType()
+        for line in output:
+            print(line)
 
+    def test_21006_evaporation_json_read(self):
+        str_json = """{
+                        "Tj_min": 40,
+                        "Tj_max": 60,
+                        "Condenser_brine_temp_min": -10,
+                        "Condenser_brine_temp_max": 0,
+                        "Pressure_control": "Specific_pressure",
+                        "Press_min": 20,
+                        "Press_max": 50,
+                        "Press_unit": "kPaA",
+                        "Agitation_spec": "Specific_RPM",
+                        "Agitation(rpm)": 150,
+                        "End_spec_min(v/w)": 0.8,
+                        "End_spec_max(v/w)": 1.0,
+                        "End_guideline_min(v/w)": null,
+                        "End_guideline_max(v/w)": null
+                    }"""
+        json_dict = json.loads(str_json)
+        print()
+        print("=================")
+        print(json_dict)
+        print("=================")
+        #evap_obj = evap.Evaporation(caller=self, flowsheet=self.flowsheet, operation_seq=1, edit_comment="test evaporation")
+        self.evap_obj.load_from_json_dict(json_dict=json_dict)
+        print(f'operation_seq: {self.evap_obj.operation_seq}')
+        print(f'edit_comment: {self.evap_obj.edit_comment}')
+        print(f'Tj_min: {self.evap_obj.Tj_min}')
+        print(f'Tj_max: {self.evap_obj.Tj_max}')
+        print(f'Tbr_min: {self.evap_obj.Tbr_min}')
+        print(f'Tbr_max: {self.evap_obj.Tbr_max}')
+        print(f'P_ctrl: {self.evap_obj.P_ctrl}')
+        print(f'P_min: {self.evap_obj.P_min}')
+        print(f'P_max: {self.evap_obj.P_max}')
+        print(f'P_unit: {self.evap_obj.P_unit}')
+        print(f'agit_spec: {self.evap_obj.agit_spec}')
+        print(f'agit_rpm: {self.evap_obj.agit_rpm}')
+        print(f'end_vw_spec_min: {self.evap_obj.end_vw_spec_min}')
+        print(f'end_vw_spec_max: {self.evap_obj.end_vw_spec_max}')
+        print(f'end_vw_guide_min: {self.evap_obj.end_vw_guide_min}')
+        print(f'end_vw_guide_max: {self.evap_obj.end_vw_guide_max}')
 
 def suite_json_test():
     suite = unittest.TestSuite()
@@ -536,7 +583,9 @@ def suite_json_test():
     # suite.addTest(Test_21000_input_json("test_21000_sampling_json_read"))
     #suite.addTest(Test_21000_input_json("test_21001_agitation_json_read"))
     #suite.addTest(Test_21000_input_json("test_21002_charging_json_read"))
-    suite.addTest(Test_21000_input_json("test_21004_cip_json_read"))
+    #suite.addTest(Test_21000_input_json("test_21004_cip_json_read"))
+    #suite.addTest(Test_21000_input_json("test_21005_evaporation_json_out"))
+    suite.addTest(Test_21000_input_json("test_21006_evaporation_json_read"))
     return suite
             
 

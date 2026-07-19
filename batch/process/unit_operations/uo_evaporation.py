@@ -9,6 +9,7 @@ from flow_draw.batch.process.unit_operations import unit_operation as uo
 from flow_draw.data_io import process_io as procio
 from flow_draw.materials import materials as mats
 from flow_draw.trait_def import trait_def as trdef
+from flow_draw.data_io.json_io import Objason, Array, Primitive
 #from flow_draw.trait_def.trait_def import GetMats
 
 
@@ -79,34 +80,48 @@ list_hedr = defs.list_hedr_uo_evap
 
 
 
-opt_press_ctrl_specific = defs.opt_uo_evap_press_ctrl_specific
+opt_press_ctrl_specific = "Specific_pressure"
 """option item for the attribute paress_spec_ for uo_evap: Specific pressure value"""
-opt_press_ctrl_arbitrary_with_guide = defs.opt_uo_evap_press_ctrl_arbitrary_with_guide
+opt_press_ctrl_arbitrary_with_guide = "Arbitrary_with_optional_guideline"
 """option item for the attribute press_spec for uo_evap: Arbitrary with optional guideline"""
-opt_press_ctrl_arbitrary = defs.opt_uo_evap_press_ctrl_arbitrary
+opt_press_ctrl_arbitrary = "Arbitrary"
 """option item for the attribute press_spec for uo_evap: Arbitrary without a guieline"""
-opt_press_ctrl_full_vac = defs.opt_uo_evap_press_ctrl_full_vac
+opt_press_ctrl_full_vac = "Full_vacuum_(FV)"
 """list of options for the parameter press_unit for uo_evap"""
 
-opt_press_unit_MPaA = defs.opt_uo_evap_press_unit_MPaA
+list_opt_press = [opt_press_ctrl_specific,
+                  opt_press_ctrl_arbitrary_with_guide,
+                  opt_press_ctrl_arbitrary,
+                  opt_press_ctrl_full_vac]
+
+
+opt_press_unit_MPaA = "MPaA"
 """option item for the attribute press_unit for uo_evap: MPaA"""
-opt_press_unit_kPaA = defs.opt_uo_evap_press_unit_kPaA
+opt_press_unit_kPaA = "kPaA"
 """option item for the attribute press_unit for uo_evap: kPaA"""
-opt_press_unit_MPaG = defs.opt_uo_evap_press_unit_MPaG
+opt_press_unit_MPaG = "MPaG"
 """option item for the attribute press_unit for uo_evap: MPaG"""
-opt_press_unit_kPaG = defs.opt_uo_evap_press_unit_kPaG
+opt_press_unit_kPaG = "kPaG"
 """option item for the attribute press_unit for uo_evap: kPaG"""
+list_opt_press_unit = [opt_press_unit_MPaA,
+                       opt_press_unit_kPaA,
+                       opt_press_unit_MPaG,
+                       opt_press_unit_kPaG]
 
-
-opt_agit_spec_specif = defs.opt_uo_evap_agit_spec_specif
+opt_agit_spec_specif = "Specific_RPM"
 """option item for the attribute agitation spec for uo_evap: A specific RPM is provided by the user"""
-opt_agit_spec_guide = defs.opt_uo_evap_agit_spec_guide
+opt_agit_spec_guide = "Guidance_RPM"
 """option item for the attribute agitation spec for uo_evap: A guidance RPM is provided by the user"""
-opt_agit_spec_arbitrary = defs.opt_uo_evap_agit_spec_arbitrary
+opt_agit_spec_arbitrary = "arbitrary_RPM"
 """option item for the attribute agitation spec for uo_evap: Totally discretional RPM for evaporation"""
+list_opt_agit_spec = [opt_agit_spec_specif,
+                      opt_agit_spec_guide,
+                      opt_agit_spec_arbitrary]
 
-
-dict_opt = defs.dict_opt_uo_evap
+#dict_opt = defs.dict_opt_uo_evap
+dict_opt = {hedr_press_ctrl:list_opt_press,
+            hedr_press_unit:list_opt_press_unit,
+            hedr_agit_spec:list_opt_agit_spec}
 """Dictionary of <header item>:<drop-down options>"""
 
 
@@ -272,6 +287,113 @@ class Evaporation(uo.UnitOperation, uo_tag=defs.tag_uo_evap):
         self.end_volume_guide_min:float = None
         self.end_vw_guide_max:float = None
         self.end_volume_guide_max:float = None
+
+    def get_json_schema(caller = None):
+        json_common = Evaporation.json_common()
+        Tj_min = Primitive(prim_type='number',
+                           key=hedr_Tj_min,
+                           description='Lower limit of the jacket temperature of the reactor or evaporator. Optional. Please follow the given instruction.',
+                           nullable=True)
+        Tj_max = Primitive(prim_type='number',
+                           key=hedr_Tj_max,
+                           description='Upper limit of the jacket temperature of the reactor or evaporator. Optional. Please follow the given instruction.',
+                           nullable=True)
+        Tbr_cond_min = Primitive(prim_type='number',
+                           key=hedr_T_brine_cond_min,
+                           description='Lower limit of the temperature of the brine supplied to the condenser. Optional. Please follow the given instruction.',
+                           nullable=True)
+        Tbr_cond_max = Primitive(prim_type='number',
+                           key=hedr_T_brine_cond_max,
+                           description='Upper limit of the temperature of the brine supplied to the condenser. Optional. Please follow the given instruction.',
+                           nullable=True)
+        press_ctrl = Primitive(prim_type='string',
+                               key=hedr_press_ctrl,
+                               enum=list_opt_press,
+                               description=f'Pressure control. '
+                               f'"{opt_press_ctrl_specific}" means the evaporation must happen under a specific pressrue range. At least one one from "{hedr_press_min}" and "{hedr_press_max}" must be specified. '
+                               f'"{opt_press_ctrl_arbitrary_with_guide}" shuld be chosen when recommended pressure range is specified by using at least one one from "{hedr_press_min}" and "{hedr_press_max}". '
+                               f'If the pressure is at the operator\'s discretion, please select "{opt_press_ctrl_arbitrary}". Pressures ("{hedr_press_min}" and )doesn\'t have to be specified in this case. '
+                               f'For evaporation at the lowet possible pressure, please select "{opt_press_ctrl_full_vac}".')
+        press_min = Primitive(prim_type='number',
+                              key=hedr_press_min,
+                              description=f'Lower limit of the distillation pressure. '
+                              f'At least on of this or "{hedr_press_max}" is needed if "{hedr_press_ctrl}" is "{opt_press_ctrl_specific}" or "{opt_press_ctrl_arbitrary_with_guide}". '
+                              f'The unit of the pressure is specified by "{hedr_press_unit}".',
+                              nullable=True,
+                              required=True)
+        press_max = Primitive(prim_type='number',
+                              key=hedr_press_max,
+                              description=f'Upper limit of the distillation pressure. '
+                              f'At least on of this or "{hedr_press_min}" is needed if "{hedr_press_ctrl}" is "{opt_press_ctrl_specific}" or "{opt_press_ctrl_arbitrary_with_guide}". '
+                              f'The unit of the pressure is specified by "{hedr_press_unit}".',
+                              nullable=True,
+                              required=True)
+        press_unit = Primitive(prim_type='string',
+                               key=hedr_press_unit,
+                               enum=list_opt_press_unit,
+                               nullable=True,
+                               description=f'Pressure unit. This property is associated with "{hedr_press_min}" and "{hedr_press_max}". This property is mandatory if either of them has a value.')
+        spec_agit = Primitive(prim_type='string',
+                              key=hedr_agit_spec,
+                              enum=list_opt_agit_spec,
+                              description=f'Specification of the agitation during evaporation. '
+                              f'With "{opt_agit_spec_specif}", specific agitation rate (rpm) shall be designated. '
+                              f'Non-binding guidance agitation rate will be given when "{opt_agit_spec_guide}" is selected. '
+                              f'If "{opt_agit_spec_arbitrary}" chosen, agitation rate is at operator\'s discretion.')
+        agit_rate = Primitive(prim_type='number',
+                              key=hedr_agit_rpm,
+                              description=f'Agitation rate in rpm during condensation. This property must be filled if "{hedr_agit_spec} is "{opt_agit_spec_specif}" or "{opt_agit_spec_guide}".',
+                              nullable=True)
+        endpoint_spec_min = Primitive(prim_type='number',
+                                      key=hedr_val_endpoint_spec_min,
+                                      description='Specification. Lower limit of the liquid volume at the end of the condensation. Please specify the volume in volume-per-weight (v/w) unit.',
+                                      nullable=True)
+        endpoint_spec_max = Primitive(prim_type='number',
+                                      key=hedr_val_endpoint_spec_max,
+                                      description='Specification. Upper limit of the liquid volume at the end of the condensation. Please specify the volume in volume-per-weight (v/w) unit.',
+                                      nullable=True)
+        endpoint_guide_max = Primitive(prim_type='number',
+                                       key=hedr_val_endpoint_guide_max,
+                                       description='Non-binding guidance. Upper limit of the liquid volume at the end of the condensation. Please specify the volume in volume-per-weight (v/w) unit.',
+                                       nullable=True)
+        endpoint_guide_min = Primitive(prim_type='number',
+                                       key=hedr_val_endpoint_guide_min,
+                                       description='Non-binding guidance. Lower limit of the liquid volume at the end of the condensation. Please specify the volume in volume-per-weight (v/w) unit.',
+                                       nullable=True)
+        obj_evap = Objason(key=Evaporation.uo_tag,
+                           description='Evaporation unit operation. Please follow the given instruction for each property.',
+                           props=[Tj_min, Tj_max, Tbr_cond_min, Tbr_cond_max,
+                                  press_ctrl, press_min, press_max, press_unit,
+                                  spec_agit, agit_rate,
+                                  endpoint_spec_min, endpoint_spec_max,
+                                  endpoint_guide_min, endpoint_guide_max])
+        return obj_evap
+
+
+    def load_from_json_dict(self, json_dict: dict=None):
+        """
+        Loads necessary parameters from a JSON object.
+        The header items must be in line with the definition the class Evaporation.
+        The header items can be passed from the get_json_schema() of each UnitOperation-drived class.
+        This is the overriding mehtod in the class Evaporation..
+        """
+        self.Tj_min = json_dict.get(hedr_Tj_min, None)
+        self.Tj_max = json_dict.get(hedr_Tj_max, None)
+        self.Tbr_min = json_dict.get(hedr_T_brine_cond_min, None)
+        self.Tbr_max = json_dict.get(hedr_T_brine_cond_max, None)
+        self.P_ctrl = json_dict.get(hedr_press_ctrl, None)
+        self.P_min = json_dict.get(hedr_press_min, None)
+        self.P_max = json_dict.get(hedr_press_max, None)
+        self.P_unit = json_dict.get(hedr_press_unit, None)
+        self.agit_spec = json_dict.get(hedr_agit_spec, None)
+        self.agit_rpm = json_dict.get(hedr_agit_rpm, None)
+        self.end_vw_spec_min = json_dict.get(hedr_val_endpoint_spec_min, None)
+        self.end_vw_spec_max = json_dict.get(hedr_val_endpoint_spec_max, None)
+        self.end_volume_spec_min = json_dict.get(hedr_val_endpoint_spec_min, None)
+        self.end_volume_spec_max = json_dict.get(hedr_val_endpoint_spec_max, None)
+        self.end_volume_guide_min = json_dict.get(hedr_val_endpoint_guide_min, None)
+        self.end_volume_guide_max = json_dict.get(hedr_val_endpoint_guide_max, None)
+
 
     def load_params_from_df(self, df: pd.DataFrame):
         """
