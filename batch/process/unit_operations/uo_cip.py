@@ -63,6 +63,9 @@ list_hedr = [hedr_cip_tgt,
             #  hedr_destination]
 """List of header items"""
 
+key_json_unit_cip:str = 'single_cip_element'
+key_json_arr_unit:str = 'arr_unit_cip'
+
 
 #########################################################
 # UO-specific options, list, header_item: list dictionry thereof (for data input and internalsignaling)
@@ -197,11 +200,14 @@ class CIP(uo.UnitOperation, uo_tag=defs.tag_uo_cip):
         if not pd.isna(first_row[hedr_postcomment]):
             self.post_comment = first_row[hedr_postcomment]
         for _, subitem in df.iterrows():
-            self.cip_operations.append(UnitCleaning(caller=self, sheet=self.flowsheet, ser_cip=subitem))
+            obj_unit = UnitCleaning(sheet=self.flowsheet)
+            obj_unit.load_from_ser(caller=self, ser_cip=subitem)
+            self.cip_operations.append(obj_unit)
 
 
-    def get_json_schema(caller:trdef.UniversalTrait = None)->json_io.Objason:
+    def get_json_schema(caller:trdef.GetMats = None)->json_io.Objason:
         # list_cmn = Agitation.json_common(arg_name_uo=Agitation.uo_tag)
+        list_mats = (caller.get_mats()).get_list_mats()
         list_cmn = CIP.json_common()
         cip_tgt = Primitive(prim_type="string",
                             key=hedr_cip_tgt,
@@ -209,6 +215,7 @@ class CIP(uo.UnitOperation, uo_tag=defs.tag_uo_cip):
                             required=True)
         cip_solvent = Primitive(prim_type='string',
                                 key=hedr_solvent,
+                                enum=list_mats,
                                 description='Solvent for CIP.',
                                 required=True)
         cip_qty = Primitive(prim_type="number",
@@ -221,13 +228,29 @@ class CIP(uo.UnitOperation, uo_tag=defs.tag_uo_cip):
                             description='Transit point of the cleaning liquid. Optional',
                             required=True,
                             nullable=True)
-        json_cip = Objason(#key=defs.tag_uo_cip,
-                           key=CIP.uo_tag,
-                           props=list_cmn+[cip_tgt, cip_solvent, cip_qty, cip_via],
+        unit_cip = Objason(key=key_json_unit_cip,
+                           props=[cip_tgt, cip_solvent, cip_qty, cip_via],
+                           description=f'This object holds information of a unit CIP element. '
+                           f'A unit CIP element holds "{hedr_cip_tgt}", "{hedr_solvent}", "{hedr_qty_kg}", "{hedr_via}".'
+                           f'A single CIP block can consists of multiple unit CIP elemtns.')
+        arr_unit = Array(key=key_json_arr_unit,
+                         content=unit_cip,
+                         description='An array of unit CIP element(s). CIP operataion can consits of one or more unit CIP element(s)')
+        
+        json_cip = Objason(key=CIP.uo_tag,
+                           props=list_cmn+[arr_unit],
                            description='This is object for cleaning in place (CIP) during the process. '\
                             'CIP is done to carry out the process with limited number of pieces of equipment by avoiding contamination.'\
                             'Please work with this object if the given process flow explicitly indicates the need for CIP.')
         return json_cip
+
+    def load_from_json_dict(self, json_dict):
+        super().load_from_json_dict(json_dict)
+        arr_unit_cip:list[dict[str, any]] = json_dict[key_json_arr_unit]
+        for unit_cip in arr_unit_cip:
+            obj_unit_cip = UnitCleaning(sheet=self.flowsheet)
+            obj_unit_cip.load_from_json_dict(unit_cip=unit_cip)
+            self.cip_operations.append(obj_unit_cip)
 
 
     def get_detail_header(self) -> list[str]:
@@ -301,7 +324,8 @@ class CIP(uo.UnitOperation, uo_tag=defs.tag_uo_cip):
 
 
 class UnitCleaning:
-    def __init__(self, caller:trdef.UniversalTrait=None, sheet:fsht.Flowsheet=None, ser_cip:pd.Series=None):
+    # def __init__(self, caller:trdef.UniversalTrait=None, sheet:fsht.Flowsheet=None, ser_cip:pd.Series=None):
+    def __init__(self, sheet:fsht.Flowsheet=None):
         self.flowsheet:fsht.Flowsheet = sheet
         self.target:str = None
         self.solvent:str = None
@@ -309,6 +333,26 @@ class UnitCleaning:
         self.via:str = None
         #self.destination:str = None
 
+        # if not pd.isna(ser_cip[hedr_cip_tgt]):
+        #     self.target = ser_cip[hedr_cip_tgt]
+        # else:
+        #     raise ValueError(f"Op. Seq. {caller.operation_seq}, {caller.__class__.__name__}: No cleaning target provided.")
+        
+        # if not pd.isna(ser_cip[hedr_solvent]):
+        #     self.solvent = ser_cip[hedr_solvent]
+        # else:
+        #     raise ValueError(f"Op. Seq. {caller.operation_seq}, {caller.__class__.__name__}: No cleaning solvent provided.")
+        
+        # if not pd.isna(ser_cip[hedr_qty_kg]):
+        #     self.qty_kg = ser_cip[hedr_qty_kg]
+        
+        # if not pd.isna(ser_cip[hedr_via]):
+        #     self.via = ser_cip[hedr_via]
+
+        # if not pd.isna(ser_cip[hedr_destination]):
+        #     self.destination = ser_cip[hedr_destination]
+
+    def load_from_ser(self, caller:trdef.UniversalTrait=None, ser_cip:pd.Series=None):
         if not pd.isna(ser_cip[hedr_cip_tgt]):
             self.target = ser_cip[hedr_cip_tgt]
         else:
@@ -325,9 +369,12 @@ class UnitCleaning:
         if not pd.isna(ser_cip[hedr_via]):
             self.via = ser_cip[hedr_via]
 
-        # if not pd.isna(ser_cip[hedr_destination]):
-        #     self.destination = ser_cip[hedr_destination]
-    
+    def load_from_json_dict(self, unit_cip:dict[str,any]=None):       
+        self.target:str = unit_cip[hedr_cip_tgt]
+        self.solvent:str = unit_cip[hedr_solvent]
+        self.qty_kg:float = unit_cip[hedr_qty_kg]
+        self.via:str = unit_cip[hedr_via]        
+
     def put_unit_cleaning(self):
         self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
                                 method=self.target,

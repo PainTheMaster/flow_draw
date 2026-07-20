@@ -250,6 +250,8 @@ class Primitive(JsonEntity):
 
         if self.enum is not None:
             enum_values = ','.join(self.json_literal(item) for item in self.enum)
+            if self.nullable:
+                enum_values += ',null'
             list_json_str.append(f' "enum":[{enum_values}],')
 
         if self.const is not None:

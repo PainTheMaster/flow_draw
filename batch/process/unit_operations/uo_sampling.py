@@ -2,6 +2,7 @@
 # imports
 #########################################################
 import pandas as pd
+import warnings
 import flow_draw.definitions as defs
 import flow_draw.data_io.flowsheet as fsht
 from typing import Optional
@@ -297,7 +298,7 @@ class Sampling(uo.UnitOperation, uo_tag=defs.tag_uo_sampling):
                                    description=f'Unit for a monitoring item. Null is accepted.',
                                    nullable=True,
                                    required=True)
-        obj_monit = Objason(key=key_json_pair_monit,
+        pair_monit = Objason(key=key_json_pair_monit,
                             props=[monit_item, monit_unit],
                             description="A pair of monitoring item and the unit for it.")
         
@@ -310,7 +311,7 @@ class Sampling(uo.UnitOperation, uo_tag=defs.tag_uo_sampling):
         #                         required=False)
         
         arr_monit_items = Array(key=key_json_arr_monit_items,
-                                content=obj_monit,
+                                content=pair_monit,
                                 description=f'An array of pairing object of monitoring item and unit for it. This is linked to "{hedr_monit_item_high}" elsewhere on a higher leve.',
                                 required=True,
                                 nullable=True)
@@ -362,17 +363,14 @@ class Sampling(uo.UnitOperation, uo_tag=defs.tag_uo_sampling):
         return json_sampling 
         
 
-        
-        
-        
-        
-
-        
-        
-        
-        
-        
-
+    def load_from_json_dict(self, json_dict:dict[str, any]):
+        super().load_from_json_dict(json_dict)
+        arr_sample:list[dict[str,any]] = json_dict[key_json_arr_samples]
+        if arr_sample is not None:
+            for i, sample in enumerate(arr_sample):
+                single_sample=SingleSample(flowsheet=self.flowsheet)
+                single_sample.load_from_single_sample_json(sample_seq=i+1, sample=sample)
+                self.list_samples.append(single_sample)
 
 
 
@@ -495,6 +493,66 @@ class SingleSample:
         if not pd.isna(ser[hedr_sample_comment]):
             self.sample_comment = ser[hedr_sample_comment]
 
+    def load_from_single_sample_json(self, sample_seq:int=None, sample:dict[str,any]=None):
+        self.sample_seq = sample_seq
+        self.name = sample[hedr_sample_name]
+        if self.name is None:
+            warnings.warn(
+                message=f"No name given for sample sequence {self.sample_seq}",
+                category=RuntimeWarning
+            )
+        self.category=sample[hedr_sampling_cat]
+        if self.category is None:
+            warnings.warn(
+                message=f"No sampling category given for sample sequence {self.sample_seq}",
+                category=RuntimeWarning
+            )
+
+        if self.category == opt_sampling_cat_ipc or self.category == opt_sampling_cat_both:
+            arr_ipc:list[dict[str, any]] = sample[key_json_arr_ipc_items]
+            if arr_ipc is None:
+                warnings.warn(
+                    message=f'"{key_json_arr_ipc_items}" is null for sample sequence {self.sample_seq} '
+                    f'although the catetory is "{opt_sampling_cat_ipc}" is "{opt_sampling_cat_both}."'
+                )
+            else:
+                for ipc in arr_ipc:
+                    self.content_ipc_criteria.append(ipc[hedr_ipc_criteria])
+                    self.rec_ipc_item_name.append(ipc[hedr_ipc_rec_titles])
+                    if ipc[hedr_ipc_rec_units] is not None:
+                        self.rec_ipc_unit.append(ipc[hedr_ipc_rec_units])
+                    else:
+                        self.rec_ipc_unit.append("")
+        
+        if self.category == opt_sampling_cat_monit or self.category == opt_sampling_cat_both:
+            arr_monit:list[dict[str, any]] = sample[key_json_arr_monit]
+            if arr_monit is None:
+                warnings.warn(
+                    message=f'"{key_json_arr_monit}" is null for sample sequence {self.sample_seq} '
+                    f'although the catetory is "{opt_sampling_cat_monit}" is "{opt_sampling_cat_both}."'
+                )
+            else:
+                for monit in arr_monit: #"monit" corresponds to obj_monit
+                   self.__process_obj_monit(sample_seq=sample_seq, obj_monit=monit)
+
+    def __process_obj_monit(self, sample_seq:int = None, obj_monit:dict[str, any]=None):
+        if obj_monit[key_json_arr_monit_items] is None:
+            warnings.warn(
+                message=f'"arr_monit_items" is empty for sample sequence {sample_seq}',
+                category=RuntimeWarning)
+        else:
+            for i, monit_pair in enumerate(obj_monit[key_json_arr_monit_items]):
+                high_level_item:str = ""
+                if i == 0:
+                    high_level_item = obj_monit[hedr_monit_item_high]
+                self.content_monit_items.append(high_level_item)
+                self.rec_monit_item_name.append(monit_pair[hedr_monit_rec_items])
+                if monit_pair[hedr_monit_rec_units] is None:
+                    self.rec_monit_unit.append("")
+                else:
+                    self.rec_monit_unit.append(monit_pair[hedr_monit_rec_units])
+
+
     def output_single_sample(self):
         self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
                                 method=dict_parts_stcs[tag_part_flow_mthod_instr_sampling],
@@ -518,13 +576,13 @@ class SingleSample:
             self.flowsheet.put_line(record=dict_parts_stcs[tag_part_flow_rec_criterion_ok_nok])
 
     def __output_monit(self):
-        idx_long:int = None
+        idx_longer:int = None
         if len(self.content_monit_items) >= len(self.rec_monit_item_name):
-            idx_long = len(self.content_monit_items)
+            idx_longer = len(self.content_monit_items)
         else:
-            idx_long = len(self.rec_monit_item_name)
+            idx_longer = len(self.rec_monit_item_name)
         
-        for idx in range(idx_long):
+        for idx in range(idx_longer):
             temp_content_monit_item: str = ""
             if idx <=len(self.content_monit_items)-1:
                 temp_content_monit_item = dict_parts_stcs[tag_stc_flow_monit_item].format(monit_item=self.content_monit_items[idx])

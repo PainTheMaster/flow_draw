@@ -17,7 +17,7 @@ header_postcomment = defs.hedr_cmn_io_dtil_postcmnt #Don't include this in the s
 hedr_material_name = 'Material_Name'
 hedr_metrics_value = 'Metrics_Value'
 hedr_metrics_unit = 'Metrics_Unit'
-hedr_error = 'Permissible_Error(%)'
+hedr_error_pct = 'Permissible_Error(%)'
 hedr_method = 'Charging_Method'
 hedr_time_control = 'Time_Control'
 hedr_time_min = 'Minimum_Time(min)'
@@ -29,7 +29,7 @@ hedr_temp_max = 'Maximum_Temp(deg-C)'
 list_header_items = [hedr_material_name,
                      hedr_metrics_value,
                      hedr_metrics_unit,
-                     hedr_error,
+                     hedr_error_pct,
                      hedr_method,
                      hedr_time_control,
                      hedr_time_min,
@@ -160,8 +160,6 @@ part_mthd_plchldr_jp = "<Placeholder: charging method>"
 """Flowsheet component for class Charging. A place holder. An ption for Liquid charging."""
 
 
-#TODO: Charging method!!!!
-
 dict_jp_parts={tag_part_instr_ini : part_instr_ini_jp,
                 tag_part_instr_end : part_instr_end_jp,
                 tag_part_rec_input : part_rec_input_jp,
@@ -283,7 +281,7 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
                                 f'This item has to be consistent with the other entry "{hedr_metrics_value}"',
                               enum=list_metrics_unit)
         permiss_error = Primitive(prim_type="number",
-                                  key=hedr_error,
+                                  key=hedr_error_pct,
                                   description="Permissible error of the material quantity indicated in percent (%). If not specified in the data source, "\
                                     "please use the default value of 1 percent for the key raw material, and 5 percent for other materials.")
         charging_method = Primitive(prim_type='string',
@@ -344,25 +342,7 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
                               props=[name_mats, qty_mats, unit_mats, permiss_error, charging_method, time_ctrl, time_min, time_max, temp_ctrl, temp_min, temp_max],
                               description='Combination of material, quantity, permissible quantity error, charging method, time constraints, temperature range to define each charging/dosing operation.'
                              )
-        # input_entry.if_then_else(prop=time_ctrl.key,
-        #                          val_if=timectrl_min,
-        #                          props_then=[time_min])
-        # input_entry.if_then_else(prop=time_ctrl.key,
-        #                          val_if=timectrl_max,
-        #                          props_then=[time_max])
-        # input_entry.if_then_else(prop=time_ctrl.key,
-        #                          val_if=timectrl_min_max,
-        #                          props_then=[time_min, time_max])
-        # input_entry.if_then_else(prop=temp_ctrl.key,
-        #                          val_if=temprctrl_min,
-        #                          props_then=[temp_min])
-        # input_entry.if_then_else(prop=temp_ctrl.key,
-        #                          val_if=temprctrl_max,
-        #                          props_then=[temp_max])
-        # input_entry.if_then_else(prop=temp_ctrl.key,
-        #                          val_if=temprctrl_min_max,
-        #                          props_then=[temp_min, temp_max])
-        
+
         arr_input = Array(key=arry_inputs_json,
                           content=input_entry,
                           description='A list of material input entries. A single material or more is put in the reactor vessel in a charging/dosing stage.',
@@ -378,30 +358,9 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
 
 
     def load_from_json_dict(self, json_dict: dict[str, any]):
-        self.operation_seq=json_dict[defs.hedr_cmn_io_dtil_seq]
-        if defs.hedr_cmn_io_dtil_edt_cmnt in json_dict:
-            self.edit_comment = json_dict[defs.hedr_cmn_io_dtil_edt_cmnt]
-        if defs.hedr_cmn_io_dtil_precmnt in json_dict:
-            self.pre_comment = json_dict[defs.hedr_cmn_io_dtil_precmnt]
-        if defs.hedr_cmn_io_dtil_postcmnt in json_dict:
-            self.post_comment = json_dict[defs.hedr_cmn_io_dtil_postcmnt]
+        super().load_from_json_dict(json_dict=json_dict)
         arr_input: list[dict[str, str|float]] = json_dict[arry_inputs_json]
         for single_input in arr_input:
-            # name_mat:str = tmp_ipt[hedr_material_name]
-            # #metrics value: float
-            # qty_mats:float = tmp_ipt[hedr_metrics_value]
-            # #metrics unit: str
-            # unit_mats:str = tmp_ipt[hedr_metrics_unit]
-            # #error: float percentage
-            # permis_error:float = tmp_ipt[hedr_error]
-            # #charging method: str
-            # charging_method:str = tmp_ipt[hedr_method]
-            # #time control method: str
-            # tmie_ctrl:str = tmp_ipt[hedr_time_control]
-            # #temp_min: float
-            # tempr_min:float = tmp_ipt[hedr_temp_min]
-            # #temp_max: float
-            # tempr_max:float = tmp_ipt[hedr_temp_max]
             new_input = Input(mats_data=self.mats_data)
             new_input.load_from_json_dict(json_dict=single_input)
             self.inputs.append(new_input)
@@ -413,7 +372,7 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
 
 
     def output_unit_operation(self):
-        #TODO Leave explanatory comments here.
+        #TODO: Leave explanatory comments here.
         self.flowsheet.header_organizer(op_nr=self.operation_seq, title=lang_dict_uo_titles[self.uo_tag])
         if not (self.pre_comment == None or self.pre_comment == ''):
             self.flowsheet.put_body_comments(self.pre_comment)
@@ -636,7 +595,7 @@ class Input:
         self.material_name = ser[hedr_material_name]
         self.metrics_unit = ser[hedr_metrics_unit]
         self.metrics_val = ser[hedr_metrics_value]
-        self.error_pct = ser[hedr_error]
+        self.error_pct = ser[hedr_error_pct]
         self.method  = ser[hedr_method]
         self.time_control = ser[hedr_time_control]
         if self.time_control == timectrl_min or self.time_control == timectrl_min_max:
@@ -659,16 +618,17 @@ class Input:
         self.material_name = json_dict[hedr_material_name]
         self.metrics_unit = json_dict[hedr_metrics_unit]
         self.metrics_val = json_dict[hedr_metrics_value]
+        self.error_pct = json_dict[hedr_error_pct]
         self.method = json_dict[hedr_method]
         self.time_control = json_dict[hedr_time_control]
-        if (self.time_control == timectrl_min or self.time_control == timectrl_min_max) and hedr_time_min in json_dict:
+        if (self.time_control == timectrl_min or self.time_control == timectrl_min_max): #and hedr_time_min in json_dict:
             self.time_min = json_dict[hedr_time_min]
-        if (self.time_control == timectrl_max or self.time_control == timectrl_min_max) and hedr_time_max in json_dict:
+        if (self.time_control == timectrl_max or self.time_control == timectrl_min_max): #and hedr_time_max in json_dict:
             self.time_max = json_dict[hedr_time_max]
         self.temp_control = json_dict[hedr_temp_control]
-        if (self.temp_control == temprctrl_min or self.temp_control == temprctrl_min_max) and hedr_temp_min in json_dict:
+        if (self.temp_control == temprctrl_min or self.temp_control == temprctrl_min_max): #and hedr_temp_min in json_dict:
             self.temp_min = json_dict[hedr_temp_min]
-        if (self.temp_control == temprctrl_max or self.temp_control == temprctrl_min_max) and hedr_temp_max in json_dict:
+        if (self.temp_control == temprctrl_max or self.temp_control == temprctrl_min_max): #and hedr_temp_max in json_dict:
             self.temp_max = json_dict[hedr_temp_max]
         if self.mats_data is None:
             warnings.warn(message=f"{__class__.__name}: mats_data is None",

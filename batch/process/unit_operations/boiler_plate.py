@@ -10,6 +10,7 @@ from flow_draw.data_io import process_io as procio
 from flow_draw.materials import materials as mats
 from flow_draw.trait_def import trait_def as trdef
 #from flow_draw.trait_def.trait_def import GetMats
+from flow_draw.data_io.json_io import Objason, Array, Primitive
 
 
 
