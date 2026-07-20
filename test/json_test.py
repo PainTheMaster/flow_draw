@@ -9,6 +9,7 @@ import flow_draw.batch.process.unit_operations.uo_charging as chgng
 import flow_draw.batch.process.unit_operations.uo_sampling as smplng
 import flow_draw.batch.process.unit_operations.uo_cip as cip
 import flow_draw.data_io.process_io as pio
+import json
 
 
 class TestIO_00000_basic_func(unittest.TestCase):
@@ -201,6 +202,10 @@ class Test_20000_proc_json(unittest.TestCase, trdef.GetMats):
         print("==========================")
         print(f"len(json_str)=={len(json_str)}; {json_str.count('\n')} lines")
         
+        print("==========================")
+        schema_obj = json.loads(json_str)
+        print(type(schema_obj))
+        print(schema_obj)
         print("==========================")
 
         self.assertTrue(True)
