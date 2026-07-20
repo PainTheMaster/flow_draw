@@ -11,6 +11,7 @@ import flow_draw.batch.process.unit_operations.uo_charging as chgng
 import flow_draw.batch.process.unit_operations.uo_sampling as smplng
 import flow_draw.batch.process.unit_operations.uo_cip as cip
 import flow_draw.batch.process.unit_operations.uo_evaporation as evap
+import flow_draw.batch.process.unit_operations.uo_filtration as filt
 import flow_draw.data_io.process_io as pio
 
 
@@ -253,6 +254,7 @@ class Test_21000_input_json(unittest.TestCase, trdef.GetMats):
         self.chgng_obj = chgng.Charging(caller=self, flow_sheet=flowsheet, operation_seq=4, edit_comment="test charging")
         self.cip_obj = cip.CIP(caller=self, flowsheet=flowsheet, operation_seq=5, edit_comment="Example edit comment for CIP")
         self.evap_obj = evap.Evaporation(caller=self, flowsheet=flowsheet, operation_seq=6, edit_comment="test evaporation")
+        self.filt_obj = filt.Filtration(caller=self, flowsheet=flowsheet, operation_seq=7, edit_comment='Test for filtration JSON I/O')
         return super().setUp()
     
     def get_mats(self) -> mats.Materials:
@@ -571,21 +573,62 @@ class Test_21000_input_json(unittest.TestCase, trdef.GetMats):
         print(f'end_vw_guide_min: {self.evap_obj.end_vw_guide_min}')
         print(f'end_vw_guide_max: {self.evap_obj.end_vw_guide_max}')
 
+        print(f'end_volume_spec_min: {self.evap_obj.end_volume_spec_min}')
+        print(f'end_volume_spec_max: {self.evap_obj.end_volume_spec_max}')
+        print(f'end_volume_guide_min: {self.evap_obj.end_volume_guide_min}')
+        print(f'end_volume_guide_max: {self.evap_obj.end_volume_guide_max}')
+
+
+    def test_21007_filtration_json_out(self):
+        json_obj:Objason = filt.Filtration.get_json_schema(caller=self)
+        json_str = json_obj.asType()
+        for line in json_str:
+            print(line)
+
+    def test_21008_filtration_json_read(self):
+        str_json = """{
+                        "Seq_Nr": 3,
+                        "Unit_Operation": "filtration",
+                        "Edit_Comment": "Pressure range based on batch record.",
+                        "Pre-comment": "Verify filter integrity before use.",
+                        "Post-comment": "Record final filtrate volume.",
+                        "Filtering Equipment": "Pall Supor EKV Filter",
+                        "Tj set point": 20.0,
+                        "Filt P_min": 50.0,
+                        "Filt P_max": 150.0,
+                        "Pressure Unit": "kPa",
+                        "Need_integrity_test": true
+                    }"""
+        json_dict = json.loads(str_json)
+        print()
+        print("=================")
+        print(json_dict)
+        print("=================")
+        self.filt_obj.load_from_json_dict(json_dict=json_dict)
+        print(f'operation_seq: {self.filt_obj.operation_seq}')
+        print(f'edit_comment: {self.filt_obj.edit_comment}')
+        print(f'pre_comment: {self.filt_obj.pre_comment}')
+        print(f'post_comment: {self.filt_obj.post_comment}')
+        print(f'equipment: {self.filt_obj.equipment}')
+        print(f'Tj_setpoint: {self.filt_obj.Tj_setpoint}')
+        print(f'press_min: {self.filt_obj.press_min}')
+        print(f'press_max: {self.filt_obj.press_max}')
+        print(f'pressure_unit: {self.filt_obj.unit_press}')
+        print(f'integ_test: {self.filt_obj.integ_test}')
+
+
 def suite_json_test():
     suite = unittest.TestSuite()
-    #suite.addTest(TestIO_00000_basic_func('test_0000_singleprop'))
-    #suite.addTest(Test_10000_unit_ops('test_10000_charging_json'))
-    #suite.addTest(TestIO_00000_basic_func('test_uo_agitation'))
-    #suite.addTest(Test_10000_unit_ops("test_12000_cip_json"))
-    #suite.addTest(Test_10000_unit_ops("test_10000_charging_json"))
-    #suite.addTest(Test_20000_proc_json("test_20000_proc_comp_json"))
-    #suite.addTest(Test_10000_unit_ops("test_12001_agit_json"))
     # suite.addTest(Test_21000_input_json("test_21000_sampling_json_read"))
     #suite.addTest(Test_21000_input_json("test_21001_agitation_json_read"))
     #suite.addTest(Test_21000_input_json("test_21002_charging_json_read"))
     #suite.addTest(Test_21000_input_json("test_21004_cip_json_read"))
     #suite.addTest(Test_21000_input_json("test_21005_evaporation_json_out"))
-    suite.addTest(Test_21000_input_json("test_21006_evaporation_json_read"))
+    # suite.addTest(Test_21000_input_json("test_21006_evaporation_json_read"))
+    #suite.addTest(Test_21000_input_json('test_21007_filtration_json_out'))
+    suite.addTest(Test_21000_input_json('test_21008_filtration_json_read'))
+    
+
     return suite
             
 

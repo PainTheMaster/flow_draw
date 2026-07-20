@@ -9,6 +9,7 @@ from flow_draw.batch.process.unit_operations import unit_operation as uo
 from flow_draw.data_io import process_io as procio
 from flow_draw.materials import materials as mats
 from flow_draw.trait_def import trait_def as trdef
+from flow_draw.data_io.json_io import Primitive, Objason, Array 
 #from flow_draw.trait_def.trait_def import GetMats
 
 
@@ -52,7 +53,7 @@ hedr_press_max = "Filt P_max"
 """Header item for maximum filtration pressure"""
 hedr_unit_press = "Pressure Unit"
 """Header item for pressure """
-hedr_integ_test = "Integrity test?"
+hedr_integ_test = "Need_integrity_test"
 """Header item for integrity test"""
 list_hedr = [hedr_equip,
              hedr_Tj_setpoint,
@@ -239,8 +240,52 @@ class Filtration(uo.UnitOperation, uo_tag=defs.tag_uo_filt):
         self.press_max:float = None
         self.unit_press:str = None
         self.integ_test:bool = False
-
     
+    def get_json_schema(caller:trdef.UniversalTrait = None):
+        cmn_schema = Filtration.json_common()
+        filt_device = Primitive(prim_type='string',
+                                key = hedr_equip,
+                                description = 'Please designate the filterin device for the operation. This property is required and not nullable. '
+                                'If a right name is no found in the given set of information, please put "<Placeholder>" here.')
+        temp_jacket = Primitive(prim_type = 'number',
+                                key = hedr_Tj_setpoint,
+                                description = 'Please designate the Tj set point for the filtration device. This property is optional and nullable.',
+                                nullable=True)
+        press_min = Primitive(prim_type = 'number',
+                              key = hedr_press_min,
+                              description = 'Please designate the minimum pressure for the filtration operation. This property is optional and nullable. '
+                              'Please follow the information on the given flowsheet',
+                              nullable=True)
+        press_max = Primitive(prim_type = 'number',
+                              key = hedr_press_max,
+                              description = 'Please designate the maximum pressure for the filtration operation. This property is optional and nullable.'
+                              'Please follow the information on the given flowsheet',
+                              nullable=True)
+        press_unit = Primitive(prim_type='string',
+                               key=hedr_unit_press,
+                               enum= list_opt_unit_press,
+                               description=f'Pressure unit to designate the pressure for the filtration operation. '
+                               f'This property is mandatory if either of "{hedr_press_min}" or "{hedr_press_max}" has a non-null value.',
+                               nullable=True)
+        integ_test = Primitive(prim_type='boolean',
+                               key=hedr_integ_test,
+                               description='Please designate whether the integrity test is required for the filtration operation.')
+        obj_filtration = Objason(key=Filtration.uo_tag,
+                                 props=cmn_schema + [filt_device, temp_jacket, press_min, press_max, press_unit, integ_test],
+                                 description='This object describes the filtration operation in the process flowsheet.')
+        return obj_filtration
+        
+    def load_from_json_dict(self, json_dict):
+        super().load_from_json_dict(json_dict)
+        self.equipment = json_dict.get(hedr_equip, None)
+        self.Tj_setpoint = json_dict.get(hedr_Tj_setpoint, None)
+        self.press_min = json_dict.get(hedr_press_min, None)
+        self.press_max = json_dict.get(hedr_press_max, None)
+        self.unit_press = json_dict.get(hedr_unit_press, None)
+        self.integ_test = json_dict.get(hedr_integ_test, None)
+        print(f'self.integ_test: {self.integ_test} (type: {type(self.integ_test)})')
+
+
     def load_params_from_df(self, df: pd.DataFrame):
         """
         Loads necessary parameters from a DataFrame object.
@@ -276,6 +321,9 @@ class Filtration(uo.UnitOperation, uo_tag=defs.tag_uo_filt):
     def get_detail_option_menu(self) -> Optional[dict[str, list[str]]]:
         return dict_filt_drpdwn
     
+
+
+
     def output_unit_operation(self):
         self.flowsheet.header_organizer(op_nr=self.operation_seq, title=lang_dict_uo_titles[self.uo_tag])
         if not (self.pre_comment == None or self.pre_comment == ''):
