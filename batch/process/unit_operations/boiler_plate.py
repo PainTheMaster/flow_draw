@@ -38,10 +38,20 @@ opt_time_unit_hour:str = defs.tag_flow_cmn_time_unit_hour
 #########################################################
 # UO-specific hader items and list thereof
 #########################################################
-
 #hedr_<something> = defs.hedr_<unit operation>_<specification item>
 #list_hedr = defs.list_hedr_<list of header items for the uo>
 #dict_dtil_drpdwn = defs.dict_opt_<unit operation>
+
+"""
+Here, header items to hold pieces of information for the filter dryer set-up shall be placed. The following ithems have to be collected to complete the unit operation block:
+-ID of the filtering equipment.
+-Type/catalog code of the filter cloth.
+-Number of the filter cloths.
+-Type/catalog code of the bag filter.
+
+
+""" 
+
 
 #########################################################
 # UO-specific options, list, header_item: list dictionry thereof (for data input and internalsignaling)
@@ -123,6 +133,7 @@ class ClassName(uo.UnitOperation, uo_tag=defs.tag_uo_"UO_NAME"):
 
 
     def get_detail_header(self) -> list[str]:
+        """UO-specific items only."""
         pass
 
     def get_detail_option_menu(self) -> Optional[dict[str, list[str]]]:

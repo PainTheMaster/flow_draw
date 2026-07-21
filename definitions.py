@@ -122,6 +122,12 @@ tag_uo_filt: str = "filtration"
 part_uo_title_filt_jp = "ろ過"
 """JP expression of filtration"""
 
+tag_uo_filt_setup: str = "filter_setup"
+"""Tag for an unit operation filter setup"""
+part_uo_title_filt_setup_jp = "ろ過準備"
+"""JP expression of filter setup"""
+
+
 tag_uo_cake_rinse: str = "rinse"
 """Tag for an unit operation rinsing filter cake"""
 part_uo_title_cake_rinse_jp = "湿性末リンス"
@@ -169,6 +175,7 @@ dict_jp_part_uo_titles = {tag_uo_line_clearance : part_uo_title_clearance_jp,
                           tag_uo_cip : part_uo_title_cip_jp,
                           tag_uo_transfer : part_uo_title_transfer_jp,
                           tag_uo_filt : part_uo_title_filt_jp,
+                          tag_uo_filt_setup: part_uo_title_filt_setup_jp,
                           tag_uo_cake_rinse : part_uo_title_cake_rinse_jp,
                           tag_uo_reslurry : part_uo_title_reslurry_jp,
                           tag_uo_drying : part_uo_title_drying_jp,

@@ -17,6 +17,7 @@ import flow_draw.batch.process.unit_operations.uo_cip as cip
 import flow_draw.batch.process.unit_operations.uo_transfer as trsf
 import flow_draw.batch.process.unit_operations.uo_filtration as filt
 import flow_draw.batch.process.unit_operations.uo_sampling as smplng
+import flow_draw.batch.process.unit_operations.uo_filter_setup as fltsup
 import flow_draw.data_io.flowsheet  as fsht
 import flow_draw.materials.materials as mats
 import flow_draw.trait_def.trait_def as trdef
@@ -1005,6 +1006,35 @@ class SamplingTest4300(unittest.TestCase, trdef.UniversalTrait):
             test_inst.load_params_from_df(df=df)
 
 
+class FiltSetupTest4400(unittest.TestCase, trdef.UniversalTrait):
+    def __init__(self, methodName = "runTest"):
+        super().__init__(methodName)
+
+    def setUp(self):
+        self.flowsheet = fsht.Flowsheet()
+    
+    def test_4400_full(self):
+        test_inst = fltsup.FiltSetup(caller=self,
+                                    flowsheet=self.flowsheet,
+                                    operation_seq=1,
+                                    num_subitems=1,
+                                    edit_comment="This is a comment for test 4400.")
+        df = fltsup.FiltSetup.generate_test_df(equip_id="test_4400_FD",
+                                              filt_cloth = "FC-4400",
+                                              num_cloth=1,
+                                              bag_filter = "BF-4400",
+                                              press_leak_test = "0.1",
+                                              press_drop_leak_test = "0.01",
+                                              time_leak_test = "10",
+                                              unit_press='MPa')
+        test_inst.load_params_from_df(df)
+        test_inst.output_unit_operation()
+        self.flowsheet.save("Test_4400_filt_setup_full.xlsx")
+        self.assertTrue(True)
+
+
+
+
 def suite_0000_40000():
     
     suite = unittest.TestSuite()
@@ -1014,8 +1044,8 @@ def suite_0000_40000():
     # suite.addTest(UnitOperationOutputTest("test_1005_temp_ctrl_TiTj_mode"))
     # suite.addTest(UnitOperationOutputTest("test_1006_temp_ctrl_Tj_mode"))
     # suite.addTest(UnitOperationOutputTest("test_1007_temp_ctrl_Ti_mode"))
-    suite.addTest(UnitOperationOutputTest("test_1008_agit_full"))
-    suite.addTest(UnitOperationOutputTest("test_1009_agit_minimal"))
+    # suite.addTest(UnitOperationOutputTest("test_1008_agit_full"))
+    # suite.addTest(UnitOperationOutputTest("test_1009_agit_minimal"))
     # suite.addTest(UnitOperationOutputTest("test_1010_settling_full"))
     # suite.addTest(UnitOperationOutputTest("test_1011_settling_minimal"))
     # suite.addTest(UnitOperationOutputTest("test_1012_phase_disch_full"))
@@ -1045,6 +1075,7 @@ def suite_0000_40000():
     # suite.addTest(SamplingTest4300("test_4306_ipc_item_unit_mismatch"))
     # suite.addTest(SamplingTest4300("test_4307_ipc_criteria_item_mismatch"))
     # suite.addTest(SamplingTest4300("test_4308_monit_item_unit_mismatch"))
+    suite.addTest(FiltSetupTest4400("test_4400_full"))
 
 
     return suite

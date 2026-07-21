@@ -34,7 +34,7 @@ opt_time_unit_minute:str = defs.tag_flow_cmn_time_unit_minute
 """Tag for a common flowsheet component for an unit of time: minute"""
 opt_time_unit_hour:str = defs.tag_flow_cmn_time_unit_hour
 """Tag for a common flowsheet component for an unit of time: hour"""
-list
+
 
 #########################################################
 # UO-specific hader items and list thereof
