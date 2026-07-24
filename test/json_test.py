@@ -12,6 +12,7 @@ import flow_draw.batch.process.unit_operations.uo_sampling as smplng
 import flow_draw.batch.process.unit_operations.uo_cip as cip
 import flow_draw.batch.process.unit_operations.uo_evaporation as evap
 import flow_draw.batch.process.unit_operations.uo_filtration as filt
+import flow_draw.batch.process.unit_operations.uo_filter_setup as filtsup
 import flow_draw.data_io.process_io as pio
 import json
 
@@ -374,7 +375,6 @@ class Test_21000_input_json(unittest.TestCase, trdef.GetMats):
 
         self.assertTrue(True)
 
-
     def test_21001_agitation_json_read(self):
         json_str:str ="""
             {
@@ -583,7 +583,6 @@ class Test_21000_input_json(unittest.TestCase, trdef.GetMats):
         print(f'end_volume_guide_min: {self.evap_obj.end_volume_guide_min}')
         print(f'end_volume_guide_max: {self.evap_obj.end_volume_guide_max}')
 
-
     def test_21007_filtration_json_out(self):
         json_obj:Objason = filt.Filtration.get_json_schema(caller=self)
         json_str = json_obj.asType()
@@ -621,6 +620,13 @@ class Test_21000_input_json(unittest.TestCase, trdef.GetMats):
         print(f'pressure_unit: {self.filt_obj.unit_press}')
         print(f'integ_test: {self.filt_obj.integ_test}')
 
+    def test_21009_filter_setup_json_out(self):
+        json_obj:Objason = filtsup.FiltSetup.get_json_schema(caller=self)
+        json_str = json_obj.asType()
+        for line in json_str:
+            print(line)
+        self.assertTrue(True)
+
 
 def suite_json_test():
     suite = unittest.TestSuite()
@@ -631,7 +637,8 @@ def suite_json_test():
     #suite.addTest(Test_21000_input_json("test_21005_evaporation_json_out"))
     # suite.addTest(Test_21000_input_json("test_21006_evaporation_json_read"))
     #suite.addTest(Test_21000_input_json('test_21007_filtration_json_out'))
-    suite.addTest(Test_21000_input_json('test_21008_filtration_json_read'))
+    #suite.addTest(Test_21000_input_json('test_21008_filtration_json_read'))
+    suite.addTest(Test_21000_input_json('test_21009_filter_setup_json_out'))
     
 
     return suite

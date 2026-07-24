@@ -167,7 +167,7 @@ stc_bag_filter_jp:str = "バグフィルター:{bag_filter_type}"
 """Text template to designate the bag filter type."""
 
 tag_stc_press_leak_test:str = "stc_press_leak_test"
-"""Tag for the text template for the applied pressure for leak test: includes a placeholder {press_appl}, {press_unit},{time}, and {press_drop}"""
+"""Tag for the text template for the applied pressure for leak test: includes a placeholder {press_appl}, {press_unit}, {time}, and {press_drop}"""
 stc_flow_press_leak_test_jp:str = "{press_appl}{press_unit}に加圧し、{time}分間で{press_drop}{press_unit}以上の圧力降下がないことを確認する。"
 """Text template to designate the applied pressure for leak test."""
 
@@ -248,15 +248,15 @@ class FiltSetup(uo.UnitOperation, uo_tag=defs.tag_uo_filt_setup):
             self.filter_cloth_type = first_row[hedr_filter_cloth]
         if not pd.isna(first_row[hedr_num_filter]):
             self.num_filter_cloths = first_row[hedr_num_filter]
-        if not pd.isna(first_row[hedr_bag_filter]):
+        if not pd.isna(first_row[hedr_bag_filter]): 
             self.bag_filter_type = first_row[hedr_bag_filter]
-        if not pd.isna(first_row[hedr_press_leak_test]):
+        if not pd.isna(first_row[hedr_press_leak_test]): 
             self.press_leak_test = first_row[hedr_press_leak_test]
-        if not pd.isna(first_row[hedr_press_drop_leak_test]):
+        if not pd.isna(first_row[hedr_press_drop_leak_test]): 
             self.press_drop_leak_test = first_row[hedr_press_drop_leak_test]
-        if not pd.isna(first_row[hedr_time_leak_test]):
+        if not pd.isna(first_row[hedr_time_leak_test]): 
             self.time_leak_test = first_row[hedr_time_leak_test]
-        if not pd.isna(first_row[hedr_press_unit]):
+        if not pd.isna(first_row[hedr_press_unit]): #*************
             self.unit_press = first_row[hedr_press_unit]
 
 
@@ -269,7 +269,54 @@ class FiltSetup(uo.UnitOperation, uo_tag=defs.tag_uo_filt_setup):
     
 
     def get_json_schema(caller: trdef.UniversalTrait=None)->Objason:
-        pass
+        common_schema:list[Primitive] = FiltSetup.json_common()
+
+        equip_id = Primitive(prim_type='string',
+                            key = hedr_equip,
+                            description = 'This is to designate the filtration equipment ID. '
+                            'This is a mandatory property of the object. If the necessary information is not found in the given flowsheet, please put "<placeholder>".',
+                            nullable = False)
+        typ_filt_cloth = Primitive(prim_type='string',
+                                   key = hedr_filter_cloth,
+                                   description = 'This is to designate the filter cloth type. '
+                                      'This is a mandatory property of the object. If the necessary information is not found in the given flowsheet, please put "<placeholder>".',
+                                   nullable = False)
+        num_filt_cloth = Primitive(prim_type='integer',
+                                   key = hedr_num_filter,
+                                   description = 'Number of filter cloths. This is a mandatory property of the object. '
+                                   'If the necessary information is not found in the given flowsheet, please put "<placeholder>".',
+                                   nullable = False)
+        typ_bag_filt = Primitive(prim_type='string',
+                                 key = hedr_bag_filter,
+                                 description = 'This is to designate a bag filter type. '
+                                        'This is a mandatory property of the object. If the necessary information is not found in the given flowsheet, please put "<placeholder>".',
+                                 nullable = False)
+        press_leak_test = Primitive(prim_type='number',
+                                    key = hedr_press_leak_test,
+                                    description = 'Pressure for the leak test. '
+                                        'This is a mandatory property of the object. If the necessary information is not found in the given flowsheet, please put 0.',
+                                    nullable = False)
+        press_drop_leak_test = Primitive(prim_type='number',
+                                          key = hedr_press_drop_leak_test,
+                                          description = 'Pressure drop criterion for the leak test. '
+                                              'This is a mandatory property of the object. If the necessary information is not found in the given flowsheet, please put 0.',
+                                          nullable = False)
+        time_leak_test = Primitive(prim_type='number',
+                                   key = hedr_time_leak_test,
+                                   description = 'Duration of the leak test. '
+                                    'This is a mandatory property of the object. If the necessary information is not found in the given flowsheet, 10 minutes is the default value.',
+                                   nullable = False)
+        unit_press = Primitive(prim_type='string',
+                               key = hedr_press_unit,
+                               enum = list_opt_press_unit,
+                               description = f'Unit for the leak test pressure. If the necessary information is not found in the given flowsheet, please select "{defs.opt_press_MPa}" as the default value. ',
+                               nullable = False)
+        obj_filt_setup = Objason(key = FiltSetup.uo_tag,
+                                description = 'This is a unit operation for the filter dryer set-up.',
+                                props = common_schema+[equip_id, typ_filt_cloth, num_filt_cloth, typ_bag_filt, press_leak_test, press_drop_leak_test, time_leak_test, unit_press])
+
+        return obj_filt_setup
+
 
 
     def load_from_json_dict(self, json_dict: dict[str, any]):
