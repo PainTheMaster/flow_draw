@@ -139,6 +139,14 @@ class ClassName(uo.UnitOperation, uo_tag=defs.tag_uo_"UO_NAME"):
     def get_detail_option_menu(self) -> Optional[dict[str, list[str]]]:
         pass
     
+    def get_json_schema(caller: trdef.UniversalTrait=None)->Objason:
+        common_schema:list[Primitive] = ThisClass.json_common()
+
+
+    def load_from_json_dict(self, json_dict: dict[str, any]):
+        super().load_from_json_dict(json_dict)
+        pass
+
     def output_unit_operation(self):
         self.flowsheet.header_organizer(op_nr=self.operation_seq, title=lang_dict_uo_titles[self.uo_tag])
         if not (self.pre_comment == None or self.pre_comment == ''):

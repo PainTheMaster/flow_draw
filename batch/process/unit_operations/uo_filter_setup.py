@@ -320,8 +320,15 @@ class FiltSetup(uo.UnitOperation, uo_tag=defs.tag_uo_filt_setup):
 
 
     def load_from_json_dict(self, json_dict: dict[str, any]):
-        pass
-
+        super().load_from_json_dict(json_dict)
+        self.equip_id = json_dict[hedr_equip]
+        self.filter_cloth_type = json_dict[hedr_filter_cloth]
+        self.num_filter_cloths = json_dict[hedr_num_filter]
+        self.bag_filter_type = json_dict[hedr_bag_filter]
+        self.press_leak_test = json_dict[hedr_press_leak_test]
+        self.press_drop_leak_test = json_dict[hedr_press_drop_leak_test]
+        self.time_leak_test = json_dict[hedr_time_leak_test]
+        self.unit_press = json_dict[hedr_press_unit]
 
 
     def output_unit_operation(self):

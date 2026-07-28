@@ -195,6 +195,24 @@ class UnitOperation(ABC):
     
     @classmethod
     def json_common(cls)->list[Primitive]:
+        """
+        Generates objects for the unit-operation-common items in the JSON schema below.
+        <ul>
+        <li>seq_uo: int
+        <li>name_uo: str
+        <li>edtcmnt: str
+        <li>precmnt: str
+        <li>postcmnt: str
+        </ul>
+
+        Params
+        -----------
+        None
+
+        Returns
+        -----------
+        list[Primitive]
+        """
         seq_uo = Primitive(prim_type="integer",
                            key=defs.hedr_cmn_io_dtil_seq,
                            description="Sequence number (1, 2, 3...) in a series of unit operations in the process",
@@ -229,6 +247,24 @@ class UnitOperation(ABC):
 
     @abstractmethod
     def load_from_json_dict(self, json_dict: dict[str, any]):
+        """
+        Load the unit operation data from a JSON dictionary. The following items are retrieved from the dictionary.
+        <ul>
+        <li>seq_uo: int</li>
+        <li>edit_comment: str</li>
+        <li>pre_comment: str</li>
+        <li>post_comment: str</li>
+        </ul>
+        
+        Params
+        -----------
+        json_dict: dict[str, any]
+            The JSON dictionary containing the unit operation data.
+
+        Returns
+        -----------
+        None
+        """
         self.operation_seq = json_dict[defs.hedr_cmn_io_dtil_seq]
         self.edit_comment = json_dict[defs.hedr_cmn_io_dtil_edt_cmnt]
         self.pre_comment = json_dict[defs.hedr_cmn_io_dtil_precmnt]
