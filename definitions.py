@@ -1004,7 +1004,7 @@ tag_part_flow_uo_innert_gas_plchldr = opt_uo_innert_gas_plchldr
 part_flow_uo_innert_gas_plchldr_jp = "<gas: placeholder>"
 """Flow sheet part placeholder"""
 
-tag_part_flow_uo_innert_rplace_complete = "replacement complete"
+tag_part_flow_uo_innert_rplace_complete = "replacement_complete"
 """tag for innert gas replacement complete check-box"""
 part_flow_uo_innert_rplace_complete_jp = "□ 置換実施"
 """Flow sheet part for innert gas replacement complete check-box"""

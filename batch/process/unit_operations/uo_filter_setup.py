@@ -284,7 +284,7 @@ class FiltSetup(uo.UnitOperation, uo_tag=defs.tag_uo_filt_setup):
         num_filt_cloth = Primitive(prim_type='integer',
                                    key = hedr_num_filter,
                                    description = 'Number of filter cloths. This is a mandatory property of the object. '
-                                   'If the necessary information is not found in the given flowsheet, please put "<placeholder>".',
+                                   'If the necessary information is not found in the given flowsheet, please put 0.',
                                    nullable = False)
         typ_bag_filt = Primitive(prim_type='string',
                                  key = hedr_bag_filter,

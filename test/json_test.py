@@ -261,6 +261,7 @@ class Test_21000_input_json(unittest.TestCase, trdef.GetMats):
         self.cip_obj = cip.CIP(caller=self, flowsheet=flowsheet, operation_seq=5, edit_comment="Example edit comment for CIP")
         self.evap_obj = evap.Evaporation(caller=self, flowsheet=flowsheet, operation_seq=6, edit_comment="test evaporation")
         self.filt_obj = filt.Filtration(caller=self, flowsheet=flowsheet, operation_seq=7, edit_comment='Test for filtration JSON I/O')
+        self.filtsup_obj = filtsup.FiltSetup(caller=self, flowsheet=flowsheet, operation_seq=8, edit_comment='Test for filter setup JSON I/O')
         return super().setUp()
     
     def get_mats(self) -> mats.Materials:
@@ -627,6 +628,57 @@ class Test_21000_input_json(unittest.TestCase, trdef.GetMats):
             print(line)
         self.assertTrue(True)
 
+    def test21010_filter_setup_json_read(self):
+        str_json = """{
+                    "Seq_Nr": 3,
+                    "Unit_Operation": "filter_setup",
+                    "Edit_Comment": null,
+                    "Pre-comment": "ろ過機の組立前に、フィルタークロスの外観検査を実施すること。",
+                    "Post-comment": null,
+                    "Equipment": "F-201",
+                    "Filter_cloth_type": "PPクロス（100メッシュ)",
+                    "Number_cloth": 2,
+                    "Bag_filter_type": "PPバグフィルター 5μm",
+                    "App_press_leak_test": 0.2,
+                    "Permiss_press_leak_test": 0.02,
+                    "Time_leak_test": 10,
+                    "Pressure_unit": "MPa"
+                    }"""
+        json_dict = json.loads(str_json)
+        print()
+        print("=================")
+        print(json_dict)
+        print("=================")
+        self.filtsup_obj.load_from_json_dict(json_dict=json_dict)
+        """
+        FYI...
+        def load_from_json_dict(self, json_dict: dict[str, any]):
+            super().load_from_json_dict(json_dict)
+            self.equip_id = json_dict[hedr_equip]
+            self.filter_cloth_type = json_dict[hedr_filter_cloth]
+            self.num_filter_cloths = json_dict[hedr_num_filter]
+            self.bag_filter_type = json_dict[hedr_bag_filter]
+            self.press_leak_test = json_dict[hedr_press_leak_test]
+            self.press_drop_leak_test = json_dict[hedr_press_drop_leak_test]
+            self.time_leak_test = json_dict[hedr_time_leak_test]
+            self.unit_press = json_dict[hedr_press_unit]
+        """
+
+        print(f'operation_seq: {self.filtsup_obj.operation_seq}')
+        print(f'edit_comment: {self.filtsup_obj.edit_comment}')
+        print(f'pre_comment: {self.filtsup_obj.pre_comment}')
+        print(f'post_comment: {self.filtsup_obj.post_comment}')
+        print(f'equip_id: {self.filtsup_obj.equip_id}')
+        print(f'filter_cloth_type: {self.filtsup_obj.filter_cloth_type}')
+        print(f'num_filter_cloths: {self.filtsup_obj.num_filter_cloths}')
+        print(f'bag_filter_type: {self.filtsup_obj.bag_filter_type}')
+        print(f'press_leak_test: {self.filtsup_obj.press_leak_test}')
+        print(f'press_drop_leak_test: {self.filtsup_obj.press_drop_leak_test}')
+        print(f'time_leak_test: {self.filtsup_obj.time_leak_test}')
+        print(f'unit_press: {self.filtsup_obj.unit_press}') 
+
+        self.assertTrue(True)
+
 
 def suite_json_test():
     suite = unittest.TestSuite()
@@ -638,7 +690,8 @@ def suite_json_test():
     # suite.addTest(Test_21000_input_json("test_21006_evaporation_json_read"))
     #suite.addTest(Test_21000_input_json('test_21007_filtration_json_out'))
     #suite.addTest(Test_21000_input_json('test_21008_filtration_json_read'))
-    suite.addTest(Test_21000_input_json('test_21009_filter_setup_json_out'))
+    #suite.addTest(Test_21000_input_json('test_21009_filter_setup_json_out'))
+    suite.addTest(Test_21000_input_json('test21010_filter_setup_json_read'))
     
 
     return suite
