@@ -13,6 +13,7 @@ import flow_draw.batch.process.unit_operations.uo_cip as cip
 import flow_draw.batch.process.unit_operations.uo_evaporation as evap
 import flow_draw.batch.process.unit_operations.uo_filtration as filt
 import flow_draw.batch.process.unit_operations.uo_filter_setup as filtsup
+import flow_draw.batch.process.process as proc
 import flow_draw.data_io.process_io as pio
 import json
 
@@ -678,6 +679,41 @@ class Test_21000_input_json(unittest.TestCase, trdef.GetMats):
         print(f'unit_press: {self.filtsup_obj.unit_press}') 
 
         self.assertTrue(True)
+
+
+class Test_30000_json_ai_interface(unittest.TestCase, trdef.GetMats):
+    def setUp(self):
+        self.mats_df = mats.Materials.generate_mats_df()
+        self.mats_df = mats.Materials.add_to_mats_df(mats_df=self.mats_df,
+                                                       material="test mat 1",
+                                                       main_star=True,
+                                                       mw = 18.01,
+                                                       density=1.00,
+                                                       conc_assay=99.999,
+                                                       kg_main=2.00,
+                                                       remark="Actually, I'm water.")
+        self.mats_df = mats.Materials.add_to_mats_df(mats_df=self.mats_df,
+                                                       material="test mat 2",
+                                                       main_star=False,
+                                                       mw = 46.07,
+                                                       density=0.789,
+                                                       conc_assay=94.0,
+                                                       remark="Actually, I'm ethanol.")
+        self.mats_inst = mats.Materials(self.mats_df)
+
+        obj_proc = proc.Process(batch_name="ai_test_batch", process_name="ai_test_process", num_uo=4)
+        obj_proc.mats_data = self.mats_inst
+
+        return super().setUp()
+    
+    def get_mats(self) -> mats.Materials:
+        return self.mats_inst
+
+
+    
+
+
+    
 
 
 def suite_json_test():

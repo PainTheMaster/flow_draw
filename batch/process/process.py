@@ -9,6 +9,10 @@ import flow_draw.batch.process.unit_operations.uo_sampling as smplng
 import flow_draw.batch.process.unit_operations.uo_cip as cip
 import flow_draw.batch.process.unit_operations.uo_agitation as agit
 import flow_draw.batch.process.unit_operations.uo_placeholder as plchldr
+import flow_draw.batch.process.unit_operations.uo_filter_setup as fltstup
+import flow_draw.batch.process.unit_operations.uo_filtration as filt
+
+
 
 from flow_draw.data_io import process_io as proc_io
 from flow_draw.data_io import flowsheet as fsht
@@ -18,6 +22,9 @@ from flow_draw.trait_def.trait_def import GetMats as GetMats
 
 from flow_draw.data_io import json_io
 from flow_draw.data_io.json_io import JsonEntity, Array, Objason, Primitive
+
+list_uo: list[type[uo.UnitOperation]] = [agit.Agitation, chgng.Charging, cip.CIP, fltstup.FiltSetup, filt.Filtration,smplng.Sampling, plchldr.Placeholder]
+
 
 class Process(GetMats):
     """
@@ -52,6 +59,7 @@ class Process(GetMats):
         self.batch_name:str = batch_name
         self.process_name:str = process_name
         self.num_uo:int = None
+        self.data_input: proc_io.ProcessIO = None
         if(num_uo is not None):
             self.num_uo = num_uo
         else:
@@ -111,6 +119,10 @@ class Process(GetMats):
         #self.data_input.save_form()
 
 
+    def generate_proc_detail_for_ai(self):
+        self.data_input.json
+        #TODO: impelment me!
+        pass
 
 
     def load_uo_summary(self):
@@ -219,8 +231,9 @@ class Process(GetMats):
     def ai_load_process_details(self):
         self.load_materials_data()
         #lit_uo = list(unitop.registry_uo_cls.values())
+        #TODO: Please replace list_uo with the real one before release.
         list_uo: list[type[uo.UnitOperation]] = [chgng.Charging, agit.Agitation, cip.CIP, smplng.Sampling]
-        self.data_input.ai_load_process_details()
+        self.data_input.ai_load_process_details(caller=self, list_uo=list_uo)
 
         
 

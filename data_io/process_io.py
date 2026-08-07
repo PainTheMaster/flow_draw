@@ -1,5 +1,6 @@
 import os
 import math
+import json
 import openpyxl as xl
 import pandas as pd
 import flow_draw.definitions as defs
@@ -419,62 +420,9 @@ class ProcessIO:
 
         return tables
 
-    # def json_uo(caller: trdef.UniversalTrait, list_uo: list[unitop.UnitOperation])->Array:
-    #     list_objason: list[Objason] = []
-    #     for uo in list_uo:
-    #         objason_uo = uo.get_json_schema(caller)
-    #         list_objason.append(objason_uo)
-    #     arr_objason = Array(key='array_unit_operations',
-    #                         content=list_objason,
-    #                         description='List of unit operations. Please work with this array to put together the pieces of information for the process.')
-    #     return arr_objason
-    
 
 
-
-    # def json_uo(self, caller:trdef.UniversalTrait, list_uo: list[type[uo.UnitOperation]])->str:
-        
-    #     list_json_str:list[str] = []
-        
-    #     list_json_str.append('{')
-    #     list_json_str.append(' "$schema": "https://json-schema.org/draft/2020-12/schema",')
-    #     temp_title = f'{self.process_name}'
-    #     list_json_str.append(f' "title": "{temp_title}",')
-    #     temp_descr = f'Unit operation sequence for process \\\"{self.process_name}\\\"'
-    #     list_json_str.append(f' "description": "{temp_descr}",')
-    #     list_json_str.append(' "type":"array",')
-    #     list_json_str.append(' "items":{')
-    #     list_json_str.append('  "anyOf": [')
-        
-    #     for uo in list_uo:
-    #         temp_entry = f'   {{"$ref":"#/$defs/{uo.uo_tag}"}},'
-    #         list_json_str.append(temp_entry)
-    #     list_json_str[-1] = list_json_str[-1].removesuffix(',')
-        
-    #     list_json_str.append('  ]') #corresponds to "oneOf":[
-    #     list_json_str.append(' },')  #corresponds to "items":{
-
-    #     list_json_str.append(' "$defs":{')
-    #     for uo in list_uo:
-    #         objson_uo:Objason = uo.get_json_schema(caller)
-    #         arr_str_objason = objson_uo.asEntity()
-    #         for line in arr_str_objason:
-    #             list_json_str.append('  '+line)
-    #         list_json_str[-1] = list_json_str[-1]+','
-    #     list_json_str[-1] = list_json_str[-1].removesuffix(',')
-
-    #     list_json_str.append(' }') #corresponds to "$defs":{
-    #     list_json_str.append('}')
-
-    #     for line in list_json_str:
-    #         print(line)
-
-    #     single_str_json = '\n'.join(list_json_str)
-    #     return single_str_json
-
-
-
-    def json_uo(self, caller:trdef.UniversalTrait, list_uo: list[type[uo.UnitOperation]])->str:
+    def json_uo(self, caller:trdef.UniversalTrait, list_uo: list[type[uo.UnitOperation]])->dict[str, any]:
         
         list_json_str:list[str] = []
         
@@ -491,8 +439,8 @@ class ProcessIO:
         list_json_str.append('   "items":{')
         list_json_str.append('    "anyOf": [')
         
-        for uo in list_uo:
-            temp_entry = f'     {{"$ref":"#/$defs/{uo.uo_tag}"}},'
+        for uo_cls in list_uo:
+            temp_entry = f'     {{"$ref":"#/$defs/{uo_cls.uo_tag}"}},'
             list_json_str.append(temp_entry)
         list_json_str[-1] = list_json_str[-1].removesuffix(',')
         
@@ -503,8 +451,8 @@ class ProcessIO:
         list_json_str.append(f' "required":["{defs.json_key_arr_uo_params}"],')
         list_json_str.append(' "additionalProperties":false,')
         list_json_str.append(' "$defs":{')
-        for uo in list_uo:
-            objson_uo:Objason = uo.get_json_schema(caller)
+        for uo_cls in list_uo:
+            objson_uo:Objason = uo_cls.get_json_schema(caller)
             arr_str_objason = objson_uo.asEntity()
             for line in arr_str_objason:
                 list_json_str.append('  '+line)
@@ -518,11 +466,10 @@ class ProcessIO:
             print(line)
 
         single_str_json = '\n'.join(list_json_str)
-        return single_str_json
+        return json.loads(single_str_json)
 
 
-    def ai_load_process_details(self, caller: trdef.GetMats=None,  list_uo: list[uo.UnitOperation]=[]):
-        str_json_uo=self.json_uo(caller=caller, list_uo=list_uo)
+    def ai_load_process_details(self, caller: trdef.GetMats=None,  list_uo: list[type[uo.UnitOperation]]=[]):
         filename_input = self.process_name+'.pdf'
 
         poppler_dir = "C:\\poppler-26.02.0\\Library\\bin"
@@ -537,7 +484,49 @@ class ProcessIO:
         for i, img in enumerate(images):
             img.save(fp=f'images\\page_{i+1}.png', format='PNG')
             image_paths.append(f'.\\images\\page_{i+1}.png')
+
+        content_list:list[dict[str, any]] = [{"type":"text",
+                                              "text":"指定したIDのファイルには化合物の合成フローが示されています。プロセスを解析して指定した様式のJSONで返してください。"}]
+
+        for path in image_paths:
+            content_list.append({"type":"image_url",
+                                 "image_url":{
+                                     "url": f"data:image/png;base64,{self.__encode_image(path)}"
+                                    }
+                                }
+            )
+
+        schema_dict = self.json_uo(caller, list_uo)
+        response_format={
+                        "type": "json_schema",
+                        "json_schema": {
+                            "name": "process_detais",
+                            "strict": True,
+                            "schema": schema_dict
+                            }
+                        }
+        response = client.chat.completions.create(
+            model="gpt-5",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are a helpful assistant that extracts process information from images and returns it in a specified JSON format."
+                },
+                {
+                    "role": "user",
+                    "content": content_list
+                }
+            ],
+            response_format=response_format
+        )
+
+
         
+
+    def __encode_image(self,image_paht:str)->str:
+        with open(image_paht, "rb") as image_file:
+            encoded_string = base64.b64encode(image_file.read()).decode("utf-8")
+        return encoded_string
         
 
 
