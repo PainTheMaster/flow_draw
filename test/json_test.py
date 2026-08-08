@@ -685,24 +685,59 @@ class Test_30000_json_ai_interface(unittest.TestCase, trdef.GetMats):
     def setUp(self):
         self.mats_df = mats.Materials.generate_mats_df()
         self.mats_df = mats.Materials.add_to_mats_df(mats_df=self.mats_df,
-                                                       material="test mat 1",
+                                                       material="H-Ala-Glu-GlyOme",
                                                        main_star=True,
-                                                       mw = 18.01,
+                                                       mw = 200,
                                                        density=1.00,
                                                        conc_assay=99.999,
-                                                       kg_main=2.00,
-                                                       remark="Actually, I'm water.")
+                                                       kg_main=0.200,
+                                                       remark="")
         self.mats_df = mats.Materials.add_to_mats_df(mats_df=self.mats_df,
-                                                       material="test mat 2",
+                                                       material="Fmoc-Gly-OH",
                                                        main_star=False,
-                                                       mw = 46.07,
-                                                       density=0.789,
+                                                       mw = 100,
+                                                       density=1.00,
                                                        conc_assay=94.0,
-                                                       remark="Actually, I'm ethanol.")
+                                                       remark="")
+        self.mats_df = mats.Materials.add_to_mats_df(mats_df=self.mats_df,
+                                                    material="dichloromethane",
+                                                    main_star=False,
+                                                    mw = 84.93,
+                                                    density=1.33,
+                                                    conc_assay=99.0,
+                                                    remark="")
+        self.mats_df = mats.Materials.add_to_mats_df(mats_df=self.mats_df,
+                                                    material="1-hydroxy-7-azabenzotriazole",
+                                                    main_star=False,
+                                                    mw = 136.114,
+                                                    density=0.973,
+                                                    conc_assay=98.0,
+                                                    remark="")
+        self.mats_df = mats.Materials.add_to_mats_df(mats_df=self.mats_df,
+                                                    material="conc NaHCO3",
+                                                    main_star=False,
+                                                    mw = 18,
+                                                    density=1.0,
+                                                    conc_assay=9.6,
+                                                    remark="")
+        self.mats_df = mats.Materials.add_to_mats_df(mats_df=self.mats_df,
+                                                    material="conc NaCl",
+                                                    main_star=False,
+                                                    mw = 18,
+                                                    density=1.0,
+                                                    conc_assay=26,
+                                                    remark="")
+        self.mats_df = mats.Materials.add_to_mats_df(mats_df=self.mats_df,
+                                                    material="Hexane",
+                                                    main_star=False,
+                                                    mw = 86.18,
+                                                    density=0.67,
+                                                    conc_assay=95,
+                                                    remark="")             
         self.mats_inst = mats.Materials(self.mats_df)
 
-        obj_proc = proc.Process(batch_name="ai_test_batch", process_name="ai_test_process", num_uo=4)
-        obj_proc.mats_data = self.mats_inst
+        self.obj_proc = proc.Process(batch_name="ai_test_batch", process_name="ai_test_process", num_uo=4)
+        self.obj_proc.mats_data = self.mats_inst
 
         return super().setUp()
     
@@ -710,10 +745,10 @@ class Test_30000_json_ai_interface(unittest.TestCase, trdef.GetMats):
         return self.mats_inst
 
 
-    
+    def test_30000_load_proc_details(self):
+        self.obj_proc.ai_load_process_details()
+        self.assertTrue(True)
 
-
-    
 
 
 def suite_json_test():
@@ -727,8 +762,8 @@ def suite_json_test():
     #suite.addTest(Test_21000_input_json('test_21007_filtration_json_out'))
     #suite.addTest(Test_21000_input_json('test_21008_filtration_json_read'))
     #suite.addTest(Test_21000_input_json('test_21009_filter_setup_json_out'))
-    suite.addTest(Test_21000_input_json('test21010_filter_setup_json_read'))
-    
+    # suite.addTest(Test_21000_input_json('test21010_filter_setup_json_read'))
+    suite.addTest(Test_30000_json_ai_interface('test_30000_load_proc_details'))
 
     return suite
             

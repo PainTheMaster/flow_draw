@@ -229,7 +229,7 @@ class Process(GetMats):
     
 
     def ai_load_process_details(self):
-        self.load_materials_data()
+        # self.load_materials_data()
         #lit_uo = list(unitop.registry_uo_cls.values())
         #TODO: Please replace list_uo with the real one before release.
         list_uo: list[type[uo.UnitOperation]] = [chgng.Charging, agit.Agitation, cip.CIP, smplng.Sampling]

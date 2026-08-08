@@ -427,9 +427,9 @@ class ProcessIO:
         list_json_str:list[str] = []
         
         list_json_str.append('{')
-        list_json_str.append(' "$schema": "https://json-schema.org/draft/2020-12/schema",')
-        temp_title = f'{self.process_name}'
-        list_json_str.append(f' "title": "{temp_title}",')
+        # list_json_str.append(' "$schema": "https://json-schema.org/draft/2020-12/schema",')
+        # temp_title = f'{self.process_name}'
+        # list_json_str.append(f' "title": "{temp_title}",')
         temp_descr = f'Unit operation sequence for process \\\"{self.process_name}\\\"'
         list_json_str.append(f' "description": "{temp_descr}",')
         list_json_str.append(' "type":"object",')
@@ -462,8 +462,8 @@ class ProcessIO:
         list_json_str.append(' }') #corresponds to "$defs":{
         list_json_str.append('}')  #corresponds to outer-most {
 
-        for line in list_json_str:
-            print(line)
+        # for line in list_json_str:
+        #     print(line)
 
         single_str_json = '\n'.join(list_json_str)
         return json.loads(single_str_json)
@@ -478,7 +478,7 @@ class ProcessIO:
         client = OpenAI(api_key=os.getenv("OPEN_AI_KEY"))
         print("Open AI client opened")
         
-        os.mkdir('.\\images')
+        #os.mkdir('.\\images')
         images = pdf2image.convert_from_path(filename_input, dpi=300)
         image_paths:list[str] = []
         for i, img in enumerate(images):
@@ -495,6 +495,7 @@ class ProcessIO:
                                     }
                                 }
             )
+            os.remove(path=path)
 
         schema_dict = self.json_uo(caller, list_uo)
         response_format={
@@ -505,6 +506,8 @@ class ProcessIO:
                             "schema": schema_dict
                             }
                         }
+        print("-----------------------")
+        print(response_format)
         response = client.chat.completions.create(
             model="gpt-5",
             messages=[
@@ -520,7 +523,21 @@ class ProcessIO:
             response_format=response_format
         )
 
+        result_text = response.choices[0].message.content
+        print()
+        print('-------------------')
+        print(result_text)
 
+        print()
+        print('-------------------')
+        u = response.usage
+        print(f"input : {u.prompt_tokens}")
+        print(f"output: {u.completion_tokens}")
+        print(f"total : {u.total_tokens}")
+
+        # 内訳（キャッシュヒットと推論トークン）
+        print(f"cached   : {u.prompt_tokens_details.cached_tokens}")
+        print(f"reasoning: {u.completion_tokens_details.reasoning_tokens}")
         
 
     def __encode_image(self,image_paht:str)->str:
