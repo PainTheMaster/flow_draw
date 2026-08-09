@@ -1,0 +1,206 @@
+{
+    "json_uo_param_array": [
+        {
+            "Seq_Nr": 1,
+            "Unit_Operation": "charging",
+            "Edit_Comment": null,
+            "Pre-comment": null,
+            "Post-comment": null,
+            "arr_charging_input_entry": [
+                {
+                    "Material_Name": "H-Ala-Glu-GlyOme",
+                    "Metrics_Value": 1,
+                    "Metrics_Unit": "equiv",
+                    "Permissible_Error(%)": 1,
+                    "Charging_Method": "powder_port",
+                    "Time_Control": "No_time_control",
+                    "Minimum_Time(min)": null,
+                    "Maximum_Time(min)": null,
+                    "Temp_Control": "No_temp_control",
+                    "Minimum_Temp(deg-C)": null,
+                    "Maximum_Temp(deg-C)": null
+                },
+                {
+                    "Material_Name": "Fmoc-Gly-OH",
+                    "Metrics_Value": 1.05,
+                    "Metrics_Unit": "equiv",
+                    "Permissible_Error(%)": 5,
+                    "Charging_Method": "powder_port",
+                    "Time_Control": "No_time_control",
+                    "Minimum_Time(min)": null,
+                    "Maximum_Time(min)": null,
+                    "Temp_Control": "No_temp_control",
+                    "Minimum_Temp(deg-C)": null,
+                    "Maximum_Temp(deg-C)": null
+                },
+                {
+                    "Material_Name": "dichloromethane",
+                    "Metrics_Value": 1,
+                    "Metrics_Unit": "v/w",
+                    "Permissible_Error(%)": 5,
+                    "Charging_Method": "press_vessel",
+                    "Time_Control": "No_time_control",
+                    "Minimum_Time(min)": null,
+                    "Maximum_Time(min)": null,
+                    "Temp_Control": "No_temp_control",
+                    "Minimum_Temp(deg-C)": null,
+                    "Maximum_Temp(deg-C)": null
+                },
+                {
+                    "Material_Name": "1-hydroxy-7-azabenzotriazole",
+                    "Metrics_Value": 1.1,
+                    "Metrics_Unit": "equiv",
+                    "Permissible_Error(%)": 5,
+                    "Charging_Method": "powder_port",
+                    "Time_Control": "No_time_control",
+                    "Minimum_Time(min)": null,
+                    "Maximum_Time(min)": null,
+                    "Temp_Control": "No_temp_control",
+                    "Minimum_Temp(deg-C)": null,
+                    "Maximum_Temp(deg-C)": null
+                }
+            ]
+        },
+        {
+            "Seq_Nr": 2,
+            "Unit_Operation": "agitation",
+            "Edit_Comment": null,
+            "Pre-comment": null,
+            "Post-comment": null,
+            "Specification": "arbitrary",
+            "Rotation_(rpm)": null,
+            "Ti_min_(deg-C)": 10,
+            "Ti_max_(deg-C)": 10,
+            "Minimum_time": 1,
+            "Maximum_time": 1,
+            "Time_unit": "hr",
+            "Dissolution_check": "No"
+        },
+        {
+            "Seq_Nr": 3,
+            "Unit_Operation": "charging",
+            "Edit_Comment": null,
+            "Pre-comment": null,
+            "Post-comment": null,
+            "arr_charging_input_entry": [
+                {
+                    "Material_Name": "conc NaHCO3",
+                    "Metrics_Value": 0.5,
+                    "Metrics_Unit": "v/w",
+                    "Permissible_Error(%)": 5,
+                    "Charging_Method": "press_vessel",
+                    "Time_Control": "No_time_control",
+                    "Minimum_Time(min)": null,
+                    "Maximum_Time(min)": null,
+                    "Temp_Control": "No_temp_control",
+                    "Minimum_Temp(deg-C)": null,
+                    "Maximum_Temp(deg-C)": null
+                }
+            ]
+        },
+        {
+            "Seq_Nr": 4,
+            "Unit_Operation": "agitation",
+            "Edit_Comment": null,
+            "Pre-comment": null,
+            "Post-comment": null,
+            "Specification": "arbitrary",
+            "Rotation_(rpm)": null,
+            "Ti_min_(deg-C)": 5,
+            "Ti_max_(deg-C)": 5,
+            "Minimum_time": 1,
+            "Maximum_time": 1,
+            "Time_unit": "hr",
+            "Dissolution_check": "No"
+        },
+        {
+            "Seq_Nr": 5,
+            "Unit_Operation": "charging",
+            "Edit_Comment": null,
+            "Pre-comment": null,
+            "Post-comment": null,
+            "arr_charging_input_entry": [
+                {
+                    "Material_Name": "conc NaCl",
+                    "Metrics_Value": 0.5,
+                    "Metrics_Unit": "v/w",
+                    "Permissible_Error(%)": 5,
+                    "Charging_Method": "press_vessel",
+                    "Time_Control": "No_time_control",
+                    "Minimum_Time(min)": null,
+                    "Maximum_Time(min)": null,
+                    "Temp_Control": "No_temp_control",
+                    "Minimum_Temp(deg-C)": null,
+                    "Maximum_Temp(deg-C)": null
+                }
+            ]
+        },
+        {
+            "Seq_Nr": 6,
+            "Unit_Operation": "agitation",
+            "Edit_Comment": null,
+            "Pre-comment": null,
+            "Post-comment": null,
+            "Specification": "arbitrary",
+            "Rotation_(rpm)": null,
+            "Ti_min_(deg-C)": 25,
+            "Ti_max_(deg-C)": 25,
+            "Minimum_time": null,
+            "Maximum_time": null,
+            "Time_unit": null,
+            "Dissolution_check": "No"
+        },
+        {
+            "Seq_Nr": 7,
+            "Unit_Operation": "charging",
+            "Edit_Comment": null,
+            "Pre-comment": null,
+            "Post-comment": null,
+            "arr_charging_input_entry": [
+                {
+                    "Material_Name": "Hexane",
+                    "Metrics_Value": 0.75,
+                    "Metrics_Unit": "v/w",
+                    "Permissible_Error(%)": 5,
+                    "Charging_Method": "press_vessel",
+                    "Time_Control": "Time_control_with_minimum_and_maximum",
+                    "Minimum_Time(min)": 60,
+                    "Maximum_Time(min)": 60,
+                    "Temp_Control": "Temp_control_with_minimum_and_maximum",
+                    "Minimum_Temp(deg-C)": 25,
+                    "Maximum_Temp(deg-C)": 25
+                }
+            ]
+        },
+        {
+            "Seq_Nr": 8,
+            "Unit_Operation": "agitation",
+            "Edit_Comment": null,
+            "Pre-comment": null,
+            "Post-comment": null,
+            "Specification": "arbitrary",
+            "Rotation_(rpm)": null,
+            "Ti_min_(deg-C)": 5,
+            "Ti_max_(deg-C)": 25,
+            "Minimum_time": 2,
+            "Maximum_time": 2,
+            "Time_unit": "hr",
+            "Dissolution_check": "No"
+        },
+        {
+            "Seq_Nr": 9,
+            "Unit_Operation": "agitation",
+            "Edit_Comment": null,
+            "Pre-comment": null,
+            "Post-comment": null,
+            "Specification": "arbitrary",
+            "Rotation_(rpm)": null,
+            "Ti_min_(deg-C)": 5,
+            "Ti_max_(deg-C)": 5,
+            "Minimum_time": 6,
+            "Maximum_time": 6,
+            "Time_unit": "hr",
+            "Dissolution_check": "No"
+        }
+    ]
+}

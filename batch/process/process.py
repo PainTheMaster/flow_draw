@@ -8,9 +8,13 @@ import flow_draw.batch.process.unit_operations.uo_charging as chgng
 import flow_draw.batch.process.unit_operations.uo_sampling as smplng
 import flow_draw.batch.process.unit_operations.uo_cip as cip
 import flow_draw.batch.process.unit_operations.uo_agitation as agit
-import flow_draw.batch.process.unit_operations.uo_placeholder as plchldr
+import flow_draw.batch.process.unit_operations.uo_evaporation as evap
 import flow_draw.batch.process.unit_operations.uo_filter_setup as fltstup
 import flow_draw.batch.process.unit_operations.uo_filtration as filt
+import flow_draw.batch.process.unit_operations.uo_placeholder as plchldr
+import flow_draw.batch.process.unit_operations.uo_innert_replacement as innert
+
+
 
 
 
@@ -197,7 +201,7 @@ class Process(GetMats):
 
     #TODO: Create the process detail input form, for each unit operation in teh list_uo, get the uo-specific header and feed it to ProcessIO.generate_proc_detail_form()
 
-    #TODO: Load the process detail\
+    #TODO: Load the process detail
     def load_unitop_detail(self):
         """
         Expected to be triggered by the Batch class, this function loads unit operation details from self.data_input.
@@ -232,10 +236,17 @@ class Process(GetMats):
         # self.load_materials_data()
         #lit_uo = list(unitop.registry_uo_cls.values())
         #TODO: Please replace list_uo with the real one before release.
-        list_uo: list[type[uo.UnitOperation]] = [chgng.Charging, agit.Agitation, cip.CIP, smplng.Sampling]
+        list_uo: list[type[uo.UnitOperation]] = [chgng.Charging,
+                                                 smplng.Sampling,
+                                                 cip.CIP,
+                                                 agit.Agitation,
+                                                 evap.Evaporation,
+                                                 fltstup.FiltSetup,
+                                                 filt.Filtration,
+                                                 plchldr.Placeholder,
+                                                 innert.InnertReplacement]
         self.data_input.ai_load_process_details(caller=self, list_uo=list_uo)
 
-        
 
 
 

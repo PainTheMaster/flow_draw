@@ -432,6 +432,7 @@ class Evaporation(uo.UnitOperation, uo_tag=defs.tag_uo_evap):
         The header items can be passed from the get_json_schema() of each UnitOperation-drived class.
         This is the overriding mehtod in the class Evaporation..
         """
+        super().load_from_json_dict(json_dict)
         self.Tj_min = json_dict.get(hedr_Tj_min, None)
         self.Tj_max = json_dict.get(hedr_Tj_max, None)
         self.Tbr_min = json_dict.get(hedr_T_brine_cond_min, None)

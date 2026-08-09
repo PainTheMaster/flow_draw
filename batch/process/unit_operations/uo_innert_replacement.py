@@ -192,9 +192,9 @@ class InnertReplacement(uo.UnitOperation, uo_tag=defs.tag_uo_innert_replace):
 
     def load_from_json_dict(self, json_dict: dict[str, any]):
         super().load_from_json_dict(json_dict)
-        self.innert_gas = json_dict[hedr_gas]
-        self.neg_pressure = json_dict[hedr_neg_pres]
-        self.num_repeat = json_dict[hedr_num_repeat]
+        self.innert_gas = json_dict.get(hedr_gas, opt_gas_N2)
+        self.neg_pressure = json_dict.get(hedr_neg_pres, -0.08)
+        self.num_repeat = json_dict.get(hedr_num_repeat, 2)
 
     def output_unit_operation(self):
         self.flowsheet.header_organizer(op_nr=self.operation_seq, title=lang_dict_uo_titles[self.uo_tag])

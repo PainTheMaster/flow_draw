@@ -10,6 +10,8 @@ from flow_draw.batch.process.unit_operations import unit_operation as uo
 from flow_draw.data_io import process_io as procio
 from flow_draw.materials import materials as mats
 from flow_draw.trait_def import trait_def as trdef
+from flow_draw.data_io.json_io import Objason, Array, Primitive
+
 #from flow_draw.trait_def.trait_def import GetMats
 
 
@@ -24,8 +26,8 @@ hedr_postcomment = defs.hedr_cmn_io_dtil_postcmnt #Don't include this in the spe
 #########################################################
 # UO-specific hader items and list thereof
 #########################################################
-hedr_sop = defs.hedr_uo_lnclrnc_sop
-list_hedr = defs.list_hedr_uo_lnclrnc
+hedr_sop = "SOP_for_line-clearnce"
+list_hedr = [hedr_sop]
 
 
 
@@ -115,6 +117,22 @@ class LineClearance(uo.UnitOperation, uo_tag=defs.tag_uo_line_clearance):
     
     def get_detail_option_menu(self) -> Optional[dict[str, list[str]]]:
         return None
+
+    def get_json_schema(caller: trdef.UniversalTrait=None)->Objason:
+        common_schema:list[Primitive] = LineClearance.json_common()
+        sop = Primitive(prim_type = "string",
+                        key="SOP_title",
+                        description='Title of the SOP document. If valid information is not provided, please put <placeholder> in the field.',
+                        nullable=False)
+        obj_clearance = Objason(key=LineClearance.uo_tag,
+                                props=[common_schema, sop],
+                                description="Unit operation for line clearance in a process workflow. This unit operation is used to indicate that the line clearance step is completed in the process.")
+        return obj_clearance
+
+    def load_from_json_dict(self, json_dict: dict[str, any]):
+        super().load_from_json_dict(json_dict)
+        self.sop = json_dict.get(key=hedr_sop, default='<placeholder>')        
+
 
     def output_unit_operation(self):
         self.flowsheet.header_organizer(op_nr=self.operation_seq, title=lang_dict_uo_titles[self.uo_tag])

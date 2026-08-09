@@ -265,10 +265,11 @@ class UnitOperation(ABC):
         -----------
         None
         """
-        self.operation_seq = json_dict[defs.hedr_cmn_io_dtil_seq]
-        self.edit_comment = json_dict[defs.hedr_cmn_io_dtil_edt_cmnt]
-        self.pre_comment = json_dict[defs.hedr_cmn_io_dtil_precmnt]
-        self.post_comment = json_dict[defs.hedr_cmn_io_dtil_postcmnt]
+
+        self.operation_seq = json_dict.get(defs.hedr_cmn_io_dtil_seq, None)
+        self.edit_comment = json_dict.get(defs.hedr_cmn_io_dtil_edt_cmnt, None)
+        self.pre_comment = json_dict.get(defs.hedr_cmn_io_dtil_precmnt, None)
+        self.post_comment = json_dict.get(defs.hedr_cmn_io_dtil_postcmnt, None)
 
 
 

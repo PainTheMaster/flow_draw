@@ -479,7 +479,7 @@ class ProcessIO:
         print("Open AI client opened")
         
         #os.mkdir('.\\images')
-        images = pdf2image.convert_from_path(filename_input, dpi=300)
+        images = pdf2image.convert_from_path(filename_input, dpi=150)
         image_paths:list[str] = []
         for i, img in enumerate(images):
             img.save(fp=f'images\\page_{i+1}.png', format='PNG')

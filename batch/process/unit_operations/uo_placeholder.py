@@ -9,6 +9,8 @@ from flow_draw.data_io import process_io as procio
 from flow_draw.materials import materials as mats
 from flow_draw.data_io.flowsheet import Flowsheet as fsht
 from flow_draw.trait_def import trait_def as trdef
+from flow_draw.data_io.json_io import Objason, Array, Primitive
+
 
 
 #########################################################
@@ -21,8 +23,8 @@ header_postcomment = defs.hedr_cmn_io_dtil_postcmnt #Don't include this in the s
 #########################################################
 # UO-specific hader items and list thereof
 #########################################################
-hedr_lines = defs.hedr_uo_plchldr_lines
-list_hedr = defs.list_hedr_uo_plchldr
+hedr_lines = "Lines"
+list_hedr = [hedr_lines]
 
 
 #########################################################
@@ -77,6 +79,35 @@ class Placeholder(uo.UnitOperation, uo_tag=defs.tag_uo_placeholder):
     def get_detail_option_menu(self) -> Optional[dict[str, list[str]]]:
         return None
 
+    def get_json_schema(caller: trdef.UniversalTrait=None)->Objason:
+        seq_uo = Primitive(prim_type="integer",
+                            key=defs.hedr_cmn_io_dtil_seq,
+                            description="Sequence number (1, 2, 3...) in a series of unit operations in the process",
+                            required=True)
+        name_uo = Primitive(prim_type="string",
+                            key=defs.hedr_cmn_io_dtil_uo,
+                            description="Unit operation name in the process detail worksheet",
+                            const=Placeholder.uo_tag,
+                            required=True)
+        edtcmnt = Primitive(prim_type="string",
+                            key=defs.hedr_cmn_io_dtil_edt_cmnt,
+                            description="An optional editorial comment. This comment will not be printed on the flowsheet.",
+                            required=True,
+                            nullable=True)
+        precmnt = Primitive(prim_type="string",
+                            key=defs.hedr_cmn_io_dtil_precmnt,
+                            description=f"If {Placeholder.uo_tag} is selected, please be sure to make a brief commnt on the the step, such as intended activity or anticipated outcome.",
+                            required=True,
+                            nullable=False)
+        postcmnt = Primitive(prim_type="string",
+                            key=defs.hedr_cmn_io_dtil_postcmnt,
+                            description="An optional short instructional comment placed at the end of the instruction block for the unit operation in the process workflow",
+                            required=True,
+                            nullable=True)
+        uo_schema = Objason(key = Placeholder.uo_tag,
+                            props = [seq_uo, name_uo, edtcmnt, precmnt, postcmnt],
+                            description = "A placeholder unit operation for a process workflow. This unit operation is used to indicate that a step in the process is not yet defined or is intentionally left blank.")
+        return uo_schema
 
     def load_params_from_df(self, df: pd.DataFrame):
         """
@@ -92,6 +123,11 @@ class Placeholder(uo.UnitOperation, uo_tag=defs.tag_uo_placeholder):
             self.post_comment = first_row[header_postcomment]
         for _, subitem in df.iterrows():
             self.num_lines+=subitem[hedr_lines]
+
+    #TODO: please test me!
+    def load_from_json_dict(self, json_dict: dict[str:any]=None):
+        super().load_from_json_dict(json_dict)
+        self.num_lines = 1
 
 
     def output_unit_operation(self):
