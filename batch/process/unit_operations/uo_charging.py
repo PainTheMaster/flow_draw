@@ -215,7 +215,7 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
     TODO: Make some comment here.
     """
     
-    def __init__(self, caller: GetMats=None, flow_sheet:fsht.Flowsheet=None, operation_seq:int=None, num_subitems: int =None, edit_comment:str=None):
+    def __init__(self, caller: GetMats=None, flowsheet:fsht.Flowsheet=None, operation_seq:int=None, num_subitems: int =None, edit_comment:str=None):
         """
         Initialises the newly created instance of the class Charging.
 
@@ -224,7 +224,7 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
         caller: flow_draw.trait_def.trait_def.GetMats
             The calling object. In the case of the class Charging, GetMats class is expected. From the given caller object, Charging expects materials.Materials passed by get_mats() method.
         """
-        super().__init__(caller=caller, flowsheet=flow_sheet, operation_seq=operation_seq, num_subitems=num_subitems, edit_comment=edit_comment)
+        super().__init__(caller=caller, flowsheet=flowsheet, operation_seq=operation_seq, num_subitems=num_subitems, edit_comment=edit_comment)
         # self.mats_data: mats.Materials = GetMats(self.caller).get_mats() #なんかやだからキャストする。
         self.mats_data: mats.Materials = None
         if caller is not None:

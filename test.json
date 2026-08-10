@@ -1,256 +1,44 @@
-{
-    "json_uo_param_array": [
-        {
-            "Seq_Nr": 1,
-            "Unit_Operation": "charging",
-            "Edit_Comment": null,
-            "Pre-comment": "Charge key substrates to the 30 L glass reactor",
-            "Post-comment": null,
-            "arr_charging_input_entry": [
-                {
-                    "Material_Name": "H-Ala-Glu-GlyOme",
-                    "Metrics_Value": 1,
-                    "Metrics_Unit": "equiv",
-                    "Permissible_Error(%)": 1,
-                    "Charging_Method": "powder_port",
-                    "Time_Control": "No_time_control",
-                    "Minimum_Time(min)": null,
-                    "Maximum_Time(min)": null,
-                    "Temp_Control": "No_temp_control",
-                    "Minimum_Temp(deg-C)": null,
-                    "Maximum_Temp(deg-C)": null
-                },
-                {
-                    "Material_Name": "Fmoc-Gly-OH",
-                    "Metrics_Value": 1.05,
-                    "Metrics_Unit": "equiv",
-                    "Permissible_Error(%)": 5,
-                    "Charging_Method": "powder_port",
-                    "Time_Control": "No_time_control",
-                    "Minimum_Time(min)": null,
-                    "Maximum_Time(min)": null,
-                    "Temp_Control": "No_temp_control",
-                    "Minimum_Temp(deg-C)": null,
-                    "Maximum_Temp(deg-C)": null
-                }
-            ]
-        },
-        {
-            "Seq_Nr": 2,
-            "Unit_Operation": "charging",
-            "Edit_Comment": null,
-            "Pre-comment": "Add solvent",
-            "Post-comment": null,
-            "arr_charging_input_entry": [
-                {
-                    "Material_Name": "dichloromethane",
-                    "Metrics_Value": 1,
-                    "Metrics_Unit": "v/w",
-                    "Permissible_Error(%)": 5,
-                    "Charging_Method": "press_vessel",
-                    "Time_Control": "No_time_control",
-                    "Minimum_Time(min)": null,
-                    "Maximum_Time(min)": null,
-                    "Temp_Control": "No_temp_control",
-                    "Minimum_Temp(deg-C)": null,
-                    "Maximum_Temp(deg-C)": null
-                }
-            ]
-        },
-        {
-            "Seq_Nr": 3,
-            "Unit_Operation": "charging",
-            "Edit_Comment": null,
-            "Pre-comment": "Charge coupling additive",
-            "Post-comment": null,
-            "arr_charging_input_entry": [
-                {
-                    "Material_Name": "1-hydroxy-7-azabenzotriazole",
-                    "Metrics_Value": 1.1,
-                    "Metrics_Unit": "equiv",
-                    "Permissible_Error(%)": 5,
-                    "Charging_Method": "powder_port",
-                    "Time_Control": "No_time_control",
-                    "Minimum_Time(min)": null,
-                    "Maximum_Time(min)": null,
-                    "Temp_Control": "No_temp_control",
-                    "Minimum_Temp(deg-C)": null,
-                    "Maximum_Temp(deg-C)": null
-                }
-            ]
-        },
-        {
-            "Seq_Nr": 4,
-            "Unit_Operation": "agitation",
-            "Edit_Comment": null,
-            "Pre-comment": "Reaction stage",
-            "Post-comment": null,
-            "Specification": "arbitrary",
-            "Rotation_(rpm)": null,
-            "Ti_min_(deg-C)": 10,
-            "Ti_max_(deg-C)": 10,
-            "Minimum_time": 1,
-            "Maximum_time": 1,
-            "Time_unit": "hr",
-            "Dissolution_check": "No"
-        },
-        {
-            "Seq_Nr": 5,
-            "Unit_Operation": "charging",
-            "Edit_Comment": null,
-            "Pre-comment": "Work-up: add saturated NaHCO3 aq",
-            "Post-comment": null,
-            "arr_charging_input_entry": [
-                {
-                    "Material_Name": "conc NaHCO3",
-                    "Metrics_Value": 0.5,
-                    "Metrics_Unit": "v/w",
-                    "Permissible_Error(%)": 5,
-                    "Charging_Method": "press_vessel",
-                    "Time_Control": "No_time_control",
-                    "Minimum_Time(min)": null,
-                    "Maximum_Time(min)": null,
-                    "Temp_Control": "No_temp_control",
-                    "Minimum_Temp(deg-C)": null,
-                    "Maximum_Temp(deg-C)": null
-                }
-            ]
-        },
-        {
-            "Seq_Nr": 6,
-            "Unit_Operation": "agitation",
-            "Edit_Comment": null,
-            "Pre-comment": "Post-quench agitation",
-            "Post-comment": null,
-            "Specification": "arbitrary",
-            "Rotation_(rpm)": null,
-            "Ti_min_(deg-C)": 5,
-            "Ti_max_(deg-C)": 5,
-            "Minimum_time": 1,
-            "Maximum_time": 1,
-            "Time_unit": "hr",
-            "Dissolution_check": "No"
-        },
-        {
-            "Seq_Nr": 7,
-            "Unit_Operation": "phase_discharge",
-            "Edit_Comment": null,
-            "Pre-comment": "Separate and remove aqueous layer",
-            "Post-comment": null,
-            "origin": "30 L glass reactor",
-            "via": null,
-            "destination": [
-                "W-layer"
-            ]
-        },
-        {
-            "Seq_Nr": 8,
-            "Unit_Operation": "charging",
-            "Edit_Comment": null,
-            "Pre-comment": "Wash with brine",
-            "Post-comment": null,
-            "arr_charging_input_entry": [
-                {
-                    "Material_Name": "conc NaCl",
-                    "Metrics_Value": 0.5,
-                    "Metrics_Unit": "v/w",
-                    "Permissible_Error(%)": 5,
-                    "Charging_Method": "press_vessel",
-                    "Time_Control": "No_time_control",
-                    "Minimum_Time(min)": null,
-                    "Maximum_Time(min)": null,
-                    "Temp_Control": "No_temp_control",
-                    "Minimum_Temp(deg-C)": null,
-                    "Maximum_Temp(deg-C)": null
-                }
-            ]
-        },
-        {
-            "Seq_Nr": 9,
-            "Unit_Operation": "phase_discharge",
-            "Edit_Comment": null,
-            "Pre-comment": "Separate and remove aqueous layer after brine wash",
-            "Post-comment": null,
-            "origin": "30 L glass reactor",
-            "via": null,
-            "destination": [
-                "W-layer"
-            ]
-        },
-        {
-            "Seq_Nr": 10,
-            "Unit_Operation": "temp_control",
-            "Edit_Comment": null,
-            "Pre-comment": "Raise temperature to 25 °C",
-            "Post-comment": null,
-            "Control_Mode": "Ti_control",
-            "Ti_set_point(degC)": 25,
-            "Ti_limit_low(degC)": null,
-            "Ti_limit_high(degC)": null,
-            "Ti_tgt_low(degC)": null,
-            "Ti_tgt_high(degC)": null,
-            "Tj_set_point(degC)": null,
-            "Tj_min(degC)": null,
-            "Tj_max(degC)": null,
-            "Prog_time_value": null,
-            "Prog_time_unit": null,
-            "Check_end_point": null
-        },
-        {
-            "Seq_Nr": 11,
-            "Unit_Operation": "charging",
-            "Edit_Comment": null,
-            "Pre-comment": "Add hexane dropwise over 1 hour at 25 °C with gentle agitation",
-            "Post-comment": null,
-            "arr_charging_input_entry": [
-                {
-                    "Material_Name": "Hexane",
-                    "Metrics_Value": 0.75,
-                    "Metrics_Unit": "v/w",
-                    "Permissible_Error(%)": 5,
-                    "Charging_Method": "press_vessel",
-                    "Time_Control": "Time_control_with_minimum_and_maximum",
-                    "Minimum_Time(min)": 60,
-                    "Maximum_Time(min)": 60,
-                    "Temp_Control": "Temp_control_with_minimum_and_maximum",
-                    "Minimum_Temp(deg-C)": 25,
-                    "Maximum_Temp(deg-C)": 25
-                }
-            ]
-        },
-        {
-            "Seq_Nr": 12,
-            "Unit_Operation": "temp_control",
-            "Edit_Comment": null,
-            "Pre-comment": "Cool to 5 °C over 2 hours with gentle agitation",
-            "Post-comment": null,
-            "Control_Mode": "Ti_control",
-            "Ti_set_point(degC)": 5,
-            "Ti_limit_low(degC)": null,
-            "Ti_limit_high(degC)": null,
-            "Ti_tgt_low(degC)": null,
-            "Ti_tgt_high(degC)": null,
-            "Tj_set_point(degC)": null,
-            "Tj_min(degC)": null,
-            "Tj_max(degC)": null,
-            "Prog_time_value": null,
-            "Prog_time_unit": null,
-            "Check_end_point": null
-        },
-        {
-            "Seq_Nr": 13,
-            "Unit_Operation": "agitation",
-            "Edit_Comment": null,
-            "Pre-comment": "Aging at 5 °C",
-            "Post-comment": null,
-            "Specification": "arbitrary",
-            "Rotation_(rpm)": null,
-            "Ti_min_(deg-C)": 5,
-            "Ti_max_(deg-C)": 5,
-            "Minimum_time": 6,
-            "Maximum_time": 6,
-            "Time_unit": "hr",
-            "Dissolution_check": "No"
-        }
-    ]
-}
+[
+    {'Seq_Nr': 1, 'Unit_Operation': 'charging', 'Edit_Comment': None, 'Pre-comment': None, 'Post-comment': None, 'arr_charging_input_entry': [
+            {'Material_Name': 'H-Ala-Glu-GlyOMe', 'Metrics_Value': 1.0, 'Metrics_Unit': 'equiv', 'Permissible_Error(%)': 1, 'Charging_Method': 'powder_port', 'Time_Control': 'No_time_control', 'Minimum_Time(min)': None, 'Maximum_Time(min)': None, 'Temp_Control': 'No_temp_control', 'Minimum_Temp(deg-C)': None, 'Maximum_Temp(deg-C)': None
+            },
+            {'Material_Name': 'Fmoc-Gly-OH', 'Metrics_Value': 1.05, 'Metrics_Unit': 'equiv', 'Permissible_Error(%)': 5, 'Charging_Method': 'powder_port', 'Time_Control': 'No_time_control', 'Minimum_Time(min)': None, 'Maximum_Time(min)': None, 'Temp_Control': 'No_temp_control', 'Minimum_Temp(deg-C)': None, 'Maximum_Temp(deg-C)': None
+            },
+            {'Material_Name': 'dichloromethane', 'Metrics_Value': 1.0, 'Metrics_Unit': 'v/w', 'Permissible_Error(%)': 5, 'Charging_Method': 'press_vessel', 'Time_Control': 'No_time_control', 'Minimum_Time(min)': None, 'Maximum_Time(min)': None, 'Temp_Control': 'No_temp_control', 'Minimum_Temp(deg-C)': None, 'Maximum_Temp(deg-C)': None
+            },
+            {'Material_Name': '1-hydroxy-7-azabenzotriazole', 'Metrics_Value': 1.1, 'Metrics_Unit': 'equiv', 'Permissible_Error(%)': 5, 'Charging_Method': 'powder_port', 'Time_Control': 'No_time_control', 'Minimum_Time(min)': None, 'Maximum_Time(min)': None, 'Temp_Control': 'No_temp_control', 'Minimum_Temp(deg-C)': None, 'Maximum_Temp(deg-C)': None
+            }
+        ]
+    },
+    {'Seq_Nr': 2, 'Unit_Operation': 'agitation', 'Edit_Comment': None, 'Pre-comment': 'Reaction hold.', 'Post-comment': None, 'Specification': 'arbitrary', 'Rotation_(rpm)': None, 'Ti_min_(deg-C)': 10, 'Ti_max_(deg-C)': 10, 'Minimum_time': 1, 'Maximum_time': 1, 'Time_unit': 'hr', 'Dissolution_check': 'No'
+    },
+    {'Seq_Nr': 3, 'Unit_Operation': 'charging', 'Edit_Comment': None, 'Pre-comment': 'Work-up: add saturated NaHCO3 aq.', 'Post-comment': None, 'arr_charging_input_entry': [
+            {'Material_Name': 'conc NaHCO3', 'Metrics_Value': 0.5, 'Metrics_Unit': 'v/w', 'Permissible_Error(%)': 5, 'Charging_Method': 'press_vessel', 'Time_Control': 'No_time_control', 'Minimum_Time(min)': None, 'Maximum_Time(min)': None, 'Temp_Control': 'No_temp_control', 'Minimum_Temp(deg-C)': None, 'Maximum_Temp(deg-C)': None
+            }
+        ]
+    },
+    {'Seq_Nr': 4, 'Unit_Operation': 'agitation', 'Edit_Comment': None, 'Pre-comment': None, 'Post-comment': None, 'Specification': 'arbitrary', 'Rotation_(rpm)': None, 'Ti_min_(deg-C)': 5, 'Ti_max_(deg-C)': 5, 'Minimum_time': 1, 'Maximum_time': 1, 'Time_unit': 'hr', 'Dissolution_check': 'No'
+    },
+    {'Seq_Nr': 5, 'Unit_Operation': 'phase_discharge', 'Edit_Comment': None, 'Pre-comment': 'Discharge W-layer; retain organic layer.', 'Post-comment': None, 'origin': '30 L glass reactor', 'via': None, 'destination': ['W-layer'
+        ]
+    },
+    {'Seq_Nr': 6, 'Unit_Operation': 'charging', 'Edit_Comment': None, 'Pre-comment': 'Wash with brine.', 'Post-comment': None, 'arr_charging_input_entry': [
+            {'Material_Name': 'conc NaCl', 'Metrics_Value': 0.5, 'Metrics_Unit': 'v/w', 'Permissible_Error(%)': 5, 'Charging_Method': 'press_vessel', 'Time_Control': 'No_time_control', 'Minimum_Time(min)': None, 'Maximum_Time(min)': None, 'Temp_Control': 'No_temp_control', 'Minimum_Temp(deg-C)': None, 'Maximum_Temp(deg-C)': None
+            }
+        ]
+    },
+    {'Seq_Nr': 7, 'Unit_Operation': 'phase_discharge', 'Edit_Comment': None, 'Pre-comment': 'Discharge W-layer after brine wash; keep organic layer.', 'Post-comment': None, 'origin': '30 L glass reactor', 'via': None, 'destination': ['W-layer'
+        ]
+    },
+    {'Seq_Nr': 8, 'Unit_Operation': 'temp_control', 'Edit_Comment': None, 'Pre-comment': 'Raise temperature to 25 °C.', 'Post-comment': None, 'Control_Mode': 'Ti/Tj_control', 'Ti_set_point(degC)': 25, 'Ti_limit_low(degC)': 25, 'Ti_limit_high(degC)': 25, 'Ti_tgt_low(degC)': None, 'Ti_tgt_high(degC)': None, 'Tj_set_point(degC)': None, 'Tj_min(degC)': 1000, 'Tj_max(degC)': 1000, 'Prog_time_value': None, 'Prog_time_unit': None, 'Check_end_point': None
+    },
+    {'Seq_Nr': 9, 'Unit_Operation': 'charging', 'Edit_Comment': None, 'Pre-comment': 'Add n-hexane dropwise over 1 hour with gentle agitation.', 'Post-comment': None, 'arr_charging_input_entry': [
+            {'Material_Name': 'Hexane', 'Metrics_Value': 0.75, 'Metrics_Unit': 'v/w', 'Permissible_Error(%)': 5, 'Charging_Method': 'press_vessel', 'Time_Control': 'Time_control_with_minimum_and_maximum', 'Minimum_Time(min)': 60, 'Maximum_Time(min)': 60, 'Temp_Control': 'No_temp_control', 'Minimum_Temp(deg-C)': None, 'Maximum_Temp(deg-C)': None
+            }
+        ]
+    },
+    {'Seq_Nr': 10, 'Unit_Operation': 'temp_control', 'Edit_Comment': None, 'Pre-comment': 'Cool to 5 °C over 2 hours with gentle agitation.', 'Post-comment': None, 'Control_Mode': 'Programme', 'Ti_set_point(degC)': 5, 'Ti_limit_low(degC)': 5, 'Ti_limit_high(degC)': 5, 'Ti_tgt_low(degC)': None, 'Ti_tgt_high(degC)': None, 'Tj_set_point(degC)': None, 'Tj_min(degC)': 1000, 'Tj_max(degC)': 1000, 'Prog_time_value': 2, 'Prog_time_unit': 'hr', 'Check_end_point': None
+    },
+    {'Seq_Nr': 11, 'Unit_Operation': 'agitation', 'Edit_Comment': None, 'Pre-comment': 'Aging at 5 °C.', 'Post-comment': None, 'Specification': 'arbitrary', 'Rotation_(rpm)': None, 'Ti_min_(deg-C)': 5, 'Ti_max_(deg-C)': 5, 'Minimum_time': 6, 'Maximum_time': 6, 'Time_unit': 'hr', 'Dissolution_check': 'No'
+    }
+]

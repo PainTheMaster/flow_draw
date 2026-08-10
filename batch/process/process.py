@@ -16,11 +16,6 @@ import flow_draw.batch.process.unit_operations.uo_innert_replacement as innert
 import flow_draw.batch.process.unit_operations.uo_line_clearance as lnclear
 import flow_draw.batch.process.unit_operations.uo_phase_discharge as phdisch
 import flow_draw.batch.process.unit_operations.uo_temp_control as tempctrl
-
-
-
-
-
 from flow_draw.data_io import process_io as proc_io
 from flow_draw.data_io import flowsheet as fsht
 from flow_draw.materials.materials import Materials as mats
@@ -160,31 +155,6 @@ class Process(GetMats):
                                         num_subitems=num_subitems,
                                         edit_comment=edit_comment)
             self.seq_uo.append(new_uo_inst)
-
-    # def __prep_uo(self, df_summary: pd.DataFrame):
-    #     """
-    #     Creates a series of (partially filled) UnitOperation instances by interpreting a given process summary DataFrame.
-    #     After the run, the self.list_uo will hold a series of unit operation instances each of which knwos the category of the unit operation (the type(sub-class) itself), sequenc number, number of subitems, and edit comment.
-        
-    #     Parameters
-    #     -----------
-    #     df_summary: pandas.DataFrame
-    #         A DataFrame object containing a seiries of unit operations with sequence number, number of subitems, and edit comment for each. The header items shall be consistent with the definition in the definitions module.
-        
-    #     Returns:
-    #         None
-    #     """
-    #     uo_reg = unit_operation.registry_uo_cls
-    #     for _, row in df_summary.iterrows():
-    #         seq = int(row[defs.header_summary_sequence])
-    #         uo_title = str(row[defs.header_summary_uo])
-    #         num_subitems = int(row[defs.header_summary_num_subitems])
-    #         edit_comment = str(row[defs.header_summary_edit_comment])
-    #     if not uo_title in uo_reg:
-    #         raise RuntimeError(f"{self.__class__.__name__}: Unit operation name \"{uo_title}\" not in the registry.")
-        
-    #     new_uo_inst = uo_reg[uo_title](self, self.flowsheet, seq, num_subitems=num_subitems, edit_comment=edit_comment)
-    #     self.list_uo.append(new_uo_inst)
         
 
     def load_materials_data(self):
@@ -252,9 +222,22 @@ class Process(GetMats):
                                                  phdisch.PhaseDisch,
                                                  tempctrl.TempControl
                                                  ]
-        self.data_input.ai_load_process_details(caller=self, list_uo=list_uo)
+        arr_steps = self.data_input.ai_load_process_details(caller=self, list_uo=list_uo)
+        uo_reg = uo.registry_uo_cls
+        for step in arr_steps:
+            uo_tag = step[defs.hedr_cmn_io_dtil_uo]
+            new_uo_inst = uo_reg[uo_tag](caller=self,
+                                        flowsheet=self.flowsheet,
+                                        operation_seq=step[defs.hedr_cmn_io_dtil_seq],
+                                        edit_comment=step[defs.hedr_cmn_io_dtil_edt_cmnt])
+            new_uo_inst.load_from_json_dict(step)
+            self.seq_uo.append(new_uo_inst)
 
+        for step in self.seq_uo:
+            step.output_unit_operation()
 
+        self.flowsheet.save(filename=self.process_name+".xlsx")
+           
 
 
     def get_mats(self) -> mats:

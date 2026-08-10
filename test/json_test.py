@@ -258,7 +258,7 @@ class Test_21000_input_json(unittest.TestCase, trdef.GetMats):
 
         self.sampling = smplng.Sampling(flowsheet=flowsheet, operation_seq=2, edit_comment="test sampling")
         self.agit_obj = agit.Agitation(flowsheet=flowsheet, operation_seq=3, edit_comment="test agit")
-        self.chgng_obj = chgng.Charging(caller=self, flow_sheet=flowsheet, operation_seq=4, edit_comment="test charging")
+        self.chgng_obj = chgng.Charging(caller=self, flowsheet=flowsheet, operation_seq=4, edit_comment="test charging")
         self.cip_obj = cip.CIP(caller=self, flowsheet=flowsheet, operation_seq=5, edit_comment="Example edit comment for CIP")
         self.evap_obj = evap.Evaporation(caller=self, flowsheet=flowsheet, operation_seq=6, edit_comment="test evaporation")
         self.filt_obj = filt.Filtration(caller=self, flowsheet=flowsheet, operation_seq=7, edit_comment='Test for filtration JSON I/O')

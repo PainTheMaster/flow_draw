@@ -469,7 +469,7 @@ class ProcessIO:
         return json.loads(single_str_json)
 
 
-    def ai_load_process_details(self, caller: trdef.GetMats=None,  list_uo: list[type[uo.UnitOperation]]=[]):
+    def ai_load_process_details(self, caller: trdef.GetMats=None,  list_uo: list[type[uo.UnitOperation]]=[]) -> list[dict[str, any]]:
         filename_input = self.process_name+'.pdf'
 
         poppler_dir = "C:\\poppler-26.02.0\\Library\\bin"
@@ -538,7 +538,14 @@ class ProcessIO:
         # 内訳（キャッシュヒットと推論トークン）
         print(f"cached   : {u.prompt_tokens_details.cached_tokens}")
         print(f"reasoning: {u.completion_tokens_details.reasoning_tokens}")
-        
+
+        print()
+        print('-------------------')        
+        json_dict = json.loads(result_text)
+        arr_uos: list[dict[str, any]] = json_dict[(defs.json_key_arr_uo_params)]
+        print(arr_uos)
+        return arr_uos
+
 
     def __encode_image(self,image_paht:str)->str:
         with open(image_paht, "rb") as image_file:

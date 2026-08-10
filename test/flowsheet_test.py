@@ -33,7 +33,7 @@ class SaltyWaterFlow(unittest.TestCase):
         tst_proc = proc.Process(batch_name=batch_name, process_name=proc_name,num_uo=1, comment="comment for proc")
         tst_proc.mats_data = mats.Materials(df_mats=PurchaseMaterials())
         tst_chgng = chgng.Charging(caller=tst_proc,
-                                    flow_sheet=tst_proc.flowsheet,
+                                    flowsheet=tst_proc.flowsheet,
                                     operation_seq=1,
                                     num_subitems=2,
                                     edit_comment="put salt and water")
