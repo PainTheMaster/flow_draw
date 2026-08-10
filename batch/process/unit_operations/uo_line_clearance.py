@@ -125,7 +125,7 @@ class LineClearance(uo.UnitOperation, uo_tag=defs.tag_uo_line_clearance):
                         description='Title of the SOP document. If valid information is not provided, please put <placeholder> in the field.',
                         nullable=False)
         obj_clearance = Objason(key=LineClearance.uo_tag,
-                                props=[common_schema, sop],
+                                props=common_schema+[sop],
                                 description="Unit operation for line clearance in a process workflow. This unit operation is used to indicate that the line clearance step is completed in the process.")
         return obj_clearance
 

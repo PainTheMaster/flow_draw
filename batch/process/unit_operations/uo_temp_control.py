@@ -10,6 +10,7 @@ from flow_draw.data_io import process_io as procio
 from flow_draw.materials import materials as mats
 from flow_draw.trait_def import trait_def as trdef
 #from flow_draw.trait_def.trait_def import GetMats
+from flow_draw.data_io.json_io import Objason, Array, Primitive
 
 
 
@@ -47,56 +48,82 @@ opt_time_unit_hour:str = defs.tag_flow_cmn_time_unit_hour
 #########################################################
 
             ##### header items for detail worksheet######
-hedr_mode:str = defs.hedr_uo_tempr_ctrl_mode
+
+hedr_mode:str = "Control_Mode"
 """Detail heder item: temperature control mode (e.g. Ti, Ti/Tj, amping)"""
-hedr_Ti_sp:str = defs.hedr_uo_tempr_ctrl_Ti_sp
+hedr_Ti_sp:str = "Ti_set_point(degC)"
 """Detail heder item: Ti set point for Ti, Ti/Tj mode"""
-hedr_Ti_limit_low:str = defs.hedr_uo_tempr_ctrl_Ti_limit_low
+hedr_Ti_limit_low:str = "Ti_limit_low(degC)"
 """Detail heder item: Ti lower limit designaetd by the process owner."""
-hedr_Ti_limit_high:str = defs.hedr_uo_tempr_ctrl_Ti_limit_high
+hedr_Ti_limit_high:str = "Ti_limit_high(degC)"
 """Detail heder item: Ti upper limit designated by the process owner."""
-hedr_Ti_tgt_low:str = defs.hedr_uo_tempr_ctrl_Ti_tgt_low
+hedr_Ti_tgt_low:str = "Ti_tgt_low(degC)"
 """Detail heder item: Ti TARGET lower limit designated by the process owner."""
-hedr_Ti_tgt_high:str = defs.hedr_uo_tempr_ctrl_Ti_tgt_high
+hedr_Ti_tgt_high:str = "Ti_tgt_high(degC)"
 """Detail heder item: Ti TARGET higher limit designated by the process owner."""
-hedr_Tj_sp:str = defs.hedr_uo_tempr_ctrl_Tj_sp
+
+hedr_Tj_sp:str = "Tj_set_point(degC)"
 """Detail heder item: Tj set point for Tj mode"""
-hedr_Tj_limit_low:str = defs.hedr_uo_tempr_ctrl_Tj_limit_low
+
+hedr_Tj_limit_low:str = "Tj_min(degC)"
 """Detail heder item: Tj lower limit for Tj, Ti/Tj mode."""
-hedr_Tj_lmit_high:str = defs.hedr_uo_tempr_ctrl_Tj_limit_high
+
+hedr_Tj_limit_high:str = "Tj_max(degC)"
 """Detail heder item: Tj higher limit for Tj, Ti/Tj mode"""
+
 #hedr_Ti_prog_sp_end:str = defs.hedr_uo_tempr_ctrl_prog_Ti_sp_end
 #hedr_Ti_prog_sp_end:str = defs.hedr_uo_tempr_ctrl_Ti_sp #TODO check if this is needed. Now, programme mode uses just Ti_sp
 """Detail heder item: Ti end target for ramp mode"""
-hedr_prog_time_val:str = defs.hedr_uo_tempr_ctrl_prog_time_val
+
+hedr_prog_time_val:str = "Prog_time_value"
 """Detail heder item: Ramp up/down time value"""
-hedr_prog_time_unit:str = defs.hedr_uo_tempr_ctrl_prog_time_unit
+
+hedr_prog_time_unit:str = "Prog_time_unit"
 """Detail heder item: Ramp up/down time unit"""
-hedr_endpoint_check:str = defs.hedr_uo_tempr_ctrl_endpoint_check
+
+hedr_endpoint_check:str = "Check_end_point"
 """Detail heder item: need for heating/cooling end point check."""
 
-list_hedr:list[str] = defs.list_hedr_uo_tempr_ctrl
+list_hedr:list[str] = [hedr_mode,
+                       hedr_Ti_sp,
+                       hedr_Ti_limit_low,
+                       hedr_Ti_limit_high,
+                       hedr_Ti_tgt_low,
+                       hedr_Ti_tgt_high,
+                       hedr_Tj_sp,
+                       hedr_Tj_limit_low,
+                       hedr_Tj_limit_high,
+                       hedr_prog_time_val,
+                       hedr_prog_time_unit,
+                       hedr_endpoint_check]
 """List of header items for unit operation temperature controle"""
 
 
         ##### UO-specific option items for the detail input table #######
-#For hedr_uo_tempr_ctrl_mode
-opt_mode_TiTj:str = defs.opt_uo_tempr_ctrl_mode_TiTj
+
+opt_mode_TiTj:str = "Ti/Tj_control"
 """Option for detail table: temperature control with single point Ti and Tj range"""
-opt_mode_Tj:str = defs.opt_uo_tempr_ctrl_mode_Tj
+opt_mode_Tj:str = "Tj_control"
 """Option for detail table: temperature control on jacket temperature (single point)"""
-opt_mode_prog:str = defs.opt_uo_tempr_ctrl_mode_prog
+opt_mode_prog:str = "Programme"
 """Option for detail table: temperature ramping, cooling or heating with time constraint"""
-opt_mode_Ti:str = defs.opt_uo_tempr_ctrl_mode_Ti
+opt_mode_Ti:str = "Ti_control"
 """Option for detail table: temperature control on liquid temperature (single point)"""
-# list_opt_mode = defs.list_opt_uo_tempr_ctrl_mode
-# """List of a series of temperature control options"""
+
+list_opt_mode:list[str] = [opt_mode_TiTj,
+                           opt_mode_Tj,
+                           opt_mode_prog,
+                           opt_mode_Ti]
+"""List of options corresponding to the header item hedr_mode for the detail input table of unit operation temperature control"""
 
 
 opt_check_endpoint_yes:str = opt_yes
 """Option for detail table: Need for temperature control endpoint check-box--yes"""
 opt_check_endpoint_no:str = opt_no
 """Option for detail table: Need for temperature control endpoint check-box--no"""
+list_opt_check_endpoint:list[str] = [opt_check_endpoint_yes,
+                                     opt_check_endpoint_no]
+"""List options corresponding to the header item hedr_endpoint_check for the detail input table of unit operation temperature control"""
 
 
 tag_flow_cmn_time_unit_second:str = defs.tag_flow_cmn_time_unit_second
@@ -105,12 +132,15 @@ tag_flow_cmn_time_unit_minute:str = defs.tag_flow_cmn_time_unit_minute
 """Tag for a common flowsheet component for an unit of time: minute"""
 tag_flow_cmn_time_unit_hour:str = defs.tag_flow_cmn_time_unit_hour
 """Tag for a common flowsheet component for an unit of time: hour"""
+list_opt_time_unit:list[str] = [tag_flow_cmn_time_unit_second,
+                                tag_flow_cmn_time_unit_minute,
+                                tag_flow_cmn_time_unit_hour]
+"""List of options corresponding to the header item hedr_prog_time_unit for the detail input table of unit operation temperature control"""
 
-# list_opt_check_endpoint=defs.list_opt_uo_tempr_ctrl_check_endpoint
-# """List options for detail table: Need for temperature control endpoint check-box--yes/no"""
 
-
-dict_opt:dict[str, list[str]] = defs.dict_opt_uo_tempr_ctrl
+dict_opt:dict[str, list[str]] = {hedr_mode:list_opt_mode,
+                                 hedr_endpoint_check:list_opt_check_endpoint,
+                                 hedr_prog_time_unit:list_opt_time_unit}
 """Dictionary for detail input form for the unit operation uo_tempr_ctrl"""
 
 
@@ -142,59 +172,87 @@ Language dictionary for common parts.
 """
 
                     #------------- component dictionary ---------------------
-
-tag_part_flow_title_tempr_config:str = defs.tag_part_flow_tempr_ctrl_title_tempr_config
+tag_part_flow_title_tempr_config:str = "uo_title_tempr_config"
 """Tag for a flowsheet component: Unit operation title for temperature configuration."""
-tag_part_flow_title_compl_tempr_ctrl:str = defs.tag_part_flow_tempr_ctrl_title_compl_tempr_ctrl
+tag_part_flow_title_compl_tempr_ctrl:str = "uo_title_tempr_compl_control"
 """Tag for a flowsheet component: Unit operation title for complete temperature control."""
-# tag_part_flow_prog_mode:str = defs.tag_part_flow_tempr_ctrl_prog_mode
-# """Tag for a flowsheet component: Instruction for progremme heating/cooling mode"""
-tag_part_flow_instr_init_temp_ctrl:str = defs.tag_part_flow_tempr_ctrl_instr_init_temp_ctrl
+tag_part_flow_instr_init_temp_ctrl:str = "instr_init_temp_ctrl"
 """Tag for a flowsheet component: Instruction to activate temperature control."""
-tag_part_flow_instr_compl_temp_ctrl:str = defs.tag_part_flow_tempr_ctrl_instr_compl_temp_ctrl
+tag_part_flow_instr_compl_temp_ctrl:str = "instr_complete_temp_ctrl"
 """Tag for a flowsheet component: Instrction to complete the temperature control."""
-tag_part_flow_instr_check_Ti_in_range:str = defs.tag_part_flow_tempr_ctrl_instr_check_Ti_in_range
+tag_part_flow_instr_check_Ti_in_range:str = "instr_check_temp_in_range"
 """Tag for a flowsheet component: Instrction to check if the Ti is in range."""
-tag_part_flow_check_config:str = defs.tag_part_flow_tempr_ctrl_check_config
+tag_part_flow_check_config:str = "check_temp_config"
 """Tag for a flowsheet part: check-box for temperature configuration."""
-tag_part_flow_check_activate:str = defs.tag_part_flow_tempr_ctrl_check_activate
+tag_part_flow_check_activate:str = "check_temp_control_activated"
 """Tag for a flowsheet part: check-box for activation of temperature control."""
-tag_part_flow_check_endpoint:str = defs.tag_part_flow_tempr_ctrl_check_endpoint
+tag_part_flow_check_endpoint:str = "check_temp_end_point"
 """Tag for a flowsheet part: check-box for temperature end point"""
-tag_part_flow_rec_Ti_ini:str = defs.tag_part_flow_tempr_ctrl_rec_Ti_ini
+tag_part_flow_rec_Ti_ini:str = "rec_Ti_ini"
 """Tag for a flowsheet part: recrd field for initial Ti"""
-tag_part_flow_rec_Ti_end:str = defs.tag_part_flow_tempr_ctrl_rec_Ti_end
+tag_part_flow_rec_Ti_end:str = "rec_Ti_end"
 """Tag for a flowsheet part: recrd field for end Ti"""
-lang_dict_parts_flow:dict[str, str]  = defs.dict_jp_part_flow_tempr_ctrl
+
+dict_jp_part:dict[str, str] = {tag_part_flow_title_tempr_config: "温調開始",
+                               tag_part_flow_title_compl_tempr_ctrl: "温調",
+                               tag_part_flow_instr_init_temp_ctrl: "温調開始",
+                               tag_part_flow_instr_compl_temp_ctrl: "温調完了",
+                               tag_part_flow_instr_check_Ti_in_range: "内温管理範囲内確認",
+                               tag_part_flow_check_config: "□ 設定値確認",
+                               tag_part_flow_check_activate: "□ 温調開始",
+                               tag_part_flow_check_endpoint: "□ 温度到達確認",
+                               tag_part_flow_rec_Ti_ini: "温調開始時内温_______℃",
+                               tag_part_flow_rec_Ti_end: "温調完了時内温_______℃"}
+
+lang_dict_parts_flow:dict[str, str]  = dict_jp_part
 """Japanese language dictionary for flowsheet parts for unit operation temperature control."""
 
 
                     #------------- Sentece dictionary ---------------------
-
-tag_stc_Tj_sp:str = defs.tag_stc_tempr_ctrl_Tj_sp
+tag_stc_Tj_sp:str = "Tj_set_point"
 """Tag for an instruction sentence for temperature control. Tj set point. Includes placeholder{Tj}"""
-tag_stc_Ti_Tj_config:str = defs.tag_stc_tempr_ctrl_Ti_Tj_config
+tag_stc_Ti_Tj_config:str = "Ti_Tj_control"
 """Tag for an instruction sentence for temperature control. Ti/Tj configuration. Includes placeholder{Ti}, {Tj_low}, and {Tj_high}"""
-tag_stc_prog_mode:str = defs.tag_stc_tempr_ctrl_prog_mode
+tag_stc_prog_mode:str = "configure_programme_mode"
 """Tag for an instruction sentence for temperature control. Programme mode. Includes placeholder{Ti}, {Tj_low}, and {Tj_high}"""
-tag_stc_prog_duration_minimum:str = defs.tag_stc_tempr_ctrl_prog_duration_minimum
+tag_stc_prog_duration_minimum:str = "minimum_duration_programme_mode"
 """Sentence template for temperature control. Time requirement for programme heating/cooling mode. Includes  placeholders {time_min} and {time_unit}."""
-tag_stc_Ti_range:str = defs.tag_stc_tempr_ctrl_Ti_range
+tag_stc_Ti_range:str = "Ti_range"
 """Tag for an instruction sentence for temperature control. Ti range Includes placeholder {Ti_low} and {Ti_high}"""
-tag_stc_prog_term_Ti_range:str = defs.tag_stc_tempr_ctrl_prog_term_Ti_range
+tag_stc_prog_terminal_Ti_range:str = "Programme_mode_terminal_Ti_range"
 """Tag for an instruction sentence for temperature control. Programme mode terminal Ti range. Includes placeholder {Ti_low} and {Ti_high}"""
-tag_stc_Ti_high_limit_only:str = defs.tag_stc_tempr_ctrl_Ti_high_limit_only
+tag_stc_Ti_limit_high_only:str = "Ti_upper_limit_only"
 """Tag for an instruction sentence for temperature control. Ti upper limit only, includes placeholder {Ti_high}"""
-tag_stc_Ti_low_limit_only:str = defs.tag_stc_tempr_ctrl_Ti_low_limit_only
+tag_stc_Ti_limit_low_only:str = "Ti_lower_limit_only"
 """Tag for an instruction sentence for temperature control. Ti lower limit only, includes placeholder {Ti_low}"""
-tag_stc_Ti_tgt_range:str = defs.tag_stc_tempr_ctrl_Ti_tgt_range
+tag_stc_Ti_tgt_range:str = "Ti_tgt_range"
 """Tag for an instruction sentence for temperature control. Ti target range. Includes placeholder {Ti_low} and {Ti_high}."""
-tag_stc_Ti_tgt_single:str = defs.tag_stc_tempr_ctrl_Ti_tgt_single
+tag_stc_Ti_tgt_single:str = "Ti_tgt_single"
 """Tag for an instruction sentence for temperature control. Ti target single point.  Includes placeholder {Ti}"""
-tag_stc_Ti_spec_sp_single:str = defs.tag_stc_tempr_ctrl_Ti_spec_sp_single
+tag_stc_Ti_tgt_low:str = "Ti_tgt_low"
+"""Tag for an instruction sentence for temperature control. Ti lower target. Includes placeholder {Ti_low}"""
+tag_stc_Ti_tgt_high:str = "Ti_tgt_high"
+"""Tag for an instruction sentence for temperature control. Ti higher target. Includes placeholder {Ti_high}"""
+tag_stc_Ti_spec_sp_single:str = "Ti_spec_sp"
 """Tag for an instruction sentence for temperature control. Ti specification single point for Ti mode. Includes placeholder {Ti}"""
-tag_stc_duration:str = defs.tag_stc_flow_tempr_ctrl_result_duration
+tag_stc_duration:str = "duration_for_temp_control_(result)"
 """Tag for a record field for temperature control (cooling/heating) duration in a specic time unit. Includes a placeholder {time_unit}"""
+
+dict_jp_stcs: dict[str, str] = {tag_stc_Tj_sp :"外温設定: {Tj} ℃",
+                               tag_stc_Ti_Tj_config :"内外温制御: 内温設定{Ti} ℃、外温範囲{Tj_low}～{Tj_high} ℃",
+                               tag_stc_prog_mode :"プログラム温調: 内温設定{Ti} ℃、外温範囲{Tj_low}～{Tj_high} ℃",
+                               tag_stc_prog_duration_minimum :"温調時間: {time_min} {time_unit}以上",
+                               tag_stc_Ti_range :"内温管理幅: {Ti_low}～{Ti_high} ℃",
+                               tag_stc_prog_terminal_Ti_range :"終点内温範囲: {Ti_low}～{Ti_high} ℃",
+                               tag_stc_Ti_limit_high_only :"内温管理: {Ti_high} ℃以下",
+                               tag_stc_Ti_limit_low_only :"内温管理: {Ti_low} ℃以上",
+                               tag_stc_Ti_tgt_range :"内温目標幅: {Ti_low}～{Ti_high} ℃",
+                               tag_stc_Ti_tgt_low :"内温目標: {Ti_low} ℃ 以上",
+                               tag_stc_Ti_tgt_high :"内温目標: {Ti_high} ℃ 以下",
+                               tag_stc_Ti_tgt_single :"内温目標値: {Ti} ℃",
+                               tag_stc_Ti_spec_sp_single :"内温設定値: {Ti} ℃",
+                               tag_stc_duration :"温調時間: _________{time_unit}"}
+
 lang_dict_stcs:dict[str, str] = defs.dict_jp_stcs_tempr_ctrl
 """JP language dictionary for """
 
@@ -242,8 +300,6 @@ class TempControl(uo.UnitOperation, uo_tag=defs.tag_uo_tempr_ctrl):
         """Lower limit of Tj range for Ti/Tj and programme mode"""
         self.Tj_limit_high:float = None
         """Higher limit of Tj range for Ti/Tj and programme mode"""
-        # self.Ti_prog_sp:float = None
-        # """Ti set point for programme heating/cooling mode."""
         self.time_val_prog:float = None
         """Ramp time for programme heating/cooling mode"""
         self.time_unit_prog:str = None
@@ -293,11 +349,8 @@ class TempControl(uo.UnitOperation, uo_tag=defs.tag_uo_tempr_ctrl):
         if not pd.isna(first_row[hedr_Tj_limit_low]):
             self.Tj_limit_low = float(first_row[hedr_Tj_limit_low])
                 
-        if not pd.isna(first_row[hedr_Tj_lmit_high]):
-            self.Tj_limit_high = float(first_row[hedr_Tj_lmit_high])
-                
-        # if not pd.isna(first_row[hedr_Ti_prog_sp_end]):
-        #     self.Ti_prog_sp = float(first_row[hedr_Ti_prog_sp_end])
+        if not pd.isna(first_row[hedr_Tj_limit_high]):
+            self.Tj_limit_high = float(first_row[hedr_Tj_limit_high])
                 
         if not pd.isna(first_row[hedr_prog_time_val]):
             self.time_val_prog = float(first_row[hedr_prog_time_val])
@@ -309,17 +362,133 @@ class TempControl(uo.UnitOperation, uo_tag=defs.tag_uo_tempr_ctrl):
         self.endpoint_check = (first_row[hedr_endpoint_check] == opt_yes)
         """first_row[hedr_endpoint_check] shall has a value of 'Yes', 'No', NaN or something else. Only 'Yes' is regarded as the affirmative choice."""
 
+    def get_json_schema(caller: trdef.UniversalTrait=None)->Objason:
+        common_schema:list[Primitive] = TempControl.json_common()
+        mode = Primitive(prim_type='string',
+                         key=hedr_mode,
+                         description=f'Temperature control mode: This is a mandatory item.'
+                                     f'"{opt_mode_TiTj}" mode is most common. A specific set point of the reactor internal temperature (Ti) is given, whereas a specific range of the jacket temperature (Tj) is instructed.'
+                                     f'"{opt_mode_Tj}" mode is selected when only the jacket temperature must be maintained at a specific set point. '
+                                     f'"{opt_mode_prog}" mode means the reactor Ti approaches a specific set point within a specific time frame, whereas the jacket temperature is maintained within a specific range. Prioritise this mode if time constraint is given. '
+                                     f'"{opt_mode_Ti}" mode is selected when only the reactor internal temperature must be maintained at a specific set point. This is less common. This is less reliable mode of control. Try to avoid this mode and prioritise other modes as much as possible. '
+                                     f'If no mode is provided in the data source, please select "{opt_mode_TiTj}" to keep the ball rolling.',
+                         enum = list_opt_mode)
+        Ti_sp = Primitive(prim_type='number',
+                          key=hedr_Ti_sp,
+                          description=f'Ti set point (instructed by the process owner). '
+                          f'Mandatory if "{hedr_mode}" is "{opt_mode_TiTj}", "{opt_mode_prog}", or "{opt_mode_Ti}". '
+                          f'Optional and nullable if "{hedr_mode}" is "{opt_mode_Tj}". '
+                          'If necessary data is not provided, please put 1000 as a dummy value for the time being.',
+                          nullable=True,
+                          required=True)
+        Ti_limit_low = Primitive(prim_type='number',
+                                key=hedr_Ti_limit_low,
+                                description=f'Ti lower limit (instructed by the process owner). '
+                                f'At leaset one of "{hedr_Ti_limit_low}" or "{hedr_Ti_limit_high}" must be provided if "{hedr_mode}" is "{opt_mode_TiTj}". '
+                                f'Both "{hedr_Ti_limit_low}" and "{hedr_Ti_limit_high}" must be provided if "{hedr_mode}" is "{opt_mode_prog}". '
+                                f'Optional and nullable if "{hedr_mode}" is "{opt_mode_Tj}" or "{opt_mode_Ti}". '
+                                'If the necessary data is not provided, please put 1000 as a dummy value for the time being.',
+                                nullable=True,
+                                required=True)
+        Ti_limit_high = Primitive(prim_type='number',
+                                key=hedr_Ti_limit_high,
+                                description=f'Ti upper limit (instructed by the process owner). '
+                                f'At leaset one of "{hedr_Ti_limit_low}" or "{hedr_Ti_limit_high}" must be provided if "{hedr_mode}" is "{opt_mode_TiTj}". '
+                                f'Both "{hedr_Ti_limit_low}" and "{hedr_Ti_limit_high}" must be provided if "{hedr_mode}" is "{opt_mode_prog}". '
+                                f'Optional and nullable if "{hedr_mode}" is "{opt_mode_Tj}" or "{opt_mode_Ti}". '
+                                'If the necessary data is not provided, please put 1000 as a dummy value for the time being.',
+                                nullable=True,
+                                required=True)
+        Ti_tgt_low = Primitive(prim_type='number',
+                              key=hedr_Ti_tgt_low,
+                              description='Lower end of Ti target range (instructed by the process woner). Nullable, if no data is provided',
+                              nullable=True,
+                              required=True)
+        Ti_tgt_high = Primitive(prim_type='number',
+                               key=hedr_Ti_tgt_high,
+                               description='Upper end of Ti target range (instructed by the process woner). Nullable, if no data is provided',
+                               nullable=True,
+                               required=True)
+        Tj_sp = Primitive(prim_type='number',
+                          key=hedr_Tj_sp,
+                          description=f'Tj set point for Tj control mode. Mandatory if "{hedr_mode}" is "{opt_mode_Tj}". Nullable otherwise.',
+                          nullable=True,
+                          required=True)
+        Tj_limit_low = Primitive(prim_type='number',
+                                 key=hedr_Tj_limit_low,
+                                 description=f'Lower limit of the jacket temperature (instructed by the process owner). '
+                                             f'Mandatory if "{hedr_mode}" is "{opt_mode_TiTj}" or "{opt_mode_prog}". '
+                                             f'Optional and nullable otherwise.',
+                                 nullable=True,
+                                 required=True)
+        Tj_limit_high = Primitive(prim_type='number',
+                                  key=hedr_Tj_limit_high,
+                                  description=f'Upper limit of the jacket temperature (instructed by the process owner). '
+                                              f'Mandatory if "{hedr_mode}" is "{opt_mode_TiTj}" or "{opt_mode_prog}". '
+                                              f'Optional and nullable otherwise.',
+                                  nullable=True,
+                                  required=True)
+        prog_time_val = Primitive(prim_type='number',
+                                  key=hedr_prog_time_val,
+                                  description=f'Ramp time for programme heating/cooling mode. Mandatory if "{hedr_mode}" is "{opt_mode_prog}". '
+                                              f'Optional and nullable otherwise.',
+                                  nullable=True,
+                                  required=True)
+        prog_time_unit = Primitive(prim_type='string',
+                                   key=hedr_prog_time_unit,
+                                   description=f'Time unit for programme heating/cooling mode. Mandatory if "{hedr_mode}" is "{opt_mode_prog}". '
+                                               f'Optional and nullable otherwise.',
+                                   enum=list_opt_time_unit,
+                                   nullable=True,
+                                   required=True)
+        endpoint_check = Primitive(prim_type='string',
+                                   key=hedr_endpoint_check,
+                                   description=f'Need for temperature control end point check. '
+                                               f'Optional. Please select "{opt_check_endpoint_yes}" or "{opt_check_endpoint_no}" if apparent on the data source.',
+                                   enum=list_opt_check_endpoint,
+                                   nullable=True,
+                                   required=True)
+        obj_schema = Objason(key=TempControl.uo_tag,
+                             description=f'Temperature control unit operation.',
+                             props = common_schema+[mode,
+                                                    Ti_sp,
+                                                    Ti_limit_low,
+                                                    Ti_limit_high,
+                                                    Ti_tgt_low,
+                                                    Ti_tgt_high,
+                                                    Tj_sp,
+                                                    Tj_limit_low,
+                                                    Tj_limit_high,
+                                                    prog_time_val,
+                                                    prog_time_unit,
+                                                    endpoint_check],
+                            )
+        return obj_schema
 
-
+    def load_from_json_dict(self, json_dict: dict[str, any]):
+        super().load_from_json_dict(json_dict)
+        self.ctrl_mode = json_dict.get(hedr_mode, None)
+        self.Ti_sp = json_dict.get(hedr_Ti_sp, None)
+        self.Ti_limit_low = json_dict.get(hedr_Ti_limit_low, None)
+        self.Ti_limit_high = json_dict.get(hedr_Ti_limit_high, None)
+        self.Ti_tgt_low = json_dict.get(hedr_Ti_tgt_low, None)
+        self.Ti_tgt_high = json_dict.get(hedr_Ti_tgt_high, None)
+        self.Tj_sp = json_dict.get(hedr_Tj_sp, None)
+        self.Tj_limit_low = json_dict.get(hedr_Tj_limit_low, None)
+        self.Tj_limit_high = json_dict.get(hedr_Tj_limit_high, None)
+        self.time_val_prog = json_dict.get(hedr_prog_time_val, None)
+        self.time_unit_prog = json_dict.get(hedr_prog_time_unit, None)
+        self.endpoint_check = (json_dict.get(hedr_endpoint_check, opt_no)== opt_yes)
 
     def __put_TiTj_mode(self):
         stc_spec:str = None
         if self.Ti_limit_low is None and self.Ti_limit_high is None:
             raise ValueError(f"{self.__class__.__name__}: Op. Seq. {self.operation_seq} Ti limit not specified in the input form for Ti/Tj control mode.")
         elif self.Ti_limit_low is not None and self.Ti_limit_high is None:
-            stc_spec = lang_dict_stcs[tag_stc_Ti_low_limit_only].format(Ti_low=self.Ti_limit_low)
+            stc_spec = lang_dict_stcs[tag_stc_Ti_limit_low_only].format(Ti_low=self.Ti_limit_low)
         elif self.Ti_limit_low is None and self.Ti_limit_high is not None:
-            stc_spec = lang_dict_stcs[tag_stc_Ti_high_limit_only].format(Ti_high=self.Ti_limit_high)
+            stc_spec = lang_dict_stcs[tag_stc_Ti_limit_high_only].format(Ti_high=self.Ti_limit_high)
+        # Ti_limit_low == Ti_limit_high is not realistic.
         else:
             stc_spec = lang_dict_stcs[tag_stc_Ti_range].format(Ti_low=self.Ti_limit_low, Ti_high=self.Ti_limit_high)
 
@@ -327,9 +496,9 @@ class TempControl(uo.UnitOperation, uo_tag=defs.tag_uo_tempr_ctrl):
         if self.Ti_tgt_low is None and self.Ti_tgt_high is None:
             pass
         elif self.Ti_tgt_low is not None and self.Ti_tgt_high is None:
-            stc_target = lang_dict_stcs[tag_stc_Ti_tgt_single].format(Ti=self.Ti_tgt_low)
+            stc_target = lang_dict_stcs[tag_stc_Ti_tgt_low].format(Ti_low=self.Ti_tgt_low)
         elif self.Ti_tgt_low is None and self.Ti_tgt_high is not None:
-            stc_target = lang_dict_stcs[tag_stc_Ti_tgt_single].format(Ti=self.Ti_tgt_high)
+            stc_target = lang_dict_stcs[tag_stc_Ti_tgt_high].format(Ti_high=self.Ti_tgt_high)
         elif self.Ti_tgt_low == self.Ti_tgt_high:
             stc_target = lang_dict_stcs[tag_stc_Ti_tgt_single].format(Ti=self.Ti_tgt_high)
         else:
@@ -341,7 +510,6 @@ class TempControl(uo.UnitOperation, uo_tag=defs.tag_uo_tempr_ctrl):
         else:
             stc_concat_ranges = stc_spec+" ("+stc_target+")"
 
-
         self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
                                 method=lang_dict_parts_flow[tag_part_flow_instr_init_temp_ctrl],
                                 content=lang_dict_stcs[tag_stc_Ti_Tj_config].format(Ti=self.Ti_sp, Tj_low=self.Tj_limit_low, Tj_high=self.Tj_limit_high),
@@ -351,13 +519,6 @@ class TempControl(uo.UnitOperation, uo_tag=defs.tag_uo_tempr_ctrl):
         self.flowsheet.put_line(content=stc_concat_ranges,
                                 record=lang_dict_parts_flow[tag_part_flow_rec_Ti_ini])
         self.flowsheet.linefeed()
-        # if self.endpoint_check:
-        #     self.flowsheet.linefeed()
-        #     self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
-        #                             content=lang_dict_parts_flow[tag_part_flow_instr_check_Ti_in_range],
-        #                             record=lang_dict_parts_flow[tag_part_flow_check_endpoint],
-        #                             operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
-        #                             witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
 
     def __put_Tj_mode(self):
         sentence_Tj:str = None
@@ -370,9 +531,10 @@ class TempControl(uo.UnitOperation, uo_tag=defs.tag_uo_tempr_ctrl):
         if self.Ti_limit_low is None and self.Ti_limit_high is None:
             pass
         elif self.Ti_limit_low is not None and self.Ti_limit_high is None:
-            stc_spec_Ti = lang_dict_stcs[tag_stc_Ti_low_limit_only].format(Ti_low=self.Ti_limit_low)
+            stc_spec_Ti = lang_dict_stcs[tag_stc_Ti_limit_low_only].format(Ti_low=self.Ti_limit_low)
         elif self.Ti_limit_low is None and self.Ti_limit_high is not None:
-            stc_spec_Ti = lang_dict_stcs[tag_stc_Ti_high_limit_only].format(Ti_high=self.Ti_limit_high)
+            stc_spec_Ti = lang_dict_stcs[tag_stc_Ti_limit_high_only].format(Ti_high=self.Ti_limit_high)
+        # Ti_limit_low == Ti_limit_high is not realistic.
         else:
             stc_spec_Ti = lang_dict_stcs[tag_stc_Ti_range].format(Ti_low=self.Ti_limit_low, Ti_high=self.Ti_limit_high)
 
@@ -380,9 +542,9 @@ class TempControl(uo.UnitOperation, uo_tag=defs.tag_uo_tempr_ctrl):
         if self.Ti_tgt_low is None and self.Ti_tgt_high is None:
             pass
         elif self.Ti_tgt_low is not None and self.Ti_tgt_high is None:
-            stc_target_Ti = lang_dict_stcs[tag_stc_Ti_tgt_single].format(Ti=self.Ti_tgt_low)
+            stc_target_Ti = lang_dict_stcs[tag_stc_Ti_tgt_low].format(Ti_low=self.Ti_tgt_low)
         elif self.Ti_tgt_low is None and self.Ti_tgt_high is not None:
-            stc_target_Ti = lang_dict_stcs[tag_stc_Ti_tgt_single].format(Ti=self.Ti_tgt_high)
+            stc_target_Ti = lang_dict_stcs[tag_stc_Ti_tgt_high].format(Ti_high=self.Ti_tgt_high)
         elif self.Ti_tgt_low == self.Ti_tgt_high:
             stc_target_Ti = lang_dict_stcs[tag_stc_Ti_tgt_single].format(Ti=self.Ti_tgt_high)
         else:
@@ -437,7 +599,7 @@ class TempControl(uo.UnitOperation, uo_tag=defs.tag_uo_tempr_ctrl):
         elif self.Ti_limit_high is None:
             raise ValueError(f"{self.__class__.__name__}: Op. Seq. {self.operation_seq} Ti higher limit not specified in the input form for programme control mode.")
         else:
-            instr_Ti_range = lang_dict_stcs[tag_stc_prog_term_Ti_range].format(Ti_low=self.Ti_limit_low, Ti_high=self.Ti_limit_high)
+            instr_Ti_range = lang_dict_stcs[tag_stc_prog_terminal_Ti_range].format(Ti_low=self.Ti_limit_low, Ti_high=self.Ti_limit_high)
 
         self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
                                 method=lang_dict_parts_flow[tag_part_flow_instr_init_temp_ctrl],
@@ -449,18 +611,7 @@ class TempControl(uo.UnitOperation, uo_tag=defs.tag_uo_tempr_ctrl):
                                 record=lang_dict_parts_flow[tag_part_flow_check_activate])
         self.flowsheet.put_line(content=instr_Ti_range,
                                 record=lang_dict_parts_flow[tag_part_flow_rec_Ti_ini])
-        # self.flowsheet.put_line(record=lang_dict_parts_flow[tag_part_flow_rec_Ti_ini])
         self.flowsheet.linefeed()
-        # self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
-        #                         method=lang_dict_parts_flow[tag_part_flow_instr_compl_temp_ctrl],
-        #                         content=lang_dict_parts_flow[tag_part_flow_instr_check_Ti_in_range],
-        #                         record=lang_dict_parts_flow[tag_part_flow_check_endpoint],
-        #                         operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
-        #                         witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
-        # self.flowsheet.put_line(record=lang_dict_stcs[tag_stc_duration].format(time_unit=self.time_unit_prog))
-        # self.flowsheet.put_line(record=lang_dict_parts_flow[tag_part_flow_rec_Ti_end])
-
-
 
 
     def __put_Ti_mode(self):
@@ -474,9 +625,9 @@ class TempControl(uo.UnitOperation, uo_tag=defs.tag_uo_tempr_ctrl):
         if self.Ti_limit_low is None and self.Ti_limit_high is None:
             pass
         elif self.Ti_limit_low is not None and self.Ti_limit_high is None:
-            stc_spec_Ti = lang_dict_stcs[tag_stc_Ti_low_limit_only].format(Ti_low=self.Ti_limit_low)
+            stc_spec_Ti = lang_dict_stcs[tag_stc_Ti_limit_low_only].format(Ti_low=self.Ti_limit_low)
         elif self.Ti_limit_low is None and self.Ti_limit_high is not None:
-            stc_spec_Ti = lang_dict_stcs[tag_stc_Ti_high_limit_only].format(Ti_high=self.Ti_limit_high)
+            stc_spec_Ti = lang_dict_stcs[tag_stc_Ti_limit_high_only].format(Ti_high=self.Ti_limit_high)
         else:
             stc_spec_Ti = lang_dict_stcs[tag_stc_Ti_range].format(Ti_low=self.Ti_limit_low, Ti_high=self.Ti_limit_high)
 
@@ -484,9 +635,9 @@ class TempControl(uo.UnitOperation, uo_tag=defs.tag_uo_tempr_ctrl):
         if self.Ti_tgt_low is None and self.Ti_tgt_high is None:
             pass
         elif self.Ti_tgt_low is not None and self.Ti_tgt_high is None:
-            stc_target_Ti = lang_dict_stcs[tag_stc_Ti_tgt_single].format(Ti=self.Ti_tgt_low)
+            stc_target_Ti = lang_dict_stcs[tag_stc_Ti_tgt_low].format(Ti_low=self.Ti_tgt_low)
         elif self.Ti_tgt_low is None and self.Ti_tgt_high is not None:
-            stc_target_Ti = lang_dict_stcs[tag_stc_Ti_tgt_single].format(Ti=self.Ti_tgt_high)
+            stc_target_Ti = lang_dict_stcs[tag_stc_Ti_tgt_high].format(Ti_high=self.Ti_tgt_high)
         elif self.Ti_tgt_low == self.Ti_tgt_high:
             stc_target_Ti = lang_dict_stcs[tag_stc_Ti_tgt_single].format(Ti=self.Ti_tgt_high)
         else:

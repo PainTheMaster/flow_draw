@@ -4,7 +4,7 @@
             "Seq_Nr": 1,
             "Unit_Operation": "charging",
             "Edit_Comment": null,
-            "Pre-comment": null,
+            "Pre-comment": "Charge key substrates to the 30 L glass reactor",
             "Post-comment": null,
             "arr_charging_input_entry": [
                 {
@@ -32,7 +32,16 @@
                     "Temp_Control": "No_temp_control",
                     "Minimum_Temp(deg-C)": null,
                     "Maximum_Temp(deg-C)": null
-                },
+                }
+            ]
+        },
+        {
+            "Seq_Nr": 2,
+            "Unit_Operation": "charging",
+            "Edit_Comment": null,
+            "Pre-comment": "Add solvent",
+            "Post-comment": null,
+            "arr_charging_input_entry": [
                 {
                     "Material_Name": "dichloromethane",
                     "Metrics_Value": 1,
@@ -45,7 +54,16 @@
                     "Temp_Control": "No_temp_control",
                     "Minimum_Temp(deg-C)": null,
                     "Maximum_Temp(deg-C)": null
-                },
+                }
+            ]
+        },
+        {
+            "Seq_Nr": 3,
+            "Unit_Operation": "charging",
+            "Edit_Comment": null,
+            "Pre-comment": "Charge coupling additive",
+            "Post-comment": null,
+            "arr_charging_input_entry": [
                 {
                     "Material_Name": "1-hydroxy-7-azabenzotriazole",
                     "Metrics_Value": 1.1,
@@ -62,10 +80,10 @@
             ]
         },
         {
-            "Seq_Nr": 2,
+            "Seq_Nr": 4,
             "Unit_Operation": "agitation",
             "Edit_Comment": null,
-            "Pre-comment": null,
+            "Pre-comment": "Reaction stage",
             "Post-comment": null,
             "Specification": "arbitrary",
             "Rotation_(rpm)": null,
@@ -77,10 +95,10 @@
             "Dissolution_check": "No"
         },
         {
-            "Seq_Nr": 3,
+            "Seq_Nr": 5,
             "Unit_Operation": "charging",
             "Edit_Comment": null,
-            "Pre-comment": null,
+            "Pre-comment": "Work-up: add saturated NaHCO3 aq",
             "Post-comment": null,
             "arr_charging_input_entry": [
                 {
@@ -99,10 +117,10 @@
             ]
         },
         {
-            "Seq_Nr": 4,
+            "Seq_Nr": 6,
             "Unit_Operation": "agitation",
             "Edit_Comment": null,
-            "Pre-comment": null,
+            "Pre-comment": "Post-quench agitation",
             "Post-comment": null,
             "Specification": "arbitrary",
             "Rotation_(rpm)": null,
@@ -114,10 +132,22 @@
             "Dissolution_check": "No"
         },
         {
-            "Seq_Nr": 5,
+            "Seq_Nr": 7,
+            "Unit_Operation": "phase_discharge",
+            "Edit_Comment": null,
+            "Pre-comment": "Separate and remove aqueous layer",
+            "Post-comment": null,
+            "origin": "30 L glass reactor",
+            "via": null,
+            "destination": [
+                "W-layer"
+            ]
+        },
+        {
+            "Seq_Nr": 8,
             "Unit_Operation": "charging",
             "Edit_Comment": null,
-            "Pre-comment": null,
+            "Pre-comment": "Wash with brine",
             "Post-comment": null,
             "arr_charging_input_entry": [
                 {
@@ -136,25 +166,41 @@
             ]
         },
         {
-            "Seq_Nr": 6,
-            "Unit_Operation": "agitation",
+            "Seq_Nr": 9,
+            "Unit_Operation": "phase_discharge",
             "Edit_Comment": null,
-            "Pre-comment": null,
+            "Pre-comment": "Separate and remove aqueous layer after brine wash",
             "Post-comment": null,
-            "Specification": "arbitrary",
-            "Rotation_(rpm)": null,
-            "Ti_min_(deg-C)": 25,
-            "Ti_max_(deg-C)": 25,
-            "Minimum_time": null,
-            "Maximum_time": null,
-            "Time_unit": null,
-            "Dissolution_check": "No"
+            "origin": "30 L glass reactor",
+            "via": null,
+            "destination": [
+                "W-layer"
+            ]
         },
         {
-            "Seq_Nr": 7,
+            "Seq_Nr": 10,
+            "Unit_Operation": "temp_control",
+            "Edit_Comment": null,
+            "Pre-comment": "Raise temperature to 25 °C",
+            "Post-comment": null,
+            "Control_Mode": "Ti_control",
+            "Ti_set_point(degC)": 25,
+            "Ti_limit_low(degC)": null,
+            "Ti_limit_high(degC)": null,
+            "Ti_tgt_low(degC)": null,
+            "Ti_tgt_high(degC)": null,
+            "Tj_set_point(degC)": null,
+            "Tj_min(degC)": null,
+            "Tj_max(degC)": null,
+            "Prog_time_value": null,
+            "Prog_time_unit": null,
+            "Check_end_point": null
+        },
+        {
+            "Seq_Nr": 11,
             "Unit_Operation": "charging",
             "Edit_Comment": null,
-            "Pre-comment": null,
+            "Pre-comment": "Add hexane dropwise over 1 hour at 25 °C with gentle agitation",
             "Post-comment": null,
             "arr_charging_input_entry": [
                 {
@@ -173,25 +219,29 @@
             ]
         },
         {
-            "Seq_Nr": 8,
-            "Unit_Operation": "agitation",
+            "Seq_Nr": 12,
+            "Unit_Operation": "temp_control",
             "Edit_Comment": null,
-            "Pre-comment": null,
+            "Pre-comment": "Cool to 5 °C over 2 hours with gentle agitation",
             "Post-comment": null,
-            "Specification": "arbitrary",
-            "Rotation_(rpm)": null,
-            "Ti_min_(deg-C)": 5,
-            "Ti_max_(deg-C)": 25,
-            "Minimum_time": 2,
-            "Maximum_time": 2,
-            "Time_unit": "hr",
-            "Dissolution_check": "No"
+            "Control_Mode": "Ti_control",
+            "Ti_set_point(degC)": 5,
+            "Ti_limit_low(degC)": null,
+            "Ti_limit_high(degC)": null,
+            "Ti_tgt_low(degC)": null,
+            "Ti_tgt_high(degC)": null,
+            "Tj_set_point(degC)": null,
+            "Tj_min(degC)": null,
+            "Tj_max(degC)": null,
+            "Prog_time_value": null,
+            "Prog_time_unit": null,
+            "Check_end_point": null
         },
         {
-            "Seq_Nr": 9,
+            "Seq_Nr": 13,
             "Unit_Operation": "agitation",
             "Edit_Comment": null,
-            "Pre-comment": null,
+            "Pre-comment": "Aging at 5 °C",
             "Post-comment": null,
             "Specification": "arbitrary",
             "Rotation_(rpm)": null,

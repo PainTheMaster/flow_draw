@@ -13,6 +13,9 @@ import flow_draw.batch.process.unit_operations.uo_filter_setup as fltstup
 import flow_draw.batch.process.unit_operations.uo_filtration as filt
 import flow_draw.batch.process.unit_operations.uo_placeholder as plchldr
 import flow_draw.batch.process.unit_operations.uo_innert_replacement as innert
+import flow_draw.batch.process.unit_operations.uo_line_clearance as lnclear
+import flow_draw.batch.process.unit_operations.uo_phase_discharge as phdisch
+import flow_draw.batch.process.unit_operations.uo_temp_control as tempctrl
 
 
 
@@ -244,7 +247,11 @@ class Process(GetMats):
                                                  fltstup.FiltSetup,
                                                  filt.Filtration,
                                                  plchldr.Placeholder,
-                                                 innert.InnertReplacement]
+                                                 innert.InnertReplacement,
+                                                 lnclear.LineClearance,
+                                                 phdisch.PhaseDisch,
+                                                 tempctrl.TempControl
+                                                 ]
         self.data_input.ai_load_process_details(caller=self, list_uo=list_uo)
 
 

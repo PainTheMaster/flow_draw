@@ -685,7 +685,7 @@ class Test_30000_json_ai_interface(unittest.TestCase, trdef.GetMats):
     def setUp(self):
         self.mats_df = mats.Materials.generate_mats_df()
         self.mats_df = mats.Materials.add_to_mats_df(mats_df=self.mats_df,
-                                                       material="H-Ala-Glu-GlyOme",
+                                                       material="H-Ala-Glu-GlyOMe",
                                                        main_star=True,
                                                        mw = 200,
                                                        density=1.00,

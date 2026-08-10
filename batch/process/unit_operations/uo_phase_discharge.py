@@ -9,6 +9,7 @@ from flow_draw.batch.process.unit_operations import unit_operation as uo
 from flow_draw.data_io import process_io as procio
 from flow_draw.materials import materials as mats
 from flow_draw.trait_def import trait_def as trdef
+from flow_draw.data_io.json_io import Objason, Array, Primitive
 #from flow_draw.trait_def.trait_def import GetMats
 
 
@@ -41,14 +42,17 @@ opt_time_unit_hour:str = defs.tag_flow_cmn_time_unit_hour
 #list_hedr = defs.list_hedr_<list of header items for the uo>
 #dict_dtil_drpdwn = defs.dict_opt_<unit operation>
 
-hedr_origin = defs.hedr_uo_phasedisch_origin
+hedr_origin = "origin"
 """Header item for uo_phase_discharge: origin of the discarded lower phase, e.g., reaction vessel, etc."""
-hedr_via = defs.hedr_uo_phasedisch_via
+hedr_via = "via"
 """Header item for uo_phase_discharge: way point of the discarded lower phase, e.g., multiplexker, etc"""
-hedr_destin = defs.hedr_uo_phasedisch_destin
+hedr_destin = "destination"
 """Header item for uo_phase_discharge: destination of the discarded lower phase, e.g., wate liqour tank, etc"""
-list_hedr = defs.list_hedr_uo_phasedich
+list_hedr = [hedr_origin, hedr_via, hedr_destin]
 """list of  hader fields for the unit operation phase discharge"""
+
+key_json_single_destin = "single_destination"
+"""For JSON schema. Key for a single destination of the discharged phase."""
 
 #########################################################
 # UO-specific options, list, header_item: list dictionry thereof (for data input and internalsignaling)
@@ -88,30 +92,43 @@ Language dictionary for common parts.
 
                   #>>>>>>>>>>>>> Flowsheet components <<<<<<<<<<<<<<<<
 
-tag_part_flow_method_connection = defs.tag_part_flow_uo_phasedisch_method_connection
+tag_part_flow_method_connection = "line connection"
 """Tag for a flowsheet component for a unit operation phase discharging: Discharging line connection"""
-tag_part_flow_chk_connected = defs.tag_part_flow_uo_phasedisch_chk_connected
+tag_part_flow_chk_connected = "check box line connected"
 """Tag for a flowsheet component for a unit operation phase discharging: check box for phase discharging line connected"""
-tag_part_flow_method_disch = defs.tag_part_flow_uo_phasedisch_method_disch
+tag_part_flow_method_disch = "instr (method col) disch"
 """Tag for a flowsheet component for a unit operation phase discharging: Instruction (method colum) for discharging."""
-tag_part_flow_content_disch = defs.tag_part_flow_uo_phasedisch_content_disch
+tag_part_flow_content_disch = "action (content col) disch"
 """Tag for a flowsheet component for a unit operation phase discharging: Description of action (content column) for discharging"""
-tag_part_flow_chk_discharged = defs.tag_part_flow_uo_phasedisch_chk_discharged
+tag_part_flow_chk_discharged = "check box phase discharged"
 """Tag for a flowsheet component for a unit operation phase discharging: check box for the completion of the phase discharging"""
-dict_part_flow = defs.dict_jp_part_flow_uo_phasedisch
+
+dict_jp_part_flow:dict[str, str]={tag_part_flow_method_connection : "ライン構築",
+                                  tag_part_flow_chk_connected : "□ ライン構築確認",
+                                  tag_part_flow_method_disch : "下層排出",
+                                  tag_part_flow_content_disch : "排出実施", 
+                                  tag_part_flow_chk_discharged : "□ 実施確認"}
+
+dict_part_flow = dict_jp_part_flow
 """Language dictionary for flowsheet parts for the unit operation phase discharging"""
 
                     #>>>>>>>>>>>>> Sentences <<<<<<<<<<<<<<<<<<<<<<<<<
 
-tag_stc_origin = defs.tag_stc_uo_phasedisch_origin
+tag_stc_origin = "sentence origin"
 """A tag for an instruction sentence for a unit operation phase discharging: sentence to designate the origon vessel of the discharged phase, includes placeholder {origin}"""
-tag_stc_via = defs.tag_stc_uo_phasedisch_via
+tag_stc_via = "sentence via"
 """A tag for an instruction sentence for a unit operation phase discharging: sentence to designate the way point, e.g., multiplexer, includes placeholder {via}"""
-tag_stc_destin_single = defs.tag_stc_uo_phasedisch_destin_single
+tag_stc_destin_single = "sentence single destination"
 """A tag for an instruction sentence for a unit operation phase discharging: sentence to designate the destination, includes placeholder {destination}"""
-tag_stc_destin_multi = defs.tag_stc_uo_phasedisch_destin_multi
+tag_stc_destin_multi = "sentence multiple destination"
 """A tag for an instruction sentence for a unit operation phase discharging: sentence to designate multiple destinations, includes placeholder {destination}--singular!"""
-dict_stcs = defs.dict_jp_stcs_uo_phasedisch
+
+dict_jp_stcs = {tag_stc_origin : "移送元: {origin}",
+                tag_stc_via : "経由: {via}",
+                tag_stc_destin_single : "移送先: {destination}",
+                tag_stc_destin_multi : "移送先: {destination} (使用したものを〇)"}
+
+dict_stcs = dict_jp_stcs
 """Japanese language dictionary for instruction sentences for the unit operation phase discharging"""
 
 #########################################################
@@ -163,16 +180,52 @@ class PhaseDisch(uo.UnitOperation, uo_tag=defs.tag_uo_phase_disch):
         for _, subitem in df.iterrows():
             if not pd.isna(subitem[hedr_destin]):
                 self.destin.append(subitem[hedr_destin])
-            
-
-
 
     def get_detail_header(self) -> list[str]:
         return list_hedr
 
     def get_detail_option_menu(self) -> Optional[dict[str, list[str]]]:
         return None
-    
+
+    def get_json_schema(caller: trdef.UniversalTrait=None)->Objason:
+        common_schema:list[Primitive] = PhaseDisch.json_common()
+        origin = Primitive(prim_type='string',
+                           key=hedr_origin,
+                           description='Origin vessel of the discharged process liquied. If not specified in the data source, please put <placeholder>.',
+                           )
+        via = Primitive(prim_type='string',
+                        key=hedr_via,
+                        description='Way point of the discharged process liquied, e.g., multiplexer. Nullable if not specified in the data source. '
+                        'If not specified in the data source, please put <placeholder>.',
+                        nullable=True,
+                        required = True)
+        single_destin = Primitive(prim_type='string',
+                                  key=key_json_single_destin,
+                                  description='Destination of the discharged process liquied. E.g., waste tank, etc.'
+                                  'Multiple destinations are allowed, as well as a sole destination. '
+                                  'If not specified in the data source, please put <placeholder>.',
+                                  nullable=False,
+                                  required=True)
+        
+        destin = Array(key=hedr_destin,
+                       content=single_destin,
+                       description=f'An array of destination(s) {key_json_single_destin} of the discharged process liquied. E.g., waste tank, etc.',
+                       nullable=False,
+                       required=True)
+        
+        obj_schema = Objason(key = PhaseDisch.uo_tag,
+                            description = 'Unit operation: phase discharge',
+                            props = common_schema + [origin, via, destin],
+                            nullable = False)
+        return obj_schema
+
+    def load_from_json_dict(self, json_dict: dict[str, any]):
+        super().load_from_json_dict(json_dict)
+        self.origin = json_dict.get(hedr_origin, None)
+        self.via = json_dict.get(hedr_via, None)
+        self.destin = json_dict.get(hedr_destin, [])
+
+        
     def output_unit_operation(self):
         self.flowsheet.header_organizer(op_nr=self.operation_seq, title=lang_dict_uo_titles[self.uo_tag])
         if not (self.pre_comment == None or self.pre_comment == ''):
