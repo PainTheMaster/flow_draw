@@ -4,6 +4,7 @@
 import pandas as pd
 import flow_draw.definitions as defs
 import flow_draw.data_io.flowsheet as fsht
+import warnings
 from typing import Optional
 from flow_draw.batch.process.unit_operations import unit_operation as uo
 from flow_draw.data_io import process_io as procio
@@ -11,6 +12,7 @@ from flow_draw.materials import materials as mats
 from flow_draw.trait_def import trait_def as trdef
 #from flow_draw.trait_def.trait_def import GetMats
 from flow_draw.data_io.json_io import Objason, Array, Primitive
+
 
 
 
@@ -357,7 +359,8 @@ class TempControl(uo.UnitOperation, uo_tag=defs.tag_uo_tempr_ctrl):
             if not pd.isna(first_row[hedr_prog_time_unit]):
                 self.time_unit_prog = first_row[hedr_prog_time_unit]
             else:
-                raise RuntimeWarning(f"{self.__class__.__name__}: Op. Seq. {self.operation_seq} temperature control: Ramp time for programme heating/cooling defined, but its unit (min, hour, etc) not selected in the form.")
+                warnings.warn(message=f"{self.__class__.__name__}: Op. Seq. {self.operation_seq} temperature control: Ramp time for programme heating/cooling defined, but its unit (min, hour, etc) not selected in the form.",
+                              category = RuntimeWarning)
                 
         self.endpoint_check = (first_row[hedr_endpoint_check] == opt_yes)
         """first_row[hedr_endpoint_check] shall has a value of 'Yes', 'No', NaN or something else. Only 'Yes' is regarded as the affirmative choice."""

@@ -10,7 +10,7 @@ from flow_draw.data_io import process_io as procio
 from flow_draw.materials import materials as mats
 from flow_draw.trait_def import trait_def as trdef
 #from flow_draw.trait_def.trait_def import GetMats
-
+from flow_draw.data_io.json_io import Objason, Array, Primitive
 
 
 #########################################################
@@ -262,13 +262,13 @@ class Transfer(uo.UnitOperation, uo_tag=defs.tag_uo_transfer):
             self.flowsheet.put_body_comments(self.pre_comment)
             self.flowsheet.linefeed()        
             
-        self.put_setup()
+        self.__put_setup()
 
         if not (self.post_comment == None or self.post_comment == ''):
             self.flowsheet.put_body_comments(self.post_comment)
             self.flowsheet.linefeed()
     
-    def put_setup(self):
+    def __put_setup(self):
         col_content:list[str] = []
         use_filter:bool = (self.typ_filter is not None)
         col_rec:list[str] = [None]
@@ -304,7 +304,45 @@ class Transfer(uo.UnitOperation, uo_tag=defs.tag_uo_transfer):
                                     record=col_rec[i])
         
         self.flowsheet.linefeed()
-                               
+
+    def get_json_schema(caller: trdef.UniversalTrait=None)->Objason:
+        common_schema:list[Primitive] = Transfer.json_common()
+        instruction_type = Primitive(prim_type='string',
+                                   key = hedr_operation,
+                                   description='This variable is to keep the type of the instruction'
+                                   f'"{opt_operation_setup}" means just setting up the transfer line is expected in this step. '
+                                   f'"{opt_operation_transfer}" the trasfer itself is needed together with the setting up. '
+                                   'This is an mandatory field.',
+                                   enum=list_opt_operation,
+                                   nullable=False,
+                                   required=True
+                                   )
+        origin = Primitive(prim_type='string',
+                           key=hedr_origin,
+                           description='The origin of the process solution or slurry. This is a mandatory field. '
+                           'If the name/ID of the origin vessel cannot be extracted from the data source, please put "<placeholder>" for editing later.',
+                           nullable=False,
+                           required=True)
+        via = Primitive(prim_type='string',
+                        key = hedr_via,
+                        description='The way point of the process liquid or slurry. This is an optional field and nullable.',
+                        nullable=True,
+                        required=True)
+        destin = Primitive(prim_type='string',
+                           key =hedr_destin,
+                           description='Destination vessel, waste stream, etc of the process liquid/slurry. '
+                           'Since any kinds of transfer operation has its destination by definition, this is a mandatory non-nullable field. '
+                           'If no god piece of information cannot be extracted from the data source, please put "<placeholder>" for editing later on.',
+                           nullable=False,
+                           required=True)
+        filter = Primitive(prim_type='string',
+                           key = hedr_filter_typ,
+                           description='The type of the filter used amid the transfer. '
+                           'Normally, transfer through a polishing filter is required on the final (wet) stage of an API synthesis to remove any potential dusts and foreing matters. '
+                           'This is an optional field and nullable. ',
+                           nullable=True,
+                           required=True)
+
 
     @classmethod
     def generate_test_df(cls,
