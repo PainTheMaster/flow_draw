@@ -335,13 +335,27 @@ class Transfer(uo.UnitOperation, uo_tag=defs.tag_uo_transfer):
                            'If no god piece of information cannot be extracted from the data source, please put "<placeholder>" for editing later on.',
                            nullable=False,
                            required=True)
-        filter = Primitive(prim_type='string',
+        filter_typ = Primitive(prim_type='string',
                            key = hedr_filter_typ,
                            description='The type of the filter used amid the transfer. '
                            'Normally, transfer through a polishing filter is required on the final (wet) stage of an API synthesis to remove any potential dusts and foreing matters. '
                            'This is an optional field and nullable. ',
                            nullable=True,
                            required=True)
+        obj_transf = Objason(key=Transfer.uo_tag,
+                             props=common_schema+[instruction_type, origin, via, destin, filter_typ],
+                             description='This is a unit operation to set up a transfer line and/or to transfer a process solution or slurry from an origin vessel '
+                             'to a destination vessel, waste stream, etc.')
+        return obj_transf
+
+
+    def load_from_json_dict(self, json_dict: dict[str, any]):
+        super().load_from_json_dict(json_dict)
+        self.operation = json_dict.get(hedr_operation, None)
+        self.origin = json_dict.get(hedr_origin, None)
+        self.via = json_dict.get(hedr_via, None)
+        self.destination = json_dict.get(hedr_destin, None)
+        self.filter_typ = json_dict.get(hedr_filter_typ, None)
 
 
     @classmethod
