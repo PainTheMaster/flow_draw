@@ -18,6 +18,7 @@ import flow_draw.batch.process.unit_operations.uo_transfer as trsf
 import flow_draw.batch.process.unit_operations.uo_filtration as filt
 import flow_draw.batch.process.unit_operations.uo_sampling as smplng
 import flow_draw.batch.process.unit_operations.uo_filter_setup as fltsup
+import flow_draw.batch.process.unit_operations.uo_drying as drying
 import flow_draw.data_io.flowsheet  as fsht
 import flow_draw.materials.materials as mats
 import flow_draw.trait_def.trait_def as trdef
@@ -1033,49 +1034,77 @@ class FiltSetupTest4400(unittest.TestCase, trdef.UniversalTrait):
         self.assertTrue(True)
 
 
+class DryingTest4500(unittest.TestCase, trdef.GetProcName):
+    def __init__(self, methodName = "runTest"):
+        super().__init__(methodName)
+
+    def setUp(self):
+        self.flowsheet = fsht.Flowsheet()
+
+    def get_proc_name(self)->str:
+        return "TestProc4500"
+    
+    def test_4500_full(self):
+        test_inst = drying.Drying(caller=self,
+                                    flowsheet=self.flowsheet,
+                                    operation_seq=1,
+                                    num_subitems=1,
+                                    edit_comment="This is a comment for test 4500.")
+        """
+            def generate_test_df(cls,
+                         precomment:str=None,
+                         postcomment:str=None,
+                         Tj_ctrl_cat:Literal["Tj_ctrl_spec", "Tj_ctrl_arbitrary", "Tj_ctrl_guide"]=None,
+                         Tj_low:float=None,
+                         Tj_high:float=None,
+                         Tbr_high:float=None,
+                         Tbr_low:float=None,
+                         mode_vac:Literal["arbitrary", "range", "full_vacuum"]=None,
+                         pres_low:float=None,
+                         pres_high:float=None,
+                         intermission:Literal["Yes", "No"]="Yes",
+                         test_cat:Literal["ipc", "monit_no_tgt", "monit_with_tgt", None]=None,
+                         test_item:str=None,
+                         test_val_tgt_criterion:float=None,
+                         test_unit_val:str=None)->pd.DataFrame:
+        """
+        df = drying.Drying.generate_test_df(precomment="Pre-comment for test-4500",
+                                            postcomment="Post-comment for test-4500",
+                                            Tj_ctrl_cat="Tj_ctrl_arbitrary",
+                                            Tj_low=50.0,
+                                            Tj_high=80.0,
+                                            Tbr_low=-20.0,
+                                            Tbr_high=5.0,
+                                            mode_vac="range",
+                                            pres_low=0.0,
+                                            pres_high=0.05,
+                                            intermission="Yes",
+                                            test_cat="ipc",
+                                            test_item="KF",
+                                            test_val_tgt_criterion=5.0,
+                                            test_unit_val="%")
+        drying.Drying.add_to_test_df(df=df,
+                                     test_cat="monit_with_tgt",
+                                     test_item="THF",
+                                     test_val_tgt_criterion=100,
+                                     test_unit_val="ppm")
+        drying.Drying.add_to_test_df(df=df,
+                                     test_cat="monit_no_tgt",
+                                     test_item="pH")
+
+        test_inst.load_params_from_df(df)
+        test_inst.output_unit_operation()
+        self.flowsheet.save("Test_4500_drying_full.xlsx")
+        self.assertTrue(True)
+
+
 
 
 def suite_0000_40000():
     
     suite = unittest.TestSuite()
-    # suite.addTest(UnitOperationOutputTest("test_1001_placeholder"))
-    #For the 2nd and likewise.... suite.addTest("something here")
-    # suite.addTest(UnitOperationOutputTest("test_1004_temp_ctrl_prog_mode"))
-    # suite.addTest(UnitOperationOutputTest("test_1005_temp_ctrl_TiTj_mode"))
-    # suite.addTest(UnitOperationOutputTest("test_1006_temp_ctrl_Tj_mode"))
-    # suite.addTest(UnitOperationOutputTest("test_1007_temp_ctrl_Ti_mode"))
-    # suite.addTest(UnitOperationOutputTest("test_1008_agit_full"))
-    # suite.addTest(UnitOperationOutputTest("test_1009_agit_minimal"))
-    # suite.addTest(UnitOperationOutputTest("test_1010_settling_full"))
-    # suite.addTest(UnitOperationOutputTest("test_1011_settling_minimal"))
-    # suite.addTest(UnitOperationOutputTest("test_1012_phase_disch_full"))
-    # suite.addTest(UnitOperationOutputTest("test_1013_phase_disch_med"))
-    # suite.addTest(UnitOperationOutputTest("test_1014_phase_disch_minimal"))
-    # suite.addTest(AgitationTest2000("test_2001_press_discrepancy"))
-    # suite.addTest(AgitationTest2000("test_2002_no_press_unit"))
-    # suite.addTest(AgitationTest2000("test_2003_no_evap_endpoint"))
-    # suite.addTest(AgitationTest2000("test_2004_minimum_datasets"))
-    # suite.addTest(CIPTest3000("test_3000_full_datasets"))
-    # suite.addTest(CIPTest3000("test_3001_minimum_datasets"))
-    # suite.addTest(TransfTest4100("test_4100_fullset"))
-    # suite.addTest(TransfTest4100("test_4101_no_via"))
-    # suite.addTest(TransfTest4100("test_4102_minimum"))
-    # suite.addTest(TransfTest4100("test_4103_err_no_operation"))
-    # suite.addTest(TransfTest4100("test_4104_err_no_destin"))
-    # suite.addTest(FiltTest4200("test_4201_filt_full"))
-    # suite.addTest(FiltTest4200("test_4202_filt_p_max"))
-    # suite.addTest(FiltTest4200("test_4203_filt_min"))
-    # suite.addTest(FiltTest4200("test_4204_no_equip"))
-    # suite.addTest(FiltTest4200("test_4205_no_p_unit"))
-    # suite.addTest(samplingTest4300("test_4301_full"))
-    # suite.addTest(SamplingTest4300("test_4302_ipc_only"))
-    # suite.addTest(SamplingTest4300("test_4303_monit_only"))
-    # suite.addTest(SamplingTest4300("test_4304_noname_err"))
-    # suite.addTest(SamplingTest4300("test_4305_no_ipc_crteria"))
-    # suite.addTest(SamplingTest4300("test_4306_ipc_item_unit_mismatch"))
-    # suite.addTest(SamplingTest4300("test_4307_ipc_criteria_item_mismatch"))
-    # suite.addTest(SamplingTest4300("test_4308_monit_item_unit_mismatch"))
-    suite.addTest(FiltSetupTest4400("test_4400_full"))
+    #suite.addTest(FiltSetupTest4400("test_4400_full"))
+    suite.addTest(DryingTest4500("test_4500_full"))
 
 
     return suite
