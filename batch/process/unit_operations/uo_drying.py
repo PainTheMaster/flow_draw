@@ -784,7 +784,7 @@ class Drying(uo.UnitOperation, uo_tag=defs.tag_uo_drying):
         df.at[df.index[0], hedr_test_cat]=test_cat
         df.at[df.index[0], hedr_test_item]=test_item
         df.at[df.index[0], hedr_test_val_tgt_criterion]=test_val_tgt_criterion
-        df.at[df.index[0], hedr_test_unit_val]=test_unit_val
+        df.at[df.index[0], hedr_test_unit]=test_unit_val
 
         return df
     
@@ -802,7 +802,7 @@ class Drying(uo.UnitOperation, uo_tag=defs.tag_uo_drying):
         df.at[row, hedr_test_cat]=test_cat
         df.at[row, hedr_test_item]=test_item
         df.at[row, hedr_test_val_tgt_criterion]=test_val_tgt_criterion
-        df.at[row, hedr_test_unit_val]=test_unit_val
+        df.at[row, hedr_test_unit]=test_unit_val
 
         return df
 
