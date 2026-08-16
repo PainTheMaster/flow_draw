@@ -351,7 +351,7 @@ class Sampling(uo.UnitOperation, uo_tag=defs.tag_uo_sampling):
         
         arr_samples = Array(key=key_json_arr_samples,
                             content=single_sample,
-                            description="An array of samples belonging to one sampling block and the necessary monitoring and/or IPC requirements associateid with them.",
+                            description="An array of samples belonging to one sampling block and the necessary monitoring and/or IPC requirements associated with them.",
                             required=True,
                             nullable=True)
 

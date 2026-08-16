@@ -422,23 +422,23 @@ class Drying(uo.UnitOperation, uo_tag=defs.tag_uo_drying):
 
     def get_detail_option_menu(self) -> Optional[dict[str, list[str]]]:
         return dict_opt
-    
-    def get_json_schema(cls, caller: type[trdef.UniversalTrait]=None)->Objason:
-        common_schema:list[Primitive] = cls.json_common()
+
+    def get_json_schema(caller: type[trdef.UniversalTrait]=None)->Objason:
+        common_schema:list[Primitive] = Drying.json_common()
         Tj_ctrl_cat:Primitive = Primitive(prim_type="string",
                                           key=hedr_Tj_ctrl_cat,
                                           description=f'The category of the filter dryer jacket temperature control. '
                                           f'Options are "{opt_Tj_ctrl_cat_spec}", "{opt_Tj_ctrl_cat_guide}", and "{opt_Tj_ctrl_cat_arbitrary}". '
                                           f'"{opt_Tj_ctrl_cat_spec}": The jacket temperature has to be kept within the range specified by "{hedr_Tj_low}" and/or "{hedr_Tj_high}", strictly GMP-wise. '
                                           f'"{opt_Tj_ctrl_cat_guide}": The temperature is controlled according to a non-binding guidance indicated by "{hedr_Tj_low}" and/or "{hedr_Tj_high}". '
-                                          f'"{opt_Tj_ctrl_cat_arbitrary}": The temperature can be arbitrarily controlled by the operator on the shop floor. ',
+                                          f'"{opt_Tj_ctrl_cat_arbitrary}": The temperature can be arbitrarily controlled by the operator on the shop floor.',
                                           enum=list_opt_Tj_ctrl_cat
                                           )
         Tj_low:Primitive = Primitive(prim_type="number",
                                      key=hedr_Tj_low,
                                      description=f'The lower limit of the jacket temperature. '
                                      f'If "{hedr_Tj_ctrl_cat}" is "{opt_Tj_ctrl_cat_spec}" or "{opt_Tj_ctrl_cat_guide}", '
-                                     f'at least one of this value or "{hedr_Tj_high}" is mandatory. Nullable, otherwise. The unit is in degree Celsius.'
+                                     f'at least one of this value or "{hedr_Tj_high}" is mandatory. Nullable, otherwise. The unit is in degree Celsius. '
                                      f'If a guideline value is given as a single point, please put it in both "{hedr_Tj_low}" and "{hedr_Tj_high}".',
                                      nullable=True,
                                      required=True)
@@ -446,14 +446,14 @@ class Drying(uo.UnitOperation, uo_tag=defs.tag_uo_drying):
                                       key=hedr_Tj_high,
                                       description=f'The upper limit of the jacket temperature. '
                                       f'If "{hedr_Tj_ctrl_cat}" is "{opt_Tj_ctrl_cat_spec}" or "{opt_Tj_ctrl_cat_guide}", '
-                                      f'at least one of this value or "{hedr_Tj_low}" is mandatory. Nullable, otherwise. The unit is in degree Celsius.'
+                                      f'at least one of this value or "{hedr_Tj_low}" is mandatory. Nullable, otherwise. The unit is in degree Celsius. '
                                       f'If a guideline value is given as a single point, please put it in both "{hedr_Tj_low}" and "{hedr_Tj_high}".',
                                       nullable=True,
                                       required=True)
         Tbr_low:Primitive = Primitive(prim_type="number",
                                       key=hedr_Tbr_low,
                                       description='The lower limit of the condenser brine temperature. '
-                                      'Nullable if not specified in the data source. The unit is in degree Celsius. ',
+                                      'Nullable if not specified in the data source. The unit is in degree Celsius.',
                                       nullable=True,
                                       required=True)
         Tbr_high:Primitive = Primitive(prim_type="number",
@@ -466,9 +466,9 @@ class Drying(uo.UnitOperation, uo_tag=defs.tag_uo_drying):
                                        key=hedr_mode_vac,
                                        description=f'The mode of vacuum for the drying operation. Options are "{opt_mode_vac_arbitrary}", "{opt_mode_vac_range}", and "{opt_mode_vac_full_vacuum}". '
                                        f'"{opt_mode_vac_arbitrary}": The vacuum can be arbitrarily controlled by the operator on the shop floor. '
-                                       f'"{opt_mode_vac_range}": The vacuum has to be kept within the range specified by "{hedr_pres_low}" and/or "{hedr_pres_high}".'
-                                       f'"{opt_mode_vac_full_vacuum}": The vacuum has to be kept at full vacuum.'
-                                       'If no specification is found in the data source, please select "{opt_mode_vac_full_vacuum}" as the default.',
+                                       f'"{opt_mode_vac_range}": The vacuum has to be kept within the range specified by "{hedr_pres_low}" and/or "{hedr_pres_high}". '
+                                       f'"{opt_mode_vac_full_vacuum}": The vacuum has to be kept at full vacuum. '
+                                       f'If no specification is found in the data source, please select "{opt_mode_vac_full_vacuum}" as the default.',
                                        enum=list_opt_mode_vac,
                                        nullable=False,
                                        required=True)
@@ -510,7 +510,7 @@ class Drying(uo.UnitOperation, uo_tag=defs.tag_uo_drying):
                                        description=f'The test category for the drying operation. Options are "{opt_test_cat_ipc}", "{opt_test_cat_monit_with_tgt}", and "{opt_test_cat_monit_no_tgt}". '
                                        f'"{opt_test_cat_ipc}": In-Process Control (IPC) with a test item name and a criterion. '
                                        f'"{opt_test_cat_monit_with_tgt}": Monitoring with target criterion with an item name, a target value, and a unit. '
-                                       f'"{opt_test_cat_monit_no_tgt}": Monitoring without target criterion with an item name. ',                                       
+                                       f'"{opt_test_cat_monit_no_tgt}": Monitoring without target criterion with an item name.',                                       
                                        enum=list_opt_test_cat,
                                        nullable=False,
                                        required=True)
@@ -519,10 +519,11 @@ class Drying(uo.UnitOperation, uo_tag=defs.tag_uo_drying):
                                         description='The test item name for the drying operation.',
                                         nullable=False,
                                         required=True)
-        test_val_tgt_criterion:Primitive = Primitive(prim_type='number',
+        test_val_tgt_criterion:Primitive = Primitive(prim_type=['number', 'string'],
                                                     key=hedr_test_val_tgt_criterion,
                                                     description='The target value or the criterion for the test item for the drying operation. '
-                                                    f'if "{hedr_test_cat}" is "{opt_test_cat_ipc}" or "{opt_test_cat_monit_with_tgt}", this value is mandatory. Nullable, otherwise.',
+                                                    f'If "{hedr_test_cat}" is "{opt_test_cat_ipc}" or "{opt_test_cat_monit_with_tgt}", this value is mandatory. Nullable, otherwise. '
+                                                    'Please return the value in "number" type in lieu of "string" type as far as possible.',
                                                     nullable=True,
                                                     required=True)
         test_unit_val:Primitive = Primitive(prim_type='string',
@@ -534,10 +535,10 @@ class Drying(uo.UnitOperation, uo_tag=defs.tag_uo_drying):
                                    props=[test_cat, test_item, test_val_tgt_criterion, test_unit_val],
                                    description='The JSON object for the test description for the drying operation.')
         arr_test:Array = Array(key=key_json_arr_test,
-                               items=obj_test,
-                               description='The JSON array for the list of test description for the drying operation.'
+                               content=obj_test,
+                               description='The JSON array for the list of test description for the drying operation. '
                                'Normally, multiple test items of various categories are possible for a drying operation.')
-        obj_drying:Objason = Objason(key=cls.uo_tag,
+        obj_drying:Objason = Objason(key=Drying.uo_tag,
                                     props=common_schema+[Tj_ctrl_cat,
                                                           Tj_low, Tj_high,
                                                           Tbr_low, Tbr_high,
@@ -548,16 +549,35 @@ class Drying(uo.UnitOperation, uo_tag=defs.tag_uo_drying):
                                     description='The JSON object for the drying operation.',
                                     )
         return obj_drying
-
-
-        
-        
         
 
 
     def load_from_json_dict(self, json_dict: dict[str, any]):
         super().load_from_json_dict(json_dict)
-        pass
+        self.Tj_ctrl_cat = json_dict.get(hedr_Tj_ctrl_cat, opt_Tj_ctrl_cat_arbitrary)
+        self.Tj_low = json_dict.get(hedr_Tj_low, None)
+        self.Tj_high = json_dict.get(hedr_Tj_high, None)
+        self.Tbr_low = json_dict.get(hedr_Tbr_low, None)
+        self.Tbr_high = json_dict.get(hedr_Tbr_high, None)
+        self.mode_vac = json_dict.get(hedr_mode_vac, opt_mode_vac_full_vacuum)
+        self.pres_low = json_dict.get(hedr_pres_low, None)
+        self.pres_high = json_dict.get(hedr_pres_high, None)
+        self.rpm_min = json_dict.get(hedr_rpm_min, None)
+        self.rpm_max = json_dict.get(hedr_rpm_max, None)
+        self.intermission = (json_dict.get(hedr_intermission, opt_no) == opt_yes)
+        list_test: list[dict[str, any]] = json_dict.get(key_json_arr_test, [])
+        for test_dict in list_test:
+            test_item:TestDescription = TestDescription(test_cat=test_dict.get(hedr_test_cat, None),
+                                                        test_item=test_dict.get(hedr_test_item, None),
+                                                        test_val_tgt_criterion=test_dict.get(hedr_test_val_tgt_criterion, None),
+                                                        test_unit_val=test_dict.get(hedr_test_unit, None))
+            if test_item.test_cat == opt_test_cat_ipc:
+                self.list_ipc.append(test_item)
+            elif test_item.test_cat == opt_test_cat_monit_with_tgt:
+                self.list_monit_with_tgt.append(test_item)
+            elif test_item.test_cat == opt_test_cat_monit_no_tgt:
+                self.list_monit_no_tgt.append(test_item)
+            
 
     def output_unit_operation(self):
         self.flowsheet.header_organizer(op_nr=self.operation_seq, title=lang_dict_uo_titles[self.uo_tag])
@@ -810,5 +830,5 @@ class TestDescription:
     def __init__(self, test_cat:str=None, test_item:str=None, test_val_tgt_criterion:float=None, test_unit_val:str=None):
         self.test_cat:str = test_cat
         self.test_item:str = test_item
-        self.test_val_tgt_criterion:float = test_val_tgt_criterion
+        self.test_val_tgt_criterion:float|str = test_val_tgt_criterion
         self.test_unit_val:str = test_unit_val

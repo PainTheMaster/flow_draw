@@ -62,10 +62,10 @@ tag_uo_line_clearance: str = "line_clearance"
 part_uo_title_clearance_jp = "ラインクリアランス"
 """JP expression of line clearance"""
 
-tag_uo_innert_replace: str = "innert_gas_placement"
-"""Tag for an unit operation N2 replacement"""
-part_uo_title_innert_replace_jp = "減圧不活性ガス置換"
-"""JP expression of N2 replacement"""
+tag_uo_inert_replace: str = "inert_gas_replacement"
+"""Tag for an unit operation inert gas replacement"""
+part_uo_title_inert_replace_jp = "減圧不活性ガス置換"
+"""JP expression of inert gas replacement"""
 
 tag_uo_tempr_ctrl: str = "temp_control"
 """Tag for an unit operation for temperature control"""
@@ -164,7 +164,7 @@ part_uo_title_placeholder = "<Op._place_holder>"
 """JP expression of place holder"""
 
 dict_jp_part_uo_titles = {tag_uo_line_clearance : part_uo_title_clearance_jp,
-                          tag_uo_innert_replace : part_uo_title_innert_replace_jp,
+                          tag_uo_inert_replace : part_uo_title_inert_replace_jp,
                           tag_uo_tempr_ctrl : part_uo_title_tempr_ctrl_jp,
                           tag_uo_charging : part_uo_title_charging_jp,
                           tag_uo_agitation : part_uo_title_agitation_jp,
@@ -436,35 +436,35 @@ list_hedr_uo_lnclrnc = [hedr_uo_lnclrnc_sop]
 
 
 ######################################################
-##  INNERT REPLACEMENT HEADER ITEMS AND OPTIONS     ##
+##  INERT REPLACEMENT HEADER ITEMS AND OPTIONS     ##
 ######################################################
 
                         #>>>>>>>>>>Detail table header items and list thereof <<<<<<<<<<<<<<
 
-hedr_uo_innert_gas = "Innert_Gas"
-"""Detail header item: Innert gas used for replacement"""
-hedr_uo_innert_neg_press = "Negative_Press(MPaG)"
-"""Detail header item: Negative pressure before innert gas compensation"""
-hedr_uo_innert_num_repeat = "Repetition"
+hedr_uo_inert_gas = "Inert_Gas"
+"""Detail header item: Inert gas used for replacement"""
+hedr_uo_inert_neg_press = "Negative_Press(MPaG)"
+"""Detail header item: Negative pressure before inert gas compensation"""
+hedr_uo_inert_num_repeat = "Repetition"
 """Detail header item: Times the replacement (vaccum then compensation) repeated"""
-list_hedr_uo_innert = [hedr_uo_innert_gas, hedr_uo_innert_neg_press, hedr_uo_innert_num_repeat]
-"""Detail header list: List of header items for detail input form for innert gas relacement"""
+list_hedr_uo_inert = [hedr_uo_inert_gas, hedr_uo_inert_neg_press, hedr_uo_inert_num_repeat]
+"""Detail header list: List of header items for detail input form for inert gas replacement"""
 
 
         #>>>>>>>>>>Option items, lists, and a dictionary for drop-down list in detail input form<<<<<<<<<<<<<<
 
-opt_uo_innert_gas_N2 = "N2"
-"""Drop-down option item: choice of gas for innertization. Nitrogen gas"""
-opt_uo_innert_gas_Ar = "Ar"
-"""Drop-down option item: choice of gas for innertization. Argon gas"""
-opt_uo_innert_gas_plchldr = "(placeholder)"
-"""Drop-down option item: choice of gas for innertization. Placeholer"""
-list_opt_uo_innert_gas = [opt_uo_innert_gas_N2,
-                          opt_uo_innert_gas_Ar,
-                          opt_uo_innert_gas_plchldr]
+opt_uo_inert_gas_N2 = "N2"
+"""Drop-down option item: choice of gas for inertization. Nitrogen gas"""
+opt_uo_inert_gas_Ar = "Ar"
+"""Drop-down option item: choice of gas for inertization. Argon gas"""
+opt_uo_inert_gas_plchldr = "(placeholder)"
+"""Drop-down option item: choice of gas for inertization. Placeholder"""
+list_opt_uo_inert_gas = [opt_uo_inert_gas_N2,
+                          opt_uo_inert_gas_Ar,
+                          opt_uo_inert_gas_plchldr]
 """List for a drop-down list in the detail input table"""
 
-dict_opt_uo_innert = {hedr_uo_innert_gas : list_opt_uo_innert_gas}
+dict_opt_uo_inert = {hedr_uo_inert_gas : list_opt_uo_inert_gas}
 """Dictionary for drop-down lists in detail input form"""
 
 ######################################################
@@ -982,38 +982,38 @@ dict_jp_stcs_flow_lnclrnc = {tag_stc_flow_lnclrnc_instr : stc_flow_lnclrnc_instr
 
 
 ###################################################
-#        PARTS FOR INNERT_REPLACEMENT             #
+#        PARTS FOR INERT_REPLACEMENT             #
 ###################################################
 
-        #>>>>>>>>>>>>>> flowsheet compoentns in local language and tags (keys) thereof <<<<<<<<<<<<<<<<<<<
+        #>>>>>>>>>>>>>> flowsheet components in local language and tags (keys) thereof <<<<<<<<<<<<<<<<<<<
 #sets of:
 #tag_part_flow_<unit operation>_<sort: instr, rec, mthod, etc>_<descr> = str
 #part_flow_<unit operation>_<sort: instr, rec, mthod, etc>_<descr>_<lang> = str
 #Follwed by 
 #dict_<lang>_part_flow_<unit operation> = {<tag> : <component loc. lang>}
-tag_part_flow_uo_innert_gas_N2 = opt_uo_innert_gas_N2
+tag_part_flow_uo_inert_gas_N2 = opt_uo_inert_gas_N2
 """Tag for replacing gas N2 on the flowsheet"""
-part_flow_uo_innert_gas_N2_jp = "窒素"
+part_flow_uo_inert_gas_N2_jp = "窒素"
 """Flow sheet part Nitorgen"""
-tag_part_flow_uo_innert_gas_Ar = opt_uo_innert_gas_Ar
+tag_part_flow_uo_inert_gas_Ar = opt_uo_inert_gas_Ar
 """Tag for replacing gas argon on the flowsheet"""
-part_flow_uo_innert_gas_Ar_jp = "アルゴン"
+part_flow_uo_inert_gas_Ar_jp = "アルゴン"
 """Flow sheet part argon"""
-tag_part_flow_uo_innert_gas_plchldr = opt_uo_innert_gas_plchldr
+tag_part_flow_uo_inert_gas_plchldr = opt_uo_inert_gas_plchldr
 """Tag for replacing gas placeholder on the flowsheet"""
-part_flow_uo_innert_gas_plchldr_jp = "<gas: placeholder>"
+part_flow_uo_inert_gas_plchldr_jp = "<gas: placeholder>"
 """Flow sheet part placeholder"""
 
-tag_part_flow_uo_innert_rplace_complete = "replacement_complete"
-"""tag for innert gas replacement complete check-box"""
-part_flow_uo_innert_rplace_complete_jp = "□ 置換実施"
-"""Flow sheet part for innert gas replacement complete check-box"""
+tag_part_flow_uo_inert_rplace_complete = "replacement_complete"
+"""tag for inert gas replacement complete check-box"""
+part_flow_uo_inert_rplace_complete_jp = "□ 置換実施"
+"""Flow sheet part for inert gas replacement complete check-box"""
 
-dict_jp_part_flow_uo_innert = {tag_part_flow_uo_innert_gas_N2 : part_flow_uo_innert_gas_N2_jp,
-                                tag_part_flow_uo_innert_gas_Ar : part_flow_uo_innert_gas_Ar_jp,
-                                tag_part_flow_uo_innert_gas_plchldr : part_flow_uo_innert_gas_plchldr_jp,
-                                tag_part_flow_uo_innert_rplace_complete : part_flow_uo_innert_rplace_complete_jp}
-"""JP language dictionary for flowsheet parts for the unit operation innert gas replacement"""
+dict_jp_part_flow_uo_inert = {tag_part_flow_uo_inert_gas_N2 : part_flow_uo_inert_gas_N2_jp,
+                                tag_part_flow_uo_inert_gas_Ar : part_flow_uo_inert_gas_Ar_jp,
+                                tag_part_flow_uo_inert_gas_plchldr : part_flow_uo_inert_gas_plchldr_jp,
+                                tag_part_flow_uo_inert_rplace_complete : part_flow_uo_inert_rplace_complete_jp}
+"""JP language dictionary for flowsheet parts for the unit operation inert gas replacement"""
 
 
 
@@ -1023,11 +1023,11 @@ dict_jp_part_flow_uo_innert = {tag_part_flow_uo_innert_gas_N2 : part_flow_uo_inn
 #dict_<lang>_stcs_<unit operation> = {tag : sentence}
 """Language dictionary for instruction SENTENCES with place holders 'min' and/or 'max'. Use str.format()"""
 
-tag_stc_flow_uo_innert_instr = "innert replacement instruction"
-"""Tag for the instruction sentence for innert gas replacement, the sentence has 3 placeholders: {press}, {gas}, {rep}"""
-stc_flow_uo_innert_instr_jp = "到達内圧目安:{press} MPaG, {gas}置換回数{rep}回"
-"""Instruction sentence for innert gas replacement"""
-dict_jp_stcs_uo_innert = {tag_stc_flow_uo_innert_instr : stc_flow_uo_innert_instr_jp}
+tag_stc_flow_uo_inert_instr = "inert replacement instruction"
+"""Tag for the instruction sentence for inert gas replacement, the sentence has 3 placeholders: {press}, {gas}, {rep}"""
+stc_flow_uo_inert_instr_jp = "到達内圧目安:{press} MPaG, {gas}置換回数{rep}回"
+"""Instruction sentence for inert gas replacement"""
+dict_jp_stcs_uo_inert = {tag_stc_flow_uo_inert_instr : stc_flow_uo_inert_instr_jp}
 
 
 

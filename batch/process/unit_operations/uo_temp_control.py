@@ -293,9 +293,9 @@ class TempControl(uo.UnitOperation, uo_tag=defs.tag_uo_tempr_ctrl):
         self.Ti_limit_high:float = None
         """Ti higher limit (instructed by the process owner)"""
         self.Ti_tgt_low:float = None
-        """Lower end of Ti target range (instructed by the process woner)"""
+        """Lower end of Ti target range (instructed by the process owner)"""
         self.Ti_tgt_high:float = None
-        """Higher end of Ti target range (instructed by the process woner)"""
+        """Higher end of Ti target range (instructed by the process owner)"""
         self.Tj_sp:float = None
         """Tj set point for Tj control mode"""
         self.Tj_limit_low:float = None
@@ -387,7 +387,7 @@ class TempControl(uo.UnitOperation, uo_tag=defs.tag_uo_tempr_ctrl):
         Ti_limit_low = Primitive(prim_type='number',
                                 key=hedr_Ti_limit_low,
                                 description=f'Ti lower limit (instructed by the process owner). '
-                                f'At leaset one of "{hedr_Ti_limit_low}" or "{hedr_Ti_limit_high}" must be provided if "{hedr_mode}" is "{opt_mode_TiTj}". '
+                                f'At least one of "{hedr_Ti_limit_low}" or "{hedr_Ti_limit_high}" must be provided if "{hedr_mode}" is "{opt_mode_TiTj}". '
                                 f'Both "{hedr_Ti_limit_low}" and "{hedr_Ti_limit_high}" must be provided if "{hedr_mode}" is "{opt_mode_prog}". '
                                 f'Optional and nullable if "{hedr_mode}" is "{opt_mode_Tj}" or "{opt_mode_Ti}". '
                                 'If the necessary data is not provided, please put 1000 as a dummy value for the time being.',
@@ -396,7 +396,7 @@ class TempControl(uo.UnitOperation, uo_tag=defs.tag_uo_tempr_ctrl):
         Ti_limit_high = Primitive(prim_type='number',
                                 key=hedr_Ti_limit_high,
                                 description=f'Ti upper limit (instructed by the process owner). '
-                                f'At leaset one of "{hedr_Ti_limit_low}" or "{hedr_Ti_limit_high}" must be provided if "{hedr_mode}" is "{opt_mode_TiTj}". '
+                                f'At least one of "{hedr_Ti_limit_low}" or "{hedr_Ti_limit_high}" must be provided if "{hedr_mode}" is "{opt_mode_TiTj}". '
                                 f'Both "{hedr_Ti_limit_low}" and "{hedr_Ti_limit_high}" must be provided if "{hedr_mode}" is "{opt_mode_prog}". '
                                 f'Optional and nullable if "{hedr_mode}" is "{opt_mode_Tj}" or "{opt_mode_Ti}". '
                                 'If the necessary data is not provided, please put 1000 as a dummy value for the time being.',
@@ -404,12 +404,12 @@ class TempControl(uo.UnitOperation, uo_tag=defs.tag_uo_tempr_ctrl):
                                 required=True)
         Ti_tgt_low = Primitive(prim_type='number',
                               key=hedr_Ti_tgt_low,
-                              description='Lower end of Ti target range (instructed by the process woner). Nullable, if no data is provided',
+                              description='Lower end of Ti target range (instructed by the process owner). Nullable, if no data is provided',
                               nullable=True,
                               required=True)
         Ti_tgt_high = Primitive(prim_type='number',
                                key=hedr_Ti_tgt_high,
-                               description='Upper end of Ti target range (instructed by the process woner). Nullable, if no data is provided',
+                               description='Upper end of Ti target range (instructed by the process owner). Nullable, if no data is provided',
                                nullable=True,
                                required=True)
         Tj_sp = Primitive(prim_type='number',

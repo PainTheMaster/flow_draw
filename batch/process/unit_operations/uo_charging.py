@@ -63,7 +63,7 @@ timectrl_none = "No_time_control"
 timectrl_min = "Time_control_with_minimum"
 timectrl_max = "Time_control_with_maximum"
 timectrl_min_max = 'Time_control_with_minimum_and_maximum'
-timectrl_placeholder = 'Placeholder'
+timectrl_placeholder = 'placeholder'
 #List below
 list_time_control = [timectrl_none,
                     timectrl_min,
@@ -75,7 +75,7 @@ temprctrl_none = "No_temp_control"
 temprctrl_min = "Temp_control_with_minimum"
 temprctrl_max = "Temp_control_with_maximum"
 temprctrl_min_max = 'Temp_control_with_minimum_and_maximum'
-temprctrl_placeholder = 'Placeholder'
+temprctrl_placeholder = 'placeholder'
 #list below
 list_temp_control = [temprctrl_none,
                     temprctrl_min,
@@ -88,7 +88,7 @@ opt_mtrcs_vol = "v/w"
 #list below
 list_metrics_unit = [opt_mtrcs_eq, opt_mtrcs_vol]
 
-error_range_placeholder = 'place_holder'
+error_range_placeholder = 'placeholder'
 list_error_range = [None, 1.0, None, None, None, 5.0, error_range_placeholder]
 
 dict_dtil_drpdwn = {hedr_metrics_unit : list_metrics_unit,

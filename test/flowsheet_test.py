@@ -178,7 +178,7 @@ class UnitOperationOutputTest(unittest.TestCase):
     def test_1003_innert_replace(self):
         sheet = fsht.Flowsheet()
         uo_instance = innert.InnertReplacement(flowsheet=sheet, operation_seq=3)
-        uo_instance.innert_gas=defs.opt_uo_innert_gas_Ar
+        uo_instance.innert_gas=defs.opt_uo_inert_gas_Ar
         uo_instance.neg_pressure = -0.08
         uo_instance.num_repeat = 2
         uo_instance.output_unit_operation()

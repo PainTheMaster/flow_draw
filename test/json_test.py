@@ -6,17 +6,23 @@ import flow_draw.data_io.flowsheet as fsht
 import flow_draw.batch.process.unit_operations.uo_agitation as agit
 import flow_draw.batch.process.unit_operations.unit_operation as uo
 import flow_draw.trait_def.trait_def as trdef
-import flow_draw.materials.materials as mats
+
 import flow_draw.batch.process.unit_operations.uo_charging as chgng
 import flow_draw.batch.process.unit_operations.uo_sampling as smplng
 import flow_draw.batch.process.unit_operations.uo_cip as cip
 import flow_draw.batch.process.unit_operations.uo_evaporation as evap
 import flow_draw.batch.process.unit_operations.uo_filtration as filt
 import flow_draw.batch.process.unit_operations.uo_filter_setup as filtsup
+import flow_draw.batch.process.unit_operations.uo_placeholder as plchldr
+import flow_draw.batch.process.unit_operations.uo_inert_replacement as inert
+import flow_draw.batch.process.unit_operations.uo_line_clearance as lnclear
+import flow_draw.batch.process.unit_operations.uo_phase_discharge as phdisch
+import flow_draw.batch.process.unit_operations.uo_temp_control as tempctrl
 import flow_draw.batch.process.process as proc
 import flow_draw.data_io.process_io as pio
+import flow_draw.batch.process.unit_operations.uo_drying as drying
 import json
-
+from flow_draw.materials.materials import Materials as mats
 
 class TestIO_00000_basic_func(unittest.TestCase):
     def test_0000_singleprop(self):
@@ -117,8 +123,8 @@ class TestIO_00000_basic_func(unittest.TestCase):
 
 class Test_10000_unit_ops(unittest.TestCase, trdef.GetMats):
     def setUp(self):
-        self.mats_df = mats.Materials.generate_mats_df()
-        self.mats_df = mats.Materials.add_to_mats_df(mats_df=self.mats_df,
+        self.mats_df = mats.generate_mats_df()
+        self.mats_df = mats.add_to_mats_df(mats_df=self.mats_df,
                                                        material="test mat 1",
                                                        main_star=True,
                                                        mw = 18.01,
@@ -126,17 +132,17 @@ class Test_10000_unit_ops(unittest.TestCase, trdef.GetMats):
                                                        conc_assay=99.999,
                                                        kg_main=2.00,
                                                        remark="Actually, I'm water.")
-        self.mats_df = mats.Materials.add_to_mats_df(mats_df=self.mats_df,
+        self.mats_df = mats.add_to_mats_df(mats_df=self.mats_df,
                                                        material="test mat 2",
                                                        main_star=False,
                                                        mw = 46.07,
                                                        density=0.789,
                                                        conc_assay=94.0,
                                                        remark="Actually, I'm ethanol.")
-        self.mats_inst = mats.Materials(self.mats_df)
+        self.mats_inst = mats(self.mats_df)
         return super().setUp()
     
-    def get_mats(self) -> mats.Materials:
+    def get_mats(self) -> mats:
         return self.mats_inst
     
     def test_10000_charging_json(self):
@@ -184,8 +190,8 @@ class Test_10000_unit_ops(unittest.TestCase, trdef.GetMats):
 
 class Test_20000_proc_json(unittest.TestCase, trdef.GetMats):
     def setUp(self):
-        self.mats_df = mats.Materials.generate_mats_df()
-        self.mats_df = mats.Materials.add_to_mats_df(mats_df=self.mats_df,
+        self.mats_df = mats.generate_mats_df()
+        self.mats_df = mats.add_to_mats_df(mats_df=self.mats_df,
                                                        material="test mat 1",
                                                        main_star=True,
                                                        mw = 18.01,
@@ -193,17 +199,17 @@ class Test_20000_proc_json(unittest.TestCase, trdef.GetMats):
                                                        conc_assay=99.999,
                                                        kg_main=2.00,
                                                        remark="Actually, I'm water.")
-        self.mats_df = mats.Materials.add_to_mats_df(mats_df=self.mats_df,
+        self.mats_df = mats.add_to_mats_df(mats_df=self.mats_df,
                                                        material="test mat 2",
                                                        main_star=False,
                                                        mw = 46.07,
                                                        density=0.789,
                                                        conc_assay=94.0,
                                                        remark="Actually, I'm ethanol.")
-        self.mats_inst = mats.Materials(self.mats_df)
+        self.mats_inst = mats(self.mats_df)
         return super().setUp()
     
-    def get_mats(self) -> mats.Materials:
+    def get_mats(self) -> mats:
         return self.mats_inst
 
     def test_20000_proc_comp_json(self):
@@ -232,8 +238,8 @@ class Test_21000_input_json(unittest.TestCase, trdef.GetMats):
     def setUp(self):
         flowsheet = fsht.Flowsheet()
 
-        self.mats_df = mats.Materials.generate_mats_df()
-        self.mats_df = mats.Materials.add_to_mats_df(mats_df=self.mats_df,
+        self.mats_df = mats.generate_mats_df()
+        self.mats_df = mats.add_to_mats_df(mats_df=self.mats_df,
                                                        material="test mat 1",
                                                        main_star=True,
                                                        mw = 18.01,
@@ -241,20 +247,20 @@ class Test_21000_input_json(unittest.TestCase, trdef.GetMats):
                                                        conc_assay=99.999,
                                                        kg_main=2.00,
                                                        remark="Actually, I'm water.")
-        self.mats_df = mats.Materials.add_to_mats_df(mats_df=self.mats_df,
+        self.mats_df = mats.add_to_mats_df(mats_df=self.mats_df,
                                                        material="test mat 2",
                                                        main_star=False,
                                                        mw = 46.07,
                                                        density=0.789,
                                                        conc_assay=94.0,
                                                        remark="Actually, I'm ethanol.")
-        self.mats_df = mats.Materials.add_to_mats_df(mats_df=self.mats_df,
+        self.mats_df = mats.add_to_mats_df(mats_df=self.mats_df,
                                                      material="super cleaning solvet",
                                                      main_star=False,
                                                      density=0.789,
                                                      conc_assay=100.0,
                                                      remark="I'm a clenaing solvent")
-        self.mats_inst = mats.Materials(self.mats_df)
+        self.mats_inst = mats(self.mats_df)
 
         self.sampling = smplng.Sampling(flowsheet=flowsheet, operation_seq=2, edit_comment="test sampling")
         self.agit_obj = agit.Agitation(flowsheet=flowsheet, operation_seq=3, edit_comment="test agit")
@@ -263,9 +269,10 @@ class Test_21000_input_json(unittest.TestCase, trdef.GetMats):
         self.evap_obj = evap.Evaporation(caller=self, flowsheet=flowsheet, operation_seq=6, edit_comment="test evaporation")
         self.filt_obj = filt.Filtration(caller=self, flowsheet=flowsheet, operation_seq=7, edit_comment='Test for filtration JSON I/O')
         self.filtsup_obj = filtsup.FiltSetup(caller=self, flowsheet=flowsheet, operation_seq=8, edit_comment='Test for filter setup JSON I/O')
+        self.drying_obj = drying.Drying(caller=self, flowsheet=flowsheet, operation_seq=9, edit_comment='Test for drying JSON I/O')
         return super().setUp()
     
-    def get_mats(self) -> mats.Materials:
+    def get_mats(self) -> mats:
         return self.mats_inst
 
     def test_21000_sampling_json_read(self):
@@ -680,11 +687,153 @@ class Test_21000_input_json(unittest.TestCase, trdef.GetMats):
 
         self.assertTrue(True)
 
+    def test_21011_drying_json_out(self):
+        json_obj:Objason = drying.Drying.get_json_schema(caller=self)
+        json_str = json_obj.asType()
+        for line in json_str:
+            print(line)
+        self.assertTrue(True)
 
-class Test_30000_json_ai_interface(unittest.TestCase, trdef.GetMats):
+    def test_21012_drying_json_read(self):
+        str_json = """
+        {
+                        "Seq_Nr": 12,
+                        "Unit_Operation": "drying",
+                        "Edit_Comment": "Drying conditions taken from the flowsheet rev.3, section 4.2.",
+                        "Pre-comment": "Confirm that the cake washing is complete and the mother liquor line is closed before starting the vacuum.",
+                        "Post-comment": "Break the vacuum with nitrogen before discharging the dried product.",
+                        "Tj_ctrl_cat": "Tj_ctrl_spec",
+                        "Tj_low_drying": 40.0,
+                        "Tj_high_drying": 50.0,
+                        "Tbr_low": -20.0,
+                        "Tbr_high": -10.0,
+                        "mode_vac": "range",
+                        "pres_low": 0.001,
+                        "pres_high": 0.008,
+                        "rpm_min": 1.0,
+                        "rpm_max": 5.0,
+                        "intermission_drying": "Yes",
+                        "list_test_drying": [
+                            {
+                            "test_cat": "ipc",
+                            "test_item": "Loss on drying",
+                            "test_tgt_criterion": 0.5,
+                            "test_unit": "%"
+                            },
+                            {
+                            "test_cat": "ipc",
+                            "test_item": "Residual n-hexane",
+                            "test_tgt_criterion": 290,
+                            "test_unit": "ppm"
+                            },
+                            {
+                            "test_cat": "monit_with_tgt",
+                            "test_item": "Water content (KF)",
+                            "test_tgt_criterion": 0.2,
+                            "test_unit": "%"
+                            },
+                            {
+                            "test_cat": "monit_no_tgt",
+                            "test_item": "Appearance of the dried cake",
+                            "test_tgt_criterion": null,
+                            "test_unit": null
+                            }
+                        ]
+                    }
+                    """
+        json_dict = json.loads(str_json)
+        self.drying_obj.load_from_json_dict(json_dict=json_dict)
+        print('====================')
+        print(f'operation_seq: {self.drying_obj.operation_seq}')
+        print(f'edit_comment: {self.drying_obj.edit_comment}')
+        print(f'pre_comment: {self.drying_obj.pre_comment}')
+        print(f'post_comment: {self.drying_obj.post_comment}')
+        print(f'Tj_ctrl_cat: {self.drying_obj.Tj_ctrl_cat}')
+        print(f'Tj_low: {self.drying_obj.Tj_low}')
+        print(f'Tj_high: {self.drying_obj.Tj_high}')
+        print(f'Tbr_low: {self.drying_obj.Tbr_low}')
+        print(f'Tbr_high: {self.drying_obj.Tbr_high}')
+        print(f'mode_vac: {self.drying_obj.mode_vac}')
+        print(f'pres_low: {self.drying_obj.pres_low}')
+        print(f'pres_high: {self.drying_obj.pres_high}')
+        print(f'rpm_min: {self.drying_obj.rpm_min}')
+        print(f'rpm_max: {self.drying_obj.rpm_max}')
+        print(f'intermission: {self.drying_obj.intermission}')
+        print('<tests>')
+        for test in self.drying_obj.list_ipc:
+            print('--------------------')
+            print(f'  test_cat: {test.test_cat}')
+            print(f'  test_item: {test.test_item}')
+            print(f'  test_tgt_criterion: {test.test_val_tgt_criterion}')
+            print(f'  test_unit: {test.test_unit_val}')
+        for test in self.drying_obj.list_monit_with_tgt:
+            print('--------------------')
+            print(f'  test_cat: {test.test_cat}')
+            print(f'  test_item: {test.test_item}')
+            print(f'  test_tgt_criterion: {test.test_val_tgt_criterion}')
+            print(f'  test_unit: {test.test_unit_val}')
+        for test in self.drying_obj.list_monit_no_tgt:
+            print('--------------------')
+            print(f'  test_cat: {test.test_cat}')
+            print(f'  test_item: {test.test_item}')
+            print(f'  test_tgt_criterion: {test.test_val_tgt_criterion}')
+            print(f'  test_unit: {test.test_unit_val}')
+        self.assertTrue(True)
+
+class Test_30000_json_proc_output(unittest.TestCase):
     def setUp(self):
-        self.mats_df = mats.Materials.generate_mats_df()
-        self.mats_df = mats.Materials.add_to_mats_df(mats_df=self.mats_df,
+        self.mats_df = mats.generate_mats_df()
+        self.mats_df = mats.add_to_mats_df(mats_df=self.mats_df,
+                                                       material="test mat 1",
+                                                       main_star=True,
+                                                       mw = 18.01,
+                                                       density=1.00,
+                                                       conc_assay=99.999,
+                                                       kg_main=2.00,
+                                                       remark="Actually, I'm water.")
+        self.mats_df = mats.add_to_mats_df(mats_df=self.mats_df,
+                                                       material="test mat 2",
+                                                       main_star=False,
+                                                       mw = 46.07,
+                                                       density=0.789,
+                                                       conc_assay=94.0,
+                                                       remark="Actually, I'm ethanol.")
+        self.mats_inst = mats(self.mats_df)
+        self.obj_proc = proc.Process(batch_name="json_test_batch", process_name="json_test_process", num_uo=4)
+        self.obj_proc.mats_data = self.mats_inst
+        self.list_uo = [chgng.Charging,
+                        smplng.Sampling,
+                        cip.CIP,
+                        agit.Agitation,
+                        evap.Evaporation,
+                        filtsup.FiltSetup,
+                        filt.Filtration,
+                        plchldr.Placeholder,
+                        inert.InertReplacement,
+                        lnclear.LineClearance,
+                        phdisch.PhaseDisch,
+                        tempctrl.TempControl,
+                        drying.Drying
+                        ]
+        return super().setUp()
+
+    def test_30000_json_uo(self):
+
+        dict_json_uo = self.obj_proc.data_input.json_uo(caller=self.obj_proc, list_uo=self.list_uo)
+        print()
+        print('----------------------')
+        print(dict_json_uo)
+        print('----------------------')
+        with open("uo.json", "w", encoding="utf-8") as f:
+            json.dump(dict_json_uo, f, ensure_ascii=False, indent=1)
+        self.assertTrue(True)
+
+
+
+class Test_40000_json_ai_interface(unittest.TestCase, trdef.GetMats):
+    def setUp(self):
+        self.mats_df = mats.generate_mats_df()
+        self.mats_df = mats.add_to_mats_df(mats_df=self.mats_df,
                                                        material="H-Ala-Glu-GlyOMe",
                                                        main_star=True,
                                                        mw = 200,
@@ -692,60 +841,59 @@ class Test_30000_json_ai_interface(unittest.TestCase, trdef.GetMats):
                                                        conc_assay=99.999,
                                                        kg_main=0.200,
                                                        remark="")
-        self.mats_df = mats.Materials.add_to_mats_df(mats_df=self.mats_df,
+        self.mats_df = mats.add_to_mats_df(mats_df=self.mats_df,
                                                        material="Fmoc-Gly-OH",
                                                        main_star=False,
                                                        mw = 100,
                                                        density=1.00,
                                                        conc_assay=94.0,
                                                        remark="")
-        self.mats_df = mats.Materials.add_to_mats_df(mats_df=self.mats_df,
+        self.mats_df = mats.add_to_mats_df(mats_df=self.mats_df,
                                                     material="dichloromethane",
                                                     main_star=False,
                                                     mw = 84.93,
                                                     density=1.33,
                                                     conc_assay=99.0,
                                                     remark="")
-        self.mats_df = mats.Materials.add_to_mats_df(mats_df=self.mats_df,
+        self.mats_df = mats.add_to_mats_df(mats_df=self.mats_df,
                                                     material="1-hydroxy-7-azabenzotriazole",
                                                     main_star=False,
                                                     mw = 136.114,
                                                     density=0.973,
                                                     conc_assay=98.0,
                                                     remark="")
-        self.mats_df = mats.Materials.add_to_mats_df(mats_df=self.mats_df,
+        self.mats_df = mats.add_to_mats_df(mats_df=self.mats_df,
                                                     material="conc NaHCO3",
                                                     main_star=False,
                                                     mw = 18,
                                                     density=1.0,
                                                     conc_assay=9.6,
                                                     remark="")
-        self.mats_df = mats.Materials.add_to_mats_df(mats_df=self.mats_df,
+        self.mats_df = mats.add_to_mats_df(mats_df=self.mats_df,
                                                     material="conc NaCl",
                                                     main_star=False,
                                                     mw = 18,
                                                     density=1.0,
                                                     conc_assay=26,
                                                     remark="")
-        self.mats_df = mats.Materials.add_to_mats_df(mats_df=self.mats_df,
+        self.mats_df = mats.add_to_mats_df(mats_df=self.mats_df,
                                                     material="Hexane",
                                                     main_star=False,
                                                     mw = 86.18,
                                                     density=0.67,
                                                     conc_assay=95,
                                                     remark="")             
-        self.mats_inst = mats.Materials(self.mats_df)
+        self.mats_inst = mats(self.mats_df)
 
         self.obj_proc = proc.Process(batch_name="ai_test_batch", process_name="ai_test_process", num_uo=4)
         self.obj_proc.mats_data = self.mats_inst
 
         return super().setUp()
     
-    def get_mats(self) -> mats.Materials:
+    def get_mats(self) -> mats:
         return self.mats_inst
 
-
-    def test_30000_load_proc_details(self):
+    def test_40000_load_proc_details(self):
         self.obj_proc.ai_load_process_details()
         self.assertTrue(True)
 
@@ -763,7 +911,10 @@ def suite_json_test():
     #suite.addTest(Test_21000_input_json('test_21008_filtration_json_read'))
     #suite.addTest(Test_21000_input_json('test_21009_filter_setup_json_out'))
     # suite.addTest(Test_21000_input_json('test21010_filter_setup_json_read'))
-    suite.addTest(Test_30000_json_ai_interface('test_30000_load_proc_details'))
+    #suite.addTest(Test_30000_json_ai_interface('test_30000_load_proc_details'))
+    #suite.addTest(Test_21000_input_json('test_21011_drying_json_out'))
+    #suite.addTest(Test_21000_input_json('test_21012_drying_json_read'))
+    suite.addTest(Test_30000_json_proc_output('test_30000_json_uo'))
 
     return suite
             

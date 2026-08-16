@@ -220,7 +220,7 @@ class UnitOperation(ABC):
         name_uo = Primitive(prim_type="string",
                             key=defs.hedr_cmn_io_dtil_uo,
                             description="Unit operation name in the process detail worksheet",
-                            const=cls.uo_tag,
+                            enum=[cls.uo_tag],
                             required=True)
         edtcmnt = Primitive(prim_type="string",
                             key=defs.hedr_cmn_io_dtil_edt_cmnt,

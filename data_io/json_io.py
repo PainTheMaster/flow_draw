@@ -218,7 +218,7 @@ class Objason(JsonEntity):
         
 class Primitive(JsonEntity):
     def __init__(self,
-                 prim_type:Literal['string','integer', 'number','boolean'] = None,
+                 prim_type:Literal['string','integer', 'number','boolean']|list[Literal['string','integer', 'number','boolean']] = None,
                  key:str = None,
                  description:str = None,
                  enum:list[str]|list[int]|list[float]|list[bool] = None,
@@ -243,10 +243,17 @@ class Primitive(JsonEntity):
         list_json_str.append('{')
         if self.description is not None:
             list_json_str.append(f' "description":{self.json_literal(self.description)},')
-        if self.nullable:
-            list_json_str.append(f' "type": ["{self.prim_type}", "null"],')
-        else:
-            list_json_str.append(f' "type":"{self.prim_type}",')
+        if isinstance(self.prim_type, list):
+            joined = ', '.join(f'"{item}"' for item in self.prim_type)
+            if self.nullable:
+                list_json_str.append(f' "type": [{joined}, "null"],')
+            else:
+                list_json_str.append(f' "type": [{joined}],')
+        else:    
+            if self.nullable:
+                list_json_str.append(f' "type": ["{self.prim_type}", "null"],')
+            else:
+                list_json_str.append(f' "type":"{self.prim_type}",')
 
         if self.enum is not None:
             enum_values = ','.join(self.json_literal(item) for item in self.enum)

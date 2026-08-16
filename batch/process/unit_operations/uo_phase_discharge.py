@@ -191,17 +191,16 @@ class PhaseDisch(uo.UnitOperation, uo_tag=defs.tag_uo_phase_disch):
         common_schema:list[Primitive] = PhaseDisch.json_common()
         origin = Primitive(prim_type='string',
                            key=hedr_origin,
-                           description='Origin vessel of the discharged process liquied. If not specified in the data source, please put <placeholder>.',
+                           description='Origin vessel of the discharged process liquid. If not specified in the data source, please put <placeholder>.',
                            )
         via = Primitive(prim_type='string',
                         key=hedr_via,
-                        description='Way point of the discharged process liquied, e.g., multiplexer. Nullable if not specified in the data source. '
-                        'If not specified in the data source, please put <placeholder>.',
+                        description='Way point of the discharged process liquid, e.g., multiplexer. Nullable if not specified in the data source.',
                         nullable=True,
                         required = True)
         single_destin = Primitive(prim_type='string',
                                   key=key_json_single_destin,
-                                  description='Destination of the discharged process liquied. E.g., waste tank, etc.'
+                                  description='Destination of the discharged process liquid. E.g., waste tank, etc.'
                                   'Multiple destinations are allowed, as well as a sole destination. '
                                   'If not specified in the data source, please put <placeholder>.',
                                   nullable=False,
@@ -209,7 +208,7 @@ class PhaseDisch(uo.UnitOperation, uo_tag=defs.tag_uo_phase_disch):
         
         destin = Array(key=hedr_destin,
                        content=single_destin,
-                       description=f'An array of destination(s) {key_json_single_destin} of the discharged process liquied. E.g., waste tank, etc.',
+                       description=f'An array of destination(s) {key_json_single_destin} of the discharged process liquid. E.g., waste tank, etc.',
                        nullable=False,
                        required=True)
         

@@ -12,10 +12,11 @@ import flow_draw.batch.process.unit_operations.uo_evaporation as evap
 import flow_draw.batch.process.unit_operations.uo_filter_setup as fltstup
 import flow_draw.batch.process.unit_operations.uo_filtration as filt
 import flow_draw.batch.process.unit_operations.uo_placeholder as plchldr
-import flow_draw.batch.process.unit_operations.uo_innert_replacement as innert
+import flow_draw.batch.process.unit_operations.uo_inert_replacement as inert
 import flow_draw.batch.process.unit_operations.uo_line_clearance as lnclear
 import flow_draw.batch.process.unit_operations.uo_phase_discharge as phdisch
 import flow_draw.batch.process.unit_operations.uo_temp_control as tempctrl
+import flow_draw.batch.process.unit_operations.uo_drying as drying
 from flow_draw.data_io import process_io as proc_io
 from flow_draw.data_io import flowsheet as fsht
 from flow_draw.materials.materials import Materials as mats
@@ -218,10 +219,11 @@ class Process(GetMats, GetProcName):
                                                  fltstup.FiltSetup,
                                                  filt.Filtration,
                                                  plchldr.Placeholder,
-                                                 innert.InnertReplacement,
+                                                 inert.InnertReplacement,
                                                  lnclear.LineClearance,
                                                  phdisch.PhaseDisch,
-                                                 tempctrl.TempControl
+                                                 tempctrl.TempControl,
+                                                 drying.Drying
                                                  ]
         arr_steps = self.data_input.ai_load_process_details(caller=self, list_uo=list_uo)
         uo_reg = uo.registry_uo_cls

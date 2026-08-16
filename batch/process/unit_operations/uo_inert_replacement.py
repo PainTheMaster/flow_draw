@@ -28,29 +28,29 @@ header_postcomment = defs.hedr_cmn_io_dtil_postcmnt #Don't include this in the s
 #hedr_<something> = defs.hedr_<unit operation>_<specification item>
 #list_hedr = defs.list_hedr_<list of header items for the uo>
 #dict_dtil_drpdwn = defs.dict_opt_<unit operation>
-hedr_gas = "Innert_Gas"
-"""Detail header item: Innert gas used for replacement"""
+hedr_gas = "Inert_Gas"
+"""Detail header item: Inert gas used for replacement"""
 hedr_neg_pres = "Negative_Press(MPaG)"
-"""Detail header item: Negative pressure before innert gas compensation"""
+"""Detail header item: Negative pressure before inert gas compensation"""
 hedr_num_repeat = "Repetition"
-"""Detail header item: Times the replacement (vaccum then compensation) repeated"""
+"""Detail header item: Times the replacement (vacuum then compensation) repeated"""
 list_hedr = [hedr_gas,
             hedr_neg_pres,
             hedr_num_repeat]
-"""Detail header list: List of header items for detail input form for innert gas relacement"""
+"""Detail header list: List of header items for detail input form for inert gas relacement"""
 
 #########################################################
 # UO-specific options, list, header_item: list dictionry thereof (for data input and internalsignaling)
 #########################################################
 
 opt_gas_N2 = "N2"
-"""Drop-down option item: choice of gas for innertization. Nitrogen gas"""
+"""Drop-down option item: choice of gas for inertization. Nitrogen gas"""
 opt_gas_Ar = "Ar"
-"""Drop-down option item: choice of gas for innertization. Argon gas"""
+"""Drop-down option item: choice of gas for inertization. Argon gas"""
 opt_gas_He = "He"
-"""Drop-down option item: choice of gas for innertization. Helium gas"""
+"""Drop-down option item: choice of gas for inertization. Helium gas"""
 opt_gas_plchldr = "(placeholder)"
-"""Drop-down option item: choice of gas for innertization. Placeholer"""
+"""Drop-down option item: choice of gas for inertization. Placeholer"""
 list_opt_gas = [opt_gas_N2,
                 opt_gas_Ar,
                 opt_gas_He,
@@ -81,29 +81,29 @@ Language dictionary for common parts.
 """
 
 #lang_dict_<this unit operation> = defs.dict_jp_part_<this unit operation>
-tag_part_flow_gas_N2 = defs.opt_uo_innert_gas_N2
+tag_part_flow_gas_N2 = defs.opt_uo_inert_gas_N2
 """Tag for replacing gas N2 on the flowsheet"""
-tag_part_flow_gas_Ar = defs.opt_uo_innert_gas_Ar
+tag_part_flow_gas_Ar = defs.opt_uo_inert_gas_Ar
 """Tag for replacing gas argon on the flowsheet"""
-tag_part_flow_gas_plchldr = defs.opt_uo_innert_gas_plchldr
+tag_part_flow_gas_plchldr = defs.opt_uo_inert_gas_plchldr
 """Tag for replacing gas placeholder on the flowsheet"""
 tag_part_flow_rplace_complete = "replacement_complete"
-"""tag for innert gas replacement complete check-box"""
+"""tag for inert gas replacement complete check-box"""
 dict_jp_part_flow = [tag_part_flow_gas_N2,
                      tag_part_flow_gas_Ar,
                      tag_part_flow_gas_plchldr,
                      tag_part_flow_rplace_complete]
-"""JP language dictionary for flowsheet parts for the unit operation innert gas replacement"""
+"""JP language dictionary for flowsheet parts for the unit operation inert gas replacement"""
 
 
-tag_stc_flow_instr = "innert replacement instruction"
-"""Tag for the instruction sentence for innert gas replacement, the sentence has 3 placeholders: {press}, {gas}, {rep}"""
+tag_stc_flow_instr = "inert replacement instruction"
+"""Tag for the instruction sentence for inert gas replacement, the sentence has 3 placeholders: {press}, {gas}, {rep}"""
 dict_jp_stcs_instr = {tag_stc_flow_instr : "到達内圧目安:{press} MPaG, {gas}置換回数{rep}回"}
-"""Instruction sentece for innert gas replacement in Japanese"""
+"""Instruction sentece for inert gas replacement in Japanese"""
 
 
 dict_stcs_instr = dict_jp_stcs_instr
-"""Instruction sentece for innert gas replacement"""
+"""Instruction sentece for inert gas replacement"""
 
 
 
@@ -126,7 +126,7 @@ dict_stcs_instr = dict_jp_stcs_instr
 
 
 
-class InnertReplacement(uo.UnitOperation, uo_tag=defs.tag_uo_innert_replace):
+class InertReplacement(uo.UnitOperation, uo_tag=defs.tag_uo_inert_replace):
     def __init__(self,
                  caller:type[trdef.UniversalTrait] = None, 
                  flowsheet:fsht.Flowsheet = None,
@@ -134,7 +134,7 @@ class InnertReplacement(uo.UnitOperation, uo_tag=defs.tag_uo_innert_replace):
                  num_subitems:int = None,
                  edit_comment:str = None):
         super().__init__(caller=caller, flowsheet=flowsheet, operation_seq=operation_seq, num_subitems=1, edit_comment=edit_comment)
-        self.innert_gas:str = None
+        self.inert_gas:str = None
         self.neg_pressure:float = None
         self.num_repeat:int = None
 
@@ -152,7 +152,7 @@ class InnertReplacement(uo.UnitOperation, uo_tag=defs.tag_uo_innert_replace):
             self.pre_comment = first_row[header_precomment]
         if not pd.isna(first_row[header_postcomment]):
             self.post_comment = first_row[header_postcomment]
-        self.innert_gas = first_row[hedr_gas]
+        self.inert_gas = first_row[hedr_gas]
         self.neg_pressure = first_row[hedr_neg_pres]
         self.num_repeat = first_row[hedr_num_repeat]
 
@@ -164,35 +164,35 @@ class InnertReplacement(uo.UnitOperation, uo_tag=defs.tag_uo_innert_replace):
 
 
     def get_json_schema(caller: trdef.UniversalTrait=None)->procio.Objason:
-        common_schema:list = InnertReplacement.json_common()
-        innert_gas = Primitive(prim_type='string',
+        common_schema:list = InertReplacement.json_common()
+        inert_gas = Primitive(prim_type='string',
                                key=hedr_gas,
-                               description=f"Innert gas for replacement of the air in the reactor for safety and quality."
+                               description=f"Inert gas for replacement of the air in the reactor for safety and quality."
                                f"If no gas is selected, please use {opt_gas_N2} as default.",
                                enum=list_opt_gas,
                                nullable=False)
         
         neg_pressure =Primitive(prim_type='number',
                                 key=hedr_neg_pres,
-                                description=f"Negative pressure (MPaG) to be reached before innert gas compensation."
-                                "If nor information is available, please use -0.08 MPaG as default.",
+                                description=f"Negative pressure (MPaG) to be reached before inert gas compensation."
+                                "If no information is available, please use -0.08 MPaG as default.",
                                 nullable=False)
         
         num_repeat =Primitive(prim_type='integer',
                               key=hedr_num_repeat,
-                              description=f"Number of times the replacement (vaccum then compensation) is repeated."
+                              description=f"Number of times the replacement (vacuum then compensation) is repeated."
                               "If no information is available, please use 2 as default.",
                               nullable=False)
         
-        obj_schema = Objason(key=InnertReplacement.uo_tag,
-                             props=common_schema+[innert_gas, neg_pressure, num_repeat],
-                             description=f"Unit operation for innert gas replacement in the reactor.")
+        obj_schema = Objason(key=InertReplacement.uo_tag,
+                             props=common_schema+[inert_gas, neg_pressure, num_repeat],
+                             description=f"Unit operation for inert gas replacement in the reactor.")
         return obj_schema        
 
 
     def load_from_json_dict(self, json_dict: dict[str, any]):
         super().load_from_json_dict(json_dict)
-        self.innert_gas = json_dict.get(hedr_gas, opt_gas_N2)
+        self.inert_gas = json_dict.get(hedr_gas, opt_gas_N2)
         self.neg_pressure = json_dict.get(hedr_neg_pres, -0.08)
         self.num_repeat = json_dict.get(hedr_num_repeat, 2)
 
@@ -203,7 +203,7 @@ class InnertReplacement(uo.UnitOperation, uo_tag=defs.tag_uo_innert_replace):
             self.flowsheet.linefeed()        
 
         instruction = dict_stcs_instr[tag_stc_flow_instr].format(press=self.neg_pressure,
-                                                                    gas=dict_jp_part_flow[self.innert_gas],
+                                                                    gas=dict_jp_part_flow[self.inert_gas],
                                                                     rep=self.num_repeat )
         self.flowsheet.put_line(time = lang_dict_cmn[tag_flow_cmn_rec_time],
                                 content=instruction,

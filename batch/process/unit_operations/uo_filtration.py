@@ -43,15 +43,15 @@ opt_time_unit_hour:str = defs.tag_flow_cmn_time_unit_hour
 #list_hedr = defs.list_hedr_<list of header items for the uo>
 #dict_dtil_drpdwn = defs.dict_opt_<unit operation>
 
-hedr_equip = "Filtering Equipment"
+hedr_equip = "Filtering_Equipment"
 """Header item for filtering equipment"""
-hedr_Tj_setpoint = "Tj set point"
+hedr_Tj_setpoint = "Tj_set_point"
 """Header item for Tj of the filtering device"""
-hedr_press_min = "Filt P_min"
+hedr_press_min = "Filt_P_min"
 """Header item for minimum filtration pressure"""
-hedr_press_max = "Filt P_max"
+hedr_press_max = "Filt_P_max"
 """Header item for maximum filtration pressure"""
-hedr_unit_press = "Pressure Unit"
+hedr_unit_press = "Pressure_Unit"
 """Header item for pressure """
 hedr_integ_test = "Need_integrity_test"
 """Header item for integrity test"""
@@ -245,8 +245,8 @@ class Filtration(uo.UnitOperation, uo_tag=defs.tag_uo_filt):
         cmn_schema = Filtration.json_common()
         filt_device = Primitive(prim_type='string',
                                 key = hedr_equip,
-                                description = 'Please designate the filterin device for the operation. This property is required and not nullable. '
-                                'If a right name is no found in the given set of information, please put "<Placeholder>" here.')
+                                description = 'Please designate the filtering device for the operation. This property is required and not nullable. '
+                                'If a right name is not found in the given set of information, please put "<Placeholder>" here.')
         temp_jacket = Primitive(prim_type = 'number',
                                 key = hedr_Tj_setpoint,
                                 description = 'Please designate the Tj set point for the filtration device. This property is optional and nullable.',
@@ -267,9 +267,11 @@ class Filtration(uo.UnitOperation, uo_tag=defs.tag_uo_filt):
                                description=f'Pressure unit to designate the pressure for the filtration operation. '
                                f'This property is mandatory if either of "{hedr_press_min}" or "{hedr_press_max}" has a non-null value.',
                                nullable=True)
-        integ_test = Primitive(prim_type='boolean',
+        integ_test = Primitive(prim_type='string',
                                key=hedr_integ_test,
-                               description='Please designate whether the integrity test is required for the filtration operation.')
+                               enum=list_opt_integ_test,
+                               description='Please designate whether the integrity test is required for the filtration operation. '
+                               f'If no information is given in the source, please select "{opt_yes}" as the default.')
         obj_filtration = Objason(key=Filtration.uo_tag,
                                  props=cmn_schema + [filt_device, temp_jacket, press_min, press_max, press_unit, integ_test],
                                  description='This object describes the filtration operation in the process flowsheet.')
@@ -282,7 +284,7 @@ class Filtration(uo.UnitOperation, uo_tag=defs.tag_uo_filt):
         self.press_min = json_dict.get(hedr_press_min, None)
         self.press_max = json_dict.get(hedr_press_max, None)
         self.unit_press = json_dict.get(hedr_unit_press, None)
-        self.integ_test = json_dict.get(hedr_integ_test, None)
+        self.integ_test = (json_dict.get(hedr_integ_test, None) == opt_yes)
         print(f'self.integ_test: {self.integ_test} (type: {type(self.integ_test)})')
 
 

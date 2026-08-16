@@ -309,7 +309,7 @@ class FiltSetup(uo.UnitOperation, uo_tag=defs.tag_uo_filt_setup):
         unit_press = Primitive(prim_type='string',
                                key = hedr_press_unit,
                                enum = list_opt_press_unit,
-                               description = f'Unit for the leak test pressure. If the necessary information is not found in the given flowsheet, please select "{defs.opt_press_MPa}" as the default value. ',
+                               description = f'Unit for the leak test pressure. If the necessary information is not found in the given flowsheet, please select "{defs.opt_press_MPa}" as the default value.',
                                nullable = False)
         obj_filt_setup = Objason(key = FiltSetup.uo_tag,
                                 description = 'This is a unit operation for the filter dryer set-up.',
