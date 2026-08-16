@@ -219,7 +219,7 @@ class Process(GetMats, GetProcName):
                                                  fltstup.FiltSetup,
                                                  filt.Filtration,
                                                  plchldr.Placeholder,
-                                                 inert.InnertReplacement,
+                                                 inert.InertReplacement,
                                                  lnclear.LineClearance,
                                                  phdisch.PhaseDisch,
                                                  tempctrl.TempControl,
@@ -241,7 +241,36 @@ class Process(GetMats, GetProcName):
 
         self.flowsheet.save(filename=self.process_name+".xlsx")
            
+    def load_from_json_dict(self, json_dict: dict[str, any]):
+        list_uo: list[type[uo.UnitOperation]] = [chgng.Charging,
+                                                 smplng.Sampling,
+                                                 cip.CIP,
+                                                 agit.Agitation,
+                                                 evap.Evaporation,
+                                                 fltstup.FiltSetup,
+                                                 filt.Filtration,
+                                                 plchldr.Placeholder,
+                                                 inert.InertReplacement,
+                                                 lnclear.LineClearance,
+                                                 phdisch.PhaseDisch,
+                                                 tempctrl.TempControl,
+                                                 drying.Drying
+                                                 ]
+        arr_steps = json_dict[defs.json_key_arr_uo_params]
+        uo_reg = uo.registry_uo_cls
+        for step in arr_steps:
+            uo_tag = step[defs.hedr_cmn_io_dtil_uo]
+            new_uo_inst = uo_reg[uo_tag](caller=self,
+                                        flowsheet=self.flowsheet,
+                                        operation_seq=step[defs.hedr_cmn_io_dtil_seq],
+                                        edit_comment=step[defs.hedr_cmn_io_dtil_edt_cmnt])
+            new_uo_inst.load_from_json_dict(step)
+            self.seq_uo.append(new_uo_inst)
 
+        for step in self.seq_uo:
+            step.output_unit_operation()
+
+        self.flowsheet.save(filename=self.process_name+".xlsx")
 
     def get_mats(self) -> mats:
         return self.mats_data

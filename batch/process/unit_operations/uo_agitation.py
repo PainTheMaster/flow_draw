@@ -427,7 +427,8 @@ class Agitation(uo.UnitOperation, uo_tag=defs.tag_uo_agitation):
                                  key=Agitation.uo_tag,
                                  props=list_cmn+[spec_agit, rpm, ti_min, ti_max, time_min, time_max, time_unit, dissolution_check],
                                  description='This is the object to store information for an unit operation of "agitation" extracted from the source.'\
-                                    '"agitation" is an unit operation where a solution/reaction mixture/slurry is agitated.',
+                                    '"agitation" is an unit operation where a solution/reaction mixture/slurry is agitated. '
+                                    f'If controlled heating/cooling (temperature ramp-up/down) is required, please consider prioritising "{defs.tag_uo_tempr_ctrl}" over this unit operation.',
                                  required=False)
         # json_agitation.if_then_else(prop = spec_agit.key,
         #                             val_if= [opt_spec_specif, opt_spec_guide],

@@ -269,6 +269,8 @@ tag_stc_Tbr_limit_high:str = "stc_Tbr_limit_high_drying"
 """The key to the sentence for the upper limit of the condenser brine temperature. Includes a placeholder "Tbr_high"."""
 tag_stc_Tbr_range:str = "stc_Tbr_range_drying"
 """The key to the sentence for the range of the condenser brine temperature. Includes placeholders "Tbr_low" and "Tbr_high"."""
+tag_stc_Tbr_guide_single:str = "stc_Tbr_guidance_single"
+"""The key to the sentence for the single point guidance of the condenser brine temperature. Includes placeholder "Tbr_guide"."""
 tag_stc_press_low:str = "stc_press_min_drying"
 """The key to the sentence for the lower limit of the drying pressure. Includes a placeholder "pres_low". In the unit of MPa."""
 tag_stc_press_high:str = "stc_press_max_drying"
@@ -303,6 +305,7 @@ dict_stc_jp:dict[str, str] = {
     tag_stc_Tbr_limit_low : "冷却用ブライン:{Tbr_low}℃以上",
     tag_stc_Tbr_limit_high : "冷却用ブライン:{Tbr_high}℃以下",
     tag_stc_Tbr_range : "冷却用ブライン:{Tbr_low}～{Tbr_high}℃",
+    tag_stc_Tbr_guide_single : "冷却用ブライン目安:{Tbr_guide}℃",
     tag_stc_press_low : "真空度:{pres_low}MPa以上",
     tag_stc_press_high : "真空度:{pres_high}MPa以下",
     tag_stc_press_range : "真空度:{pres_low}～{pres_high}MPa",
@@ -453,13 +456,15 @@ class Drying(uo.UnitOperation, uo_tag=defs.tag_uo_drying):
         Tbr_low:Primitive = Primitive(prim_type="number",
                                       key=hedr_Tbr_low,
                                       description='The lower limit of the condenser brine temperature. '
-                                      'Nullable if not specified in the data source. The unit is in degree Celsius.',
+                                      'Nullable if not specified in the data source. The unit is in degree Celsius. '
+                                      f'If a guideline value is given as a single point, please put it in both "{hedr_Tbr_low}" and "{hedr_Tbr_high}".',
                                       nullable=True,
                                       required=True)
         Tbr_high:Primitive = Primitive(prim_type="number",
                                        key=hedr_Tbr_high,
                                        description=f'The upper limit of the condenser brine temperature. '
-                                       f'Nullable if not specified in the data source. The unit is in degree Celsius.',
+                                       f'Nullable if not specified in the data source. The unit is in degree Celsius.'
+                                       f'If a guideline value is given as a single point, please put it in both "{hedr_Tbr_low}" and "{hedr_Tbr_high}".',
                                        nullable=True,
                                        required=True)
         mode_vac:Primitive = Primitive(prim_type="string",
@@ -640,7 +645,10 @@ class Drying(uo.UnitOperation, uo_tag=defs.tag_uo_drying):
                                 witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
         stc_Tbr:str = None
         if self.Tbr_low is not None and self.Tbr_high is not None:
-            stc_Tbr = dict_stc[tag_stc_Tbr_range].format(Tbr_low=self.Tbr_low, Tbr_high=self.Tbr_high)
+            if self.Tbr_low == self.Tbr_high:
+                stc_Tbr = dict_stc[tag_stc_Tbr_guide_single].format(Tbr_guide=self.Tbr_low)
+            else:
+                stc_Tbr = dict_stc[tag_stc_Tbr_range].format(Tbr_low=self.Tbr_low, Tbr_high=self.Tbr_high)
         elif self.Tbr_low is not None:
             stc_Tbr = dict_stc[tag_stc_Tbr_limit_low].format(Tbr_low=self.Tbr_low)
         elif self.Tbr_high is not None:

@@ -89,11 +89,12 @@ tag_part_flow_gas_plchldr = defs.opt_uo_inert_gas_plchldr
 """Tag for replacing gas placeholder on the flowsheet"""
 tag_part_flow_rplace_complete = "replacement_complete"
 """tag for inert gas replacement complete check-box"""
-dict_jp_part_flow = [tag_part_flow_gas_N2,
-                     tag_part_flow_gas_Ar,
-                     tag_part_flow_gas_plchldr,
-                     tag_part_flow_rplace_complete]
+dict_jp_part_flow = {tag_part_flow_gas_N2: '窒素',
+                     tag_part_flow_gas_Ar: 'アルゴン',
+                     tag_part_flow_gas_plchldr: '<gas: placeholder>',
+                     tag_part_flow_rplace_complete: '□ 置換実施'}
 """JP language dictionary for flowsheet parts for the unit operation inert gas replacement"""
+dict_part_flow = dict_jp_part_flow
 
 
 tag_stc_flow_instr = "inert replacement instruction"
@@ -203,11 +204,11 @@ class InertReplacement(uo.UnitOperation, uo_tag=defs.tag_uo_inert_replace):
             self.flowsheet.linefeed()        
 
         instruction = dict_stcs_instr[tag_stc_flow_instr].format(press=self.neg_pressure,
-                                                                    gas=dict_jp_part_flow[self.inert_gas],
+                                                                    gas=dict_part_flow[self.inert_gas],
                                                                     rep=self.num_repeat )
         self.flowsheet.put_line(time = lang_dict_cmn[tag_flow_cmn_rec_time],
                                 content=instruction,
-                                record=dict_jp_part_flow[tag_part_flow_rplace_complete],
+                                record=dict_part_flow[tag_part_flow_rplace_complete],
                                 operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
                                 witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
         self.flowsheet.linefeed()

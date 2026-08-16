@@ -1,10 +1,12 @@
 import unittest
 import json
+from pathlib import Path
 import flow_draw.data_io.json_io as json_io
 from flow_draw.data_io.json_io import Primitive, Array, Objason
 import flow_draw.data_io.flowsheet as fsht
 import flow_draw.batch.process.unit_operations.uo_agitation as agit
 import flow_draw.batch.process.unit_operations.unit_operation as uo
+import flow_draw.definitions as defs
 import flow_draw.trait_def.trait_def as trdef
 
 import flow_draw.batch.process.unit_operations.uo_charging as chgng
@@ -832,6 +834,20 @@ class Test_30000_json_proc_output(unittest.TestCase):
 
 class Test_40000_json_ai_interface(unittest.TestCase, trdef.GetMats):
     def setUp(self):
+        self.list_uo = [chgng.Charging,
+                                smplng.Sampling,
+                                cip.CIP,
+                                agit.Agitation,
+                                evap.Evaporation,
+                                filtsup.FiltSetup,
+                                filt.Filtration,
+                                plchldr.Placeholder,
+                                inert.InertReplacement,
+                                lnclear.LineClearance,
+                                phdisch.PhaseDisch,
+                                tempctrl.TempControl,
+                                drying.Drying
+                                ]
         self.mats_df = mats.generate_mats_df()
         self.mats_df = mats.add_to_mats_df(mats_df=self.mats_df,
                                                        material="H-Ala-Glu-GlyOMe",
@@ -855,6 +871,13 @@ class Test_40000_json_ai_interface(unittest.TestCase, trdef.GetMats):
                                                     density=1.33,
                                                     conc_assay=99.0,
                                                     remark="")
+        self.mats_df = mats.add_to_mats_df(mats_df=self.mats_df,
+                                           material="dicycloehexylcarbodiimide",
+                                           main_star=False,
+                                           mw = 206.33,
+                                           density=1.1,
+                                           conc_assay=99.0,
+                                           remark="")
         self.mats_df = mats.add_to_mats_df(mats_df=self.mats_df,
                                                     material="1-hydroxy-7-azabenzotriazole",
                                                     main_star=False,
@@ -888,14 +911,25 @@ class Test_40000_json_ai_interface(unittest.TestCase, trdef.GetMats):
         self.obj_proc = proc.Process(batch_name="ai_test_batch", process_name="ai_test_process", num_uo=4)
         self.obj_proc.mats_data = self.mats_inst
 
+        with Path('.\\llm_output_2026-8-16_1954.json').open('r', encoding='utf-8') as f:
+            self.test_json = json.load(f)
+
         return super().setUp()
     
     def get_mats(self) -> mats:
         return self.mats_inst
 
+    def get_proc_name(self) -> str:
+        return self.obj_proc.get_proc_name()
+
     def test_40000_load_proc_details(self):
         self.obj_proc.ai_load_process_details()
         self.assertTrue(True)
+
+    def test_40001_load_from_json(self):
+        self.obj_proc.load_from_json_dict(json_dict=self.test_json)
+        self.assertTrue(True)
+
 
 
 
@@ -911,10 +945,11 @@ def suite_json_test():
     #suite.addTest(Test_21000_input_json('test_21008_filtration_json_read'))
     #suite.addTest(Test_21000_input_json('test_21009_filter_setup_json_out'))
     # suite.addTest(Test_21000_input_json('test21010_filter_setup_json_read'))
-    #suite.addTest(Test_30000_json_ai_interface('test_30000_load_proc_details'))
+    suite.addTest(Test_40000_json_ai_interface('test_40000_load_proc_details'))
+    #suite.addTest(Test_40000_json_ai_interface('test_40001_load_from_json'))
     #suite.addTest(Test_21000_input_json('test_21011_drying_json_out'))
     #suite.addTest(Test_21000_input_json('test_21012_drying_json_read'))
-    suite.addTest(Test_30000_json_proc_output('test_30000_json_uo'))
+    #suite.addTest(Test_30000_json_proc_output('test_30000_json_uo'))
 
     return suite
             

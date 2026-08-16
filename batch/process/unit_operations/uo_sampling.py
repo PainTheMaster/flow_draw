@@ -351,7 +351,11 @@ class Sampling(uo.UnitOperation, uo_tag=defs.tag_uo_sampling):
         
         arr_samples = Array(key=key_json_arr_samples,
                             content=single_sample,
-                            description="An array of samples belonging to one sampling block and the necessary monitoring and/or IPC requirements associated with them.",
+                            description="An array of samples belonging to one sampling block and the necessary monitoring and/or IPC requirements associated with them. "
+                            "Please make replicate entries for each sample if multiple samples are appropriate in the same sampling block. "
+                            "For example if multiple samples in a certain time interval are anticipated."
+                            "For instance in more details, if sampling at 1, 2, 3...n hours is instructed, "
+                            "n sampling objects shall be included in the array, each with the same or different monitoring and/or IPC requirements.",
                             required=True,
                             nullable=True)
 

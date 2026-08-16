@@ -1,6 +1,8 @@
 import os
+import shutil
 import math
 import json
+import datetime
 import openpyxl as xl
 import pandas as pd
 import flow_draw.definitions as defs
@@ -478,7 +480,7 @@ class ProcessIO:
         client = OpenAI(api_key=os.getenv("OPEN_AI_KEY"))
         print("Open AI client opened")
         
-        #os.mkdir('.\\images')
+        os.mkdir('.\\images')
         images = pdf2image.convert_from_path(filename_input, dpi=150)
         image_paths:list[str] = []
         for i, img in enumerate(images):
@@ -495,7 +497,8 @@ class ProcessIO:
                                     }
                                 }
             )
-            os.remove(path=path)
+
+        shutil.rmtree('.\\images')
 
         schema_dict = self.json_uo(caller, list_uo)
         response_format={
@@ -524,6 +527,7 @@ class ProcessIO:
         )
 
         result_text = response.choices[0].message.content
+        
         print()
         print('-------------------')
         print(result_text)
@@ -542,7 +546,13 @@ class ProcessIO:
         print()
         print('-------------------')        
         json_dict = json.loads(result_text)
-        arr_uos: list[dict[str, any]] = json_dict[(defs.json_key_arr_uo_params)]
+
+        dt_now = datetime.datetime.now()
+        filename = f'llm_output_{dt_now.year}-{dt_now.month}-{dt_now.day}_{dt_now.hour}{dt_now.minute}.json'
+        with open(filename, 'w', encoding='utf-8') as f:
+            json.dump(json_dict, f, ensure_ascii=False, indent=1)
+
+        arr_uos: list[dict[str, any]] = json_dict[defs.json_key_arr_uo_params]
         print(arr_uos)
         return arr_uos
 

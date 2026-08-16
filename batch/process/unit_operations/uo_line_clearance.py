@@ -26,7 +26,7 @@ hedr_postcomment = defs.hedr_cmn_io_dtil_postcmnt #Don't include this in the spe
 #########################################################
 # UO-specific hader items and list thereof
 #########################################################
-hedr_sop = "SOP_for_line-clearnce"
+hedr_sop = "SOP_title"
 list_hedr = [hedr_sop]
 
 
@@ -121,7 +121,7 @@ class LineClearance(uo.UnitOperation, uo_tag=defs.tag_uo_line_clearance):
     def get_json_schema(caller: trdef.UniversalTrait=None)->Objason:
         common_schema:list[Primitive] = LineClearance.json_common()
         sop = Primitive(prim_type = "string",
-                        key="SOP_title",
+                        key=hedr_sop,
                         description='Title of the SOP document. If valid information is not provided, please put <placeholder> in the field.',
                         nullable=False)
         obj_clearance = Objason(key=LineClearance.uo_tag,
@@ -131,8 +131,8 @@ class LineClearance(uo.UnitOperation, uo_tag=defs.tag_uo_line_clearance):
 
     def load_from_json_dict(self, json_dict: dict[str, any]):
         super().load_from_json_dict(json_dict)
-        self.sop = json_dict.get(key=hedr_sop, default='<placeholder>')        
-
+        #self.sop = json_dict.get(key=hedr_sop, default='<placeholder>')        
+        self.sop = json_dict.get(hedr_sop, '<placeholder>')
 
     def output_unit_operation(self):
         self.flowsheet.header_organizer(op_nr=self.operation_seq, title=lang_dict_uo_titles[self.uo_tag])
