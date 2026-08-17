@@ -20,6 +20,7 @@ import flow_draw.batch.process.unit_operations.uo_inert_replacement as inert
 import flow_draw.batch.process.unit_operations.uo_line_clearance as lnclear
 import flow_draw.batch.process.unit_operations.uo_phase_discharge as phdisch
 import flow_draw.batch.process.unit_operations.uo_temp_control as tempctrl
+import flow_draw.batch.process.unit_operations.uo_settling as settling
 import flow_draw.batch.process.process as proc
 import flow_draw.data_io.process_io as pio
 import flow_draw.batch.process.unit_operations.uo_drying as drying
@@ -272,6 +273,7 @@ class Test_21000_input_json(unittest.TestCase, trdef.GetMats):
         self.filt_obj = filt.Filtration(caller=self, flowsheet=flowsheet, operation_seq=7, edit_comment='Test for filtration JSON I/O')
         self.filtsup_obj = filtsup.FiltSetup(caller=self, flowsheet=flowsheet, operation_seq=8, edit_comment='Test for filter setup JSON I/O')
         self.drying_obj = drying.Drying(caller=self, flowsheet=flowsheet, operation_seq=9, edit_comment='Test for drying JSON I/O')
+        self.settling_obj = settling.Settling(caller=self, flowsheet=flowsheet, operation_seq=10, edit_comment='Test for settling JSON I/O')
         return super().setUp()
     
     def get_mats(self) -> mats:
@@ -283,8 +285,8 @@ class Test_21000_input_json(unittest.TestCase, trdef.GetMats):
                     "Seq_Nr": 3,
                     "Unit_Operation": "sampling",
                     "Edit_Comment": "Added IPC criterion for conversion.",
-                    "Pre-comment": "Collect samples before proceeding to the next step.",
-                    "Post-comment": "Record results in the batch record.",
+                    "Precomment": "Collect samples before proceeding to the next step.",
+                    "Postcomment": "Record results in the batch record.",
                     "json_array_samples": [
                         {
                         "Sample_Name": "Reaction Mixture",
@@ -392,8 +394,8 @@ class Test_21000_input_json(unittest.TestCase, trdef.GetMats):
                 "Seq_Nr": 1,
                 "Unit_Operation": "agitation",
                 "Edit_Comment": null,
-                "Pre-comment": "Maintain homogeneous suspension.",
-                "Post-comment": "Confirm dissolution before proceeding.",
+                "Precomment": "Maintain homogeneous suspension.",
+                "Postcomment": "Confirm dissolution before proceeding.",
                 "Specification": "Specific RPM",
                 "Rotation_(rpm)": 250,
                 "Ti_min_(deg-C)": 20.0,
@@ -432,8 +434,8 @@ class Test_21000_input_json(unittest.TestCase, trdef.GetMats):
                 "Seq_Nr": 2,
                 "Unit_Operation": "charging",
                 "Edit_Comment": "test all constraints",
-                "Pre-comment": "Slowly add reagent",
-                "Post-comment": "Verify temperature remains stable",
+                "Precomment": "Slowly add reagent",
+                "Postcomment": "Verify temperature remains stable",
                 "arr_charging_input_entry": [
                     {
                     "Material_Name": "test mat 1",
@@ -505,8 +507,8 @@ class Test_21000_input_json(unittest.TestCase, trdef.GetMats):
                     "Seq_Nr": 5,
                     "Unit_Operation": "cip",
                     "Edit_Comment": "Cleaning after batch completion",
-                    "Pre-comment": "Flush system before cleaning",
-                    "Post-comment": "Verify cleanliness before next operation",
+                    "Precomment": "Flush system before cleaning",
+                    "Postcomment": "Verify cleanliness before next operation",
                     "arr_unit_cip": [
                         {
                         "CIP_target": "reaction vessel",
@@ -605,8 +607,8 @@ class Test_21000_input_json(unittest.TestCase, trdef.GetMats):
                         "Seq_Nr": 3,
                         "Unit_Operation": "filtration",
                         "Edit_Comment": "Pressure range based on batch record.",
-                        "Pre-comment": "Verify filter integrity before use.",
-                        "Post-comment": "Record final filtrate volume.",
+                        "Precomment": "Verify filter integrity before use.",
+                        "Postcomment": "Record final filtrate volume.",
                         "Filtering Equipment": "Pall Supor EKV Filter",
                         "Tj set point": 20.0,
                         "Filt P_min": 50.0,
@@ -643,8 +645,8 @@ class Test_21000_input_json(unittest.TestCase, trdef.GetMats):
                     "Seq_Nr": 3,
                     "Unit_Operation": "filter_setup",
                     "Edit_Comment": null,
-                    "Pre-comment": "ろ過機の組立前に、フィルタークロスの外観検査を実施すること。",
-                    "Post-comment": null,
+                    "Precomment": "ろ過機の組立前に、フィルタークロスの外観検査を実施すること。",
+                    "Postcomment": null,
                     "Equipment": "F-201",
                     "Filter_cloth_type": "PPクロス（100メッシュ)",
                     "Number_cloth": 2,
@@ -702,8 +704,8 @@ class Test_21000_input_json(unittest.TestCase, trdef.GetMats):
                         "Seq_Nr": 12,
                         "Unit_Operation": "drying",
                         "Edit_Comment": "Drying conditions taken from the flowsheet rev.3, section 4.2.",
-                        "Pre-comment": "Confirm that the cake washing is complete and the mother liquor line is closed before starting the vacuum.",
-                        "Post-comment": "Break the vacuum with nitrogen before discharging the dried product.",
+                        "Precomment": "Confirm that the cake washing is complete and the mother liquor line is closed before starting the vacuum.",
+                        "Postcomment": "Break the vacuum with nitrogen before discharging the dried product.",
                         "Tj_ctrl_cat": "Tj_ctrl_spec",
                         "Tj_low_drying": 40.0,
                         "Tj_high_drying": 50.0,
@@ -781,6 +783,49 @@ class Test_21000_input_json(unittest.TestCase, trdef.GetMats):
             print(f'  test_tgt_criterion: {test.test_val_tgt_criterion}')
             print(f'  test_unit: {test.test_unit_val}')
         self.assertTrue(True)
+
+
+    def test_21013_settling_json_out(self):
+        json_obj:Objason = settling.Settling.get_json_schema(caller=self)
+        json_str = json_obj.asType()
+        for line in json_str:
+            print(line)
+        self.assertTrue(True)
+
+    def test_21014_settling_json_read(self):
+        str_json = """
+        {
+            "Seq_Nr": 7,
+            "Unit_Operation": "settling",
+            "Edit_Comment": "Settling time based on DoE run #12.",
+            "Precomment": "Confirm that agitation is completely stopped before starting the settling period.",
+            "Postcomment": "Check that a clear interface is formed. If the interface is unclear, extend the settling time.",
+            "minimum_settling_time": 20,
+            "maximum_settling_time": 40,
+            "time_unit": "min",
+            "Ti_min_degC": 20,
+            "Ti_max_degC": 30
+        }
+        """
+        json_dict = json.loads(str_json)
+        self.settling_obj.load_from_json_dict(json_dict=json_dict)
+        print('====================')
+        print(f'operation_seq: {self.settling_obj.operation_seq}')
+        print(f'edit_comment: {self.settling_obj.edit_comment}')
+        print(f'pre_comment: {self.settling_obj.pre_comment}')
+        print(f'post_comment: {self.settling_obj.post_comment}')
+        print(f'Settling_time_min: {self.settling_obj.time_min}')
+        print(f'Settling_time_max: {self.settling_obj.time_max}')
+        print(f'Time_unit: {self.settling_obj.time_unit}')
+        print(f'Ti_min: {self.settling_obj.Ti_min}')
+        print(f'Ti_max: {self.settling_obj.Ti_max}')
+
+        self.settling_obj.output_unit_operation()
+        self.settling_obj.flowsheet.save(filename="settling_test_flowsheet.xlsx")
+
+
+        self.assertTrue(True)
+
 
 class Test_30000_json_proc_output(unittest.TestCase):
     def setUp(self):
@@ -945,10 +990,12 @@ def suite_json_test():
     #suite.addTest(Test_21000_input_json('test_21008_filtration_json_read'))
     #suite.addTest(Test_21000_input_json('test_21009_filter_setup_json_out'))
     # suite.addTest(Test_21000_input_json('test21010_filter_setup_json_read'))
-    suite.addTest(Test_40000_json_ai_interface('test_40000_load_proc_details'))
+    #suite.addTest(Test_40000_json_ai_interface('test_40000_load_proc_details'))
     #suite.addTest(Test_40000_json_ai_interface('test_40001_load_from_json'))
     #suite.addTest(Test_21000_input_json('test_21011_drying_json_out'))
     #suite.addTest(Test_21000_input_json('test_21012_drying_json_read'))
+    # suite.addTest(Test_21000_input_json('test_21013_settling_json_out'))
+    suite.addTest(Test_21000_input_json('test_21014_settling_json_read'))
     #suite.addTest(Test_30000_json_proc_output('test_30000_json_uo'))
 
     return suite

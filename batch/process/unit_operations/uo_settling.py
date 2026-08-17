@@ -12,6 +12,7 @@ from flow_draw.data_io import process_io as procio
 from flow_draw.materials import materials as mats
 from flow_draw.trait_def import trait_def as trdef
 #from flow_draw.trait_def.trait_def import GetMats
+from flow_draw.data_io.json_io import Objason, Array, Primitive
 
 
 
@@ -44,26 +45,31 @@ opt_time_unit_hour:str = defs.tag_flow_cmn_time_unit_hour
 #list_hedr = defs.list_hedr_<list of header items for the uo>
 #dict_dtil_drpdwn = defs.dict_opt_<unit operation>
 
-hedr_time_min = defs.hedr_uo_settling_time_min
+hedr_time_min = 'minimum_settling_time'
 """header for the unit operation settling: Minimum settling time"""
-hedr_time_max = defs.hedr_uo_settling_time_max
+hedr_time_max = 'maximum_settling_time'
 """header for the unit operation settling: Maximum settling time"""
-hedr_time_unit = defs.hedr_uo_settling_time_unit
+hedr_time_unit = 'time_unit'
 """header for the unit operation settling: Time unit"""
-hedr_Ti_min = defs.hedr_uo_settling_Ti_min
+hedr_Ti_min = 'Ti_min_degC'
 """header for the unit operation settling: Ti min"""
-hedr_Ti_max = defs.hedr_uo_settling_Ti_max
+hedr_Ti_max = 'Ti_max_degC'
 """header for the unit operation settling: Ti max"""
-list_hedr = defs.list_hedr_uo_settling
+list_hedr = [hedr_time_min,
+             hedr_time_max,
+             hedr_time_unit,
+             hedr_Ti_min,
+             hedr_Ti_max]
 """list of header items for the unit operation settling"""
 
 
 #########################################################
 # UO-specific options, list, header_item: list dictionry thereof (for data input and internalsignaling)
 #########################################################
-
-dict_opt = defs.dict_opt_uo_settling
-"""dict of options for heaader items"""
+list_opt_time_unit = defs.list_time_unit
+"""List of options for the item time_unit."""
+dict_opt = {hedr_time_unit : list_opt_time_unit}
+"""dict of options for header items"""
 
 
 #########################################################
@@ -94,46 +100,72 @@ Language dictionary for common parts.
 """
 
                 #----------flowsheet parts------------------#
-
-tag_part_init_settling = defs.tag_part_uo_settling_init_settling
+tag_part_init_settling = 'instr_init_settling'
 """Tag for a flowsheet component for the unit operation settling: """
-tag_part_rec_chk_agitator_stop = defs.tag_part_uo_settling_rec_chk_agitator_stop
+tag_part_Ti_arbitrary = 'settling_Ti_arbitrary'
+"""Tag for a flowsheet component for the unit operation settling: arbitrary Ti"""
+tag_part_rec_chk_agitator_stop = 'check_box_agit_stop'
 """Tag for a flowsheet component for the unit operation settling: cutting off agitation for settling"""
-tag_part_rec_Tj_ini = defs.tag_part_uo_settling_rec_Tj_ini
+tag_part_rec_Tj_ini = 'record_Tj_ini'
 """Tag for a flowsheet component for the unit operation settling: record field for the initial Tj"""
-tag_part_rec_Ti_ini = defs.tag_part_uo_settling_rec_Ti_ini
+tag_part_rec_Ti_ini = 'record_Ti_ini'
 """Tag for a flowsheet component for the unit operation settling: recorod field for the initial Ti"""
-tag_part_end_settling = defs.tag_part_uo_settling_end_settling
+tag_part_time_arbitrary = 'settling_time_arbitrary'
+"""Tag for a flowsheet component for the unit operation settling: arbitrary settling time"""
+tag_part_end_settling = 'instr_end_settling'
 """Tag for a flowsheet component for the unit operation settling: end of settling"""
-tag_part_Tj_end = defs.tag_part_uo_settling_Tj_end
+tag_part_Tj_end = 'record_Tj_end'
 """Tag for a flowsheet component for the unit operation settling: Recording field for Tj at the end of settling"""
-tag_part_Ti_end = defs.tag_part_uo_settling_Ti_end
+tag_part_Ti_end = 'record_Ti_end'
 """Tag for a flowsheet component for the unit operation settling:Recording field for Ti at the end of settling """
-dict_part_flow = defs.dict_jp_part_flow_uo_settling
-"""language dictionary for flowsheet components for the unit opeataion settling"""
+
+dict_jp_part_flow = {tag_part_init_settling : "静置開始",
+                     tag_part_Ti_arbitrary : "", #Intentionally blank.
+                     tag_part_rec_chk_agitator_stop : "□ 攪拌停止",
+                     tag_part_rec_Tj_ini : "静置開始時外温_________℃",
+                     tag_part_rec_Ti_ini : "静置開始時内温_________℃",
+                     tag_part_end_settling : "静置終了",
+                     tag_part_time_arbitrary : "", #Intentionally blank.
+                     tag_part_Tj_end : "静置終了時外温_________℃",
+                     tag_part_Ti_end : "静置終了時内_________℃"}
+
+dict_part_flow = dict_jp_part_flow
+"""language dictionary for flowsheet components for the unit operation settling"""
 
 
 
                 #----------flowsheet sentences----------------#
 
-tag_stc_time_min = defs.tag_stc_uo_settling_time_min
+tag_stc_time_min = 'sentence_minimum_settling_time'
 """Tag for a flowsheet sentence for the unit operation settling: minimum settling time. contains placeholders {time_min} and {time_unit}"""
-tag_stc_time_max = defs.tag_stc_uo_settling_time_max
+tag_stc_time_max = 'sentence_maximum_settling_time'
 """Tag for a flowsheet sentence for the unit operation settling: maximum settling time. contains placeholders {time_max} and {time_unit}"""
-tag_stc_time_range = defs.tag_stc_uo_settling_time_range
+tag_stc_time_range = 'sentence_settling_time_range'
 """Tag for a flowsheet sentence for the unit operation settling: settling time range. contains placeholders {time_min}, {time_max}, and {time_unit}"""
-tag_stc_time_single_point = defs.tag_stc_uo_settling_time_single_point
+tag_stc_time_single_point = 'sentence_settling_single_point'
 """Tag for a flowsheet sentence for the unit operation settling: settling time single point. contains placeholders {time} and {time_unit}"""
-tag_stc_Ti_min = defs.tag_stc_uo_settling_Ti_min
+tag_stc_Ti_min = 'settling_Ti_min'
 """Tag for a flowsheet sentence for the unit operation settling: Minimum Ti for settling. contains placeholders {Ti_min}"""
-tag_stc_Ti_max = defs.tag_stc_uo_settling_Ti_max
+tag_stc_Ti_max = 'settling_Ti_max'
 """Tag for a flowsheet sentence for the unit operation settling: Maximum Ti for settling. contains placeholders {Ti_max}"""
-tag_stc_Ti_range = defs.tag_stc_uo_settling_Ti_range
+tag_stc_Ti_range = 'settling_Ti_range'
 """Tag for a flowsheet sentence for the unit operation settling: Ti range for settling. contains placeholders {Ti_min} and {Ti_max}"""
-tag_stc_rec_duration = defs.tag_stc_uo_settling_rec_duration
+tag_stc_rec_duration = 'record_field_settling_duration'
 """Tag for a flowsheet sentence for the unit operation settling: record field for setting duration. contains placeholders {time_unit}"""
-dict_stcs = defs.dict_jp_stcs_uo_settling
+
+
+dict_jp_stcs = {tag_stc_time_min : "静置時間:{time_min} {time_unit}以上",
+                tag_stc_time_max : "静置時間:{time_max} {time_unit}以下",
+                tag_stc_time_range : "静置時間:{time_min}～{time_max} {time_unit}",
+                tag_stc_time_single_point : "静置時間:{time} {time_unit}",
+                tag_stc_Ti_min : "静置時内温:{Ti_min} ℃以上",
+                tag_stc_Ti_max : "静置時内温:{Ti_max} ℃以下",
+                tag_stc_Ti_range : "静置時内温:{Ti_min}～{Ti_max}℃",
+                tag_stc_rec_duration : "静置時間_________{time_unit}"}
 """Japanese language dictionary for senteces in flowsheets for the unit operation settling"""
+
+dict_stcs = defs.dict_jp_stcs_uo_settling
+"""Language dictionary for senteces in flowsheets for the unit operation settling"""
 
 
 
@@ -184,7 +216,7 @@ class Settling(uo.UnitOperation, uo_tag=defs.tag_uo_settling):
             self.time_min = first_row[hedr_time_min]
         if not pd.isna(first_row[hedr_time_max]):
             self.time_max = first_row[hedr_time_max]
-        if self.time_min is not None and self.time_max is not None:
+        if self.time_min is not None or self.time_max is not None:
             if not pd.isna(first_row[hedr_time_unit]):
                 self.time_unit = first_row[hedr_time_unit]
             else:
@@ -208,6 +240,75 @@ class Settling(uo.UnitOperation, uo_tag=defs.tag_uo_settling):
 
     def get_detail_option_menu(self) -> Optional[dict[str, list[str]]]:
         return dict_opt
+
+    def get_json_schema(caller: trdef.UniversalTrait=None)->Objason:
+        common_schema:list[Primitive] = Settling.json_common()
+        time_min:Primitive = Primitive(prim_type='number',
+                                       key=hedr_time_min,
+                                       description=f'Minimum settling time. Although this pairs with "{hedr_time_max}", '
+                                       'one-side designation (either minimum or maximum) is possible. Therefore, nullable as appropriate. '
+                                       f'If both "{hedr_time_min}" and "{hedr_time_max}" are null, an instruction for settling for an arbitrary time is generated. '
+                                       f'"{hedr_time_min}" and "{hedr_time_max}" should have the same time unit, which is designated by "{hedr_time_unit}".',
+                                       nullable=True,
+                                       required=True)
+        time_max:Primitive = Primitive(prim_type='number',
+                                       key=hedr_time_max,
+                                       description=f'Maximum settling time. Although this pairs with "{hedr_time_min}", '
+                                       'one-side designation (either minimum or maximum) is possible. Therefore, nullable as appropriate. '
+                                       f'If both "{hedr_time_min}" and "{hedr_time_max}" are null, an instruction for settling for an arbitrary time is generated. '
+                                       f'"{hedr_time_min}" and "{hedr_time_max}" should have the same time unit, which is designated by "{hedr_time_unit}".',
+                                       nullable=True,
+                                       required=True)
+        time_unit:Primitive = Primitive(prim_type='string',
+                                        key=hedr_time_unit,
+                                        description=f'Time unit for settling time. Nullable only when "{hedr_time_min}" and "{hedr_time_max}" are null.',
+                                        enum=list_opt_time_unit,
+                                        nullable=True,
+                                        required=True)
+        Ti_min:Primitive = Primitive(prim_type='number',
+                                     key=hedr_Ti_min,
+                                     description=f'Minimum Ti for settling. Although this pairs with "{hedr_Ti_max}", '
+                                     'one-side designation (either minimum or maximum) is possible. Therefore, nullable as appropriate.',
+                                     nullable=True,
+                                     required=True)
+        Ti_max:Primitive = Primitive(prim_type='number',
+                                     key=hedr_Ti_max,
+                                     description=f'Maximum Ti for settling. Although this pairs with "{hedr_Ti_min}", '
+                                     'one-side designation (either minimum or maximum) is possible. Therefore, nullable as appropriate.',
+                                     nullable=True,
+                                     required=True)
+        obj_schema:Objason = Objason(key=Settling.uo_tag,
+                                     description="Unit operation of settling. "
+                                     "In this operation, agitation is stopped and the mixture, which consists of different phases, is allowed to settle for a certain period of time for a good separation.",
+                                     props=common_schema+[time_min, time_max, time_unit, Ti_min, Ti_max],
+                                     nullable=False,
+                                     required=True)   
+        return obj_schema     
+
+                                        
+                                       
+
+
+    def load_from_json_dict(self, json_dict: dict[str, any]):
+        super().load_from_json_dict(json_dict)
+        self.time_min = json_dict.get(hedr_time_min, None)
+        self.time_max = json_dict.get(hedr_time_max, None)
+        self.time_unit = json_dict.get(hedr_time_unit, opt_time_unit_minute)
+
+        if self.time_min is not None or self.time_max is not None and json_dict.get(hedr_time_unit, None) is not None:
+            self.time_unit = json_dict.get(hedr_time_unit, None)
+        elif self.time_min is not None or self.time_max is not None and json_dict.get(hedr_time_unit, None) is None:
+            self.time_unit = opt_time_unit_minute
+            warnings.warn(message=f"{self.__class__.__name__}: No time unit is designated for Op. Seq {self.operation_seq} "
+                                 "even though the minimum and/or maximum time has been provided. Time unit of minute is put "
+                                 "just to keep the ball rolling.",
+                            category=RuntimeWarning)
+        else:
+            self.time_unit = None
+
+        self.Ti_min = json_dict.get(hedr_Ti_min, None)
+        self.Ti_max = json_dict.get(hedr_Ti_max, None)
+
     
     def output_unit_operation(self):
         self.flowsheet.header_organizer(op_nr=self.operation_seq, title=lang_dict_uo_titles[self.uo_tag])
@@ -238,7 +339,7 @@ class Settling(uo.UnitOperation, uo_tag=defs.tag_uo_settling):
         elif self.time_max is not None:
             sentence_instr_time = dict_stcs[tag_stc_time_max].format(time_max=self.time_max, time_unit=lang_dict_cmn[self.time_unit])
         else:
-            sentence_instr_time = ""
+            sentence_instr_time = dict_part_flow[tag_part_time_arbitrary]
         
         self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
                                 method=dict_part_flow[tag_part_init_settling],
@@ -248,15 +349,17 @@ class Settling(uo.UnitOperation, uo_tag=defs.tag_uo_settling):
                                 witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
     
     def __put_temp_ctrl(self):
-        sentence_instr_temp:str = None
+        sentence_instr_Ti:str = None
         if self.Ti_min is not None and self.Ti_max is not None:
-            sentence_instr_temp = dict_stcs[tag_stc_Ti_range].format(Ti_min=self.Ti_min, Ti_max=self.Ti_max)
+            sentence_instr_Ti = dict_stcs[tag_stc_Ti_range].format(Ti_min=self.Ti_min, Ti_max=self.Ti_max)
         elif self.Ti_min is not None:
-            sentence_instr_temp = dict_stcs[tag_stc_Ti_min].format(Ti_min=self.Ti_min)
+            sentence_instr_Ti = dict_stcs[tag_stc_Ti_min].format(Ti_min=self.Ti_min)
+        elif self.Ti_max is not None:
+            sentence_instr_Ti = dict_stcs[tag_stc_Ti_max].format(Ti_max=self.Ti_max)
         else:
-            sentence_instr_temp = dict_stcs[tag_stc_Ti_max].format(Ti_max=self.Ti_max)
+            sentence_instr_Ti = dict_part_flow[tag_part_Ti_arbitrary]
         
-        self.flowsheet.put_line(content=sentence_instr_temp,
+        self.flowsheet.put_line(content=sentence_instr_Ti,
                                 record=dict_part_flow[tag_part_rec_Tj_ini])
         self.flowsheet.put_line(record=dict_part_flow[tag_part_rec_Ti_ini])
 

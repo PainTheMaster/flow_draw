@@ -380,7 +380,8 @@ class Filtration(uo.UnitOperation, uo_tag=defs.tag_uo_filt):
                                 method=dict_flowsheet_comp[tag_part_flow_method_instr_end],
                                 record=dict_flowsheet_comp[tag_part_flow_rec_cake_height],
                                 operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
-                                witness=lang_dict_cmn[tag_flow_cmn_rec_sign])        
+                                witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
+        self.flowsheet.linefeed()        
 
         if not (self.post_comment == None or self.post_comment == ''):
             self.flowsheet.put_body_comments(self.post_comment)

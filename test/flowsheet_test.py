@@ -7,7 +7,7 @@ import flow_draw.batch.process.unit_operations.unit_operation as uo_module
 import flow_draw.batch.process.unit_operations.uo_charging as chgng
 import flow_draw.batch.process.unit_operations.uo_placeholder as plchldr
 import flow_draw.batch.process.unit_operations.uo_line_clearance as lnclnc
-import flow_draw.batch.process.unit_operations.uo_innert_replacement as innert
+import flow_draw.batch.process.unit_operations.uo_inert_replacement as inert
 import flow_draw.batch.process.unit_operations.uo_temp_control as tempr
 import flow_draw.batch.process.unit_operations.uo_agitation as agit
 import flow_draw.batch.process.unit_operations.uo_settling as stlng
@@ -177,7 +177,7 @@ class UnitOperationOutputTest(unittest.TestCase):
 
     def test_1003_innert_replace(self):
         sheet = fsht.Flowsheet()
-        uo_instance = innert.InnertReplacement(flowsheet=sheet, operation_seq=3)
+        uo_instance = inert.InnertReplacement(flowsheet=sheet, operation_seq=3)
         uo_instance.innert_gas=defs.opt_uo_inert_gas_Ar
         uo_instance.neg_pressure = -0.08
         uo_instance.num_repeat = 2
