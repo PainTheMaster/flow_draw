@@ -157,6 +157,10 @@ class Batch:
             proc.load_uo_summary()
             proc.load_materials_data()
 
+    def load_material_data_for_ai(self):
+        for proc in self.list_proc:
+            proc.load_materials_data()
+    
 
     def load_process_details(self):
         """
@@ -172,6 +176,14 @@ class Batch:
         """
         for proc in self.list_proc:
             proc.load_unitop_detail()
+
+    def generate_process_json(self):
+        for proc in self.list_proc:
+            proc.generate_proc_json()
+
+    def manual_load_json(self):
+        for proc in self.list_proc:
+            proc.load_json()
 
     def ai_load_process_details(self):
         for proc in self.list_proc:

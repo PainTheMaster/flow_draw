@@ -137,7 +137,7 @@ class TestForProcessCls(unittest.TestCase):
         Helper method. Injects specific values to the input form (an worksheet in an Excel file on the hard drive)
         Don't forget to save the file!
         """
-        data_input = self.test_process.data_input
+        data_input = self.test_process.data_io
         ws_chem = data_input.mats_ws
         ws_chem.cell(row=row, column=defs.col_nr_io_mats_mat).value=name_mat
         if is_main:
@@ -162,7 +162,7 @@ class TestForProcessCls(unittest.TestCase):
         Helper method. Injects specific values to the input form (an worksheet in an Excel file on the hard drive)
         Don't forget to save the file!
         """
-        data_input = self.test_process.data_input
+        data_input = self.test_process.data_io
         ws_summary = data_input.summary_ws
         if seq:
             ws_summary.cell(row=row, column=defs.col_nr_io_sumry_seq).value=seq
@@ -173,7 +173,7 @@ class TestForProcessCls(unittest.TestCase):
         ws_summary.cell(row=row, column=defs.col_nr_io_sumry_edt_cmnt).value=editcomment
 
     def save_injected_data(self):
-        data_input = self.test_process.data_input
+        data_input = self.test_process.data_io
         data_input.save_form()
 
 

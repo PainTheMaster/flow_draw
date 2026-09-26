@@ -1,5 +1,6 @@
 #from typing import List
 import pandas as pd
+import json
 import flow_draw.definitions as defs
 # from flow_draw.batch.process.unit_operations import unit_operation
 #from flow_draw.batch.process.unit_operations.unit_operation import UnitOperation as unitop
@@ -27,7 +28,20 @@ from flow_draw.trait_def.trait_def import GetProcName as GetProcName
 from flow_draw.data_io import json_io
 from flow_draw.data_io.json_io import JsonEntity, Array, Objason, Primitive
 
-list_uo: list[type[uo.UnitOperation]] = [agit.Agitation, chgng.Charging, cip.CIP, fltstup.FiltSetup, filt.Filtration,smplng.Sampling, plchldr.Placeholder]
+list_uo_common: list[type[uo.UnitOperation]] = [chgng.Charging,
+                                                 smplng.Sampling,
+                                                 cip.CIP,
+                                                 agit.Agitation,
+                                                 evap.Evaporation,
+                                                 fltstup.FiltSetup,
+                                                 filt.Filtration,
+                                                 plchldr.Placeholder,
+                                                 inert.InertReplacement,
+                                                 lnclear.LineClearance,
+                                                 phdisch.PhaseDisch,
+                                                 tempctrl.TempControl,
+                                                 drying.Drying
+                                                ]
 
 
 class Process(GetMats, GetProcName):
@@ -63,14 +77,14 @@ class Process(GetMats, GetProcName):
         self.batch_name:str = batch_name
         self.process_name:str = process_name
         self.num_uo:int = None
-        self.data_input: proc_io.ProcessIO = None
+        self.data_io: proc_io.ProcessIO = None
         if(num_uo is not None):
             self.num_uo = num_uo
         else:
             self.num_uo = 1
         self.comment: str = comment
         if not(batch_name is None or process_name is None):
-            self.data_input: proc_io.ProcessIO = proc_io.ProcessIO(batch_name=batch_name, process_name=process_name, num_unit_op=num_uo)
+            self.data_io: proc_io.ProcessIO = proc_io.ProcessIO(batch_name=batch_name, process_name=process_name, num_unit_op=num_uo)
             """
             Please note that self.data_input has only the information provided as the arguments above (batch name, process name, and number of unit operations). The object doesn't hold even the sequnce of unit operations.
             Hence the object is like a collection of placeholders for unit operations. A specific sequence is knwon when self.load_uo_summary() is called. The details for each unit operation is loaded when load_unitop_detail() is called.
@@ -99,9 +113,9 @@ class Process(GetMats, GetProcName):
         None
             Returns nothing. The results are stored in self.data_input.
         """
-        self.data_input.generate_proc_summary_form(list_unit_ops=uo.list_unit_ops)
+        self.data_io.generate_proc_summary_form(list_unit_ops=uo.list_unit_ops)
         #At the time of process summary creation, the material information should be available. Plus, it is neceesary before loading the detail.
-        self.data_input.generate_mats_form()
+        self.data_io.generate_mats_form()
         #self.data_input.save_form()
 
 
@@ -119,12 +133,11 @@ class Process(GetMats, GetProcName):
         None
         
         """
-        self.data_input.generate_mats_form()
-        #self.data_input.save_form()
+        self.data_io.generate_mats_form_for_ai()
 
 
     def generate_proc_detail_for_ai(self):
-        self.data_input.json
+        self.data_io.json
         #TODO: impelment me!
         pass
 
@@ -142,7 +155,7 @@ class Process(GetMats, GetProcName):
         ----------
         None
         """
-        df_summary = self.data_input.load_process_summary()
+        df_summary = self.data_io.load_process_summary()
         uo_reg = uo.registry_uo_cls
         for _, row in df_summary.iterrows():
             seq = int(row[defs.hedr_io_sumry_seq])
@@ -172,7 +185,7 @@ class Process(GetMats, GetProcName):
         ------------
         None
         """
-        self.mats_data = self.data_input.load_mats()
+        self.mats_data = self.data_io.load_mats()
 
     #TODO: Create the process detail input form, for each unit operation in teh list_uo, get the uo-specific header and feed it to ProcessIO.generate_proc_detail_form()
 
@@ -191,7 +204,7 @@ class Process(GetMats, GetProcName):
         None
         """
         
-        df_uo_details: list[pd.DataFrame] = self.data_input.load_process_details()
+        df_uo_details: list[pd.DataFrame] = self.data_io.load_process_details()
         for i in range(len(self.seq_uo)):
             temp_detail = df_uo_details[i]
             if self.seq_uo[i].uo_tag == (temp_detail)[defs.hedr_cmn_io_dtil_uo].iloc[0]:
@@ -205,27 +218,22 @@ class Process(GetMats, GetProcName):
     #TODO Let's implement self.prep_uo() to create a list of unit operations to be ready to receive detail data.
 
 
+    def generate_proc_json(self):
+        list_uo = list_uo_common
+        json_dict = self.data_io.json_uo(caller=self, list_uo=list_uo)
+        file_name = self.process_name+"_schema.json"
+        with open(file=file_name, mode='w', encoding='utf_8') as file_this:
+            json.dump(obj=json_dict, fp=file_this)
+
+
     
 
     def ai_load_process_details(self):
         # self.load_materials_data()
         #lit_uo = list(unitop.registry_uo_cls.values())
         #TODO: Please replace list_uo with the real one before release.
-        list_uo: list[type[uo.UnitOperation]] = [chgng.Charging,
-                                                 smplng.Sampling,
-                                                 cip.CIP,
-                                                 agit.Agitation,
-                                                 evap.Evaporation,
-                                                 fltstup.FiltSetup,
-                                                 filt.Filtration,
-                                                 plchldr.Placeholder,
-                                                 inert.InertReplacement,
-                                                 lnclear.LineClearance,
-                                                 phdisch.PhaseDisch,
-                                                 tempctrl.TempControl,
-                                                 drying.Drying
-                                                 ]
-        arr_steps = self.data_input.ai_load_process_details(caller=self, list_uo=list_uo)
+        list_uo: list[type[uo.UnitOperation]] = list_uo_common
+        arr_steps = self.data_io.ai_load_process_details(caller=self, list_uo=list_uo)
         uo_reg = uo.registry_uo_cls
         for step in arr_steps:
             uo_tag = step[defs.hedr_cmn_io_dtil_uo]
@@ -241,21 +249,9 @@ class Process(GetMats, GetProcName):
 
         self.flowsheet.save(filename=self.process_name+".xlsx")
            
-    def load_from_json_dict(self, json_dict: dict[str, any]):
-        list_uo: list[type[uo.UnitOperation]] = [chgng.Charging,
-                                                 smplng.Sampling,
-                                                 cip.CIP,
-                                                 agit.Agitation,
-                                                 evap.Evaporation,
-                                                 fltstup.FiltSetup,
-                                                 filt.Filtration,
-                                                 plchldr.Placeholder,
-                                                 inert.InertReplacement,
-                                                 lnclear.LineClearance,
-                                                 phdisch.PhaseDisch,
-                                                 tempctrl.TempControl,
-                                                 drying.Drying
-                                                 ]
+    def interprit_dict(self, json_dict: dict[str, any]):
+        list_uo: list[type[uo.UnitOperation]] = list_uo_common
+
         arr_steps = json_dict[defs.json_key_arr_uo_params]
         uo_reg = uo.registry_uo_cls
         for step in arr_steps:
@@ -271,6 +267,12 @@ class Process(GetMats, GetProcName):
             step.output_unit_operation()
 
         self.flowsheet.save(filename=self.process_name+".xlsx")
+
+    def load_json(self):
+        file_name = self.process_name+"_proc.json"
+        with open(file=file_name, mode='r') as file_this:
+            dict_proc = json.load(fp=file_name)
+            self.interprit_dict(json_dict=dict_proc)
 
     def get_mats(self) -> mats:
         return self.mats_data

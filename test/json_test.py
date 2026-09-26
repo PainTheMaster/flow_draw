@@ -866,7 +866,7 @@ class Test_30000_json_proc_output(unittest.TestCase):
 
     def test_30000_json_uo(self):
 
-        dict_json_uo = self.obj_proc.data_input.json_uo(caller=self.obj_proc, list_uo=self.list_uo)
+        dict_json_uo = self.obj_proc.data_io.json_uo(caller=self.obj_proc, list_uo=self.list_uo)
         print()
         print('----------------------')
         print(dict_json_uo)
@@ -972,7 +972,7 @@ class Test_40000_json_ai_interface(unittest.TestCase, trdef.GetMats):
         self.assertTrue(True)
 
     def test_40001_load_from_json(self):
-        self.obj_proc.load_from_json_dict(json_dict=self.test_json)
+        self.obj_proc.interprit_dict(json_dict=self.test_json)
         self.assertTrue(True)
 
 
