@@ -105,7 +105,7 @@ Language dictionary for common parts.
 # output_unit_operation(self)
 #
 #########################################################
-class ClassName(uo.UnitOperation, uo_tag=defs.tag_uo_"UO_NAME"):
+class ClassTare(uo.UnitOperation, uo_tag=defs.tag_uo_tare_pkg):
     def __init__(self,
                  caller: type[trdef.UniversalTrait] =None,
                  flowsheet:fsht.Flowsheet=None,
