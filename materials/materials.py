@@ -44,7 +44,8 @@ class Materials:
         self.df_mats: pd.DataFrame= df_mats
         self.name_main_mat:str = None
         """The value is picked-up on the course of the process in __load_df_mats()"""
-        self.kg_main_mat:float = None
+        self.gross_kg_main_mat:float = None
+        self.assay_main_mat:float = None
         self.mol_main_mat:float = None
         
         if df_mats is not None:
@@ -89,10 +90,10 @@ class Materials:
             raise RuntimeError(f"{self.__class__.__name__}: More than two (2) core building blocks ({defs.hedr_io_mats_main}) are designated.")
         else:
             ser_main_mat = df_extrd_main.iloc[0]
-            self.kg_main_mat = float(ser_main_mat[defs.hedr_io_mats_kgmain])
+            self.gross_kg_main_mat = float(ser_main_mat[defs.hedr_io_mats_kgmain])
             # if math.isnan(self.kg_main_mat):
-            if pd.isna(self.kg_main_mat):
-                raise ValueError(f"{self.__class__.__name__}: No weight (kg) is assigned to the main material \"{self.kg_main_mat}\".")
+            if pd.isna(self.gross_kg_main_mat):
+                raise ValueError(f"{self.__class__.__name__}: No weight (kg) is assigned to the main material \"{self.gross_kg_main_mat}\".")
             
             temp_mw_main_mat = float(ser_main_mat[defs.hedr_io_mats_mw])
             # if math.isnan(temp_mw_main_mat):
@@ -105,8 +106,9 @@ class Materials:
                 temp_assay_main_mat = 100.0
                 raise UserWarning(f"{self.__class__.__name__}: The concentration or assay for the main material is empty or zero.",
                               "For this run, 100%% is assumed.")
+            self.assay_main_mat = temp_assay_main_mat
             self.name_main_mat = ser_main_mat[defs.hedr_io_mats_mat]
-            self.mol_main_mat = (self.kg_main_mat*1000)/temp_mw_main_mat*(temp_assay_main_mat/100)
+            self.mol_main_mat = (self.gross_kg_main_mat*1000)/temp_mw_main_mat*(temp_assay_main_mat/100)
 
 
     def get_main_raw_material(self)->str:
@@ -158,7 +160,8 @@ class Materials:
             mol_this = self.mol_main_mat * equiv
             kg_this = mol_this * mw_this / (conc_assay_this/100.0) / 1000.0
         elif vol_per_weight is not None:
-            liq_volume_this = self.kg_main_mat * vol_per_weight #unit = L
+            #liq_volume_this = self.gross_kg_main_mat * vol_per_weight #unit = L
+            liq_volume_this = self.to_litre(vol_per_weight=vol_per_weight)
             kg_this = liq_volume_this * density_this / (conc_assay_this/100.0)
         else:
             raise ValueError(f"{self.__class__.__name__}.to_kilogram(): Both equiv:float and vol_per_weight:folat arguments are \"None\". Either must be given.")
@@ -167,12 +170,12 @@ class Materials:
 
     def to_litre(self, vol_per_weight:float = None) -> float:
         litre:float = None
-        if self.kg_main_mat is None:
+        if self.gross_kg_main_mat is None:
             raise ValueError(f"{self.__class__.__name__}.to_litre(): the weigt (kg) of the main material has not been assigned.")
         elif vol_per_weight is None:
             raise ValueError(f"{self.__class__.__name__}.to_litre(): the argument vol_per_weight:float is not put.")
         else:
-            litre = self.kg_main_mat * vol_per_weight
+            litre = self.gross_kg_main_mat * (self.assay_main_mat/100.0) * vol_per_weight
         return litre
     
     def get_list_mats(self) -> list[str]:
