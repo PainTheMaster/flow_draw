@@ -178,12 +178,12 @@ stc_flow_press_single_jp = "圧力目安:{P} {P_unit}"
 
 tag_stc_flow_press_min = "instruct stc template min press"
 """tag for an instruction sentence template: minimum pressure; includes placeholder {P_min} and {P_unit}"""
-stc_flow_press_min_jp = "圧力:{P_min} {P_unit}以下"
+stc_flow_press_min_jp = "圧力:{P_min} {P_unit}以上"
 """An instruction sentence template: minimum pressure includes; tags {P_min} and {P_unit}"""
 
 tag_stc_flow_press_max = "instruct stc template max press"
 """tag for an instruction sentence template: maximum pressure; includes placeholder {P_max} and {P_unit}"""
-stc_flow_press_max_jp = "圧力:{P_max} {P_unit}以上"
+stc_flow_press_max_jp = "圧力:{P_max} {P_unit}以下"
 """An instruction sentence template: maximum pressure includes; tags {P_max} and {P_unit}"""
 
 tag_stc_flow_rec_pres = "rec filt press"
