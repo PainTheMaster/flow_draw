@@ -261,7 +261,7 @@ class TestForProcessCls(unittest.TestCase):
         
         mats = tp.mats_data
         temp_mol_NaCl = kg_NaCl*1000.0/mw_NaCl
-        result_mats1 = ((mats.kg_main_mat==kg_NaCl) and
+        result_mats1 = ((mats.gross_kg_main_mat==kg_NaCl) and
                         (temp_mol_NaCl*0.9999<mats.mol_main_mat) and (mats.mol_main_mat < temp_mol_NaCl*1.0001))
         
         self.assertTrue(result_num_uos and result_proc_1 and result_proc_2 and result_mats1)
