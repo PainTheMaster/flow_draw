@@ -18,6 +18,7 @@ import flow_draw.batch.process.unit_operations.uo_line_clearance as lnclear
 import flow_draw.batch.process.unit_operations.uo_phase_discharge as phdisch
 import flow_draw.batch.process.unit_operations.uo_temp_control as tempctrl
 import flow_draw.batch.process.unit_operations.uo_drying as drying
+import flow_draw.batch.process.unit_operations.uo_transfer as xfer
 from flow_draw.data_io import process_io as proc_io
 from flow_draw.data_io import flowsheet as fsht
 from flow_draw.materials.materials import Materials as mats
@@ -40,7 +41,8 @@ list_uo_common: list[type[uo.UnitOperation]] = [chgng.Charging,
                                                  lnclear.LineClearance,
                                                  phdisch.PhaseDisch,
                                                  tempctrl.TempControl,
-                                                 drying.Drying
+                                                 drying.Drying,
+                                                 xfer.Transfer
                                                 ]
 
 

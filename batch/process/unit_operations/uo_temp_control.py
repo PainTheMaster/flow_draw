@@ -255,7 +255,7 @@ dict_jp_stcs: dict[str, str] = {tag_stc_Tj_sp :"外温設定: {Tj} ℃",
                                tag_stc_Ti_spec_sp_single :"内温設定値: {Ti} ℃",
                                tag_stc_duration :"温調時間: _________{time_unit}"}
 
-lang_dict_stcs:dict[str, str] = defs.dict_jp_stcs_tempr_ctrl
+lang_dict_stcs:dict[str, str] = dict_jp_stcs
 """JP language dictionary for """
 
 
