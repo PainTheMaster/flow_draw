@@ -272,8 +272,8 @@ class Process(GetMats, GetProcName):
 
     def load_json(self):
         file_name = self.process_name+"_proc.json"
-        with open(file=file_name, mode='r') as file_this:
-            dict_proc = json.load(fp=file_name)
+        with open(file=file_name, mode='r', encoding = 'utf_8') as file_this:
+            dict_proc = json.load(fp=file_this)
             self.interprit_dict(json_dict=dict_proc)
 
     def get_mats(self) -> mats:

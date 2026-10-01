@@ -274,7 +274,8 @@ class Filtration(uo.UnitOperation, uo_tag=defs.tag_uo_filt):
                                f'If no information is given in the source, please select "{opt_yes}" as the default.')
         obj_filtration = Objason(key=Filtration.uo_tag,
                                  props=cmn_schema + [filt_device, temp_jacket, press_min, press_max, press_unit, integ_test],
-                                 description='This object describes the filtration operation in the process flowsheet.')
+                                 description='This object describes the filtration operation to obtain product crystals or to remove large amount of insoluble byproducts in the process liquid.'
+                                 f'To remove a small amount of partticulate matter, please choose a unit operation of "{defs.tag_uo_transfer}" for polishing filtration during transfer.')
         return obj_filtration
         
     def load_from_json_dict(self, json_dict):

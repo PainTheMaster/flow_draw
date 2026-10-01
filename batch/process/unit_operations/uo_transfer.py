@@ -339,13 +339,14 @@ class Transfer(uo.UnitOperation, uo_tag=defs.tag_uo_transfer):
                            key = hedr_filter_typ,
                            description='The type of the filter used amid the transfer. '
                            'Normally, transfer through a polishing filter is required on the final (wet) stage of an API synthesis to remove any potential dusts and foreing matters. '
-                           'This is an optional field and nullable. ',
+                           'This is an optional field and nullable. If polishing filtration is not required, please put null in this field.',
                            nullable=True,
                            required=True)
         obj_transf = Objason(key=Transfer.uo_tag,
                              props=common_schema+[instruction_type, origin, via, destin, filter_typ],
                              description='This is a unit operation to set up a transfer line and/or to transfer a process solution or slurry from an origin vessel '
-                             'to a destination vessel, waste stream, etc.')
+                             'to a destination vessel, waste stream, etc. '
+                             'Also, This operation is good at polishing filtration of process liquids.')
         return obj_transf
 
 
