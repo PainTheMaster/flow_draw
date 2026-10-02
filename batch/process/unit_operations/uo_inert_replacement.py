@@ -187,7 +187,8 @@ class InertReplacement(uo.UnitOperation, uo_tag=defs.tag_uo_inert_replace):
         
         obj_schema = Objason(key=InertReplacement.uo_tag,
                              props=common_schema+[inert_gas, neg_pressure, num_repeat],
-                             description=f"Unit operation for inert gas replacement in the reactor.")
+                             description=f"Unit operation for inert gas replacement in the reactor. "
+                             f"For safety and quality, this unit operation should be performed before the first charging of a material or a solvent in the reactor.")
         return obj_schema        
 
 

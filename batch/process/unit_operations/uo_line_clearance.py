@@ -126,7 +126,8 @@ class LineClearance(uo.UnitOperation, uo_tag=defs.tag_uo_line_clearance):
                         nullable=False)
         obj_clearance = Objason(key=LineClearance.uo_tag,
                                 props=common_schema+[sop],
-                                description="Unit operation for line clearance in a process workflow. This unit operation is used to indicate that the line clearance step is completed in the process.")
+                                description="Unit operation for line clearance in a process workflow. This unit operation is used to instruct the line clearance before the start of production. "
+                                "Please consider putting this step even if line clearance is not mentioned explicitly in the process documentation, as this activity is required on the production side.")
         return obj_clearance
 
     def load_from_json_dict(self, json_dict: dict[str, any]):

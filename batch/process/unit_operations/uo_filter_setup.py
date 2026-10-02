@@ -294,12 +294,12 @@ class FiltSetup(uo.UnitOperation, uo_tag=defs.tag_uo_filt_setup):
         press_leak_test = Primitive(prim_type='number',
                                     key = hedr_press_leak_test,
                                     description = 'Pressure for the leak test. '
-                                        'This is a mandatory property of the object. If the necessary information is not found in the given flowsheet, please put 0.',
+                                        'This is a mandatory property of the object. If the necessary information is not found in the given flowsheet, please put 0.1 (MPaG) as the default.',
                                     nullable = False)
         press_drop_leak_test = Primitive(prim_type='number',
                                           key = hedr_press_drop_leak_test,
                                           description = 'Pressure drop criterion for the leak test. '
-                                              'This is a mandatory property of the object. If the necessary information is not found in the given flowsheet, please put 0.',
+                                              'This is a mandatory property of the object. If the necessary information is not found in the given flowsheet, please put 0.02 (MPa) as the default.',
                                           nullable = False)
         time_leak_test = Primitive(prim_type='number',
                                    key = hedr_time_leak_test,
@@ -312,8 +312,9 @@ class FiltSetup(uo.UnitOperation, uo_tag=defs.tag_uo_filt_setup):
                                description = f'Unit for the leak test pressure. If the necessary information is not found in the given flowsheet, please select "{defs.opt_press_MPa}" as the default value.',
                                nullable = False)
         obj_filt_setup = Objason(key = FiltSetup.uo_tag,
-                                description = 'This is a unit operation for the filter dryer set-up.',
-                                props = common_schema+[equip_id, typ_filt_cloth, num_filt_cloth, typ_bag_filt, press_leak_test, press_drop_leak_test, time_leak_test, unit_press])
+                                props = common_schema+[equip_id, typ_filt_cloth, num_filt_cloth, typ_bag_filt, press_leak_test, press_drop_leak_test, time_leak_test, unit_press],
+                                description = f'This is a unit operation for the filter dryer set-up. '
+                                f'Please place this unit operation before the first instance of "{defs.tag_uo_filt}", as the filtration device must be set up before use.',)
 
         return obj_filt_setup
 

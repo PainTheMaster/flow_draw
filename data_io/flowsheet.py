@@ -62,7 +62,7 @@ class Flowsheet:
         self.ws.cell(row=self.current_line, column=col_record).value = record
         self.ws.cell(row=self.current_line, column=col_operator).value = operator
         self.ws.cell(row=self.current_line, column=col_witness).value = witness
-        self.ws.cell(row=self.current_line, column=col_title_left_half).border = border_left
+        self.ws.cell(row=self.current_line, column=col_method).border = border_left
         self.current_line += 1
 
     def body_organizer(self, list_col_time: List[str], list_col_method: List[str], list_col_content: List[str], list_col_record: List[str], list_col_operator: List[str], list_col_witness: List[str]):
@@ -105,12 +105,12 @@ class Flowsheet:
                          len_list_witness)
         
         for row_rel in range(max_length):
-            self.ws.cell(row=self.current_line+row_rel, column=col_title_left_half).border = border_left
+            self.ws.cell(row=self.current_line+row_rel, column=col_method).border = border_left
 
         self.current_line += max_length
     
     def linefeed(self):
-        self.ws.cell(row=self.current_line, column=col_title_left_half).border = border_left
+        self.ws.cell(row=self.current_line, column=col_method).border = border_left
         self.current_line += 1
 
 
