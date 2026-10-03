@@ -42,6 +42,16 @@ opt_time_unit_hour:str = defs.tag_flow_cmn_time_unit_hour
 #list_hedr = defs.list_hedr_<list of header items for the uo>
 #dict_dtil_drpdwn = defs.dict_opt_<unit operation>
 
+hedr_cell = "operation_cell"
+"""
+Tag for an element operation cell (room).
+"""
+
+hedr_op_resource = "operation_resource"
+"""
+Tag for an element operation resource such as reactor, filter dryer, mill, etc.
+"""
+
 
 #########################################################
 # UO-specific options, list, header_item: list dictionry thereof (for data input and internalsignaling)
@@ -95,7 +105,7 @@ Language dictionary for common parts.
 # output_unit_operation(self)
 #
 #########################################################
-class ClassName(uo.UnitOperation, uo_tag=defs.tag_uo_"UO_NAME"):
+class Alloc(uo.UnitOperation, uo_tag=defs.tag_uo_alloc):
     def __init__(self,
                  caller: type[trdef.UniversalTrait] =None,
                  flowsheet:fsht.Flowsheet=None,
@@ -103,6 +113,8 @@ class ClassName(uo.UnitOperation, uo_tag=defs.tag_uo_"UO_NAME"):
                  num_subitems: int = None,
                  edit_comment:str=None):
         super().__init__(caller=caller, flowsheet=flowsheet, operation_seq=operation_seq, num_subitems=num_subitems, edit_comment=edit_comment)
+        self.prod_cell:str = None
+        self.op_resouce:str = None
     
     def load_params_from_df(self, df: pd.DataFrame):
         """
@@ -112,6 +124,8 @@ class ClassName(uo.UnitOperation, uo_tag=defs.tag_uo_"UO_NAME"):
         This is the overriding mehtod in the class Charging..
         """
 
+        #TODO: Implement me!
+        
         first_row = df.iloc[0]
         if not pd.isna(first_row[hedr_precomment]):
             self.pre_comment = first_row[hedr_precomment]
@@ -119,6 +133,7 @@ class ClassName(uo.UnitOperation, uo_tag=defs.tag_uo_"UO_NAME"):
             self.post_comment = first_row[hedr_postcomment]
         for _, subitem in df.iterrows():
             #<uo-specific process>
+            pass
 
 
 
@@ -130,12 +145,29 @@ class ClassName(uo.UnitOperation, uo_tag=defs.tag_uo_"UO_NAME"):
         pass
     
     def get_json_schema(caller: trdef.UniversalTrait=None)->Objason:
-        common_schema:list[Primitive] = ThisClass.json_common()
-
+        common_schema:list[Primitive] = Alloc.json_common()
+        prim_prod_cell = Primitive(prim_type='string',
+                              key=hedr_cell,
+                              description='A property to specify a production cell (room) in a chemical plant. '
+                              'If no information is provided in the document or from the user, please put "<placeholder: location>".')
+        prim_op_resource = Primitive(prim_type='string',
+                                key=hedr_op_resource,
+                                description='A property to specify an operation resoruce, such as a reactor, filter dryer, jet mill, etc. I.e., equipment. '
+                                'If no information is provided in the document or from the user, please put "<placeholder: equipment>"')
+        alloc_obj = Objason(key=Alloc.uo_tag,
+                            props=common_schema+[prim_prod_cell, prim_op_resource],
+                            description='This class is for allocation of an operation resource for prodcution operation. '
+                            'Normamally, an operation resource can be specified by a comination of a production cell (a room in a facility) and the name of a piece of equimpent. '
+                            'At least an instace of this object is necessary at the top of the sequence of unit operations. '
+                            'Other than the beginning of the sequence, this object shall typicall appear when the process solution is transferred to another reactor, '
+                            'or when a new stage of the process, such as filtration, begins. '
+                            'In a narrower meaning, this is not a unit operation on the shop floor. Thus, please do not try to assign a operation sequnce (number) to this object.')
+        return alloc_obj
 
     def load_from_json_dict(self, json_dict: dict[str, any]):
         super().load_from_json_dict(json_dict)
-        pass
+        self.prod_cell = json_dict.get(hedr_cell, '<placeholder: location>')
+        self.op_resouce = json_dict.get(hedr_op_resource, '<placeholder: equipment>')
 
     def output_unit_operation(self):
         self.flowsheet.header_organizer(op_nr=self.operation_seq, title=lang_dict_uo_titles[self.uo_tag])
@@ -152,26 +184,30 @@ class ClassName(uo.UnitOperation, uo_tag=defs.tag_uo_"UO_NAME"):
     @classmethod
     def generate_test_df(cls,
                        precomment:str=None,
-                       postcomment:str=None, 
-                       PARAMETER=DEFALUT_VALUE)->pd.DataFrame:
-        hedr:list[str] = defs.list_hedr_cmn_io_dtil + list_hedr
+                       postcomment:str=None,                   
+                       prod_cell:str = None,
+                       op_resouce:str = None)->pd.DataFrame:
+        hedr:list[str] = defs.list_hedr_cmn_io_dtil + [hedr_cell, hedr_op_resource]
         content: list[any] = [None]*len(hedr)
         s:pd.Series = pd.Series(data=content, index=hedr)
         df = s.to_frame().T
         df.at[df.index[0], hedr_precomment] = precomment
-        df.at[df.index[0], hedr_postcomment] = postcomment
-        df.at[df.index[0], HEDR_ITEM]=PARAMETER
-        ...
-
+        df.at[df.index[0], hedr_postcomment] = postcomment        
+        df.at[df.index[0], hedr_cell] = prod_cell
+        df.at[df.index[0], hedr_op_resource] = op_resouce
         return df
     
     @classmethod
     def add_to_test_df(cls,
                        df: pd.DataFrame=None,
-                       PARAMETER=DEFALUT_VALUE)->None:
+                       prod_cell:str = None,
+                       op_resouce:str = None)->None:
         width:int = len(df.columns)
         new_row:list[any] = [None]*width
         row:int = len(df)
         df.loc[row]=new_row
-        df.at[row, HEADER_ITEM]=PARAMETER
-        ...
+        df.at[row, hedr_cell] = prod_cell
+        df.at[row, hedr_op_resource] = op_resouce
+        return df
+
+

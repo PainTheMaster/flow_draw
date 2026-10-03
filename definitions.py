@@ -57,6 +57,11 @@ list_press_unit = [opt_press_kPa,
 """List of pressure units"""
 
 #unit_operations
+tag_uo_alloc:str = "resource_allocation"
+"""Tag for an unit operation resource allocation"""
+part_uo_title_alloc_jp:str = "リソース割当"
+"""JP expression of resource allocation"""
+
 tag_uo_line_clearance: str = "line_clearance"
 """Tag for an unit operation line clearance"""
 part_uo_title_clearance_jp = "ラインクリアランス"
@@ -163,7 +168,8 @@ tag_uo_placeholder: str = "placeholder"
 part_uo_title_placeholder = "<Op._place_holder>"
 """JP expression of place holder"""
 
-dict_jp_part_uo_titles = {tag_uo_line_clearance : part_uo_title_clearance_jp,
+dict_jp_part_uo_titles = {tag_uo_alloc: part_uo_title_alloc_jp,
+                          tag_uo_line_clearance : part_uo_title_clearance_jp,
                           tag_uo_inert_replace : part_uo_title_inert_replace_jp,
                           tag_uo_tempr_ctrl : part_uo_title_tempr_ctrl_jp,
                           tag_uo_charging : part_uo_title_charging_jp,
@@ -182,7 +188,8 @@ dict_jp_part_uo_titles = {tag_uo_line_clearance : part_uo_title_clearance_jp,
                           tag_uo_tare_pkg : part_uo_title_tare_pkg_jp,
                           tag_uo_prod_disch : part_uo_title_prod_disch_jp,
                           tag_uo_prod_weigh : part_uo_title_prod_weigh_jp,
-                          tag_uo_placeholder : part_uo_title_placeholder}
+                          tag_uo_placeholder : part_uo_title_placeholder
+                          }
 """dict[<tag>:<unit operation name] for unit operation name in local language}"""
 
 ################################################################

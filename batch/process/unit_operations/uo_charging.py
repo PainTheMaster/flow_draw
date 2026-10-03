@@ -84,12 +84,13 @@ list_temp_control = [temprctrl_none,
 
 #list_metrics_unit = [defs.tag_metrics_equiv, defs.tag_metrics_vol]
 opt_mtrcs_eq = "equiv"
-opt_mtrcs_vol = "v/w"
+opt_mtrcs_v_per_w = "v/w"
 #list below
-list_metrics_unit = [opt_mtrcs_eq, opt_mtrcs_vol]
+list_metrics_unit = [opt_mtrcs_eq, opt_mtrcs_v_per_w]
 
 error_range_placeholder = 'placeholder'
-list_error_range = [None, 1.0, None, None, None, 5.0, error_range_placeholder]
+error_default = 5.0
+list_error_range = [None, 1.0, None, None, None, error_default, error_range_placeholder]
 
 dict_dtil_drpdwn = {hedr_metrics_unit : list_metrics_unit,
                     hedr_method : list_charging_method,
@@ -378,16 +379,31 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
             self.flowsheet.put_body_comments(self.pre_comment)
 
         for temp_inpt in self.inputs:
-            self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
-                                     method=lang_dict_chgng_specif[temp_inpt.method],
-                                     content=temp_inpt.material_name,
-                                     record=lang_dict_chgng_specif[tag_part_rec_lot],
-                                     operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
-                                     witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
+            # self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
+            #                          method=lang_dict_chgng_specif[temp_inpt.method],
+            #                          content=temp_inpt.material_name,
+            #                          record=lang_dict_chgng_specif[tag_part_rec_lot],
+            #                          operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
+            #                          witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
+
+            line_mat = self.flowsheet.put_material(time=lang_dict_cmn[tag_flow_cmn_rec_time],
+                                                    method=lang_dict_chgng_specif[temp_inpt.method],
+                                                    record=lang_dict_chgng_specif[tag_part_rec_lot],
+                                                    operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
+                                                    witness=lang_dict_cmn[tag_flow_cmn_rec_sign],
+                                                    mat=temp_inpt.material_name,
+                                                    mw=temp_inpt.mw,
+                                                    dens=temp_inpt.dens,
+                                                    assay_conc=temp_inpt.assay_conc,
+                                                    equiv=temp_inpt.metrics_val if temp_inpt.metrics_unit == opt_mtrcs_eq else None,
+                                                    v_per_w=temp_inpt.metrics_val if temp_inpt.metrics_unit == opt_mtrcs_v_per_w else None,
+                                                    err_rel_pct=temp_inpt.error_pct if temp_inpt.error_pct is not None else error_default)
 
             #line-2: QTY instruction and record
-            str_qty = lang_dict_instr_stcs[tag_stc_qty].format(qty=temp_inpt.qty_kg, err=temp_inpt.error_kg)
-            self.flowsheet.put_line(content=str_qty, record=lang_dict_chgng_specif[tag_part_rec_input])
+            # str_qty = lang_dict_instr_stcs[tag_stc_qty].format(qty=temp_inpt.qty_kg, err=temp_inpt.error_kg)
+            # self.flowsheet.put_line(content=str_qty, record=lang_dict_chgng_specif[tag_part_rec_input])
+            self.flowsheet.put_qty(record=lang_dict_chgng_specif[tag_part_rec_input],
+                                   line_mat=line_mat)
 
             #For liquid only, flex ID 
             if (temp_inpt.method == method_liq or
@@ -411,29 +427,29 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
             self.flowsheet.put_body_comments(self.post_comment)
             self.flowsheet.linefeed()
             
-    def interact(self):
-        print("Unit operation-"+str(self.operation_seq)+": Charging")
-        print("Pre-comment?:")
-        self.pre_comment = input()
-        print("How many input materials?: ", end="")
-        self.input_count=int(input())
-        for i in range(self.input_count):
-            this_material = Input(mats_data=self.mats_data)
-            this_material.interact()
-            self.inputs.append(this_material)
-        print("Post-comment?:")
-        self.post_comment = input()
+    # def interact(self):
+    #     print("Unit operation-"+str(self.operation_seq)+": Charging")
+    #     print("Pre-comment?:")
+    #     self.pre_comment = input()
+    #     print("How many input materials?: ", end="")
+    #     self.input_count=int(input())
+    #     for i in range(self.input_count):
+    #         this_material = Input(mats_data=self.mats_data)
+    #         this_material.interact()
+    #         self.inputs.append(this_material)
+    #     print("Post-comment?:")
+    #     self.post_comment = input()
 
-    def test_data_creation(self):
-        self.pre_comment = 'This is the line-1 of a dummy pre-comment\nThis is the line-2 of a dummy pre-comment'
-        self.post_comment = 'This is the line-1 of a dummy post-comment;This is the line-2 of a dummy post-comment;The product is salty.'
-        material1 = Input(mats_data=self.mats_data)
-        material1.test_data_creation1()
-        self.inputs.append(material1)
-        material2 = Input(mats_data=self.mats_data)
-        material2.test_data_creation2()
-        self.inputs.append(material2)
-        print("Test data created for salt water.")
+    # def test_data_creation(self):
+    #     self.pre_comment = 'This is the line-1 of a dummy pre-comment\nThis is the line-2 of a dummy pre-comment'
+    #     self.post_comment = 'This is the line-1 of a dummy post-comment;This is the line-2 of a dummy post-comment;The product is salty.'
+    #     material1 = Input(mats_data=self.mats_data)
+    #     material1.test_data_creation1()
+    #     self.inputs.append(material1)
+    #     material2 = Input(mats_data=self.mats_data)
+    #     material2.test_data_creation2()
+    #     self.inputs.append(material2)
+    #     print("Test data created for salt water.")
 
 
     def __put_time_control(self, input: Input=None):
@@ -486,7 +502,17 @@ class Input:
     This class is for each material charged, each instance correspnds to each dosage in a charging operation.
     """
     def __init__(self, mats_data: mats.Materials = None):
+        #Material constants
         self.mats_data: mats.Materials = mats_data
+        self.mw:float = None
+        """Molecular weight of the material."""
+        self.dens:float = None
+        """Density of the material."""
+        self.assay_conc:float = None
+        """Assay or concentration of the material."""
+
+
+        #Charging/dosing variables
         self.material_name:str = None
         """User input. Material name. Has to be consistent with the materials table"""
         self.metrics_unit:str = None
@@ -514,68 +540,68 @@ class Input:
         self.temp_max:float = None
         """User input float. Upper temperature limit."""
     
-    def interact(self):
-        print("Material name?: ", end='')
-        self.material_name = input()
+    # def interact(self):
+    #     print("Material name?: ", end='')
+    #     self.material_name = input()
     
-        print("Metrics unit?: ")
-        for idx in range(len(list_metrics_unit)):
-            print(str(idx)+": "+list_metrics_unit[idx])
-        print("> ", end='')
-        idx = int(input())
-        self.metrics_unit = list_metrics_unit[idx]
+    #     print("Metrics unit?: ")
+    #     for idx in range(len(list_metrics_unit)):
+    #         print(str(idx)+": "+list_metrics_unit[idx])
+    #     print("> ", end='')
+    #     idx = int(input())
+    #     self.metrics_unit = list_metrics_unit[idx]
         
-        print("Metrics value?: ", end='')
-        self.metrics_val = float(input())
+    #     print("Metrics value?: ", end='')
+    #     self.metrics_val = float(input())
 
         
-        print('Permissible error?:')
-        for idx in range(len(list_error_range)):
-            if list_error_range[idx] is not None:
-                print(str(idx)+": "+str(list_error_range[idx])+"%")
-        print("> ", end='')
-        choice_error_range = int(input())
-        self.error_pct = list_error_range[choice_error_range]
+    #     print('Permissible error?:')
+    #     for idx in range(len(list_error_range)):
+    #         if list_error_range[idx] is not None:
+    #             print(str(idx)+": "+str(list_error_range[idx])+"%")
+    #     print("> ", end='')
+    #     choice_error_range = int(input())
+    #     self.error_pct = list_error_range[choice_error_range]
 
-        print('Specify a charging method?:')
-        for idx in range(len(defs.list_yesno)):
-            print(str(idx)+': '+defs.list_yesno[idx])
-        print("> ", end='')
-        specif_yesno = int(input())
-        if defs.list_yesno[specif_yesno] == defs.opt_yes:
-            for idx in range(len(list_charging_method)):
-                print(str(idx)+': '+list_charging_method[idx])
-            print("> ", end='')
-            choice_chargingmethod = int(input())
-            self.method = list_charging_method[choice_chargingmethod]
+    #     print('Specify a charging method?:')
+    #     for idx in range(len(defs.list_yesno)):
+    #         print(str(idx)+': '+defs.list_yesno[idx])
+    #     print("> ", end='')
+    #     specif_yesno = int(input())
+    #     if defs.list_yesno[specif_yesno] == defs.opt_yes:
+    #         for idx in range(len(list_charging_method)):
+    #             print(str(idx)+': '+list_charging_method[idx])
+    #         print("> ", end='')
+    #         choice_chargingmethod = int(input())
+    #         self.method = list_charging_method[choice_chargingmethod]
         
-        print("Specicfy a time control method?: ")
-        for idx in range(len(list_time_control)):
-            print(str(idx)+': '+list_time_control[idx])
-        print("> ", end='')
-        choice_time_control = int(input())
-        self.time_control = list_time_control[choice_time_control]
-        if self.time_control == timectrl_min or self.time_control == timectrl_min_max:
-            print("Charging time lower limit?: ", end='')
-            self.time_min = input()
-        if self.time_control == timectrl_max or self.time_control == timectrl_min_max:
-            print("Charging time upper limit?: ", end='')
-            self.time_max = input()
+    #     print("Specicfy a time control method?: ")
+    #     for idx in range(len(list_time_control)):
+    #         print(str(idx)+': '+list_time_control[idx])
+    #     print("> ", end='')
+    #     choice_time_control = int(input())
+    #     self.time_control = list_time_control[choice_time_control]
+    #     if self.time_control == timectrl_min or self.time_control == timectrl_min_max:
+    #         print("Charging time lower limit?: ", end='')
+    #         self.time_min = input()
+    #     if self.time_control == timectrl_max or self.time_control == timectrl_min_max:
+    #         print("Charging time upper limit?: ", end='')
+    #         self.time_max = input()
         
-        print("Specicfy a temperature control method?: ")
-        for idx in range(len(list_temp_control)):
-            print(str(idx)+': '+list_temp_control[idx])
-        print("> ", end='')
-        choice_temp_control = int(input())
-        self.temp_control = list_temp_control[choice_temp_control]
-        if self.temp_control == temprctrl_min or self.temp_control == temprctrl_min_max:
-            print("Charging temperature (℃) lower limit?: ", end='')
-            self.temp_min = float(input())
-        if self.temp_control == temprctrl_max or self.temp_control == temprctrl_min_max:
-            print("Charging temperature (℃) upper limit?: ", end='')
-            self.temp_max = float(input())
+    #     print("Specicfy a temperature control method?: ")
+    #     for idx in range(len(list_temp_control)):
+    #         print(str(idx)+': '+list_temp_control[idx])
+    #     print("> ", end='')
+    #     choice_temp_control = int(input())
+    #     self.temp_control = list_temp_control[choice_temp_control]
+    #     if self.temp_control == temprctrl_min or self.temp_control == temprctrl_min_max:
+    #         print("Charging temperature (℃) lower limit?: ", end='')
+    #         self.temp_min = float(input())
+    #     if self.temp_control == temprctrl_max or self.temp_control == temprctrl_min_max:
+    #         print("Charging temperature (℃) upper limit?: ", end='')
+    #         self.temp_max = float(input())
         
-        self.__calc_qty()
+    #     self.__calc_qty()
 
     def load_params_from_series(self, ser: pd.Series):
         """
@@ -613,6 +639,9 @@ class Input:
             #raise RuntimeWarning(f"{__class__.__name}: mats_data is None")
         else:
             self.__calc_qty()
+            self.mw = self.mats_data.get_mw(self.material_name)
+            self.density = self.mats_data.get_density(self.material_name)
+            self.assay_conc = self.mats_data.get_assay_conc(self.material_name)
 
     def load_from_json_dict(self, json_dict: dict[str, any]):
         self.material_name = json_dict[hedr_material_name]
@@ -641,7 +670,7 @@ class Input:
 
     def test_data_creation1(self):
         self.material_name = 'H2O'
-        self.metrics_unit = opt_mtrcs_vol
+        self.metrics_unit = opt_mtrcs_v_per_w
         self.metrics_val = 1.0
         self.error_pct = 5.0
         self.method = method_liq
@@ -686,7 +715,7 @@ class Input:
         if self.metrics_unit == opt_mtrcs_eq:
             self.qty_kg = self.mats_data.to_kilogram(material_name = self.material_name, equiv=self.metrics_val)
             self.error_kg = self.qty_kg * (self.error_pct/100.0)
-        elif self.metrics_unit == opt_mtrcs_vol:
+        elif self.metrics_unit == opt_mtrcs_v_per_w:
             self.qty_kg = self.mats_data.to_kilogram(material_name = self.material_name, vol_per_weight=self.metrics_val)
             self.error_kg = self.qty_kg * (self.error_pct/100.0)
         else:

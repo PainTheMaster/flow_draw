@@ -188,6 +188,8 @@ class Process(GetMats, GetProcName):
         None
         """
         self.mats_data = self.data_io.load_mats()
+        self.flowsheet.set_standards(mol_std=self.mats_data.mol_main_mat,
+                                     wt_net_std=self.mats_data.net_kg_main_mat)
 
     #TODO: Create the process detail input form, for each unit operation in teh list_uo, get the uo-specific header and feed it to ProcessIO.generate_proc_detail_form()
 
@@ -254,14 +256,15 @@ class Process(GetMats, GetProcName):
     def interprit_dict(self, json_dict: dict[str, any]):
         list_uo: list[type[uo.UnitOperation]] = list_uo_common
 
-        arr_steps = json_dict[defs.json_key_arr_uo_params]
+        arr_steps:list[dict] = json_dict[defs.json_key_arr_uo_params]
         uo_reg = uo.registry_uo_cls
         for step in arr_steps:
             uo_tag = step[defs.hedr_cmn_io_dtil_uo]
             new_uo_inst = uo_reg[uo_tag](caller=self,
                                         flowsheet=self.flowsheet,
-                                        operation_seq=step[defs.hedr_cmn_io_dtil_seq],
-                                        edit_comment=step[defs.hedr_cmn_io_dtil_edt_cmnt])
+                                        #operation_seq=step[defs.hedr_cmn_io_dtil_seq],
+                                        operation_seq=step.get(defs.hedr_cmn_io_dtil_seq, None),
+                                        edit_comment=step.get(defs.hedr_cmn_io_dtil_edt_cmnt, None))
             new_uo_inst.load_from_json_dict(step)
             self.seq_uo.append(new_uo_inst)
 

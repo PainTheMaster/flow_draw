@@ -8,7 +8,7 @@ header_material = defs.hedr_io_mats_mat
 header_main = defs.hedr_io_mats_main
 header_mw = defs.hedr_io_mats_mw
 header_density = defs.hedr_io_mats_dnsty
-header_conc_assay = defs.hedr_io_mats_concasy
+header_assay_conc = defs.hedr_io_mats_concasy
 
 desig_star = defs.itm_io_mats_desig_star
 
@@ -45,6 +45,7 @@ class Materials:
         self.name_main_mat:str = None
         """The value is picked-up on the course of the process in __load_df_mats()"""
         self.gross_kg_main_mat:float = None
+        self.net_kg_main_mat:float = None
         self.assay_main_mat:float = None
         self.mol_main_mat:float = None
         
@@ -107,12 +108,16 @@ class Materials:
                 raise UserWarning(f"{self.__class__.__name__}: The concentration or assay for the main material is empty or zero.",
                               "For this run, 100%% is assumed.")
             self.assay_main_mat = temp_assay_main_mat
+            self.net_kg_main_mat = self.gross_kg_main_mat * (temp_assay_main_mat / 100)
             self.name_main_mat = ser_main_mat[defs.hedr_io_mats_mat]
-            self.mol_main_mat = (self.gross_kg_main_mat*1000)/temp_mw_main_mat*(temp_assay_main_mat/100)
+            self.mol_main_mat = (self.net_kg_main_mat*1000)/temp_mw_main_mat
 
 
     def get_main_raw_material(self)->str:
         return self.name_main_mat
+
+    def get_mol_main_raw_material(self) -> float:
+        return self.mol_main_mat
                
     def to_kilogram(self, material_name:str = None, equiv: float = None, vol_per_weight:float = None) -> float:
         """
@@ -181,6 +186,33 @@ class Materials:
     def get_list_mats(self) -> list[str]:
         mats_list = self.df_mats[header_material].to_list()
         return mats_list
+
+    def get_mw(self, material_name:str) -> float|None:
+        hits = self.df_mats.loc[self.df_mats[defs.hedr_io_mats_mat]==material_name, defs.hedr_io_mats_mw]
+        if len(hits) != 1:
+            raise ValueError(f'{self.__class__.__name__}.get_mw(): "{material_name}" matched {len(hits)} rows (expected 1).')
+        mw_this = hits.item()
+        if pd.isna(mw_this):
+            return None
+        return float(mw_this)
+
+    def get_density(self, material_name:str) -> float|None:
+        hits = self.df_mats.loc[self.df_mats[defs.hedr_io_mats_mat]==material_name, defs.hedr_io_mats_dnsty]
+        if len(hits) != 1:
+            raise ValueError(f'{self.__class__.__name__}.get_density(): "{material_name}" matched {len(hits)} rows (expected 1).')
+        density_this = hits.item()
+        if pd.isna(density_this):
+            return None
+        return float(density_this)
+
+    def get_assay_conc(self, material_name:str) -> float|None:
+        hits = self.df_mats.loc[self.df_mats[defs.hedr_io_mats_mat]==material_name, defs.hedr_io_mats_concasy]
+        if len(hits) != 1:
+            raise ValueError(f'{self.__class__.__name__}.get_assay_conc(): "{material_name}" matched {len(hits)} rows (expected 1).')
+        conc_assay_this = hits.item()
+        if pd.isna(conc_assay_this):
+            return None
+        return float(conc_assay_this)
 
 
 
