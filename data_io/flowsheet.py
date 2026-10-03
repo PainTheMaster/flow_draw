@@ -1,10 +1,11 @@
 import openpyxl as xl
 from openpyxl.styles.borders import Border, Side
-from openpyxl.styles import Alignment
+from openpyxl.styles import Alignment, PatternFill
 from typing import List
 import re
 import flow_draw.definitions as defs
 import math
+
 
 
 line_thin = defs.xl_line_thin
@@ -16,6 +17,19 @@ border_bottom = defs.xl_border_bottom
 border_around = defs.xl_border_around
 alignment_center = defs.xl_alignment_center
 alignment_left = defs.xl_alignment_left
+
+
+"""
+#A6C9EC (light blue)
+#DAE9F8 (lighter blue)
+
+#EFC1A7 (light orange)
+#FBE2D5 (lighter orange)
+"""
+fill_light_blue = PatternFill(fgColor="A6C9EC", fill_type="solid")
+fill_lighter_blue = PatternFill(fgColor="DAE9F8", fill_type="solid")
+fill_light_orange = PatternFill(fgColor="EFC1A7", fill_type="solid")
+fill_lighter_orange = PatternFill(fgColor="FBE2D5", fill_type="solid")
 
 line_start = 1
 line_standard = line_start
@@ -280,21 +294,35 @@ class Flowsheet:
             #Standard
             self.ws.cell(row=line, column=col_xlslog_mol-1).value = dict_part_logic[tag_part_std_mol] 
             self.ws.cell(row=line, column=col_xlslog_mol).value = self.mol_std
+            self.ws.cell(row=line, column=col_xlslog_mol).fill = fill_light_orange
             self.ws.cell(row=line, column=col_xlslog_kg_net-1).value = dict_part_logic[tag_part_std_wt_net]
             self.ws.cell(row=line, column=col_xlslog_kg_net).value = self.wt_net_std
+            self.ws.cell(row=line, column=col_xlslog_kg_net).fill = fill_light_orange
             #Header
             self.ws.cell(row=line+1, column=col_xlslog_mat).value = dict_part_logic[tag_part_hedr_mat]
+            self.ws.cell(row=line+1, column=col_xlslog_mat).fill = fill_light_orange
             self.ws.cell(row=line+1, column=col_xlslog_mw).value = dict_part_logic[tag_part_hedr_mw]
+            self.ws.cell(row=line+1, column=col_xlslog_mw).fill = fill_light_orange
             self.ws.cell(row=line+1, column=col_xlslog_dens).value = dict_part_logic[tag_part_hedr_dens]
+            self.ws.cell(row=line+1, column=col_xlslog_dens).fill = fill_light_orange
             self.ws.cell(row=line+1, column=col_xlslog_assay_conc).value = dict_part_logic[tag_part_hedr_assay_conc]
+            self.ws.cell(row=line+1, column=col_xlslog_assay_conc).fill = fill_light_orange
             self.ws.cell(row=line+1, column=col_xlslog_equiv).value = dict_part_logic[tag_part_hedr_equiv]
+            self.ws.cell(row=line+1, column=col_xlslog_equiv).fill = fill_lighter_orange
             self.ws.cell(row=line+1, column=col_xlslog_v_per_w).value = dict_part_logic[tag_part_hedr_v_per_w]
+            self.ws.cell(row=line+1, column=col_xlslog_v_per_w).fill = fill_lighter_orange
             self.ws.cell(row=line+1, column=col_xlslog_mol).value = dict_part_logic[tag_part_hedr_mol]
+            self.ws.cell(row=line+1, column=col_xlslog_mol).fill = fill_light_blue
             self.ws.cell(row=line+1, column=col_xlslog_volume).value = dict_part_logic[tag_part_hedr_volume]
+            self.ws.cell(row=line+1, column=col_xlslog_volume).fill = fill_light_blue
             self.ws.cell(row=line+1, column=col_xlslog_kg_net).value = dict_part_logic[tag_part_hedr_kg_net]
+            self.ws.cell(row=line+1, column=col_xlslog_kg_net).fill = fill_light_blue
             self.ws.cell(row=line+1, column=col_xlslog_kg_gro).value = dict_part_logic[tag_part_hedr_kg_gro]
+            self.ws.cell(row=line+1, column=col_xlslog_kg_gro).fill = fill_light_blue
             self.ws.cell(row=line+1, column=col_xlslog_err_rel).value = dict_part_logic[tag_part_hedr_err_rel]
+            self.ws.cell(row=line+1, column=col_xlslog_err_rel).fill = fill_light_orange
             self.ws.cell(row=line+1, column=col_xlslog_err_abs).value = dict_part_logic[tag_part_hedr_err_abs]
+            self.ws.cell(row=line+1, column=col_xlslog_err_abs).fill = fill_light_blue
         elif line == line_standard + 1:
             pass
         else:
