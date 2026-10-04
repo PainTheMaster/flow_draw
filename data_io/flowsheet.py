@@ -309,12 +309,12 @@ class Flowsheet:
             self.ws.cell(row=line, column=col_xlslog_mol-1).value = dict_part_logic[tag_part_std_mol] 
             self.ws.cell(row=line, column=col_xlslog_mol).value = self.mol_std
             self.ws.cell(row=line, column=col_xlslog_mol).fill = fill_light_orange
-            self.ws.cell(row=line, column=col_xlslog_mol).border = border_around
+            # self.ws.cell(row=line, column=col_xlslog_mol).border = border_around
 
             self.ws.cell(row=line, column=col_xlslog_kg_net-1).value = dict_part_logic[tag_part_std_wt_net]
             self.ws.cell(row=line, column=col_xlslog_kg_net).value = self.wt_net_std
             self.ws.cell(row=line, column=col_xlslog_kg_net).fill = fill_light_orange
-            self.ws.cell(row=line, column=col_xlslog_kg_net).border = border_around
+            # self.ws.cell(row=line, column=col_xlslog_kg_net).border = border_around
             
             #Header
             self.ws.cell(row=line+1, column=col_xlslog_mat).value = dict_part_logic[tag_part_hedr_mat]

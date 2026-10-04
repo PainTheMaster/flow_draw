@@ -19,6 +19,7 @@ import flow_draw.batch.process.unit_operations.uo_filtration as filt
 import flow_draw.batch.process.unit_operations.uo_sampling as smplng
 import flow_draw.batch.process.unit_operations.uo_filter_setup as fltsup
 import flow_draw.batch.process.unit_operations.uo_drying as drying
+import flow_draw.batch.process.unit_operations.uo_alloc as alloc
 import flow_draw.data_io.flowsheet  as fsht
 import flow_draw.materials.materials as mats
 import flow_draw.trait_def.trait_def as trdef
@@ -1097,7 +1098,30 @@ class DryingTest4500(unittest.TestCase, trdef.GetProcName):
         self.flowsheet.save("Test_4500_drying_full.xlsx")
         self.assertTrue(True)
 
+class AllocTest4600(unittest.TestCase, trdef.GetProcName):
+    def __init__(self, methodName = "runTest"):
+        super().__init__(methodName)
 
+    def setUp(self):
+        self.flowsheet = fsht.Flowsheet()
+
+    def get_proc_name(self)->str:
+        return "TestProc4600"
+    
+    def test_4600_full(self):
+        # test_inst = drying.Drying(caller=self,
+        #                             flowsheet=self.flowsheet,
+        #                             operation_seq=1,
+        #                             num_subitems=1,
+        #                             edit_comment="This is a comment for test 4500.")
+        test_inst = alloc.Alloc(caller=self,
+                                flowsheet=self.flowsheet,
+                                operation_seq=1,
+                                num_subitems=1,
+                                edit_comment="This is a comment for test 4600.")
+        test_inst.output_unit_operation()
+        self.flowsheet.save("Test_4600_alloc_full.xlsx")
+        self.assertTrue(True)
 
 
 def suite_0000_40000():
@@ -1105,7 +1129,9 @@ def suite_0000_40000():
     suite = unittest.TestSuite()
     #suite.addTest(FiltSetupTest4400("test_4400_full"))
     #suite.addTest(DryingTest4500("test_4500_full"))
-    suite.addTest(SaltyWaterFlow("test0000_OutputFlow"))
+    #suite.addTest(SaltyWaterFlow("test0000_OutputFlow"))
+    #suite.addTest(DryingTest4500("test_4500_full"))
+    suite.addTest(AllocTest4600("test_4600_full"))
 
 
     return suite

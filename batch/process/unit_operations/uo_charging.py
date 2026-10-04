@@ -200,9 +200,9 @@ tag_stc_temp_min_max = temprctrl_min_max
 
 
 dict_jp_stcs={tag_stc_qty : '{qty}±{err} kg',
-              tag_stc_time_min : '*滴下時間{min}以上',
-              tag_stc_time_max : '*滴下時間{max}以内',
-              tag_stc_time_min_max : '*滴下時間{min}～{max}以内',
+              tag_stc_time_min : '*滴下時間{min}分以上',
+              tag_stc_time_max : '*滴下時間{max}分以内',
+              tag_stc_time_min_max : '*滴下時間{min}～{max}分以内',
               tag_stc_temp_min : "仕込み中内温{min}℃以上",
               tag_stc_temp_max : "仕込み中内温{max}℃以下",
               tag_stc_temp_min_max : "仕込み中内温{min}～{max}℃"}
@@ -308,12 +308,12 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
         
         time_min = Primitive(prim_type="number",
                              key=hedr_time_min,
-                             description=f'Lower limit of charging/dosing time. Necessary if "{hedr_time_control}" is "{timectrl_min}" or "{timectrl_min_max}"; nullable otherwise',
+                             description=f'Lower limit of charging/dosing time in minutes unit. Necessary if "{hedr_time_control}" is "{timectrl_min}" or "{timectrl_min_max}"; nullable otherwise',
                              nullable=True)
         
         time_max = Primitive(prim_type="number",
                              key=hedr_time_max,
-                             description=f'Upper limit of charging/dosing time. Necessary if "{hedr_time_control}" is "{timectrl_max}" or "{timectrl_min_max}"',
+                             description=f'Upper limit of charging/dosing time in minutes unit. Necessary if "{hedr_time_control}" is "{timectrl_max}" or "{timectrl_min_max}"',
                              nullable=True)
         
         temp_ctrl = Primitive(prim_type='string',
@@ -366,10 +366,6 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
             new_input.load_from_json_dict(json_dict=single_input)
             self.inputs.append(new_input)
             self.input_count += 1
-
-
-
-
 
 
     def output_unit_operation(self):

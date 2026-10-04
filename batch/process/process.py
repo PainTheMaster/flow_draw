@@ -5,6 +5,7 @@ import flow_draw.definitions as defs
 # from flow_draw.batch.process.unit_operations import unit_operation
 #from flow_draw.batch.process.unit_operations.unit_operation import UnitOperation as unitop
 import flow_draw.batch.process.unit_operations.unit_operation as uo
+import flow_draw.batch.process.unit_operations.uo_alloc as alloc
 import flow_draw.batch.process.unit_operations.uo_charging as chgng
 import flow_draw.batch.process.unit_operations.uo_sampling as smplng
 import flow_draw.batch.process.unit_operations.uo_cip as cip
@@ -42,7 +43,8 @@ list_uo_common: list[type[uo.UnitOperation]] = [chgng.Charging,
                                                  phdisch.PhaseDisch,
                                                  tempctrl.TempControl,
                                                  drying.Drying,
-                                                 xfer.Transfer
+                                                 xfer.Transfer,
+                                                 alloc.Alloc
                                                 ]
 
 
