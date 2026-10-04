@@ -51,15 +51,35 @@ Here, header items to hold pieces of information for the filter dryer set-up sha
 
 
 """ 
+hedr_pkg:str ="Package"
+"""Header for the package information of the tare unit operation."""
+hedr_num_pkg:str ="Num_Pkgs"
+"""Header for the number of packages in the tare unit operation."""
+
 
 
 #########################################################
 # UO-specific options, list, header_item: list dictionry thereof (for data input and internalsignaling)
 #########################################################
+opt_pkg_polym_bag:str = "polymer bag"
+"""Option for a polymer bag package."""
+opt_pkg_pfa_bottle:str = "PFA bottle"
+"""Option for a PFA bottle package."""
+opt_pkg_pp_bottle:str = "PP bottle"
+"""Option for a PP bottle package."""
+opt_pkg_glass_bottle:str = "Glass bottle"
+"""Option for a glass bottle package."""
+opt_pkg_plchldr:str = "<placeholder: pkg>"
+"""Placeholder for package."""
 
-
-
-
+list_opt_pkg = [
+    opt_pkg_polym_bag,
+    opt_pkg_pfa_bottle,
+    opt_pkg_pp_bottle,
+    opt_pkg_glass_bottle,
+    opt_pkg_plchldr
+]
+"""List of various packaging options for solid and liquid products/intermediates."""
 
 
 #########################################################
@@ -89,6 +109,29 @@ Language dictionary for common parts.
     tag_flow_cmn_time_unit_hour : part_flow_cmn_time_unit_hour
 """
 
+tag_part_id_balance:str = "tag_id_balance"
+"""Tag for the balance ID in the tare unit operation."""
+tag_stc_instr_tare:str = "tag_stc_instr_tare"
+"""Tag for the tare instruction in the tare unit operation. Includes a placeholder "pkg" for the package."""
+tag_stc_rec_tare:str = "tag_stc_rec_tare"
+"""Tag for the tare record in the tare unit operation. Includes a placeholder "num_pkg" for the number of packages."""
+
+dict_jp_parts_stcs_jp:dict[str, str] = {
+    opt_pkg_polym_bag: "ポリ袋",
+    opt_pkg_pfa_bottle: "PFAボトル",
+    opt_pkg_pp_bottle: "PPボトル",
+    opt_pkg_glass_bottle: "ガラス瓶",
+    opt_pkg_plchldr: "<placeholder: pkg>",
+    tag_part_id_balance: "秤量器ID:_____________",
+    tag_stc_instr_tare: "取り出しに用いる{pkg}の風袋を測定する。記載欄が足りなければ特記事項欄に記録する。",
+    tag_stc_rec_tare: "風袋重量{num_pkg}:_____________kg",
+}
+
+
+dict_parts_stcs = dict_jp_parts_stcs_jp
+"""Switchable dictionary flowsheet parts and sentence templates."""
+
+
 #########################################################
 # Class (uo.UnitOperation, uo_tag=defs.tag_uo_<UO_NAME>)
 #------------------------------------------
@@ -105,7 +148,7 @@ Language dictionary for common parts.
 # output_unit_operation(self)
 #
 #########################################################
-class ClassTare(uo.UnitOperation, uo_tag=defs.tag_uo_tare_pkg):
+class Tare(uo.UnitOperation, uo_tag=defs.tag_uo_tare_pkg):
     def __init__(self,
                  caller: type[trdef.UniversalTrait] =None,
                  flowsheet:fsht.Flowsheet=None,
@@ -128,7 +171,7 @@ class ClassTare(uo.UnitOperation, uo_tag=defs.tag_uo_tare_pkg):
         if not pd.isna(first_row[hedr_postcomment]):
             self.post_comment = first_row[hedr_postcomment]
         for _, subitem in df.iterrows():
-            #<uo-specific process>
+            pass
 
 
 
@@ -140,7 +183,8 @@ class ClassTare(uo.UnitOperation, uo_tag=defs.tag_uo_tare_pkg):
         pass
     
     def get_json_schema(caller: trdef.UniversalTrait=None)->Objason:
-        common_schema:list[Primitive] = ThisClass.json_common()
+        common_schema:list[Primitive] = Tare.json_common()
+
 
 
     def load_from_json_dict(self, json_dict: dict[str, any]):
