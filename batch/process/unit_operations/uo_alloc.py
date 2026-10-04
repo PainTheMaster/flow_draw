@@ -89,6 +89,18 @@ Language dictionary for common parts.
     tag_flow_cmn_time_unit_hour : part_flow_cmn_time_unit_hour
 """
 
+tag_number:str = 'tag_number'
+"""Tag for the unit operation number column."""
+
+
+dict_parts_jp = {
+    tag_number: "No."
+}
+"""JP dictionary for flowsheet parts."""
+
+dict_parts = dict_parts_jp
+"""Dictionary for parts in various languages. Switchable."""
+
 #########################################################
 # Class (uo.UnitOperation, uo_tag=defs.tag_uo_<UO_NAME>)
 #------------------------------------------
@@ -170,16 +182,18 @@ class Alloc(uo.UnitOperation, uo_tag=defs.tag_uo_alloc):
         self.op_resouce = json_dict.get(hedr_op_resource, '<placeholder: equipment>')
 
     def output_unit_operation(self):
-        self.flowsheet.header_organizer(op_nr=self.operation_seq, title=lang_dict_uo_titles[self.uo_tag])
+        op_resource = f'{self.prod_cell}\n{self.op_resouce}'
+        self.flowsheet.header_organizer(op_nr=dict_parts[tag_number], title=op_resource)
+
         if not (self.pre_comment == None or self.pre_comment == ''):
             self.flowsheet.put_body_comments(self.pre_comment)
             self.flowsheet.linefeed()        
-
-        #<Operation-specific processes here>
-
+        
         if not (self.post_comment == None or self.post_comment == ''):
             self.flowsheet.put_body_comments(self.post_comment)
             self.flowsheet.linefeed()
+        
+        self.flowsheet.linefeed()
     
     @classmethod
     def generate_test_df(cls,

@@ -9,7 +9,7 @@ def main():
         print(" 3: Generate material data input form(s).")
         print(" 4: Load the material data and generate process JSON Schema files.")
         print(" 5: Load process input JSON files.")
-        print(" ☕: Quit the programme (not the company).")
+        print(' ☕ or "quit": Quit the programme.')
 
         user_input = input("Your input:")
         match user_input:
@@ -26,7 +26,7 @@ def main():
                 print('The input file names must be "<process-name>_proc.json"')
                 _=input()
                 batch_this.manual_load_json()
-            case '☕':
+            case '☕' | 'quit' | 'exit':
                 break
             case _:
                 print(f'Invalid input "{user_input}".')

@@ -1,6 +1,8 @@
 import pandas as pd
 import math
+import warnings
 from flow_draw import definitions as defs
+
 
 op_list = None
 
@@ -144,21 +146,25 @@ class Materials:
         """
         if not (equiv is None or vol_per_weight is None):
             raise ValueError(f"{self.__class__.__name__}.to_kilogram(): Dual input of equiv: {equiv} and vol_per_weight: {vol_per_weight} detected for the material \"{material_name}\". A value for only one of those shall be provided.")
+        if equiv is not None and vol_per_weight is not None:
+            raise ValueError(f"{self.__class__.__name__}.to_kilogram(): Both equiv: {equiv} and vol_per_weight: {vol_per_weight} are provided for the material \"{material_name}\". Only one of them should be provided.")
+        
         if not self.df_mats[defs.hedr_io_mats_mat].isin([material_name]).any():
             raise ValueError(f"{self.__class__.__name__}.to_kilogram(): A compound name \"{material_name}\" is not defined in the raw materials table.")
         conc_assay_this = self.df_mats[self.df_mats[defs.hedr_io_mats_mat]==material_name][defs.hedr_io_mats_concasy].item()
         # if math.isnan(conc_assay_this) or conc_assay_this==0.0:
         if pd.isna(conc_assay_this) or conc_assay_this==0.0:
             conc_assay_this = 100.0
-            raise UserWarning(f"{self.__class__.__name__}.to_kilogram(): The concentration or assay for the material \"{material_name}\" is empty or zero.",
-                              "For this run, 100%% is assumed.")
+            warnings.warn(f"{self.__class__.__name__}.to_kilogram(): The concentration or assay for the material \"{material_name}\" is empty or zero.",
+                          "For this run, 100%% is assumed.", UserWarning)
+        
         mw_this = self.df_mats[self.df_mats[defs.hedr_io_mats_mat]==material_name][defs.hedr_io_mats_mw].item()
         # if math.isnan(mw_this):
-        if pd.isna(mw_this):
+        if equiv is not None and pd.isna(mw_this):
             raise ValueError(f"{self.__class__.__name__}.to_kilogram(): No molecular weight is assigned to the material \"{material_name}\".")
         density_this = self.df_mats[self.df_mats[defs.hedr_io_mats_mat]==material_name][defs.hedr_io_mats_dnsty].item()
         # if math.isnan(density_this):
-        if pd.isna(density_this):
+        if vol_per_weight is not None and pd.isna(density_this):
             raise ValueError(f"{self.__class__.__name__}.to_kilogram(): No density is assigned to the material \"{material_name}\".")
         kg_this = 0.0
         if equiv is not None:

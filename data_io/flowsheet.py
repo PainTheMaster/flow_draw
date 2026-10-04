@@ -118,6 +118,11 @@ def num_to_alph(num_col:int)->str:
         num_col //= base
     return result
 
+alph_col_time = num_to_alph(num_col = col_time)
+alph_col_op_nr = num_to_alph(num_col = col_op_nr)
+alph_col_title_left_half = num_to_alph(num_col = col_title_left_half)
+alph_col_title_right_half = num_to_alph(num_col = col_title_right_half)
+
 alph_col_mat = num_to_alph(num_col = col_xlslog_mat)
 alph_col_mw = num_to_alph(num_col = col_xlslog_mw)
 alph_col_dens = num_to_alph(num_col = col_xlslog_dens)
@@ -154,9 +159,17 @@ class Flowsheet:
                             list_col_witness=[])
         #self.linefeed()
 
-    def header_organizer(self, op_nr: int, title: str)->int:
+    def header_organizer(self,
+                         op_nr: int|str|None=None,
+                         title: str=None)->int:
         self.ws.merge_cells(start_row=self.current_line, start_column=col_title_left_half, end_row=self.current_line, end_column=col_title_right_half)
-        self.ws.cell(row=self.current_line, column=col_op_nr, value=op_nr)
+        if isinstance(op_nr, int) or isinstance(op_nr, str):
+            self.ws.cell(row=self.current_line, column=col_op_nr, value=op_nr)
+        elif op_nr is None:
+            cell_start = f'${alph_col_title_left_half}${line_start}'
+            cell_this_line = f'{alph_col_title_left_half}{self.current_line}'
+            xls_formular_count = f'=IF({cell_this_line}<>"", COUNTA({cell_start}:{cell_this_line}), "")'
+            self.ws.cell(row=self.current_line, column=col_op_nr, value=xls_formular_count)
         self.ws.cell(row=self.current_line, column=col_title_left_half, value=title)
         self.ws.cell(row=self.current_line, column=col_op_nr).border = border_around
         self.ws.cell(row=self.current_line, column=col_op_nr).alignment = alignment_center
@@ -229,7 +242,7 @@ class Flowsheet:
         if line_mat is None:
             raise ValueError("Flowsheet.put_qty(): Material line (line_mat) must be provided.")
 
-        excel_formular_qty = f'={alph_col_kg_gro}{line_mat}&" ± "&{alph_col_err_abs}{line_mat}&" kg"'
+        excel_formular_qty = f'=TEXT({alph_col_kg_gro}{line_mat},"0.00")&" ± "&TEXT({alph_col_err_abs}{line_mat},"0.00")&" kg"'
         line_qty = self.put_line(time=time, method=method, content=excel_formular_qty, record=record, operator=operator, witness=witness)
 
         return line_qty

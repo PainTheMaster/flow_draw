@@ -393,7 +393,7 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
                                                     witness=lang_dict_cmn[tag_flow_cmn_rec_sign],
                                                     mat=temp_inpt.material_name,
                                                     mw=temp_inpt.mw,
-                                                    dens=temp_inpt.dens,
+                                                    dens=temp_inpt.density,
                                                     assay_conc=temp_inpt.assay_conc,
                                                     equiv=temp_inpt.metrics_val if temp_inpt.metrics_unit == opt_mtrcs_eq else None,
                                                     v_per_w=temp_inpt.metrics_val if temp_inpt.metrics_unit == opt_mtrcs_v_per_w else None,
@@ -506,7 +506,7 @@ class Input:
         self.mats_data: mats.Materials = mats_data
         self.mw:float = None
         """Molecular weight of the material."""
-        self.dens:float = None
+        self.density:float = None
         """Density of the material."""
         self.assay_conc:float = None
         """Assay or concentration of the material."""
@@ -665,6 +665,9 @@ class Input:
             #raise RuntimeWarning(f"{__class__.__name}: mats_data is None")
         else:
             self.__calc_qty()
+            self.mw = self.mats_data.get_mw(self.material_name)
+            self.density = self.mats_data.get_density(self.material_name)
+            self.assay_conc = self.mats_data.get_assay_conc(self.material_name)
     
     
 
