@@ -1,6 +1,8 @@
 #########################################################
 # imports
 #########################################################
+import enum
+
 import pandas as pd
 import flow_draw.definitions as defs
 import flow_draw.data_io.flowsheet as fsht
@@ -51,9 +53,11 @@ Here, header items to hold pieces of information for the filter dryer set-up sha
 
 
 """ 
+hedr_location:str='Location'
+"""Header for the taring location"""
 hedr_pkg:str ="Package"
 """Header for the package information of the tare unit operation."""
-hedr_num_pkg:str ="Num_Pkgs"
+hedr_num_pkg:int ="Num_Pkgs"
 """Header for the number of packages in the tare unit operation."""
 
 
@@ -156,6 +160,10 @@ class Tare(uo.UnitOperation, uo_tag=defs.tag_uo_tare_pkg):
                  num_subitems: int = None,
                  edit_comment:str=None):
         super().__init__(caller=caller, flowsheet=flowsheet, operation_seq=operation_seq, num_subitems=num_subitems, edit_comment=edit_comment)
+        self.location:str = None
+        self.pkg_material: str = None
+        self.num_pkg:int = None
+
     
     def load_params_from_df(self, df: pd.DataFrame):
         """
@@ -184,12 +192,37 @@ class Tare(uo.UnitOperation, uo_tag=defs.tag_uo_tare_pkg):
     
     def get_json_schema(caller: trdef.UniversalTrait=None)->Objason:
         common_schema:list[Primitive] = Tare.json_common()
-
-
+        pkg_location = Primitive(prim_type='string',
+                                 key=hedr_location,
+                                 description='Place where the pacaging material(s) is tared. E.g, an isolator. If not specified in the data source, please input "<placeholder: location>".',
+                                 nullable=False,
+                                 required=True)
+        pkg_mat = Primitive(prim_type='string',
+                             key=hedr_pkg,
+                             enum=list_opt_pkg,
+                             description = f'Packaging material. Mandatory and non-nullable field. If no information is proviced, pelase select "{opt_pkg_plchldr}". ',
+                             nullable = False,
+                             required = True)
+        num_pkg = Primitive(prim_type='integer',
+                            key=hedr_num_pkg,
+                            description='Number of packaging materials. Depending on the amount/volume of the product/intermediate and the capacity of the packaging material, '
+                            'multiple pieces of mackaging materials is necessary. If no data is provided in the document, please put 1 as the default value.',
+                            nullable=None,
+                            required=True)
+        obj_tare = Objason(key=Tare.uo_tag,
+                           props=common_schema+[pkg_location, pkg_mat, num_pkg],
+                           description='This object is to formulate taring operation of the packaging material for API or its intermediate. '
+                           'The content can be either liquid or solid.',
+                           required=True,
+                           nullable=False)
+        return obj_tare
 
     def load_from_json_dict(self, json_dict: dict[str, any]):
         super().load_from_json_dict(json_dict)
-        pass
+        self.location = json_dict.get(hedr_location, '<placeholder: locatio>')
+        self.pkg_material = json_dict.get(hedr_pkg, '<placeholder: pkg material>')
+        self.num_pkg = json_dict.get(hedr_num_pkg, 1)
+
 
     def output_unit_operation(self):
         self.flowsheet.header_organizer(op_nr=self.operation_seq, title=lang_dict_uo_titles[self.uo_tag])
@@ -198,6 +231,7 @@ class Tare(uo.UnitOperation, uo_tag=defs.tag_uo_tare_pkg):
             self.flowsheet.linefeed()        
 
         #<Operation-specific processes here>
+        
 
         if not (self.post_comment == None or self.post_comment == ''):
             self.flowsheet.put_body_comments(self.post_comment)

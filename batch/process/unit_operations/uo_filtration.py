@@ -270,8 +270,10 @@ class Filtration(uo.UnitOperation, uo_tag=defs.tag_uo_filt):
         integ_test = Primitive(prim_type='string',
                                key=hedr_integ_test,
                                enum=list_opt_integ_test,
-                               description='Please designate whether the integrity test is required for the filtration operation. '
-                               f'If no information is given in the source, please select "{opt_yes}" as the default.')
+                               description='Please designate whether an integrity testing is required for this filtration operation. '
+                               'Integrity testing ensures that the filtration device is set up correctly so as to capture the solid particles correctly. '
+                               f'Even if not instructed in the original information source, an integrity testing must accompany the first filtration after an instance of "{defs.tag_uo_filt_setup}". '
+                               'Normally, only once is sufficient for a series of consecutive filtration-related unit operations with the filtration device.')
         obj_filtration = Objason(key=Filtration.uo_tag,
                                  props=cmn_schema + [filt_device, temp_jacket, press_min, press_max, press_unit, integ_test],
                                  description='This object describes the filtration operation to obtain product crystals or to remove large amount of insoluble byproducts in the process liquid.'
@@ -286,7 +288,6 @@ class Filtration(uo.UnitOperation, uo_tag=defs.tag_uo_filt):
         self.press_max = json_dict.get(hedr_press_max, None)
         self.unit_press = json_dict.get(hedr_unit_press, None)
         self.integ_test = (json_dict.get(hedr_integ_test, None) == opt_yes)
-        print(f'self.integ_test: {self.integ_test} (type: {type(self.integ_test)})')
 
 
     def load_params_from_df(self, df: pd.DataFrame):
