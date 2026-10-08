@@ -59,7 +59,12 @@ hedr_pkg:str ="Package"
 """Header for the package information of the tare unit operation."""
 hedr_num_pkg:int ="Num_Pkgs"
 """Header for the number of packages in the tare unit operation."""
-
+list_hedr = [
+    hedr_location,
+    hedr_pkg,
+    hedr_num_pkg
+]
+"""List of header items for the tare unit operation."""
 
 
 #########################################################
@@ -118,7 +123,7 @@ tag_part_id_balance:str = "tag_id_balance"
 tag_stc_instr_tare:str = "tag_stc_instr_tare"
 """Tag for the tare instruction in the tare unit operation. Includes a placeholder "pkg" for the package."""
 tag_stc_rec_tare:str = "tag_stc_rec_tare"
-"""Tag for the tare record in the tare unit operation. Includes a placeholder "num_pkg" for the number of packages."""
+"""Tag for the tare record in the tare unit operation. Includes a placeholder "count_pkg" for the number of packages."""
 
 dict_jp_parts_stcs_jp:dict[str, str] = {
     opt_pkg_polym_bag: "ポリ袋",
@@ -128,7 +133,7 @@ dict_jp_parts_stcs_jp:dict[str, str] = {
     opt_pkg_plchldr: "<placeholder: pkg>",
     tag_part_id_balance: "秤量器ID:_____________",
     tag_stc_instr_tare: "取り出しに用いる{pkg}の風袋を測定する。記載欄が足りなければ特記事項欄に記録する。",
-    tag_stc_rec_tare: "風袋重量{num_pkg}:_____________kg",
+    tag_stc_rec_tare: "風袋重量({count_pkg}):_____________kg",
 }
 
 
@@ -178,8 +183,14 @@ class Tare(uo.UnitOperation, uo_tag=defs.tag_uo_tare_pkg):
             self.pre_comment = first_row[hedr_precomment]
         if not pd.isna(first_row[hedr_postcomment]):
             self.post_comment = first_row[hedr_postcomment]
-        for _, subitem in df.iterrows():
-            pass
+        # for _, subitem in df.iterrows():
+        #     pass
+        if not pd.isna(first_row[hedr_location]):
+            self.location = first_row[hedr_location]
+        if not pd.isna(first_row[hedr_pkg]):
+            self.pkg_material = first_row[hedr_pkg]
+        if not pd.isna(first_row[hedr_num_pkg]):
+            self.num_pkg = int(first_row[hedr_num_pkg])
 
 
 
@@ -194,8 +205,8 @@ class Tare(uo.UnitOperation, uo_tag=defs.tag_uo_tare_pkg):
         common_schema:list[Primitive] = Tare.json_common()
         pkg_location = Primitive(prim_type='string',
                                  key=hedr_location,
-                                 description='Place where the pacaging material(s) is tared. E.g, an isolator. If not specified in the data source, please input "<placeholder: location>".',
-                                 nullable=False,
+                                 description='Place where the pacaging material(s) is tared. E.g, an isolator. If not specified in the data source, null is acceptable.',
+                                 nullable=True,
                                  required=True)
         pkg_mat = Primitive(prim_type='string',
                              key=hedr_pkg,
@@ -219,7 +230,7 @@ class Tare(uo.UnitOperation, uo_tag=defs.tag_uo_tare_pkg):
 
     def load_from_json_dict(self, json_dict: dict[str, any]):
         super().load_from_json_dict(json_dict)
-        self.location = json_dict.get(hedr_location, '<placeholder: locatio>')
+        self.location = json_dict.get(hedr_location, None)
         self.pkg_material = json_dict.get(hedr_pkg, '<placeholder: pkg material>')
         self.num_pkg = json_dict.get(hedr_num_pkg, 1)
 
@@ -228,34 +239,66 @@ class Tare(uo.UnitOperation, uo_tag=defs.tag_uo_tare_pkg):
         self.flowsheet.header_organizer(op_nr=self.operation_seq, title=lang_dict_uo_titles[self.uo_tag])
         if not (self.pre_comment == None or self.pre_comment == ''):
             self.flowsheet.put_body_comments(self.pre_comment)
-            self.flowsheet.linefeed()        
+            self.flowsheet.linefeed()
 
-        #<Operation-specific processes here>
+        if self.location is not None:
+            self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
+                                    method=self.location,
+                                    content=dict_parts_stcs[tag_stc_instr_tare].format(pkg=self.pkg_material),
+                                    record=dict_parts_stcs[tag_part_id_balance],
+                                    operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
+                                    witness=lang_dict_cmn[tag_flow_cmn_rec_sign],
+                                    )
+        else:
+            self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
+                                    method='',
+                                    content=self.dict_parts_stcs[tag_stc_instr_tare].format(pkg=self.pkg_material),
+                                    record=dict_parts_stcs[tag_part_id_balance],
+                                    operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
+                                    witness=lang_dict_cmn[tag_flow_cmn_rec_sign],
+                                    )
+        for i in range(1, self.num_pkg+1):
+            self.flowsheet.put_line(record=dict_parts_stcs[tag_stc_rec_tare].format(count_pkg=i))
+
+        self.flowsheet.linefeed()
         
-
         if not (self.post_comment == None or self.post_comment == ''):
             self.flowsheet.put_body_comments(self.post_comment)
             self.flowsheet.linefeed()
     
     @classmethod
     def generate_test_df(cls,
-                       PARAMETER=DEFALUT_VALUE)->pd.DataFrame:
+                         precomment='',
+                         pkg_location="isolator",
+                         pkg_material=dict_parts_stcs[opt_pkg_polym_bag],
+                         num_pkg=1,
+                         postcomment='')->pd.DataFrame:
         hedr:list[str] = defs.list_hedr_cmn_io_dtil + list_hedr
         content: list[any] = [None]*len(hedr)
         s:pd.Series = pd.Series(data=content, index=hedr)
         df = s.to_frame().T
-        df.at[df.index[0], HEDR_ITEM]=PARAMETER
-        ...
+        df.at[df.index[0], hedr_precomment]=precomment
+        df.at[df.index[0], hedr_location]=pkg_location
+        df.at[df.index[0], hedr_pkg]=pkg_material
+        df.at[df.index[0], hedr_num_pkg]=num_pkg
+        df.at[df.index[0], hedr_postcomment]=postcomment
 
         return df
     
     @classmethod
     def add_to_test_df(cls,
                        df: pd.DataFrame=None,
-                       PARAMETER=DEFALUT_VALUE)->None:
+                       precomment='',
+                       pkg_location="isolator",
+                       pkg_material=dict_parts_stcs[opt_pkg_polym_bag],
+                       num_pkg=1,
+                       postcomment='')->None:
         width:int = len(df.columns)
         new_row:list[any] = [None]*width
         row:int = len(df)
         df.loc[row]=new_row
-        df.at[row, HEADER_ITEM]=PARAMETER
-        ...
+        df.at[row, hedr_precomment]=precomment
+        df.at[row, hedr_location]=pkg_location
+        df.at[row, hedr_pkg]=pkg_material
+        df.at[row, hedr_num_pkg]=num_pkg
+        df.at[row, hedr_postcomment]=postcomment

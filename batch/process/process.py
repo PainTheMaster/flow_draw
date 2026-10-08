@@ -232,7 +232,7 @@ class Process(GetMats, GetProcName):
         json_dict = self.data_io.json_uo(caller=self, list_uo=list_uo)
         file_name = self.process_name+"_schema.json"
         with open(file=file_name, mode='w', encoding='utf_8') as file_this:
-            json.dump(obj=json_dict, fp=file_this)
+            json.dump(obj=json_dict, fp=file_this, indent=2)
 
 
     

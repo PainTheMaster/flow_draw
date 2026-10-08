@@ -20,6 +20,7 @@ import flow_draw.batch.process.unit_operations.uo_sampling as smplng
 import flow_draw.batch.process.unit_operations.uo_filter_setup as fltsup
 import flow_draw.batch.process.unit_operations.uo_drying as drying
 import flow_draw.batch.process.unit_operations.uo_alloc as alloc
+import flow_draw.batch.process.unit_operations.uo_tare as tare
 import flow_draw.data_io.flowsheet  as fsht
 import flow_draw.materials.materials as mats
 import flow_draw.trait_def.trait_def as trdef
@@ -1124,6 +1125,33 @@ class AllocTest4600(unittest.TestCase, trdef.GetProcName):
         self.assertTrue(True)
 
 
+class TareTest4700(unittest.TestCase, trdef.GetProcName):
+    def __init__(self, methodName = "runTest"):
+        super().__init__(methodName)
+
+    def setUp(self):
+        self.flowsheet = fsht.Flowsheet()
+
+    def get_proc_name(self)->str:
+        return "TestProc4700"
+    
+    def test_4700_full(self):
+        test_inst = tare.Tare(caller=self,
+                              flowsheet=self.flowsheet,
+                              operation_seq=1,
+                              num_subitems=1,
+                              edit_comment="This is a comment for test 4700.")
+
+        df = tare.Tare.generate_test_df(precomment="This is a pre-comment for test 4700.",
+                                   pkg_location="Some location",
+                                   pkg_material=tare.opt_pkg_polym_bag,
+                                   num_pkg=5,
+                                   postcomment="This is a post-comment for test 4700.")
+        test_inst.load_params_from_df(df)
+        test_inst.output_unit_operation()
+        self.flowsheet.save("Test_4700_tare_full.xlsx")
+        self.assertTrue(True)
+
 def suite_0000_40000():
     
     suite = unittest.TestSuite()
@@ -1131,7 +1159,8 @@ def suite_0000_40000():
     #suite.addTest(DryingTest4500("test_4500_full"))
     #suite.addTest(SaltyWaterFlow("test0000_OutputFlow"))
     #suite.addTest(DryingTest4500("test_4500_full"))
-    suite.addTest(AllocTest4600("test_4600_full"))
+    # suite.addTest(AllocTest4600("test_4600_full"))
+    suite.addTest(TareTest4700("test_4700_full"))
 
 
     return suite
