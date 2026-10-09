@@ -42,15 +42,18 @@ opt_time_unit_hour:str = defs.tag_flow_cmn_time_unit_hour
 #list_hedr = defs.list_hedr_<list of header items for the uo>
 #dict_dtil_drpdwn = defs.dict_opt_<unit operation>
 
+list_hedr = []
+
 
 #########################################################
 # UO-specific options, list, header_item: list dictionry thereof (for data input and internalsignaling)
 #########################################################
 
+opt_something:str = "something"
 
+list_opt_something = []
 
-
-
+dict_opt: dict[str, list[str]]={}
 
 #########################################################
 # signal -> local language dictionary and tags for it
@@ -78,6 +81,15 @@ Language dictionary for common parts.
     tag_flow_cmn_time_unit_minute : part_flow_cmn_time_unit_minute,
     tag_flow_cmn_time_unit_hour : part_flow_cmn_time_unit_hour
 """
+
+tag_part_something:str = "tag_part_something"
+
+tag_stc_something:str = "tag_stc_something"
+
+dict_parts_stcs_jp = {}
+
+dict_parts_stcs = dict_parts_stcs_jp
+
 
 #########################################################
 # Class (uo.UnitOperation, uo_tag=defs.tag_uo_<UO_NAME>)
@@ -124,10 +136,10 @@ class ClassName(uo.UnitOperation, uo_tag=defs.tag_uo_"UO_NAME"):
 
     def get_detail_header(self) -> list[str]:
         """UO-specific items only."""
-        pass
+        return list_hedr
 
     def get_detail_option_menu(self) -> Optional[dict[str, list[str]]]:
-        pass
+        return dict_opt
     
     def get_json_schema(caller: trdef.UniversalTrait=None)->Objason:
         common_schema:list[Primitive] = ThisClass.json_common()

@@ -91,6 +91,10 @@ list_opt_pkg = [
 """List of various packaging options for solid and liquid products/intermediates."""
 
 
+dict_opt: dict[str, list[str]] = {
+    hedr_pkg: list_opt_pkg
+}
+
 #########################################################
 # signal -> local language dictionary and tags for it
 #########################################################
@@ -125,7 +129,7 @@ tag_stc_instr_tare:str = "tag_stc_instr_tare"
 tag_stc_rec_tare:str = "tag_stc_rec_tare"
 """Tag for the tare record in the tare unit operation. Includes a placeholder "count_pkg" for the number of packages."""
 
-dict_jp_parts_stcs_jp:dict[str, str] = {
+dict_parts_stcs_jp:dict[str, str] = {
     opt_pkg_polym_bag: "ポリ袋",
     opt_pkg_pfa_bottle: "PFAボトル",
     opt_pkg_pp_bottle: "PPボトル",
@@ -137,7 +141,7 @@ dict_jp_parts_stcs_jp:dict[str, str] = {
 }
 
 
-dict_parts_stcs = dict_jp_parts_stcs_jp
+dict_parts_stcs = dict_parts_stcs_jp
 """Switchable dictionary flowsheet parts and sentence templates."""
 
 
@@ -196,10 +200,10 @@ class Tare(uo.UnitOperation, uo_tag=defs.tag_uo_tare_pkg):
 
     def get_detail_header(self) -> list[str]:
         """UO-specific items only."""
-        pass
+        return list_hedr
 
     def get_detail_option_menu(self) -> Optional[dict[str, list[str]]]:
-        pass
+        return dict_opt
     
     def get_json_schema(caller: trdef.UniversalTrait=None)->Objason:
         common_schema:list[Primitive] = Tare.json_common()
@@ -223,7 +227,7 @@ class Tare(uo.UnitOperation, uo_tag=defs.tag_uo_tare_pkg):
         obj_tare = Objason(key=Tare.uo_tag,
                            props=common_schema+[pkg_location, pkg_mat, num_pkg],
                            description='This object is to formulate taring operation of the packaging material for API or its intermediate. '
-                           'The content can be either liquid or solid.',
+                           f'The content can be either liquid or solid. Normally, this operation is needed just before an instance of "{defs.tag_uo_prod_disch}".',
                            required=True,
                            nullable=False)
         return obj_tare
@@ -261,7 +265,7 @@ class Tare(uo.UnitOperation, uo_tag=defs.tag_uo_tare_pkg):
             self.flowsheet.put_line(record=dict_parts_stcs[tag_stc_rec_tare].format(count_pkg=i))
 
         self.flowsheet.linefeed()
-        
+
         if not (self.post_comment == None or self.post_comment == ''):
             self.flowsheet.put_body_comments(self.post_comment)
             self.flowsheet.linefeed()
