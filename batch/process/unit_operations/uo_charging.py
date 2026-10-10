@@ -262,7 +262,7 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
         if caller is not None:
             self.mats_data = (self.caller).get_mats()
         self.input_count = 0
-        self.inputs: list[Input] = []
+        self.list_inputs: list[Input] = []
 
         #self.output_unit_operation()
 
@@ -289,7 +289,7 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
             new_input = Input(mats_data=self.mats_data)
             #each line of the df = each input material, now, the Material instance is unique in terms of the content.
             new_input.load_params_from_series(subitem)
-            self.inputs.append(new_input)
+            self.list_inputs.append(new_input)
             self.input_count += 1
 
 
@@ -419,7 +419,7 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
         for single_input in arr_input:
             new_input = Input(mats_data=self.mats_data)
             new_input.load_from_json_dict(json_dict=single_input)
-            self.inputs.append(new_input)
+            self.list_inputs.append(new_input)
             self.input_count += 1
 
 
@@ -429,7 +429,7 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
         if not (self.pre_comment == None or self.pre_comment == ''):
             self.flowsheet.put_body_comments(self.pre_comment)
 
-        for temp_inpt in self.inputs:
+        for temp_inpt in self.list_inputs:
 
             line_mat = self.flowsheet.put_material(time=lang_dict_cmn[tag_flow_cmn_rec_time],
                                                     method=lang_dict_chgng_specif[temp_inpt.method],

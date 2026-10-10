@@ -280,6 +280,10 @@ class Process(GetMats, GetProcName, GetInputs):
             self.seq_uo.append(new_uo_inst)
 
         for step in self.seq_uo:
+            if isinstance(step, chgng.Charging):
+                self.list_inputs += step.list_inputs
+        
+        for step in self.seq_uo:
             step.output_unit_operation()
 
         self.flowsheet.save(filename=self.process_name+".xlsx")

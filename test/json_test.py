@@ -477,7 +477,7 @@ class Test_21000_input_json(unittest.TestCase, trdef.GetMats):
         print(f'pre_comment: {self.chgng_obj.pre_comment}')
         print(f'post_comment: {self.chgng_obj.post_comment}')
         print()
-        for charging in self.chgng_obj.inputs:
+        for charging in self.chgng_obj.list_inputs:
             print('---------------------')
             print(f'material_name: {charging.material_name}')
             print(f'metrics_unit: {charging.metrics_unit}')

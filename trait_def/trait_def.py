@@ -70,3 +70,8 @@ class GetInputs(UniversalTrait):
             This shall be an instance of chgng.Input containing all the necessary input values for the process.
         """
         pass
+
+
+    @abstractmethod
+    def get_depended(self):
+        pass
