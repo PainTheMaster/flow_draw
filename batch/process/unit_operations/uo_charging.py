@@ -7,12 +7,13 @@ from flow_draw.batch.process.unit_operations import unit_operation as uo
 from flow_draw.data_io import process_io
 from flow_draw.materials import materials as mats
 from flow_draw.data_io.flowsheet import Flowsheet as fsht
-from flow_draw.trait_def.trait_def import GetMats
+from flow_draw.trait_def.trait_def import GetMats, GetInputs
 from flow_draw.data_io.json_io import Objason, Primitive, Array
 
 
 header_precomment = defs.hedr_cmn_io_dtil_precmnt #Don't include this in the specific header list!!!
 header_postcomment = defs.hedr_cmn_io_dtil_postcmnt #Don't include this in the specific header list!!!
+
 
 hedr_material_name = 'Material_Name'
 hedr_metrics_value = 'Metrics_Value'
@@ -38,6 +39,15 @@ list_header_items = [hedr_material_name,
                      hedr_temp_min,
                      hedr_temp_max]
 
+id_input_json = 'Material_Input_ID'
+"""The key to a material input ID for JSON data exchange."""
+
+hedr_basis_input = 'Calc_Basis_Material_Input_ID'
+"""The key to the calculation basis material input ID for JSON data exchange."""
+
+hedr_basis_array = 'Array_Calc_Basis'
+"""The key to the array of calculation basis material input IDs for JSON data exchange."""
+
 entry_input_json = 'charging_input_entry'
 """The key to a material input entry for JSON data exchange."""
 
@@ -47,15 +57,28 @@ arry_inputs_json = 'arr_charging_input_entry'
 obj_charging_json = 'charging_stage'
 """The key to the unit operation of charging."""
 
+opt_special_id_basis_tgt = -1
+"""The special ID to designate the target material as the calculation basis."""
+
+cls_input_mat_sm = 'cls_sm'
+"""Material class identifier for the starting material."""
+cls_input_mat_tgt = 'cls_tgt'
+"""Material class identifier for the target material."""
+cls_input_mat_other = 'cls_other'
+"""Material class identifier for other materials."""
+
+
 method_liq = 'liquid_port'
 method_shower = 'shower'
 method_press = 'press_vessel'
+method_mobile_tank = 'mobile_tank'
 method_pow = 'powder_port'
 method_placeholder = 'placeholder'
 #List below
 list_charging_method =[method_liq,
                        method_shower,
                        method_press,
+                       method_mobile_tank,
                        method_pow,
                        method_placeholder]
 
@@ -85,8 +108,9 @@ list_temp_control = [temprctrl_none,
 #list_metrics_unit = [defs.tag_metrics_equiv, defs.tag_metrics_vol]
 opt_mtrcs_eq = "equiv"
 opt_mtrcs_v_per_w = "v/w"
+opt_mtrcs_wwpct = "w/w%"
 #list below
-list_metrics_unit = [opt_mtrcs_eq, opt_mtrcs_v_per_w]
+list_metrics_unit = [opt_mtrcs_eq, opt_mtrcs_v_per_w, opt_mtrcs_wwpct]
 
 error_range_placeholder = 'placeholder'
 error_default = 5.0
@@ -125,6 +149,9 @@ part_rec_input_jp = '仕込み量__________kg'
 tag_part_rec_lot = "tag_chgng_rec_lot"
 part_rec_lot_jp = 'ロット番号__________'
 """Flowseet component for class Charging. A recording element for the lot number of a material"""
+
+#TODO: Add container ID!
+
 tag_part_rec_hose = "tag_chgng_rec_hose"
 part_rec_hose_jp ='溶媒用フレキID__________'
 """Flowseet component for class Charging. A recording element for the ID of flexible tube for solvents"""
@@ -153,6 +180,9 @@ part_mthd_shower_jp = "常設シャワー"
 tag_part_mthd_prssvesl = method_press
 part_mthd_prssvesl_jp = "圧送容器"
 """Flowsheet component for class Charging. Charging from a pressure vessel. An ption for Liquid charging."""
+tag_part_mthd_mobile_tank = method_mobile_tank
+part_mthd_mobile_tank_jp = "液体コンテナ"
+"""Flowsheet component for class Charging. Charging from a mobile tank. An option for large volume liquid charging."""
 tag_part_mthd_pwdr = method_pow
 part_mthd_pwdr_jp = "粉体投入口"
 """Flowsheet component for class Charging. Charging through the power port. An ption for powder charging."""
@@ -174,6 +204,7 @@ dict_jp_parts={tag_part_instr_ini : part_instr_ini_jp,
                 tag_part_mthd_liq : part_mthd_liq_jp,
                 tag_part_mthd_shower : part_mthd_shower_jp,
                 tag_part_mthd_prssvesl : part_mthd_prssvesl_jp,
+                tag_part_mthd_mobile_tank : part_mthd_mobile_tank_jp,
                 tag_part_mthd_pwdr : part_mthd_pwdr_jp,
                 tag_part_mthd_plchldr : part_mthd_plchldr_jp
                 }
@@ -216,7 +247,7 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
     TODO: Make some comment here.
     """
     
-    def __init__(self, caller: GetMats=None, flowsheet:fsht.Flowsheet=None, operation_seq:int=None, num_subitems: int =None, edit_comment:str=None):
+    def __init__(self, caller: GetMats|GetInputs=None, flowsheet:fsht.Flowsheet=None, operation_seq:int=None, num_subitems: int =None, edit_comment:str=None):
         """
         Initialises the newly created instance of the class Charging.
 
@@ -267,35 +298,60 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
         list_mats=mats_data.get_list_mats()
         #common=Charging.json_common(arg_name_uo=defs.tag_uo_charging)
         common=Charging.json_common()
-
+        id_input = Primitive(prim_type='integer',
+                             key=id_input_json,
+                             description='A unique serial number (positive or zero) for the material input. '
+                             'This value must be unique for each material input and this rule applies throughout the process. '
+                             'Regardless of the input sequence, please assign 0 for (the first input of) the starting material (the key building block of the process). '
+                             'This value is used to identify an instance of material input to calculate the quantity of other material inputs when this instance is used as the basis.',
+                             nullable=False,
+                             required=True)
         name_mats = Primitive(prim_type="string",
                               key=hedr_material_name,
                               enum=list_mats,
                               description='The name of the raw material, solvent, etc., charged.')
         qty_mats = Primitive(prim_type="number",
                              key=hedr_metrics_value,
-                             description=f'Relative quantity of the raw material, solvent, and other materials in molar equivalent (eq) or volume/weight (v/w) vs the key raw material. '\
-                                  f'The unit is selected in another entry. The key raw material is {mats_data.get_main_raw_material()}')
+                             description=f'Relative quantity of the raw material, solvent, and other materials. This object is for the value only.'
+                             f'The unit is selected in another entry. ')
         unit_mats = Primitive(prim_type="string",
                               key=hedr_metrics_unit,
-                              description=f'Unit to specify the relative quantity of the raw material, solvent, and other materials. Molar equivalent (eq) or volume/weight (v/w). '\
-                                f'This item has to be consistent with the other entry "{hedr_metrics_value}"',
+                              description=f'Unit to specify the relative quantity of the raw material, solvent, and other materials. This is for the unit only. '
+                              f'"{opt_mtrcs_eq}": molar equivalent vs the selected calculation basis material input. '
+                              f'"{opt_mtrcs_v_per_w}": volume (L) of liquid vs weight (kg) of the selected calculation basis material input. '
+                              f' "{opt_mtrcs_wwpct}": weight/weight percent vs the designated calculation basis material input. '
+                              f'This item has to be consistent with the other entry "{hedr_metrics_value}"',
                               enum=list_metrics_unit)
+        basis_input_single = Primitive(prim_type='integer',
+                                key=hedr_basis_input,
+                                description='The material input used as the basis for calculating the quantity of other material inputs.'
+                                f'If the target material is designated as the calculation basis, please put {opt_special_id_basis_tgt}.',
+                                nullable=False,
+                                required=True)
+        arr_basis_inputs = Array(key=hedr_basis_array,
+                           content = basis_input_single,
+                           description='Array of material input IDs used as the basis for calculating the quantity of other material inputs. '
+                           'In most cases, only one material input ID (the key building block) is used as the basis. '
+                           'However, multiple input IDs are allowed. For a rare example, when the key raw material is split and charged in multiple steps. '
+                           f'If the target material is designated as the calculation basis, please put {opt_special_id_basis_tgt}.',
+                           nullable=False,
+                           required = True)
         permiss_error = Primitive(prim_type="number",
                                   key=hedr_error_pct,
-                                  description="Permissible error of the material quantity indicated in percent (%). If not specified in the data source, "\
+                                  description="Permissible error of the material quantity indicated in percent (%). If not specified in the data source, "
                                     "please use the default value of 1 percent for the key raw material, and 5 percent for other materials.")
         charging_method = Primitive(prim_type='string',
                                     key=hedr_method,
                                     enum=list_charging_method,
                                     description=f"Method to charge/dose a material."\
-                                        f'"{method_liq}" is charging solvent or liquid reagent through a pipe. This method is less frequently chosen.'\
-                                        f'"{method_shower}" is charging solvents by using a showering device in the reaction vessel to clean adhered solid material on the wall.'\
-                                        f'"{method_press}" is preferred for solvents and liquid reagents. The liquid material is put in a container under a controlled pressure.'\
-                                        f'The liquid is transferred to the reaction vessel at a controlled rate.'\
-                                        f'"{method_pow}" is for solid material. A solid material is charged through an opening on the top of the reactor.'\
-                                        f'If you can\'t choose the right option, please select "{method_placeholder}"',
-                                        )
+                                        f'"{method_liq}" is charging solvent or liquid reagent through a pipe. This method is less frequently chosen. '
+                                        f'"{method_shower}" is charging solvents by using a showering device in the reaction vessel to clean adhered solid material on the wall. '
+                                        f'"{method_press}" is preferred for solvents and liquid reagents less than 10 liters. The liquid material is put in a container under some pressure. '
+                                        f'The liquid is transferred to the reaction vessel at a controlled rate. '
+                                        f'"{method_mobile_tank}" is choses when a large volume of liquid, e.g. two-digit liters of solvent, needs to be measured and charged. '
+                                        f'"{method_pow}" is for solid material. A solid material is charged through an opening on the top of the reactor. '
+                                        'As a special case, slurry of crystal seed is charged by this method.'
+                                        f'If you can\'t choose the right option, please select "{method_placeholder}"')
         time_ctrl = Primitive(prim_type='string',
                               key=hedr_time_control,
                               enum=list_time_control,
@@ -340,7 +396,7 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
                              required=True)
         
         input_entry = Objason(key=entry_input_json,
-                              props=[name_mats, qty_mats, unit_mats, permiss_error, charging_method, time_ctrl, time_min, time_max, temp_ctrl, temp_min, temp_max],
+                              props=[id_input, name_mats, qty_mats, unit_mats, arr_basis_inputs, permiss_error, charging_method, time_ctrl, time_min, time_max, temp_ctrl, temp_min, temp_max],
                               description='Combination of material, quantity, permissible quantity error, charging method, time constraints, temperature range to define each charging/dosing operation.'
                              )
 
@@ -348,8 +404,7 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
                           content=input_entry,
                           description='A list of material input entries. A single material or more is put in the reactor vessel in a charging/dosing stage.',
                           required=True)
-        charging_dosing = Objason(#key=obj_charging_json,
-                                  key=Charging.uo_tag,
+        charging_dosing = Objason(key=Charging.uo_tag,
                                   props=common+[arr_input],
                                   description='This object corresponds to a unit operation of charging/dosing which appears as a single block on the flowsheet. '
                                     'One or more material(s) are dosed/charged into the reaction vessel.',
@@ -375,19 +430,13 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
             self.flowsheet.put_body_comments(self.pre_comment)
 
         for temp_inpt in self.inputs:
-            # self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
-            #                          method=lang_dict_chgng_specif[temp_inpt.method],
-            #                          content=temp_inpt.material_name,
-            #                          record=lang_dict_chgng_specif[tag_part_rec_lot],
-            #                          operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
-            #                          witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
 
             line_mat = self.flowsheet.put_material(time=lang_dict_cmn[tag_flow_cmn_rec_time],
                                                     method=lang_dict_chgng_specif[temp_inpt.method],
                                                     record=lang_dict_chgng_specif[tag_part_rec_lot],
                                                     operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
                                                     witness=lang_dict_cmn[tag_flow_cmn_rec_sign],
-                                                    mat=temp_inpt.material_name,
+                                                    name_mat=temp_inpt.material_name,
                                                     mw=temp_inpt.mw,
                                                     dens=temp_inpt.density,
                                                     assay_conc=temp_inpt.assay_conc,
@@ -396,15 +445,14 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
                                                     err_rel_pct=temp_inpt.error_pct if temp_inpt.error_pct is not None else error_default)
 
             #line-2: QTY instruction and record
-            # str_qty = lang_dict_instr_stcs[tag_stc_qty].format(qty=temp_inpt.qty_kg, err=temp_inpt.error_kg)
-            # self.flowsheet.put_line(content=str_qty, record=lang_dict_chgng_specif[tag_part_rec_input])
             self.flowsheet.put_qty(record=lang_dict_chgng_specif[tag_part_rec_input],
                                    line_mat=line_mat)
 
             #For liquid only, flex ID 
             if (temp_inpt.method == method_liq or
-                temp_inpt.method == method_press or
-                temp_inpt.method == method_shower):
+                # temp_inpt.method == method_press or
+                temp_inpt.method == method_shower or
+                temp_inpt.method == method_mobile_tank):
                 self.flowsheet.put_line(record=lang_dict_chgng_specif[tag_part_rec_hose],
                                          operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
                                          witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
@@ -422,30 +470,6 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
         if not (self.post_comment == None or self.post_comment == ''):
             self.flowsheet.put_body_comments(self.post_comment)
             self.flowsheet.linefeed()
-            
-    # def interact(self):
-    #     print("Unit operation-"+str(self.operation_seq)+": Charging")
-    #     print("Pre-comment?:")
-    #     self.pre_comment = input()
-    #     print("How many input materials?: ", end="")
-    #     self.input_count=int(input())
-    #     for i in range(self.input_count):
-    #         this_material = Input(mats_data=self.mats_data)
-    #         this_material.interact()
-    #         self.inputs.append(this_material)
-    #     print("Post-comment?:")
-    #     self.post_comment = input()
-
-    # def test_data_creation(self):
-    #     self.pre_comment = 'This is the line-1 of a dummy pre-comment\nThis is the line-2 of a dummy pre-comment'
-    #     self.post_comment = 'This is the line-1 of a dummy post-comment;This is the line-2 of a dummy post-comment;The product is salty.'
-    #     material1 = Input(mats_data=self.mats_data)
-    #     material1.test_data_creation1()
-    #     self.inputs.append(material1)
-    #     material2 = Input(mats_data=self.mats_data)
-    #     material2.test_data_creation2()
-    #     self.inputs.append(material2)
-    #     print("Test data created for salt water.")
 
 
     def __put_time_control(self, input: Input=None):
@@ -509,12 +533,18 @@ class Input:
 
 
         #Charging/dosing variables
+        self.id_input:int = None
+        """Identifier for the charging operation instance."""
         self.material_name:str = None
         """User input. Material name. Has to be consistent with the materials table"""
+        self.material_class:str = None
+        """Class identifier for the material. Can be one of 'cls_sm', 'cls_tgt', or 'cls_other'."""
         self.metrics_unit:str = None
         """Holds one of the options in list_metrics_unit. Metrics unit suc as eq or v/w"""
         self.metrics_val:float = None
         """User input float. Factor to the main material as in x eq or y v/w"""
+        self.arr_basis_input:list = None
+        """Array of basis input values for the material."""
         self.error_pct:float = None
         """User input float. Permissible error percentage. 5.0% for most of materials."""
         self.qty_kg:float = None
@@ -536,68 +566,7 @@ class Input:
         self.temp_max:float = None
         """User input float. Upper temperature limit."""
     
-    # def interact(self):
-    #     print("Material name?: ", end='')
-    #     self.material_name = input()
-    
-    #     print("Metrics unit?: ")
-    #     for idx in range(len(list_metrics_unit)):
-    #         print(str(idx)+": "+list_metrics_unit[idx])
-    #     print("> ", end='')
-    #     idx = int(input())
-    #     self.metrics_unit = list_metrics_unit[idx]
-        
-    #     print("Metrics value?: ", end='')
-    #     self.metrics_val = float(input())
-
-        
-    #     print('Permissible error?:')
-    #     for idx in range(len(list_error_range)):
-    #         if list_error_range[idx] is not None:
-    #             print(str(idx)+": "+str(list_error_range[idx])+"%")
-    #     print("> ", end='')
-    #     choice_error_range = int(input())
-    #     self.error_pct = list_error_range[choice_error_range]
-
-    #     print('Specify a charging method?:')
-    #     for idx in range(len(defs.list_yesno)):
-    #         print(str(idx)+': '+defs.list_yesno[idx])
-    #     print("> ", end='')
-    #     specif_yesno = int(input())
-    #     if defs.list_yesno[specif_yesno] == defs.opt_yes:
-    #         for idx in range(len(list_charging_method)):
-    #             print(str(idx)+': '+list_charging_method[idx])
-    #         print("> ", end='')
-    #         choice_chargingmethod = int(input())
-    #         self.method = list_charging_method[choice_chargingmethod]
-        
-    #     print("Specicfy a time control method?: ")
-    #     for idx in range(len(list_time_control)):
-    #         print(str(idx)+': '+list_time_control[idx])
-    #     print("> ", end='')
-    #     choice_time_control = int(input())
-    #     self.time_control = list_time_control[choice_time_control]
-    #     if self.time_control == timectrl_min or self.time_control == timectrl_min_max:
-    #         print("Charging time lower limit?: ", end='')
-    #         self.time_min = input()
-    #     if self.time_control == timectrl_max or self.time_control == timectrl_min_max:
-    #         print("Charging time upper limit?: ", end='')
-    #         self.time_max = input()
-        
-    #     print("Specicfy a temperature control method?: ")
-    #     for idx in range(len(list_temp_control)):
-    #         print(str(idx)+': '+list_temp_control[idx])
-    #     print("> ", end='')
-    #     choice_temp_control = int(input())
-    #     self.temp_control = list_temp_control[choice_temp_control]
-    #     if self.temp_control == temprctrl_min or self.temp_control == temprctrl_min_max:
-    #         print("Charging temperature (℃) lower limit?: ", end='')
-    #         self.temp_min = float(input())
-    #     if self.temp_control == temprctrl_max or self.temp_control == temprctrl_min_max:
-    #         print("Charging temperature (℃) upper limit?: ", end='')
-    #         self.temp_max = float(input())
-        
-    #     self.__calc_qty()
+  
 
     def load_params_from_series(self, ser: pd.Series):
         """
@@ -640,9 +609,11 @@ class Input:
             self.assay_conc = self.mats_data.get_assay_conc(self.material_name)
 
     def load_from_json_dict(self, json_dict: dict[str, any]):
+        self.id_input =json_dict[id_input_json]
         self.material_name = json_dict[hedr_material_name]
         self.metrics_unit = json_dict[hedr_metrics_unit]
         self.metrics_val = json_dict[hedr_metrics_value]
+        self.arr_basis_input = json_dict[arry_inputs_json]
         self.error_pct = json_dict[hedr_error_pct]
         self.method = json_dict[hedr_method]
         self.time_control = json_dict[hedr_time_control]
@@ -664,7 +635,12 @@ class Input:
             self.mw = self.mats_data.get_mw(self.material_name)
             self.density = self.mats_data.get_density(self.material_name)
             self.assay_conc = self.mats_data.get_assay_conc(self.material_name)
-    
+            if self.material_name == self.mats_data.get_name_sm():
+                self.material_class = cls_input_mat_sm
+            elif self.material_name == self.mats_data.get_name_tgt():
+                self.material_class = cls_input_mat_tgt
+            else:
+                self.material_class = cls_input_mat_other
     
 
     def test_data_creation1(self):

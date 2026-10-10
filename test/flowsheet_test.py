@@ -65,19 +65,19 @@ class SaltyWaterFlow(unittest.TestCase):
 
 def PurchaseMaterials() -> pd.DataFrame:
     dict_NaCl = {defs.hedr_io_mats_mat: "NaCl",
-                 defs.hedr_io_mats_main: defs.itm_io_mats_desig_star,
+                 defs.hedr_io_mats_sm_tgt: defs.itm_io_mats_sm,
                  defs.hedr_io_mats_mw: 58.44,
                  defs.hedr_io_mats_dnsty: 2.17,
                  defs.hedr_io_mats_concasy: 100.0,
-                 defs.hedr_io_mats_kgmain: 1.00,
+                 defs.hedr_io_mats_kg_sm: 1.00,
                  defs.hedr_io_mats_remark: "table salt"}
 
     dict_Water = {defs.hedr_io_mats_mat: "Water",
-                 defs.hedr_io_mats_main: None,
+                 defs.hedr_io_mats_sm_tgt: None,
                  defs.hedr_io_mats_mw: 18.01,
                  defs.hedr_io_mats_dnsty: 1.00,
                  defs.hedr_io_mats_concasy: 100.0,
-                 defs.hedr_io_mats_kgmain: None,
+                 defs.hedr_io_mats_kg_sm: None,
                  defs.hedr_io_mats_remark: None}
     
     df_mats = pd.DataFrame([dict_NaCl, dict_Water])

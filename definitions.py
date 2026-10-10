@@ -275,25 +275,30 @@ col_nr_io_sumry_edt_cmnt = 4
 
 
         #>>>>>>>>>>>> header items for material worksheets <<<<<<<<<<<<#
+itm_io_mats_sm:str = "SM"
+"""S  to indicate the starting material"""
+itm_io_mats_tgt:str = "TGT"
+"""T to indicate the target material"""
+
 
 hedr_io_mats_mat:str = "Material"
 """header item for the column for raw material names"""
-hedr_io_mats_main = "Main(*)"
-"""Header item for the column to identify the core raw materials"""
+hedr_io_mats_sm_tgt = f"{itm_io_mats_sm}/{itm_io_mats_tgt}"
+"""Header item for the column to identify the starting material and the target material"""
 hedr_io_mats_mw:str = "MW (g/mol)"
 """Header item for the column for molecular weight"""
 hedr_io_mats_dnsty:str = "Density_(g/mL)"
 """The header for the density/specific gravity of the raw material"""
 hedr_io_mats_concasy:str = "Conc/Assay(%)"
 """The header for the concentration or assay of the raw material"""
-hedr_io_mats_kgmain:str = "Weight_Main(kg)"
+hedr_io_mats_kg_sm:str = "Weight_SM(kg-gross)"
 """Header item for the weight of core building block weight (kg)"""
 hedr_io_mats_remark:str = "Remark"
 """The header for optional remarks"""
 
 col_nr_io_mats_mat:int = 1
 """Column number for material names"""
-col_nr_io_mats_main:int = 2
+col_nr_io_mats_sm_tgt:int = 2
 """Column number for the main material star (*)"""
 col_nr_io_mats_mw : int= 3
 """Column number for molecular weights"""
@@ -307,15 +312,14 @@ col_nr_io_mats_remark: int = 7
 """Column number for comment"""
 
 list_hedr_mats_io: list[str] = [hedr_io_mats_mat,
-                               hedr_io_mats_main,
+                               hedr_io_mats_sm_tgt,
                                hedr_io_mats_mw,
                                hedr_io_mats_dnsty,
                                hedr_io_mats_concasy,
-                               hedr_io_mats_kgmain,
+                               hedr_io_mats_kg_sm,
                                hedr_io_mats_remark]
 
-itm_io_mats_desig_star:str = "*"
-"""Star (*) marker to indicate the core raw material"""
+
 
 
 

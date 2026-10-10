@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 import flow_draw.materials.materials
+import flow_draw.batch.process.unit_operations.uo_charging as chgng
 
 class UniversalTrait(ABC):
     pass
@@ -45,5 +46,27 @@ class GetProcName(UniversalTrait):
         ----------
         proc_name: str
             This shall be a string representing the name of the process.
+        """
+        pass
+
+class GetInputs(UniversalTrait):
+    """
+    GetInputs is an abstract class having get_inputs() function returning the input values for the process.
+    By calling the object, the caller can acquire the input values used in the process.
+    """
+    @abstractmethod
+    def get_inputs(self, id_input: int = None) -> chgng.Input:
+        """
+        Expected to return an instance of chgng.Input representing the input values for the process.
+
+        Parameters
+        ----------
+        id_input: int, optional
+            The identifier for the specific input to retrieve. If None, the default input is returned.
+
+        Returns
+        ----------
+        inputs: chgng.Input
+            This shall be an instance of chgng.Input containing all the necessary input values for the process.
         """
         pass

@@ -34,7 +34,8 @@ font_bold = Font(bold=True)
 
 
 line_start = 1
-line_standard = line_start
+#line_standard = line_start
+line_xlslog_hedr = line_start
 
 col_time = 1
 col_op_nr = 2
@@ -59,11 +60,15 @@ col_xlslog_kg_gro = 19
 col_xlslog_err_rel = 20
 col_xlslog_err_abs = 21
 
+col_xlslog_name_basis = 23
+col_xlslog_id_basis = 24
+col_xlslog_class = 25
+col_xlslog_mol_std = 26
+col_xlslog_kg_net_std = 27
 
-tag_part_std_mol = 'tag_mol_std'
-"""Tag for standard mol value"""
-tag_part_std_wt_net = 'tag_wt_net_std'
-"""Tag for standard net weight value"""
+
+
+
 
 tag_part_hedr_mat = "tag_hedr_mat"
 """Tag for header material"""
@@ -90,9 +95,19 @@ tag_part_hedr_err_rel = "tag_hedr_err_rel"
 tag_part_hedr_err_abs = "tag_hedr_err_abs"
 """Tag for header absolute error"""
 
-dict_part_logic_jp ={tag_part_std_mol: "std_mol→",
-                     tag_part_std_wt_net: "std_kg_net→",
-                     tag_part_hedr_mat: "Material",
+tag_part_hedr_basis_name = 'tag_name_basis'
+"""Tag for the name of the basis material"""
+tag_part_hedr_basis_id = 'tag_id_basis'
+"""Tag for the ID of the basis material"""
+tag_part_hedr_basis_class = 'tag_class_basis'
+"""Tag for the class of the basis material"""
+tag_part_hedr_basis_mol = 'tag_mol_basis'
+"""Tag for standard mol value"""
+tag_part_hedr_basis_wt_net = 'tag_wt_net_basis'
+"""Tag for standard net weight value"""
+
+
+dict_part_logic_jp ={tag_part_hedr_mat: "Material",
                      tag_part_hedr_mw: "MW(g/mol)",
                      tag_part_hedr_dens: "d(g/mL)",
                      tag_part_hedr_assay_conc: "Assay/Conc(%)",
@@ -103,7 +118,12 @@ dict_part_logic_jp ={tag_part_std_mol: "std_mol→",
                      tag_part_hedr_kg_net: "Wt(kg-net)",
                      tag_part_hedr_kg_gro: "Wt(kg-gross)",
                      tag_part_hedr_err_rel: "Err(%)",
-                     tag_part_hedr_err_abs: "Err(kg)"}
+                     tag_part_hedr_err_abs: "Err(kg)",
+                     tag_part_hedr_basis_name: "Material",
+                     tag_part_hedr_basis_id: "ID_input",
+                     tag_part_hedr_basis_class: "Class",
+                     tag_part_hedr_basis_mol: "n(mol)",
+                     tag_part_hedr_basis_wt_net: "Wt(kg-net)"}
 dict_part_logic = dict_part_logic_jp
 
 def num_to_alph(num_col:int)->str:
@@ -144,6 +164,7 @@ class Flowsheet:
         self.current_line = line_start
         self.mol_std:float = 0.0
         self.wt_net_std:float = 0.0
+        self.dict_basis:dict{int, int} = {}
 
     def set_standards(self, mol_std: float=0.0, wt_net_std: float=0.0):
         self.mol_std = mol_std
@@ -200,16 +221,19 @@ class Flowsheet:
                      record: str='',
                      operator: str='',
                      witness: str='',
-                     mat:str=None,
+                     name_mat:str=None,
                      mw:float=None,
                      dens:float=None,
                      assay_conc:float=None,
                      equiv:float=None,
                      v_per_w:float=None,
+                     name_mat_basis: str=None,
                      err_rel_pct:float=5)->int:
 
-        if mat is None:
-            raise ValueError("Flowsheet.put_material(): Material (mat) must be provided.")
+        if name_mat is None:
+            raise ValueError("Flowsheet.put_material(): Material name must be provided.")
+        if name_mat_basis is None:
+            raise ValueError("Flowsheet.put_material(): The name of the basis material must be provided.")
         if equiv is None and v_per_w is None:
             raise ValueError("Flowsheet.put_material(): Either equivalent (equiv) or volume per weight (v_per_w) must be provided.")
         if equiv is not None and v_per_w is not None:
@@ -222,7 +246,7 @@ class Flowsheet:
             excel_formular_mat = f'={alph_col_mat}{self.current_line}&" ("&{alph_col_v_per_w}{self.current_line}&" v/w)"'
         line_mat = self.put_line(time=time, method=method, content=excel_formular_mat, record=record, operator=operator, witness=witness)
 
-        self.ws.cell(row=line_mat, column=col_xlslog_mat).value = mat
+        self.ws.cell(row=line_mat, column=col_xlslog_mat).value = name_mat
         self.ws.cell(row=line_mat, column=col_xlslog_mw).value = mw if mw is not None else ""
         self.ws.cell(row=line_mat, column=col_xlslog_dens).value = dens if dens is not None else ""
         self.ws.cell(row=line_mat, column=col_xlslog_assay_conc).value = assay_conc if assay_conc is not None else 100
@@ -304,81 +328,81 @@ class Flowsheet:
 
     def __put_excel_logic(self, line:int=None)->None:
         #Background
-        if line == line_standard:
+        if line == line_xlslog_hedr:
             #Standard
-            self.ws.cell(row=line, column=col_xlslog_mol-1).value = dict_part_logic[tag_part_std_mol] 
-            self.ws.cell(row=line, column=col_xlslog_mol).value = self.mol_std
-            self.ws.cell(row=line, column=col_xlslog_mol).fill = fill_light_orange
-            # self.ws.cell(row=line, column=col_xlslog_mol).border = border_around
+            # self.ws.cell(row=line, column=col_xlslog_mol-1).value = dict_part_logic[tag_part_std_mol] 
+            # self.ws.cell(row=line, column=col_xlslog_mol).value = self.mol_std
+            # self.ws.cell(row=line, column=col_xlslog_mol).fill = fill_light_orange
+            # # self.ws.cell(row=line, column=col_xlslog_mol).border = border_around
 
-            self.ws.cell(row=line, column=col_xlslog_kg_net-1).value = dict_part_logic[tag_part_std_wt_net]
-            self.ws.cell(row=line, column=col_xlslog_kg_net).value = self.wt_net_std
-            self.ws.cell(row=line, column=col_xlslog_kg_net).fill = fill_light_orange
+            # self.ws.cell(row=line, column=col_xlslog_kg_net-1).value = dict_part_logic[tag_part_std_wt_net]
+            # self.ws.cell(row=line, column=col_xlslog_kg_net).value = self.wt_net_std
+            # self.ws.cell(row=line, column=col_xlslog_kg_net).fill = fill_light_orange
             # self.ws.cell(row=line, column=col_xlslog_kg_net).border = border_around
             
             #Header
-            self.ws.cell(row=line+1, column=col_xlslog_mat).value = dict_part_logic[tag_part_hedr_mat]
-            self.ws.cell(row=line+1, column=col_xlslog_mat).fill = fill_light_orange
-            self.ws.cell(row=line+1, column=col_xlslog_mat).border = border_around
-            self.ws.cell(row=line+1, column=col_xlslog_mat).font = font_bold
+            self.ws.cell(row=line, column=col_xlslog_mat).value = dict_part_logic[tag_part_hedr_mat]
+            self.ws.cell(row=line, column=col_xlslog_mat).fill = fill_light_orange
+            self.ws.cell(row=line, column=col_xlslog_mat).border = border_around
+            self.ws.cell(row=line, column=col_xlslog_mat).font = font_bold
             
-            self.ws.cell(row=line+1, column=col_xlslog_mw).value = dict_part_logic[tag_part_hedr_mw]
-            self.ws.cell(row=line+1, column=col_xlslog_mw).fill = fill_light_orange
-            self.ws.cell(row=line+1, column=col_xlslog_mw).border = border_around
-            self.ws.cell(row=line+1, column=col_xlslog_mw).font = font_bold
+            self.ws.cell(row=line, column=col_xlslog_mw).value = dict_part_logic[tag_part_hedr_mw]
+            self.ws.cell(row=line, column=col_xlslog_mw).fill = fill_light_orange
+            self.ws.cell(row=line, column=col_xlslog_mw).border = border_around
+            self.ws.cell(row=line, column=col_xlslog_mw).font = font_bold
 
-            self.ws.cell(row=line+1, column=col_xlslog_dens).value = dict_part_logic[tag_part_hedr_dens]
-            self.ws.cell(row=line+1, column=col_xlslog_dens).fill = fill_light_orange
-            self.ws.cell(row=line+1, column=col_xlslog_dens).border = border_around
-            self.ws.cell(row=line+1, column=col_xlslog_dens).font = font_bold
+            self.ws.cell(row=line, column=col_xlslog_dens).value = dict_part_logic[tag_part_hedr_dens]
+            self.ws.cell(row=line, column=col_xlslog_dens).fill = fill_light_orange
+            self.ws.cell(row=line, column=col_xlslog_dens).border = border_around
+            self.ws.cell(row=line, column=col_xlslog_dens).font = font_bold
 
-            self.ws.cell(row=line+1, column=col_xlslog_assay_conc).value = dict_part_logic[tag_part_hedr_assay_conc]
-            self.ws.cell(row=line+1, column=col_xlslog_assay_conc).fill = fill_light_orange
-            self.ws.cell(row=line+1, column=col_xlslog_assay_conc).border = border_around
-            self.ws.cell(row=line+1, column=col_xlslog_assay_conc).font = font_bold
+            self.ws.cell(row=line, column=col_xlslog_assay_conc).value = dict_part_logic[tag_part_hedr_assay_conc]
+            self.ws.cell(row=line, column=col_xlslog_assay_conc).fill = fill_light_orange
+            self.ws.cell(row=line, column=col_xlslog_assay_conc).border = border_around
+            self.ws.cell(row=line, column=col_xlslog_assay_conc).font = font_bold
 
-            self.ws.cell(row=line+1, column=col_xlslog_equiv).value = dict_part_logic[tag_part_hedr_equiv]
-            self.ws.cell(row=line+1, column=col_xlslog_equiv).fill = fill_lighter_orange
-            self.ws.cell(row=line+1, column=col_xlslog_equiv).border = border_around
-            self.ws.cell(row=line+1, column=col_xlslog_equiv).font = font_bold
+            self.ws.cell(row=line, column=col_xlslog_equiv).value = dict_part_logic[tag_part_hedr_equiv]
+            self.ws.cell(row=line, column=col_xlslog_equiv).fill = fill_lighter_orange
+            self.ws.cell(row=line, column=col_xlslog_equiv).border = border_around
+            self.ws.cell(row=line, column=col_xlslog_equiv).font = font_bold
 
-            self.ws.cell(row=line+1, column=col_xlslog_v_per_w).value = dict_part_logic[tag_part_hedr_v_per_w]
-            self.ws.cell(row=line+1, column=col_xlslog_v_per_w).fill = fill_lighter_orange
-            self.ws.cell(row=line+1, column=col_xlslog_v_per_w).border = border_around
-            self.ws.cell(row=line+1, column=col_xlslog_v_per_w).font = font_bold
+            self.ws.cell(row=line, column=col_xlslog_v_per_w).value = dict_part_logic[tag_part_hedr_v_per_w]
+            self.ws.cell(row=line, column=col_xlslog_v_per_w).fill = fill_lighter_orange
+            self.ws.cell(row=line, column=col_xlslog_v_per_w).border = border_around
+            self.ws.cell(row=line, column=col_xlslog_v_per_w).font = font_bold
 
-            self.ws.cell(row=line+1, column=col_xlslog_mol).value = dict_part_logic[tag_part_hedr_mol]
-            self.ws.cell(row=line+1, column=col_xlslog_mol).fill = fill_light_blue
-            self.ws.cell(row=line+1, column=col_xlslog_mol).border = border_around
-            self.ws.cell(row=line+1, column=col_xlslog_mol).font = font_bold
+            self.ws.cell(row=line, column=col_xlslog_mol).value = dict_part_logic[tag_part_hedr_mol]
+            self.ws.cell(row=line, column=col_xlslog_mol).fill = fill_light_blue
+            self.ws.cell(row=line, column=col_xlslog_mol).border = border_around
+            self.ws.cell(row=line, column=col_xlslog_mol).font = font_bold
 
-            self.ws.cell(row=line+1, column=col_xlslog_volume).value = dict_part_logic[tag_part_hedr_volume]
-            self.ws.cell(row=line+1, column=col_xlslog_volume).fill = fill_light_blue
-            self.ws.cell(row=line+1, column=col_xlslog_volume).border = border_around
-            self.ws.cell(row=line+1, column=col_xlslog_volume).font = font_bold
+            self.ws.cell(row=line, column=col_xlslog_volume).value = dict_part_logic[tag_part_hedr_volume]
+            self.ws.cell(row=line, column=col_xlslog_volume).fill = fill_light_blue
+            self.ws.cell(row=line, column=col_xlslog_volume).border = border_around
+            self.ws.cell(row=line, column=col_xlslog_volume).font = font_bold
 
-            self.ws.cell(row=line+1, column=col_xlslog_kg_net).value = dict_part_logic[tag_part_hedr_kg_net]
-            self.ws.cell(row=line+1, column=col_xlslog_kg_net).fill = fill_light_blue
-            self.ws.cell(row=line+1, column=col_xlslog_kg_net).border = border_around
-            self.ws.cell(row=line+1, column=col_xlslog_kg_net).font = font_bold
+            self.ws.cell(row=line, column=col_xlslog_kg_net).value = dict_part_logic[tag_part_hedr_kg_net]
+            self.ws.cell(row=line, column=col_xlslog_kg_net).fill = fill_light_blue
+            self.ws.cell(row=line, column=col_xlslog_kg_net).border = border_around
+            self.ws.cell(row=line, column=col_xlslog_kg_net).font = font_bold
 
-            self.ws.cell(row=line+1, column=col_xlslog_kg_gro).value = dict_part_logic[tag_part_hedr_kg_gro]
-            self.ws.cell(row=line+1, column=col_xlslog_kg_gro).fill = fill_light_blue
-            self.ws.cell(row=line+1, column=col_xlslog_kg_gro).border = border_around
-            self.ws.cell(row=line+1, column=col_xlslog_kg_gro).font = font_bold
+            self.ws.cell(row=line, column=col_xlslog_kg_gro).value = dict_part_logic[tag_part_hedr_kg_gro]
+            self.ws.cell(row=line, column=col_xlslog_kg_gro).fill = fill_light_blue
+            self.ws.cell(row=line, column=col_xlslog_kg_gro).border = border_around
+            self.ws.cell(row=line, column=col_xlslog_kg_gro).font = font_bold
 
-            self.ws.cell(row=line+1, column=col_xlslog_err_rel).value = dict_part_logic[tag_part_hedr_err_rel]
-            self.ws.cell(row=line+1, column=col_xlslog_err_rel).fill = fill_light_orange
-            self.ws.cell(row=line+1, column=col_xlslog_err_rel).border = border_around
-            self.ws.cell(row=line+1, column=col_xlslog_err_rel).font = font_bold
+            self.ws.cell(row=line, column=col_xlslog_err_rel).value = dict_part_logic[tag_part_hedr_err_rel]
+            self.ws.cell(row=line, column=col_xlslog_err_rel).fill = fill_light_orange
+            self.ws.cell(row=line, column=col_xlslog_err_rel).border = border_around
+            self.ws.cell(row=line, column=col_xlslog_err_rel).font = font_bold
 
-            self.ws.cell(row=line+1, column=col_xlslog_err_abs).value = dict_part_logic[tag_part_hedr_err_abs]
-            self.ws.cell(row=line+1, column=col_xlslog_err_abs).fill = fill_light_blue
-            self.ws.cell(row=line+1, column=col_xlslog_err_abs).border = border_around
-            self.ws.cell(row=line+1, column=col_xlslog_err_abs).font = font_bold
+            self.ws.cell(row=line, column=col_xlslog_err_abs).value = dict_part_logic[tag_part_hedr_err_abs]
+            self.ws.cell(row=line, column=col_xlslog_err_abs).fill = fill_light_blue
+            self.ws.cell(row=line, column=col_xlslog_err_abs).border = border_around
+            self.ws.cell(row=line, column=col_xlslog_err_abs).font = font_bold
             
-        elif line == line_standard + 1:
-            pass
+        # elif line == line_standard + 1:
+        #     pass
         else:
             #mol
             xls_formular_mol = f'=IF({alph_col_equiv}{line}<>"",${alph_col_mol}${line_standard}*{alph_col_equiv}{line},"")'

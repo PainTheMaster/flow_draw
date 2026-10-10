@@ -7,12 +7,14 @@ from flow_draw import definitions as defs
 op_list = None
 
 header_material = defs.hedr_io_mats_mat
-header_main = defs.hedr_io_mats_main
+header_sm_tgt = defs.hedr_io_mats_sm_tgt
+header_tgt = defs.hedr_io_mats_sm_tgt
 header_mw = defs.hedr_io_mats_mw
 header_density = defs.hedr_io_mats_dnsty
 header_assay_conc = defs.hedr_io_mats_concasy
 
-desig_star = defs.itm_io_mats_desig_star
+desig_sm = defs.itm_io_mats_sm
+desig_tgt = defs.itm_io_mats_tgt
 
 # header_key = "Key"
 # header_value = "Value"
@@ -44,82 +46,91 @@ class Materials:
             The data frame must have a header aligned with the class materials.Materials.
         """
         self.df_mats: pd.DataFrame= df_mats
-        self.name_main_mat:str = None
+        self.name_sm:str = None
         """The value is picked-up on the course of the process in __load_df_mats()"""
-        self.gross_kg_main_mat:float = None
-        self.net_kg_main_mat:float = None
-        self.assay_main_mat:float = None
-        self.mol_main_mat:float = None
+        self.gross_kg_sm:float = None
+        self.net_kg_sm:float = None
+        self.assay_sm:float = None
+        self.mol_sm:float = None
+
+        self.name_tgt:str = None
+        self.kg_net_tgt_ideal:float = None
         
         if df_mats is not None:
             self.__load_df_mats()
-        # df_extrd_main  = self.df_mats[self.df_mats[header_main]==desig_star] 
-        # if len(df_extrd_main) == 0:
-        #     raise RuntimeError(f"{self.__class__.__name__}: No core building block ({defs.hedr_io_mats_main}) is designated.")
-        # elif len(df_extrd_main) >= 2:
-        #     raise RuntimeError(f"{self.__class__.__name__}: More than two (2) core building blocks ({defs.hedr_io_mats_main}) are designated.")
-        # else:
-        #     ser_main_mat = df_extrd_main.iloc[0]
-            
-        #     self.kg_main_mat = float(ser_main_mat[defs.hedr_io_mats_kgmain])
-        #     # if math.isnan(self.kg_main_mat):
-        #     if pd.isna(self.kg_main_mat):
-        #         raise ValueError(f"{self.__class__.__name__}: No weight (kg) is assigned to the main material \"{self.kg_main_mat}\".")
-            
-        #     temp_mw_main_mat = float(ser_main_mat[defs.hedr_io_mats_mw])
-        #     # if math.isnan(temp_mw_main_mat):
-        #     if pd.isna(temp_mw_main_mat):
-        #         raise ValueError(f"{self.__class__.__name__}: No molecular weight is assigned to the main material \"{temp_mw_main_mat}\".")
-
-        #     temp_assay_main_mat = float(ser_main_mat[defs.hedr_io_mats_concasy])
-        #     # if math.isnan(temp_assay_main_mat):
-        #     if pd.isna(temp_assay_main_mat):
-        #         temp_assay_main_mat = 100.0
-        #         raise UserWarning(f"{self.__class__.__name__}: The concentration or assay for the main material is empty or zero.",
-        #                       "For this run, 100%% is assumed.")
-            
-        #     self.mol_main_mat = (self.kg_main_mat*1000)/temp_mw_main_mat*(temp_assay_main_mat/100)
-        #     # self.mol_main_mat = self.kg_main_matser_main_mat[defs]
+        
 
     def __load_df_mats(self):
         """
         Extract the core building block, from the given DataFrame and sets its quantity information in self.kg_main_mat and self.mol_main_mat.
         """
-        #Extraction of the star-designated core building block.
-        df_extrd_main  = self.df_mats[self.df_mats[header_main]==desig_star] 
-        if len(df_extrd_main) == 0:
-            raise RuntimeError(f"{self.__class__.__name__}: No core building block ({defs.hedr_io_mats_main}) is designated.")
-        elif len(df_extrd_main) >= 2:
-            raise RuntimeError(f"{self.__class__.__name__}: More than two (2) core building blocks ({defs.hedr_io_mats_main}) are designated.")
+        #Extraction of the starting material
+        df_extrd_sm  = self.df_mats[self.df_mats[header_sm_tgt]==desig_sm] 
+        if df_extrd_sm.empty:
+            raise RuntimeError(f'{self.__class__.__name__}: No starting material is designated in the colum "{defs.hedr_io_mats_sm_tgt}".')
+        elif len(df_extrd_sm) > 1:
+            raise RuntimeError(f'{self.__class__.__name__}: More than one starting materials are designated in the colum "{defs.hedr_io_mats_sm_tgt}".')
         else:
-            ser_main_mat = df_extrd_main.iloc[0]
-            self.gross_kg_main_mat = float(ser_main_mat[defs.hedr_io_mats_kgmain])
-            # if math.isnan(self.kg_main_mat):
-            if pd.isna(self.gross_kg_main_mat):
-                raise ValueError(f"{self.__class__.__name__}: No weight (kg) is assigned to the main material \"{self.gross_kg_main_mat}\".")
+            ser_sm = df_extrd_sm.iloc[0]
+
+            temp_name_sm = ser_sm[defs.hedr_io_mats_mat]
+            if pd.notna(temp_name_sm) and str(temp_name_sm).strip() != "":
+                self.name_sm = str(temp_name_sm)
+            else:
+                raise ValueError(f'{self.__class__.__name__}: No name is assigned to the starting material.')
+            temp_gross_kg_sm = ser_sm[defs.hedr_io_mats_kg_sm]
+            if pd.isna(temp_gross_kg_sm):
+                raise ValueError(f'{self.__class__.__name__}: No weight (kg) is assigned to the starting material "{self.name_sm}".')
+            self.gross_kg_sm = float(temp_gross_kg_sm)
             
-            temp_mw_main_mat = float(ser_main_mat[defs.hedr_io_mats_mw])
-            # if math.isnan(temp_mw_main_mat):
-            if pd.isna(temp_mw_main_mat):
-                raise ValueError(f"{self.__class__.__name__}: No molecular weight is assigned to the main material \"{temp_mw_main_mat}\".")
+            temp_mw_sm = ser_sm[defs.hedr_io_mats_mw]
+            if pd.isna(temp_mw_sm):
+                raise ValueError(f'{self.__class__.__name__}: No molecular weight is assigned to the starting material "{self.name_sm}".')
+            temp_mw_sm = float(temp_mw_sm)
 
-            temp_assay_main_mat = float(ser_main_mat[defs.hedr_io_mats_concasy])
-            # if math.isnan(temp_assay_main_mat):
-            if pd.isna(temp_assay_main_mat):
-                temp_assay_main_mat = 100.0
-                raise UserWarning(f"{self.__class__.__name__}: The concentration or assay for the main material is empty or zero.",
-                              "For this run, 100%% is assumed.")
-            self.assay_main_mat = temp_assay_main_mat
-            self.net_kg_main_mat = self.gross_kg_main_mat * (temp_assay_main_mat / 100)
-            self.name_main_mat = ser_main_mat[defs.hedr_io_mats_mat]
-            self.mol_main_mat = (self.net_kg_main_mat*1000)/temp_mw_main_mat
+            temp_assay_sm = ser_sm[defs.hedr_io_mats_concasy]
+            if pd.isna(temp_assay_sm):
+                temp_assay_sm = 100.0
+                warnings.warn(f"{self.__class__.__name__}: The concentration or assay for the starting material is empty or zero. For this run, 100%% is assumed.", UserWarning)
+            elif float(temp_assay_sm) == 0.0:
+                raise ValueError(f'{self.__class__.__name__}: The concentration or assay for the starting material "{self.name_sm}" is zero.')
+            self.assay_sm = float(temp_assay_sm)
+            self.net_kg_sm = self.gross_kg_sm * (temp_assay_sm / 100)
+            self.mol_sm = (self.net_kg_sm*1000)/temp_mw_sm
 
 
-    def get_main_raw_material(self)->str:
-        return self.name_main_mat
+        df_extrd_tgt  = self.df_mats[self.df_mats[header_sm_tgt]==desig_tgt] 
+        if df_extrd_tgt.empty:
+            raise RuntimeError(f'{self.__class__.__name__}: No target material is designated in the colum "{defs.hedr_io_mats_sm_tgt}".')
+        elif len(df_extrd_tgt) > 1:
+            raise RuntimeError(f'{self.__class__.__name__}: More than one target materials are designated in the colum "{defs.hedr_io_mats_sm_tgt}".')
+        else:
+            ser_tgt = df_extrd_tgt.iloc[0]
+            temp_name_tgt = ser_tgt[defs.hedr_io_mats_mat]
+            if pd.notna(temp_name_tgt) and str(temp_name_tgt).strip() != "":
+                self.name_tgt = str(temp_name_tgt)
+            else:
+                raise ValueError(f'{self.__class__.__name__}: No name is assigned to the target material.')
 
-    def get_mol_main_raw_material(self) -> float:
-        return self.mol_main_mat
+            temp_mw_tgt = ser_tgt[defs.hedr_io_mats_mw]
+            if pd.isna(temp_mw_tgt):
+                raise ValueError(f'{self.__class__.__name__}: No molecular weight is assigned to the target material "{self.name_tgt}".')
+            temp_mw_tgt = float(temp_mw_tgt)
+
+            self.kg_net_tgt_ideal = self.mol_sm * temp_mw_tgt / 1000
+
+
+    def get_name_sm(self)->str:
+        return self.name_sm
+
+    def get_mol_sm(self) -> float:
+        return self.mol_sm
+
+    def get_name_tgt(self) -> str:
+        return self.name_tgt
+
+    def get_kg_net_tgt_ideal(self) -> float:
+        return self.kg_net_tgt_ideal
                
     def to_kilogram(self, material_name:str = None, equiv: float = None, vol_per_weight:float = None) -> float:
         """
@@ -168,7 +179,7 @@ class Materials:
             raise ValueError(f"{self.__class__.__name__}.to_kilogram(): No density is assigned to the material \"{material_name}\".")
         kg_this = 0.0
         if equiv is not None:
-            mol_this = self.mol_main_mat * equiv
+            mol_this = self.mol_sm * equiv
             kg_this = mol_this * mw_this / (conc_assay_this/100.0) / 1000.0
         elif vol_per_weight is not None:
             #liq_volume_this = self.gross_kg_main_mat * vol_per_weight #unit = L
@@ -181,12 +192,12 @@ class Materials:
 
     def to_litre(self, vol_per_weight:float = None) -> float:
         litre:float = None
-        if self.gross_kg_main_mat is None:
+        if self.gross_kg_sm is None:
             raise ValueError(f"{self.__class__.__name__}.to_litre(): the weigt (kg) of the main material has not been assigned.")
         elif vol_per_weight is None:
             raise ValueError(f"{self.__class__.__name__}.to_litre(): the argument vol_per_weight:float is not put.")
         else:
-            litre = self.gross_kg_main_mat * (self.assay_main_mat/100.0) * vol_per_weight
+            litre = self.gross_kg_sm * (self.assay_sm/100.0) * vol_per_weight
         return litre
     
     def get_list_mats(self) -> list[str]:
@@ -235,11 +246,11 @@ class Materials:
             defs.hedr_io_mats_remark<br>
         """
         hedr:list[str] = [defs.hedr_io_mats_mat,
-                          defs.hedr_io_mats_main,
+                          defs.hedr_io_mats_sm_tgt,
                           defs.hedr_io_mats_mw,
                           defs.hedr_io_mats_dnsty,
                           defs.hedr_io_mats_concasy,
-                          defs.hedr_io_mats_kgmain,
+                          defs.hedr_io_mats_kg_sm,
                           defs.hedr_io_mats_remark]
         empty_df: pd.DataFrame = pd.DataFrame(columns=hedr)
         return empty_df
@@ -257,16 +268,16 @@ class Materials:
                        remark:str=None)->pd.DataFrame:
         star:str = None
         if main_star:
-            star = desig_star
+            star = desig_sm
         else:
             star = None
         s:pd.Series = pd.Series(data=[material, star, mw, density, conc_assay, kg_main, remark],
                                 index=[defs.hedr_io_mats_mat,
-                                       defs.hedr_io_mats_main,
+                                       defs.hedr_io_mats_sm_tgt,
                                        defs.hedr_io_mats_mw,
                                        defs.hedr_io_mats_dnsty,
                                        defs.hedr_io_mats_concasy,
-                                       defs.hedr_io_mats_kgmain,
+                                       defs.hedr_io_mats_kg_sm,
                                        defs.hedr_io_mats_remark])
         mats_df = pd.concat([mats_df, s.to_frame().T])
         mats_df.reset_index(inplace=True, drop=True)

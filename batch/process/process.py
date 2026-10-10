@@ -4,6 +4,7 @@ import json
 import flow_draw.definitions as defs
 # from flow_draw.batch.process.unit_operations import unit_operation
 #from flow_draw.batch.process.unit_operations.unit_operation import UnitOperation as unitop
+
 import flow_draw.batch.process.unit_operations.unit_operation as uo
 import flow_draw.batch.process.unit_operations.uo_alloc as alloc
 import flow_draw.batch.process.unit_operations.uo_charging as chgng
@@ -21,13 +22,16 @@ import flow_draw.batch.process.unit_operations.uo_temp_control as tempctrl
 import flow_draw.batch.process.unit_operations.uo_drying as drying
 import flow_draw.batch.process.unit_operations.uo_transfer as xfer
 import flow_draw.batch.process.unit_operations.uo_settling as stl
+import flow_draw.batch.process.unit_operations.uo_tare as tare
 
 from flow_draw.data_io import process_io as proc_io
 from flow_draw.data_io import flowsheet as fsht
 from flow_draw.materials.materials import Materials as mats
 
-from flow_draw.trait_def.trait_def import GetMats as GetMats
-from flow_draw.trait_def.trait_def import GetProcName as GetProcName
+# from flow_draw.trait_def.trait_def import GetMats as GetMats
+# from flow_draw.trait_def.trait_def import GetProcName as GetProcName
+# from flow_draw.trait_def.trait_def import GetInputs as GetInputs
+from flow_draw.trait_def.trait_def import GetMats, GetProcName, GetInputs
 
 from flow_draw.data_io import json_io
 from flow_draw.data_io.json_io import JsonEntity, Array, Objason, Primitive
@@ -48,10 +52,11 @@ list_uo_common: list[type[uo.UnitOperation]] = [chgng.Charging,
                                                  xfer.Transfer,
                                                  alloc.Alloc,
                                                  stl.Settling,
+                                                 tare.Tare,
                                                 ]
 
 
-class Process(GetMats, GetProcName):
+class Process(GetMats, GetProcName, GetInputs):
     """
     The Process is for a process, which consists of many unit operations. The class holds a name, an instance of InputForm class, a sries of UnitOperation(s).
 
@@ -101,6 +106,7 @@ class Process(GetMats, GetProcName):
         self.mats_data: mats = None #mats_data is stored when load_materials_data() is called.
         self.seq_uo: list[uo.UnitOperation] = []
         """Sequene of the constituting unit operations. This will be populated when self.load_uo_summary() is called."""
+        self.list_inputs: list[chgng.Input] = []
         self.flowsheet: fsht.Flowsheet = fsht.Flowsheet()
 
         
@@ -193,8 +199,8 @@ class Process(GetMats, GetProcName):
         None
         """
         self.mats_data = self.data_io.load_mats()
-        self.flowsheet.set_standards(mol_std=self.mats_data.mol_main_mat,
-                                     wt_net_std=self.mats_data.net_kg_main_mat)
+        self.flowsheet.set_standards(mol_std=self.mats_data.mol_sm,
+                                     wt_net_std=self.mats_data.net_kg_sm)
 
     #TODO: Create the process detail input form, for each unit operation in teh list_uo, get the uo-specific header and feed it to ProcessIO.generate_proc_detail_form()
 
@@ -290,6 +296,10 @@ class Process(GetMats, GetProcName):
     def get_proc_name(self) -> str:
         return self.process_name
 
-
-
-        
+    def get_inputs(self, id_input: int = None) -> chgng.Input:
+        if id_input is None:
+            raise ValueError(f"{self.__class__.__name__}.get_inputs(): No id_input is provided.")
+        for input_item in self.list_inputs:
+            if input_item.id_input == id_input:
+                return input_item
+        raise ValueError(f"{self.__class__.__name__}.get_inputs(): No input found with id_input={id_input}.")
