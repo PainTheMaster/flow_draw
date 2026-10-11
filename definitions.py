@@ -353,6 +353,9 @@ itm_cmn_io_dtil_uo_placeholder = '<uo_placeholder>'
 ######################################################
 ####       CHARGING HEADER ITEMS AND OPTIONS      ####
 ######################################################
+id_special_tgt_uo_chgng = -1
+"""Special ID for the target compound used as the quantity calculation basis in the charging unit operation."""
+
 hedr_uo_chgng_mat = 'Material_Name'
 hedr_uo_chgng_mtrcs_val = 'Metrics_Value'
 hedr_uo_chgng_mtrcs_unit = 'Metrics_Unit'

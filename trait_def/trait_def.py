@@ -109,19 +109,19 @@ class GetInputs(UniversalTrait):
         """
         pass
 
-    @abstractmethod
-    def get_id_target(self) -> int:
-        """
-        Expected to return the special ID for the target compound used as the quantity calculation basis.
+    # @abstractmethod
+    # def get_id_target(self) -> int:
+    #     """
+    #     Expected to return the special ID for the target compound used as the quantity calculation basis.
 
-        Parameters
-        ----------
-        None
+    #     Parameters
+    #     ----------
+    #     None
 
-        Returns
-        ----------
-        id_target: int
-            This shall be an integer representing the special ID for the target compound.
-        """
-        pass
+    #     Returns
+    #     ----------
+    #     id_target: int
+    #         This shall be an integer representing the special ID for the target compound.
+    #     """
+    #     pass
     

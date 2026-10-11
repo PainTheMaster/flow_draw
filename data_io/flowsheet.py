@@ -488,13 +488,13 @@ class Flowsheet:
         else:
             #mol
             xls_formular_mol = (f'=_xlfn.IFS({alph_col_equiv}{line}<>"",{alph_col_mol_basis}{line}*{alph_col_equiv}{line},'
-                                f'AND({alph_col_equiv}{line}="", {alph_col_kg_net}{line}<>""),{alph_col_kg_net}{line}*1000/{alph_col_mw}{line},'
+                                f'AND(OR({alph_col_v_per_w}{line}<>"", {alph_col_wwpct}{line}<>""),{alph_col_mw}{line}<>""),{alph_col_kg_net}{line}*1000/{alph_col_mw}{line},'
                                  'TRUE,"")')
             self.ws.cell(row=line, column=col_xlslog_mol).value = xls_formular_mol
             #v/w
             # xls_formular_volume = f'=IF({alph_col_v_per_w}{line}<>"",{alph_col_kg_net_basis}{line}*{alph_col_v_per_w}{line},"")'
             xls_formular_volume = (f'=_xlfn.IFS({alph_col_v_per_w}{line}<>"",{alph_col_kg_net_basis}{line}*{alph_col_v_per_w}{line},'
-                                   f'AND({alph_col_v_per_w}{line}="", {alph_col_kg_gro}{line}<>""),{alph_col_kg_gro}{line}/{alph_col_dens}{line},'
+                                   f'AND(OR({alph_col_equiv}{line}<>"", {alph_col_wwpct}{line}), {alph_col_dens}{line}<>""),{alph_col_kg_gro}{line}/{alph_col_dens}{line},'
                                  'TRUE,"")')
             self.ws.cell(row=line, column=col_xlslog_volume).value = xls_formular_volume
 
@@ -503,7 +503,7 @@ class Flowsheet:
             # self.ws.cell(row=line, column=col_xlslog_wwpct).value = xls_formular_wwpct
 
             #kg_net
-            xls_formular_kg_net = (f'=_xlfn.IFS({alph_col_mol}{line}<>"",{alph_col_mol}{line}*{alph_col_mw}{line}/1000,'
+            xls_formular_kg_net = (f'=_xlfn.IFS({alph_col_equiv}{line}<>"",{alph_col_mol}{line}*{alph_col_mw}{line}/1000,'
                                f'{alph_col_volume}{line}<>"",{alph_col_volume}{line}*{alph_col_dens}{line},'
                                f'{alph_col_wwpct}{line}<>"",{alph_col_kg_net_basis}{line}*{alph_col_wwpct}{line}/100,'
                                f'AND({alph_col_kg_gro}{line}<>"",{alph_col_assay_conc}{line}<>""),{alph_col_kg_gro}{line}*{alph_col_assay_conc}{line}/100,'
