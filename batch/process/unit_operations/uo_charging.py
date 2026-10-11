@@ -57,8 +57,9 @@ arry_inputs_json = 'arr_charging_input_entry'
 obj_charging_json = 'charging_stage'
 """The key to the unit operation of charging."""
 
-opt_special_id_basis_tgt = -1
-"""The special ID to designate the target material as the calculation basis."""
+opt_special_id_basis_tgt = defs.id_special_tgt_uo_chgng
+"""Special ID for the target compound used as the quantity calculation basis in the charging unit operation."""
+
 
 cls_input_mat_sm = 'cls_sm'
 """Material class identifier for the starting material."""
@@ -328,7 +329,7 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
         basis_input_single = Primitive(prim_type='integer',
                                 key=hedr_basis_input,
                                 description='The material input used as the basis for calculating the quantity of other material inputs.'
-                                f'If the target material is designated as the calculation basis, please put {opt_special_id_basis_tgt}.',
+                                f'If the target material is designated as the calculation basis, please put {self.caller.get_id_target()}.',
                                 nullable=False,
                                 required=True)
         arr_basis_inputs = Array(key=hedr_basis_array,
@@ -447,6 +448,7 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
                                                     equiv=temp_inpt.metrics_val if temp_inpt.metrics_unit == opt_mtrcs_eq else None,
                                                     v_per_w=temp_inpt.metrics_val if temp_inpt.metrics_unit == opt_mtrcs_v_per_w else None,
                                                     err_rel_pct=temp_inpt.error_pct if temp_inpt.error_pct is not None else error_default)
+            temp_inpt.fs_line_mat = line_mat
 
             #line-2: QTY instruction and record
             self.flowsheet.put_qty(record=lang_dict_chgng_specif[tag_part_rec_input],
@@ -579,7 +581,7 @@ class Input:
         """User input float. Lower temperature limit."""
         self.temp_max:float = None
         """User input float. Upper temperature limit."""
-        self.fs_line_qty:int = None
+        self.fs_line_mat:int = None
         """Flowsheet line of the qty. """
     
   
@@ -765,6 +767,7 @@ class Input:
             raise RuntimeError(f"{__class__.__name__}.calc_qty() (input of \"{self.material_name}\"): No process data provided.")
 
         if self.material_class == cls_input_mat_tgt:
+            self.arr_basis_input = [opt_special_id_basis_tgt]
             self.mol = self.mats_data.get_mol_sm() * self.proc.get_tgt_stoichiometry() * (self.proc.get_assumed_yield_pct() / 100.0)
             mw_this = self.mats_data.get_mw(material_name = self.material_name)
             if mw_this is None or not isinstance(mw_this, (float, int)) or mw_this <= 0:

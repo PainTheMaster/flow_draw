@@ -59,8 +59,11 @@ list_uo_common: list[type[uo.UnitOperation]] = [chgng.Charging,
                                                 ]
 
 
-opt_special_id_basis_tgt = chgng.opt_special_id_basis_tgt
+special_id_input_tgt = chgng.opt_special_id_basis_tgt
 """A special ID to designate the target compound to use as the quantity calculation basis."""
+
+id_special_basis_tgt = defs.id_special_tgt_uo_chgng
+"""Special ID for the target compound used as the quantity calculation basis."""
 
 num_max_iter_calc_qty = 100
 """Maximum number of iterations allowed for the quantity calculation."""
@@ -324,6 +327,21 @@ class Process(GetMats, GetProcName, GetInputs):
         for step in self.seq_uo:
             step.output_unit_operation()
 
+        self.flowsheet.linefeed()
+        input_tgt = self.get_input(id_input=special_id_input_tgt)
+        line_fs_tgt =self.flowsheet.put_material(
+                                name_mat = input_tgt.name_mat,
+                                mw = input_tgt.mw,
+                                #dens = None,
+                                #assay_conc = None,
+                                equiv = None,
+                                v_per_w = None,
+                                wwpc = None,
+                                name_mat_basis = None,
+                                #err_rel_pct = 5
+                                )
+
+
         self.flowsheet.save(filename=self.process_name+".xlsx")
 
     def load_json(self):
@@ -338,6 +356,9 @@ class Process(GetMats, GetProcName, GetInputs):
     def get_proc_name(self) -> str:
         return self.process_name
 
+    # def get_id_target(self) -> int:
+    #     return id_special_basis_tgt
+    
     def get_input(self, id_input: int = None) -> chgng.Input:
         if id_input is None:
             raise ValueError(f"{self.__class__.__name__}.get_inputs(): No id_input is provided.")

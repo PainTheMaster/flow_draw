@@ -108,4 +108,20 @@ class GetInputs(UniversalTrait):
             This shall be a float representing the target stoichiometry of the process.
         """
         pass
+
+    @abstractmethod
+    def get_id_target(self) -> int:
+        """
+        Expected to return the special ID for the target compound used as the quantity calculation basis.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        ----------
+        id_target: int
+            This shall be an integer representing the special ID for the target compound.
+        """
+        pass
     

@@ -5,6 +5,8 @@ from typing import List
 import re
 import flow_draw.definitions as defs
 import math
+import flow_draw.batch.process.unit_operations.uo_charging as chgng
+from flow_draw.batch.process.unit_operations.uo_charging import Input
 
 
 
@@ -51,20 +53,27 @@ col_xlslog_mat = 10
 col_xlslog_mw = 11
 col_xlslog_dens = 12
 col_xlslog_assay_conc = 13
-col_xlslog_equiv = 14
-col_xlslog_v_per_w = 15
-col_xlslog_mol = 16
-col_xlslog_volume = 17
-col_xlslog_kg_net = 18
-col_xlslog_kg_gro = 19
-col_xlslog_err_rel = 20
-col_xlslog_err_abs = 21
 
-col_xlslog_name_basis = 23
-col_xlslog_id_basis = 24
-col_xlslog_class = 25
-col_xlslog_mol_std = 26
-col_xlslog_kg_net_std = 27
+col_xlslog_name_basis = 14
+col_xlslog_mol_basis = 15
+col_xlslog_kg_net_basis = 16
+
+col_xlslog_equiv = 17
+col_xlslog_v_per_w = 18
+col_xlslog_wwpct = 19
+
+col_xlslog_mol = 20
+col_xlslog_volume = 21
+col_xlslog_kg_net = 22
+col_xlslog_kg_gro = 23
+col_xlslog_err_rel = 24
+col_xlslog_err_abs = 25
+
+# col_xlslog_name_basis = 23
+# col_xlslog_id_basis = 24
+# col_xlslog_class = 25
+# col_xlslog_mol_std = 26
+# col_xlslog_kg_net_std = 27
 
 
 
@@ -78,10 +87,18 @@ tag_part_hedr_dens = "tag_hedr_dens"
 """Tag for header density"""
 tag_part_hedr_assay_conc = "tag_hedr_assay_conc"
 """Tag for header assay concentration"""
+tag_part_hedr_name_basis = "tag_hedr_name_basis"
+"""Tag for header name basis"""
+tag_part_hedr_mol_basis = "tag_hedr_mol_basis"
+"""Tag for header mol basis"""
+tag_part_hedr_kg_net_basis = "tag_hedr_kg_net_basis"
+"""Tag for header net weight basis"""
 tag_part_hedr_equiv = "tag_hedr_equiv"
 """Tag for header equivalent"""
 tag_part_hedr_v_per_w = "tag_hedr_v/w"
 """Tag for header volume per weight"""
+tag_part_hedr_wwpct = "tag_hedr_wwpct"
+"""Tag for header weight percent"""
 tag_part_hedr_mol = "tag_hedr_mol"
 """Tag for header mol"""
 tag_part_hedr_volume = "tag_hedr_volume"
@@ -94,7 +111,6 @@ tag_part_hedr_err_rel = "tag_hedr_err_rel"
 """Tag for header relative error"""
 tag_part_hedr_err_abs = "tag_hedr_err_abs"
 """Tag for header absolute error"""
-
 tag_part_hedr_basis_name = 'tag_name_basis'
 """Tag for the name of the basis material"""
 tag_part_hedr_basis_id = 'tag_id_basis'
@@ -111,8 +127,12 @@ dict_part_logic_jp ={tag_part_hedr_mat: "Material",
                      tag_part_hedr_mw: "MW(g/mol)",
                      tag_part_hedr_dens: "d(g/mL)",
                      tag_part_hedr_assay_conc: "Assay/Conc(%)",
+                     tag_part_hedr_name_basis: "BasisComp",
+                     tag_part_hedr_mol_basis: "Basis_n(mol)",
+                     tag_part_hedr_kg_net_basis: "Basis_wt(kg-net)",
                      tag_part_hedr_equiv: "Equiv",
                      tag_part_hedr_v_per_w: "v/w",
+                     tag_part_hedr_wwpct: "wt(%)",
                      tag_part_hedr_mol: "n(mol)",
                      tag_part_hedr_volume: "V(L)",
                      tag_part_hedr_kg_net: "Wt(kg-net)",
@@ -147,8 +167,15 @@ alph_col_mat = num_to_alph(num_col = col_xlslog_mat)
 alph_col_mw = num_to_alph(num_col = col_xlslog_mw)
 alph_col_dens = num_to_alph(num_col = col_xlslog_dens)
 alph_col_assay_conc = num_to_alph(num_col = col_xlslog_assay_conc)
+
+alph_col_name_basis = num_to_alph(num_col = col_xlslog_name_basis)
+alph_col_mol_basis = num_to_alph(num_col = col_xlslog_mol_basis)
+alph_col_kg_net_basis = num_to_alph(num_col = col_xlslog_kg_net_basis)
+
 alph_col_equiv = num_to_alph(num_col = col_xlslog_equiv)
 alph_col_v_per_w = num_to_alph(num_col = col_xlslog_v_per_w)
+alph_col_wwpct = num_to_alph(num_col = col_xlslog_wwpct)
+
 alph_col_mol = num_to_alph(num_col = col_xlslog_mol)
 alph_col_volume = num_to_alph(num_col = col_xlslog_volume)
 alph_col_kg_net = num_to_alph(num_col = col_xlslog_kg_net)
@@ -164,7 +191,7 @@ class Flowsheet:
         self.current_line = line_start
         self.mol_std:float = 0.0
         self.wt_net_std:float = 0.0
-        self.dict_basis:dict{int, int} = {}
+        # self.dict_basis:dict{int, int} = {}
 
     def set_standards(self, mol_std: float=0.0, wt_net_std: float=0.0):
         self.mol_std = mol_std
@@ -227,6 +254,7 @@ class Flowsheet:
                      assay_conc:float=None,
                      equiv:float=None,
                      v_per_w:float=None,
+                     wwpct:float=None,
                      name_mat_basis: str=None,
                      err_rel_pct:float=5)->int:
 
@@ -234,27 +262,61 @@ class Flowsheet:
             raise ValueError("Flowsheet.put_material(): Material name must be provided.")
         if name_mat_basis is None:
             raise ValueError("Flowsheet.put_material(): The name of the basis material must be provided.")
-        if equiv is None and v_per_w is None:
-            raise ValueError("Flowsheet.put_material(): Either equivalent (equiv) or volume per weight (v_per_w) must be provided.")
-        if equiv is not None and v_per_w is not None:
-            raise ValueError("Flowsheet.put_material(): Dual input. Only one of equivalent (equiv) or volume per weight (v_per_w) should be provided.")
-        
+        # if equiv is None and v_per_w is None:
+        #     raise ValueError("Flowsheet.put_material(): Either equivalent (equiv) or volume per weight (v_per_w) must be provided.")
+        # if equiv is not None and v_per_w is not None:
+        #     raise ValueError("Flowsheet.put_material(): Dual input. Only one of equivalent (equiv) or volume per weight (v_per_w) should be provided.")
+        count_qty_rel:int = sum(x is not None for x in (equiv, v_per_w, wwpct))
+        if count_qty_rel == 0:
+            raise ValueError("Flowsheet.put_material(): One of equivalent (equiv), volume per weight (v_per_w), or weight percent (ww_pct) must be provided.")
+        elif count_qty_rel > 1:
+            raise ValueError("Flowsheet.put_material(): Only one of equivalent (equiv), volume per weight (v_per_w), or weight percent (ww_pct) should be provided.")
+
+
         excel_formular_mat:str=None
         if equiv is not None:
-            excel_formular_mat = f'={alph_col_mat}{self.current_line}&" ("&{alph_col_equiv}{self.current_line}&" equiv.)"'
+            excel_formular_mat = f'={alph_col_mat}{self.current_line}&" ("&{alph_col_equiv}{self.current_line}&" equiv vs "&{alph_col_name_basis}{self.current_line}&")"'
         elif v_per_w is not None:
-            excel_formular_mat = f'={alph_col_mat}{self.current_line}&" ("&{alph_col_v_per_w}{self.current_line}&" v/w)"'
+            excel_formular_mat = f'={alph_col_mat}{self.current_line}&" ("&{alph_col_v_per_w}{self.current_line}&" v/w vs "&{alph_col_name_basis}{self.current_line}&")"'
+        elif wwpct is not None:
+            excel_formular_mat = f'={alph_col_mat}{self.current_line}&" ("&{alph_col_ww_pct}{self.current_line}&" wt% vs "&{alph_col_name_basis}{self.current_line}&")"'
         line_mat = self.put_line(time=time, method=method, content=excel_formular_mat, record=record, operator=operator, witness=witness)
 
         self.ws.cell(row=line_mat, column=col_xlslog_mat).value = name_mat
         self.ws.cell(row=line_mat, column=col_xlslog_mw).value = mw if mw is not None else ""
         self.ws.cell(row=line_mat, column=col_xlslog_dens).value = dens if dens is not None else ""
-        self.ws.cell(row=line_mat, column=col_xlslog_assay_conc).value = assay_conc if assay_conc is not None else 100
+        self.ws.cell(row=line_mat, column=col_xlslog_assay_conc).value = assay_conc if assay_conc is not None else 100.0
         self.ws.cell(row=line_mat, column=col_xlslog_equiv).value = equiv if equiv is not None else ""
         self.ws.cell(row=line_mat, column=col_xlslog_v_per_w).value = v_per_w if v_per_w is not None else ""
+        self.ws.cell(row=line_mat, column=col_xlslog_wwpct).value = wwpct if wwpct is not None else ""
         self.ws.cell(row=line_mat, column=col_xlslog_err_rel).value = err_rel_pct
 
         return line_mat
+
+    def put_material(self,
+                     time: str ='',
+                     method: str='',
+                     record: str='',
+                     operator: str='',
+                     witness: str='',
+                     mat_input: Input=None)->int:
+        if mat_input is None:
+            raise ValueError("Flowsheet.put_material(): Material input (mat_input) must be provided.")
+
+        line_this = mat_input.fs_line_mat
+
+        if mat_input.material_class == chgng.cls_input_mat_sm:
+            self.ws.cell(row=line_this, column=col_xlslog_mat).value = mat_input.material_name
+            self.ws.cell(row=line_this, column=col_xlslog_mw).value = mat_input.mw
+            self.ws.cell(row=line_this, column=col_xlslog_dens).value = mat_input.density if mat_input.density is not None else ""
+            self.ws.cell(row=line_this, column=col_xlslog_assay_conc).value = mat_input.assay_conc if mat_input.assay_conc is not None else 100.0
+            self.ws.cell(row=line_this, column=col_xlslog_mol).value = mat_input.mol
+            self.ws.cell(row=line_this, column=col_xlslog_kg_gro).value = mat_input.kg_gro
+            self.ws.cell(row=line_this, column=col_xlslog_err_rel).value = mat_input.err_rel if mat_input.err_rel
+
+
+
+        return line_this
 
     def put_qty(self,
                 time: str ='',
@@ -361,6 +423,21 @@ class Flowsheet:
             self.ws.cell(row=line, column=col_xlslog_assay_conc).border = border_around
             self.ws.cell(row=line, column=col_xlslog_assay_conc).font = font_bold
 
+            self.ws.cell(row=line, column=col_xlslog_name_basis).value = dict_part_logic[tag_part_hedr_name_basis]
+            self.ws.cell(row=line, column=col_xlslog_name_basis).fill = fill_light_orange
+            self.ws.cell(row=line, column=col_xlslog_name_basis).border = border_around
+            self.ws.cell(row=line, column=col_xlslog_name_basis).font = font_bold
+
+            self.ws.cell(row=line, column=col_xlslog_mol_basis).value = dict_part_logic[tag_part_hedr_mol_basis]
+            self.ws.cell(row=line, column=col_xlslog_mol_basis).fill = fill_light_orange
+            self.ws.cell(row=line, column=col_xlslog_mol_basis).border = border_around
+            self.ws.cell(row=line, column=col_xlslog_mol_basis).font = font_bold
+
+            self.ws.cell(row=line, column=col_xlslog_kg_net_basis).value = dict_part_logic[tag_part_hedr_kg_net_basis]
+            self.ws.cell(row=line, column=col_xlslog_kg_net_basis).fill = fill_light_orange
+            self.ws.cell(row=line, column=col_xlslog_kg_net_basis).border = border_around
+            self.ws.cell(row=line, column=col_xlslog_kg_net_basis).font = font_bold
+
             self.ws.cell(row=line, column=col_xlslog_equiv).value = dict_part_logic[tag_part_hedr_equiv]
             self.ws.cell(row=line, column=col_xlslog_equiv).fill = fill_lighter_orange
             self.ws.cell(row=line, column=col_xlslog_equiv).border = border_around
@@ -370,6 +447,11 @@ class Flowsheet:
             self.ws.cell(row=line, column=col_xlslog_v_per_w).fill = fill_lighter_orange
             self.ws.cell(row=line, column=col_xlslog_v_per_w).border = border_around
             self.ws.cell(row=line, column=col_xlslog_v_per_w).font = font_bold
+
+            self.ws.cell(row=line, column=col_xlslog_name_basis).value = dict_part_logic[tag_part_hedr_wwpct]
+            self.ws.cell(row=line, column=col_xlslog_name_basis).fill = fill_lighter_orange
+            self.ws.cell(row=line, column=col_xlslog_name_basis).border = border_around
+            self.ws.cell(row=line, column=col_xlslog_name_basis).font = font_bold
 
             self.ws.cell(row=line, column=col_xlslog_mol).value = dict_part_logic[tag_part_hedr_mol]
             self.ws.cell(row=line, column=col_xlslog_mol).fill = fill_light_blue
@@ -405,18 +487,30 @@ class Flowsheet:
         #     pass
         else:
             #mol
-            xls_formular_mol = f'=IF({alph_col_equiv}{line}<>"",${alph_col_mol}${line_standard}*{alph_col_equiv}{line},"")'
+            xls_formular_mol = (f'=_xlfn.IFS({alph_col_equiv}{line}<>"",{alph_col_mol_basis}{line}*{alph_col_equiv}{line},'
+                                f'AND({alph_col_equiv}{line}="", {alph_col_kg_net}{line}<>""),{alph_col_kg_net}{line}*1000/{alph_col_mw}{line},'
+                                 'TRUE,"")')
             self.ws.cell(row=line, column=col_xlslog_mol).value = xls_formular_mol
-            #volume
-            xls_formular_volume = f'=IF({alph_col_v_per_w}{line}<>"",${alph_col_kg_net}${line_standard}*{alph_col_v_per_w}{line},"")'
+            #v/w
+            # xls_formular_volume = f'=IF({alph_col_v_per_w}{line}<>"",{alph_col_kg_net_basis}{line}*{alph_col_v_per_w}{line},"")'
+            xls_formular_volume = (f'=_xlfn.IFS({alph_col_v_per_w}{line}<>"",{alph_col_kg_net_basis}{line}*{alph_col_v_per_w}{line},'
+                                   f'AND({alph_col_v_per_w}{line}="", {alph_col_kg_gro}{line}<>""),{alph_col_kg_gro}{line}/{alph_col_dens}{line},'
+                                 'TRUE,"")')
             self.ws.cell(row=line, column=col_xlslog_volume).value = xls_formular_volume
+
+            # #w/w%
+            # xls_formular_wwpct = f'=IF({alph_col_wwpct}{line}<>"",{alph_col_kg_net_basis}{line}*{alph_col_wwpct}{line}/100,"")'
+            # self.ws.cell(row=line, column=col_xlslog_wwpct).value = xls_formular_wwpct
+
             #kg_net
             xls_formular_kg_net = (f'=_xlfn.IFS({alph_col_mol}{line}<>"",{alph_col_mol}{line}*{alph_col_mw}{line}/1000,'
                                f'{alph_col_volume}{line}<>"",{alph_col_volume}{line}*{alph_col_dens}{line},'
+                               f'{alph_col_wwpct}{line}<>"",{alph_col_kg_net_basis}{line}*{alph_col_wwpct}{line}/100,'
+                               f'AND({alph_col_kg_gro}{line}<>"",{alph_col_assay_conc}{line}<>""),{alph_col_kg_gro}{line}*{alph_col_assay_conc}{line}/100,'
                                'TRUE,"")')
             self.ws.cell(row=line, column=col_xlslog_kg_net).value = xls_formular_kg_net
             #kg_gro
-            xls_formular_kg_gro = f'=IF({alph_col_kg_net}{line}<>"",{alph_col_kg_net}{line}/({alph_col_assay_conc}{line}/100),"")'
+            xls_formular_kg_gro = (f'=IF({alph_col_kg_net}{line}<>"",{alph_col_kg_net}{line}/({alph_col_assay_conc}{line}/100),"")')
             self.ws.cell(row=line, column=col_xlslog_kg_gro).value = xls_formular_kg_gro
             #err_abs
             xls_formular_err_abs = f'=IF({alph_col_kg_gro}{line}<>"",{alph_col_kg_gro}{line}*{alph_col_err_rel}{line}/100,"")'
