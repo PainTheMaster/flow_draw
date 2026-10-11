@@ -1,7 +1,10 @@
 #from typing import List
+import warnings
+
 import pandas as pd
 import json
 import flow_draw.definitions as defs
+from dataclasses import dataclass
 # from flow_draw.batch.process.unit_operations import unit_operation
 #from flow_draw.batch.process.unit_operations.unit_operation import UnitOperation as unitop
 
@@ -56,6 +59,13 @@ list_uo_common: list[type[uo.UnitOperation]] = [chgng.Charging,
                                                 ]
 
 
+opt_special_id_basis_tgt = chgng.opt_special_id_basis_tgt
+"""A special ID to designate the target compound to use as the quantity calculation basis."""
+
+num_max_iter_calc_qty = 100
+"""Maximum number of iterations allowed for the quantity calculation."""
+
+
 class Process(GetMats, GetProcName, GetInputs):
     """
     The Process is for a process, which consists of many unit operations. The class holds a name, an instance of InputForm class, a sries of UnitOperation(s).
@@ -90,6 +100,8 @@ class Process(GetMats, GetProcName, GetInputs):
         self.process_name:str = process_name
         self.num_uo:int = None
         self.data_io: proc_io.ProcessIO = None
+        self.assumed_yield_pct: float = 100.0
+        self.tgt_stoichiometry: float = 1.0
         if(num_uo is not None):
             self.num_uo = num_uo
         else:
@@ -107,7 +119,10 @@ class Process(GetMats, GetProcName, GetInputs):
         self.seq_uo: list[uo.UnitOperation] = []
         """Sequene of the constituting unit operations. This will be populated when self.load_uo_summary() is called."""
         self.list_inputs: list[chgng.Input] = []
+        # self.list_dependencies: list[Dependency] = []
         self.flowsheet: fsht.Flowsheet = fsht.Flowsheet()
+
+        
 
         
 
@@ -170,6 +185,7 @@ class Process(GetMats, GetProcName, GetInputs):
         """
         df_summary = self.data_io.load_process_summary()
         uo_reg = uo.registry_uo_cls
+        self.seq_uo.clear()
         for _, row in df_summary.iterrows():
             seq = int(row[defs.hedr_io_sumry_seq])
             uo_title = str(row[defs.hedr_io_summary_uo])
@@ -199,8 +215,13 @@ class Process(GetMats, GetProcName, GetInputs):
         None
         """
         self.mats_data = self.data_io.load_mats()
-        self.flowsheet.set_standards(mol_std=self.mats_data.mol_sm,
-                                     wt_net_std=self.mats_data.net_kg_sm)
+        # self.flowsheet.set_standards(mol_std=self.mats_data.mol_sm,
+        #                              wt_net_std=self.mats_data.net_kg_sm)
+        # input_tgt = chgng.Input(mats_data = self.mats_data,
+        #                         proc = self)
+        # input_tgt.mark_as_tgt()
+        # self.list_inputs.clear()
+        # self.list_inputs.append(input_tgt)
 
     #TODO: Create the process detail input form, for each unit operation in teh list_uo, get the uo-specific header and feed it to ProcessIO.generate_proc_detail_form()
 
@@ -250,6 +271,7 @@ class Process(GetMats, GetProcName, GetInputs):
         list_uo: list[type[uo.UnitOperation]] = list_uo_common
         arr_steps = self.data_io.ai_load_process_details(caller=self, list_uo=list_uo)
         uo_reg = uo.registry_uo_cls
+        self.seq_uo.clear()
         for step in arr_steps:
             uo_tag = step[defs.hedr_cmn_io_dtil_uo]
             new_uo_inst = uo_reg[uo_tag](caller=self,
@@ -265,7 +287,8 @@ class Process(GetMats, GetProcName, GetInputs):
         self.flowsheet.save(filename=self.process_name+".xlsx")
            
     def interprit_dict(self, json_dict: dict[str, any]):
-        list_uo: list[type[uo.UnitOperation]] = list_uo_common
+        # list_uo: list[type[uo.UnitOperation]] = list_uo_common
+        self.seq_uo.clear()
 
         arr_steps:list[dict] = json_dict[defs.json_key_arr_uo_params]
         uo_reg = uo.registry_uo_cls
@@ -279,9 +302,24 @@ class Process(GetMats, GetProcName, GetInputs):
             new_uo_inst.load_from_json_dict(step)
             self.seq_uo.append(new_uo_inst)
 
+        if self.mats_data is None:
+            raise RuntimeError(f"{self.__class__.__name__}.interprit_dict(): No material data provided.")
+        input_tgt = chgng.Input(mats_data = self.mats_data, proc = self)
+        input_tgt.mark_as_tgt()
+        self.list_inputs.clear()
+        self.list_inputs.append(input_tgt)
         for step in self.seq_uo:
             if isinstance(step, chgng.Charging):
                 self.list_inputs += step.list_inputs
+
+        for _ in range(num_max_iter_calc_qty):
+            calc_complete = True
+            for input_item in self.list_inputs:
+                calc_complete &= input_item.calc_qty()
+            if calc_complete:
+                break
+        if not calc_complete:
+            raise RuntimeError(f"{self.__class__.__name__}.interprit_dict(): Quantity calculation did not converge within {num_max_iter_calc_qty} iterations.")
         
         for step in self.seq_uo:
             step.output_unit_operation()
@@ -300,10 +338,66 @@ class Process(GetMats, GetProcName, GetInputs):
     def get_proc_name(self) -> str:
         return self.process_name
 
-    def get_inputs(self, id_input: int = None) -> chgng.Input:
+    def get_input(self, id_input: int = None) -> chgng.Input:
         if id_input is None:
             raise ValueError(f"{self.__class__.__name__}.get_inputs(): No id_input is provided.")
         for input_item in self.list_inputs:
             if input_item.id_input == id_input:
                 return input_item
-        raise ValueError(f"{self.__class__.__name__}.get_inputs(): No input found with id_input={id_input}.")
+        raise LookupError(f"{self.__class__.__name__}.get_inputs(): No input found with id_input={id_input}.")
+
+    # def __organize_dependencies(self):
+    #     self.list_dependencies.clear()
+    #     #Add the new dependency
+    #     for mat_input in self.list_inputs:
+    #         depended_this = mat_input.arr_basis_input
+    #         match = False
+    #         for comp in self.list_dependencies:
+    #             depended_comp = comp.list_id
+    #             if set(depended_this) == set(depended_comp):
+    #                 match = True
+    #                 break
+    #         if not match:
+    #             id_input = depended_this[0]
+    #             input_depended = self.get_input(id_input=id_input)
+    #             name_depended = input_depended.material_name
+    #             if input_depended.material_class == chgng.cls_input_mat_sm or input_depended.material_class == chgng.cls_input_mat_tgt:
+                    
+
+
+    #             new_dep = Dependency(name=name_depended,
+    #                                  list_id=depended_this,
+    #                                  input_class=,
+    #                                  mol=,
+    #                                  wt_kg_gross=,
+    #                                  conc_assay=)
+
+            
+
+            
+        
+    # def get_dependencies(self) -> list[Dependency]:
+    #     pass
+
+    def get_assumed_yield_pct(self) -> float:
+        assumed_yield_pct = self.assumed_yield_pct
+        if assumed_yield_pct is None or not isinstance(assumed_yield_pct, (float, int)) or assumed_yield_pct < 0:
+            assumed_yield_pct = 100.0
+            warnings.warn(f"{self.__class__.__name__}.get_assumed_yield_pct(): Invalid assumed_yield_pct value. Defaulting to 100.0.", RuntimeWarning)
+        return assumed_yield_pct
+
+    def get_tgt_stoichiometry(self)->float:
+        tgt_stoichiometry = self.tgt_stoichiometry
+        if tgt_stoichiometry is None or not isinstance(tgt_stoichiometry, (float, int)) or tgt_stoichiometry <= 0:
+            tgt_stoichiometry = 1.0
+            warnings.warn(f"{self.__class__.__name__}.get_tgt_stoichiometry(): Invalid tgt_stoichiometry value. Defaulting to 1.0.", RuntimeWarning)
+        return tgt_stoichiometry
+
+@dataclass
+class Dependency:
+    name:str
+    list_id:list[int]
+    input_class:str
+    mol:float
+    wt_kg_gross:float
+    conc_assay:float

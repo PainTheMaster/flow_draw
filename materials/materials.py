@@ -119,9 +119,14 @@ class Materials:
 
             self.kg_net_tgt_ideal = self.mol_sm * temp_mw_tgt / 1000
 
-
     def get_name_sm(self)->str:
         return self.name_sm
+
+    def get_gross_kg_sm(self)->float:
+        return self.gross_kg_sm
+
+    def get_kg_net_sm(self)->float:
+        return self.net_kg_sm
 
     def get_mol_sm(self) -> float:
         return self.mol_sm
@@ -222,7 +227,7 @@ class Materials:
             return None
         return float(density_this)
 
-    def get_assay_conc(self, material_name:str) -> float|None:
+    def get_conc_assay(self, material_name:str) -> float|None:
         hits = self.df_mats.loc[self.df_mats[defs.hedr_io_mats_mat]==material_name, defs.hedr_io_mats_concasy]
         if len(hits) != 1:
             raise ValueError(f'{self.__class__.__name__}.get_assay_conc(): "{material_name}" matched {len(hits)} rows (expected 1).')

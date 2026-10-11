@@ -313,7 +313,10 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
         qty_mats = Primitive(prim_type="number",
                              key=hedr_metrics_value,
                              description=f'Relative quantity of the raw material, solvent, and other materials. This object is for the value only.'
-                             f'The unit is selected in another entry. ')
+                             f'The unit is selected in another entry. '
+                             'As a special case, if this instance is one of the split charges of the starting material (the key building block), please put the fraction of the total quantity. '
+                             f'For example, if the starting material is split into three charges, each charge should have a relative quantity of 0.333 {opt_mtrcs_eq}. '
+                             f'Otherwise (single charge), please put 1.0 {opt_mtrcs_eq} for the relative quantity of the starting material.')
         unit_mats = Primitive(prim_type="string",
                               key=hedr_metrics_unit,
                               description=f'Unit to specify the relative quantity of the raw material, solvent, and other materials. This is for the unit only. '
@@ -333,8 +336,9 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
                            description='Array of material input IDs used as the basis for calculating the quantity of other material inputs. '
                            'In most cases, only one material input ID (the key building block) is used as the basis. '
                            'However, multiple input IDs are allowed. For a rare example, when the key raw material is split and charged in multiple steps. '
-                           f'If the target material is designated as the calculation basis, please put {opt_special_id_basis_tgt}.',
-                           nullable=False,
+                           f'If the target material is designated as the calculation basis, please put {opt_special_id_basis_tgt}. '
+                           'If this input depends on nothing, e.g., the starting material, please leave this null.',
+                           nullable=True,
                            required = True)
         permiss_error = Primitive(prim_type="number",
                                   key=hedr_error_pct,
@@ -521,9 +525,11 @@ class Input:
     """
     This class is for each material charged, each instance correspnds to each dosage in a charging operation.
     """
-    def __init__(self, mats_data: mats.Materials = None):
+    def __init__(self, mats_data: mats.Materials = None, proc: GetInputs = None):
         #Material constants
         self.mats_data: mats.Materials = mats_data
+        self.proc: GetInputs = proc
+
         self.mw:float = None
         """Molecular weight of the material."""
         self.density:float = None
@@ -543,14 +549,22 @@ class Input:
         """Holds one of the options in list_metrics_unit. Metrics unit suc as eq or v/w"""
         self.metrics_val:float = None
         """User input float. Factor to the main material as in x eq or y v/w"""
-        self.arr_basis_input:list = None
+        self.arr_basis_input:list[int] = None
         """Array of basis input values for the material."""
         self.error_pct:float = None
         """User input float. Permissible error percentage. 5.0% for most of materials."""
-        self.qty_kg:float = None
+        self.qty_kg_gross:float = None
         """User input float. Quantity of this raw material."""
-        self.error_kg:float = None
+        self.error_kg_gross:float = None
         """Calculated float from qty_kg and error_pct"""
+        self.mol:float = None
+        """Calculated float. Moles of the material."""
+        self.qty_kg_net:float = None
+        """Calculated float. Net quantity of this raw material."""
+        self.vol_litre:float = None
+        """Calculated float. Volume of the material in litres."""
+        self.qty_calc_compltd:bool = False
+        """Indicates whether the quantity has been calculated."""
         self.method = ""
         """Holds one of the options in list_charging_method. Input method."""
         self.time_control:str = None
@@ -565,6 +579,8 @@ class Input:
         """User input float. Lower temperature limit."""
         self.temp_max:float = None
         """User input float. Upper temperature limit."""
+        self.fs_line_qty:int = None
+        """Flowsheet line of the qty. """
     
   
 
@@ -606,14 +622,14 @@ class Input:
             self.__calc_qty()
             self.mw = self.mats_data.get_mw(self.material_name)
             self.density = self.mats_data.get_density(self.material_name)
-            self.assay_conc = self.mats_data.get_assay_conc(self.material_name)
+            self.assay_conc = self.mats_data.get_conc_assay(self.material_name)
 
     def load_from_json_dict(self, json_dict: dict[str, any]):
         self.id_input =json_dict[id_input_json]
         self.material_name = json_dict[hedr_material_name]
         self.metrics_unit = json_dict[hedr_metrics_unit]
         self.metrics_val = json_dict[hedr_metrics_value]
-        self.arr_basis_input = json_dict[arry_inputs_json]
+        self.arr_basis_input = json_dict[hedr_basis_array]
         self.error_pct = json_dict[hedr_error_pct]
         self.method = json_dict[hedr_method]
         self.time_control = json_dict[hedr_time_control]
@@ -631,10 +647,10 @@ class Input:
                           category=RuntimeWarning)
             #raise RuntimeWarning(f"{__class__.__name}: mats_data is None")
         else:
-            self.__calc_qty()
+            # self.calc_qty()
             self.mw = self.mats_data.get_mw(self.material_name)
             self.density = self.mats_data.get_density(self.material_name)
-            self.assay_conc = self.mats_data.get_assay_conc(self.material_name)
+            self.assay_conc = self.mats_data.get_conc_assay(self.material_name)
             if self.material_name == self.mats_data.get_name_sm():
                 self.material_class = cls_input_mat_sm
             elif self.material_name == self.mats_data.get_name_tgt():
@@ -655,7 +671,7 @@ class Input:
         self.temp_control = temprctrl_min_max
         self.temp_min = 15
         self.temp_max = 25
-        self.__calc_qty()
+        self.calc_qty()
 
     def test_data_creation2(self):
         self.material_name = 'NaCl'
@@ -669,32 +685,195 @@ class Input:
         self.temp_control = temprctrl_min_max
         self.temp_min = 15
         self.temp_max = 25
-        self.__calc_qty()
+        self.calc_qty()
 
-    def __calc_qty(self):
-        """
-        Calculates the quantity of the material and permissible error in "kg" unit.
-        For this function to work, instance/values of mats_data, metrics unit (equiv or v/w), metrics value (a factor to the main starting material) have to have been let to the instance variable.
-        The calculated result is set to the self.qty_kg, self.error_kg, and returns nothing.
+    # def __calc_qty(self):
+    #     """
+    #     Calculates the quantity of the material and permissible error in "kg" unit.
+    #     For this function to work, instance/values of mats_data, metrics unit (equiv or v/w), metrics value (a factor to the main starting material) have to have been let to the instance variable.
+    #     The calculated result is set to the self.qty_kg, self.error_kg, and returns nothing.
 
-        Parameters
-        -----------
-        None
+    #     Parameters
+    #     -----------
+    #     None
 
-        Returns
-        -----------
-        None
-        """
+    #     Returns
+    #     -----------
+    #     None
+    #     """
+    #     if self.mats_data is None:
+    #         raise RuntimeError(f"{__class__.__name__}.__calc_qty() (input of \"{self.material_name}\"): No material data provided.")
+    #     if self.metrics_unit == opt_mtrcs_eq:
+    #         self.qty_kg_gross = self.mats_data.to_kilogram(material_name = self.material_name, equiv=self.metrics_val)
+    #         self.error_kg_gross = self.qty_kg_gross * (self.error_pct/100.0)
+    #     elif self.metrics_unit == opt_mtrcs_v_per_w:
+    #         self.qty_kg_gross = self.mats_data.to_kilogram(material_name = self.material_name, vol_per_weight=self.metrics_val)
+    #         self.error_kg_gross = self.qty_kg_gross * (self.error_pct/100.0)
+    #     else:
+    #         raise ValueError(f'{__class__.__name__}.__calc_qty(): metrics_unit (eq or v/w) for \"{self.material_name}\" not defined in the detail input worksheet.')
+
+    def mark_as_tgt(self):
+        self.id_input = opt_special_id_basis_tgt
+        self.material_name = self.mats_data.get_name_tgt()
+        self.material_class = cls_input_mat_tgt
+        if self.mats_data.get_mw(material_name=self.material_name) is not None:
+            self.mw = self.mats_data.get_mw(material_name=self.material_name)
+        if self.mats_data.get_density(material_name=self.material_name) is not None:
+            self.density = self.mats_data.get_density(material_name=self.material_name)
+
+    def calc_qty(self)->bool:
+        if self.qty_calc_compltd:
+            return True
+        
         if self.mats_data is None:
-            raise RuntimeError(f"{__class__.__name__}.__calc_qty() (input of \"{self.material_name}\"): Material data for provided in the material input worksheet.")
-        if self.metrics_unit == opt_mtrcs_eq:
-            self.qty_kg = self.mats_data.to_kilogram(material_name = self.material_name, equiv=self.metrics_val)
-            self.error_kg = self.qty_kg * (self.error_pct/100.0)
-        elif self.metrics_unit == opt_mtrcs_v_per_w:
-            self.qty_kg = self.mats_data.to_kilogram(material_name = self.material_name, vol_per_weight=self.metrics_val)
-            self.error_kg = self.qty_kg * (self.error_pct/100.0)
-        else:
-            raise ValueError(f'{__class__.__name__}.__calc_qty(): metrics_unit (eq or v/w) for \"{self.material_name}\" not defined in the detail input worksheet.')
+            raise RuntimeError(f"{__class__.__name__}.calc_qty() (input of \"{self.material_name}\"): No material data for provided in the material input worksheet.")
+        # if self.proc is None:
+        #     raise RuntimeError(f"{__class__.__name__}.calc_qty() (input of \"{self.material_name}\"): No process data provided.")
+        if self.arr_basis_input is None or len(self.arr_basis_input) == 0:
+            if self.material_class != cls_input_mat_sm and self.material_class != cls_input_mat_tgt:
+                raise RuntimeError(f"{__class__.__name__}.calc_qty() (input of \"{self.material_name}\"): No quantity calculation basis specified.")
+        
+        if self.material_class == cls_input_mat_sm:
+            total_mol_sm = self.mats_data.get_mol_sm()
+            total_kg_net_sm = self.mats_data.get_kg_net_sm()
+            total_kg_gross_sm = self.mats_data.get_gross_kg_sm()
+            if self.metrics_unit == opt_mtrcs_eq:
+                self.mol = total_mol_sm * self.metrics_val
+                self.qty_kg_net = total_kg_net_sm * self.metrics_val
+                self.qty_kg_gross = total_kg_gross_sm * self.metrics_val
+                self.error_kg_gross = self.qty_kg_gross * (self.error_pct/100.0)
+            elif self.metrics_unit == opt_mtrcs_wwpct:
+                self.mol = total_mol_sm * (self.metrics_val/100.0)
+                self.qty_kg_net = total_kg_net_sm * (self.metrics_val/100.0)
+                self.qty_kg_gross = total_kg_gross_sm * (self.metrics_val/100.0)
+                self.error_kg_gross = self.qty_kg_gross * (self.error_pct/100.0)
+            else:
+                raise ValueError(f'{__class__.__name__}.calc_qty(): Invalid metrics_unit "{self.metrics_unit}" for the starting material "{self.material_name}". '
+                                 'The quantity must be specified either in equivalents or weight percent.')
+            
+            dens_sm = self.mats_data.get_density(material_name=self.material_name)
+            if dens_sm is None or not isinstance(dens_sm, (float, int)) or dens_sm <= 0:
+                dens_sm = 1.0
+                warnings.warn(f'{__class__.__name__}.calc_qty() (input of \"{self.material_name}\"): No density information provided for this material.'
+                              '1.0 is assumed to estimate the volume.')
+            self.vol_litre = self.qty_kg_gross / dens_sm
+            self.qty_calc_compltd = True
+            return True
 
+        #Hereunder, the process data is required for further calculations.
+        if self.proc is None:
+            raise RuntimeError(f"{__class__.__name__}.calc_qty() (input of \"{self.material_name}\"): No process data provided.")
+
+        if self.material_class == cls_input_mat_tgt:
+            self.mol = self.mats_data.get_mol_sm() * self.proc.get_tgt_stoichiometry() * (self.proc.get_assumed_yield_pct() / 100.0)
+            mw_this = self.mats_data.get_mw(material_name = self.material_name)
+            if mw_this is None or not isinstance(mw_this, (float, int)) or mw_this <= 0:
+                raise RuntimeError(f"{__class__.__name__}.calc_qty() (input of \"{self.material_name}\"): Invalid molecular weight for this material.")
+            self.qty_kg_net = mw_this * (self.mol / 1000)
+            self.qty_kg_gross = self.qty_kg_net
+            self.qty_calc_compltd = True
+            return True
+
+        if self.metrics_unit == opt_mtrcs_eq:
+            mol_basis = 0.0
+            for dep_id in self.arr_basis_input:
+                input_depended = self.proc.get_input(dep_id)
+                if input_depended is None:
+                    raise RuntimeError(f"{__class__.__name__}.calc_qty() (input of \"{self.material_name}\"): Dependent input with ID \"{dep_id}\" not found.")
+                if input_depended.mol is None:
+                    return False
+                else:
+                    mol_basis += input_depended.mol
+            self.mol = mol_basis * self.metrics_val
+            mw_this = self.mats_data.get_mw(material_name = self.material_name)
+            if mw_this is None or not isinstance(mw_this, (float, int)) or mw_this <= 0:
+                raise RuntimeError(f"{__class__.__name__}.calc_qty() (input of \"{self.material_name}\"): Invalid molecular weight for this material.")
+            conc_assay_this = self.mats_data.get_conc_assay(material_name = self.material_name)
+            if conc_assay_this is None or not isinstance(conc_assay_this, (float, int)) or conc_assay_this <= 0:
+                raise RuntimeError(f"{__class__.__name__}.calc_qty() (input of \"{self.material_name}\"): Invalid assay for this material.")
+            self.qty_kg_net = self.mol * mw_this/1000
+            self.qty_kg_gross = self.qty_kg_net / (conc_assay_this/100.0)
+            self.error_kg_gross = self.qty_kg_gross * (self.error_pct/100.0)
+
+            dens_this = self.mats_data.get_density(material_name=self.material_name)
+            if dens_this is None or not isinstance(dens_this, (float, int)) or dens_this <= 0:
+                dens_this = 1.0
+                warnings.warn(f'{__class__.__name__}.calc_qty() (input of \"{self.material_name}\"): No density information provided tor this material.'
+                              '1.0 is assumed to estimate the volume.',
+                              RuntimeWarning)
+            self.vol_litre = self.qty_kg_gross / dens_this
+            self.qty_calc_compltd = True
+            return True
+        
+        elif self.metrics_unit == opt_mtrcs_v_per_w:
+            net_wt_basis = 0.0
+            for dep_id in self.arr_basis_input:
+                input_depended = self.proc.get_input(dep_id)
+                if input_depended is None:
+                    raise RuntimeError(f"{__class__.__name__}.calc_qty() (input of \"{self.material_name}\"): Dependent input with ID \"{dep_id}\" not found.")
+                if input_depended.qty_kg_net is None:
+                    return False
+                else:
+                    net_wt_basis += input_depended.qty_kg_net
+            self.vol_litre = net_wt_basis * self.metrics_val
+            dens_this = self.mats_data.get_density(material_name=self.material_name)
+            if dens_this is None or not isinstance(dens_this, (float, int)) or dens_this <= 0:
+                dens_this = 1.0
+                warnings.warn(f'{__class__.__name__}.calc_qty() (input of \"{self.material_name}\"): No density information provided tor this material.'
+                              '1.0 is assumed to estimate the volume.',
+                              RuntimeWarning)
+            self.qty_kg_gross = self.vol_litre * dens_this
+            self.error_kg_gross = self.qty_kg_gross * (self.error_pct/100.0)
+            self.qty_calc_compltd = True
+            conc_assay_this = self.mats_data.get_conc_assay(material_name = self.material_name)
+            if conc_assay_this is None or not isinstance(conc_assay_this, (float, int)) or conc_assay_this <= 0:
+                self.qty_calc_compltd = True
+                return True
+            self.qty_kg_net = self.qty_kg_gross * (conc_assay_this/100.0)
+            mw_this = self.mats_data.get_mw(material_name = self.material_name)
+            if mw_this is None or not isinstance(mw_this, (float, int)) or mw_this <= 0:
+                self.qty_calc_compltd = True
+                return True
+            self.mol = self.qty_kg_net*1000 / mw_this
+            self.qty_calc_compltd = True
+            return True
+
+        elif self.metrics_unit == opt_mtrcs_wwpct:
+            net_wt_basis = 0.0
+            for dep_id in self.arr_basis_input:
+                input_depended = self.proc.get_input(dep_id)
+                if input_depended is None:
+                    raise RuntimeError(f"{__class__.__name__}.calc_qty() (input of \"{self.material_name}\"): Dependent input with ID \"{dep_id}\" not found.")
+                if input_depended.qty_kg_net is None:
+                    return False
+                else:
+                    net_wt_basis += input_depended.qty_kg_net
+            self.qty_kg_net = net_wt_basis * self.metrics_val / 100
+            assay_this = self.mats_data.get_conc_assay(material_name = self.material_name)
+            if assay_this is None or not isinstance(assay_this, (float, int)) or assay_this <= 0:
+                assay_this = 100.0
+                warnings.warn(f'{__class__.__name__}.calc_qty() (input of \"{self.material_name}\"): No valid assay information provided for this material. 100.0 is assumed.',
+                              RuntimeWarning)
+            self.qty_kg_gross = self.qty_kg_net / (assay_this/100)
+            self.error_kg_gross = self.qty_kg_gross * (self.error_pct/100.0)
+            dens_this = self.mats_data.get_density(material_name=self.material_name)
+            if dens_this is None or not isinstance(dens_this, (float, int)) or dens_this <= 0:
+                dens_this = 1.0
+                warnings.warn(f'{__class__.__name__}.calc_qty() (input of \"{self.material_name}\"): No density information provided for this material. 1.0 is assumed to estimate the volume.',
+                              RuntimeWarning)
+            self.vol_litre = self.qty_kg_gross / dens_this
+            mw_this = self.mats_data.get_mw(material_name=self.material_name)
+            if mw_this is None or not isinstance(mw_this, (float, int)) or mw_this <= 0:
+                self.qty_calc_compltd = True
+                return True
+            self.mol = self.qty_kg_net*1000 / mw_this
+            self.qty_calc_compltd = True
+            return True
+
+        else:
+            raise RuntimeError(f"{__class__.__name__}.calc_qty() (input of \"{self.material_name}\"): Unsupported metrics unit \"{self.metrics_unit}\".")
+
+
+            
 
     

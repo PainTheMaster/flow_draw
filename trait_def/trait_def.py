@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 import flow_draw.materials.materials
+import flow_draw.batch.process.process as proc
 import flow_draw.batch.process.unit_operations.uo_charging as chgng
 
 class UniversalTrait(ABC):
@@ -55,7 +56,7 @@ class GetInputs(UniversalTrait):
     By calling the object, the caller can acquire the input values used in the process.
     """
     @abstractmethod
-    def get_inputs(self, id_input: int = None) -> chgng.Input:
+    def get_input(self, id_input: int = None) -> chgng.Input:
         """
         Expected to return an instance of chgng.Input representing the input values for the process.
 
@@ -72,6 +73,39 @@ class GetInputs(UniversalTrait):
         pass
 
 
+    # @abstractmethod
+    # def get_dependencies(self) -> list[proc.Dependency]:
+    #     pass
+
     @abstractmethod
-    def get_depended(self):
+    def get_assumed_yield_pct(self) -> float:
+        """
+        Expected to return the assumed yield for the process.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        ----------
+        assumed_yield: float
+            This shall be a float representing the assumed yield of the process.
+        """
         pass
+
+    @abstractmethod
+    def get_tgt_stoichiometry(self) -> float:
+        """
+        Expected to return the target stoichiometry for the process.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        ----------
+        tgt_stoichiometry: float
+            This shall be a float representing the target stoichiometry of the process.
+        """
+        pass
+    
