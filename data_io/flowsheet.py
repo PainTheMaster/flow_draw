@@ -527,7 +527,7 @@ class Flowsheet:
 
             #mol
             xls_formular_mol = (f'=_xlfn.IFS({cell_equiv}<>"",{cell_mol_basis}*{cell_equiv},'
-                                f'AND({cell_v_per_w}<>"", {cell_mw}<>"", {cell_assay_conc}<>"", {cell_dens}<>""),{cell_kg_net_basis}*{cell_v_per_w}*{cell_dens}*{cell_assay_conc}*1000/{cell_mw},'
+                                f'AND({cell_v_per_w}<>"", {cell_mw}<>"", {cell_assay_conc}<>"", {cell_dens}<>""),{cell_kg_net_basis}*{cell_v_per_w}*{cell_dens}*({cell_assay_conc}/100)*1000/{cell_mw},'
                                 #f'AND({cell_v_per_w}<>"", {cell_mw}<>"", {cell_assay_conc}<>"", {cell_dens}<>""),{cell_kg_net}*1000/{cell_mw},'
                                 f'AND({cell_wwpct}<>"", {cell_mw}<>""), {cell_kg_net_basis}*({cell_wwpct}/100)*1000/{cell_mw},'
                                 f'AND({cell_wt_abs_gro}<>"", {cell_assay_conc}<>"", {cell_mw}<>""), {cell_wt_abs_gro}*({cell_assay_conc}/100)*1000/{cell_mw},'
