@@ -310,13 +310,13 @@ class Flowsheet:
                      record: str='',
                      operator: str='',
                      witness: str='',
-                     mat_input: Input=None)->int:
+                     mat_input: Input=None,
+                     inputs: GetInputs=None)->int:
 
-        def __put_consts(self,
-                         name_mat:str=None,
+        def __put_consts(name_mat:str=None,
                          mw:float=None,
                          dens:float=None,
-                         assay_conc:float=None,
+                         conc_assay:float=None,
                          name_basis:float=None,
                          equiv:float=None,
                          v_per_w:float=None,
@@ -333,8 +333,8 @@ class Flowsheet:
                 self.ws.cell(low=line, column=col_xlslog_mw).value = mw
             if dens is not None:
                 self.ws.cell(low=line, column=col_xlslog_dens).value = dens
-            if assay_conc is not None:
-                self.ws.cell(low=line, column=col_xlslog_assay_conc).value = assay_conc
+            if conc_assay is not None:
+                self.ws.cell(low=line, column=col_xlslog_assay_conc).value = conc_assay
             if name_basis is not None:
                 self.ws.cell(low=line, column=col_xlslog_name_basis).value = name_basis
             if equiv is not None:
@@ -355,6 +355,12 @@ class Flowsheet:
         line = self.current_line
         mat_input.fs_line_mat = line
 
+        # excel_formula_mat = f'={alph_col_mat}{line}'
+        # arr_basis = mat_input.arr_basis_input
+        # name_basis = None
+        # if not arr_basis:
+        #     name_basis = (inputs.get_input(id_input=arr_basis[0])).material_name
+
         excel_formula_mat:str=""
         if mat_input.material_class == chgng.cls_input_mat_sm:
             excel_formula_mat = f'={alph_col_mat}{line}'
@@ -365,9 +371,10 @@ class Flowsheet:
             if mat_input.metrics_unit == chgng.opt_mtrcs_eq:
                 excel_formula_mat = f'={alph_col_mat}{line}&" ("&{alph_col_equiv}{line}&"equiv vs "&{alph_col_name_basis}{line}&")"'
             elif mat_input.metrics_unit == chgng.opt_mtrcs_v_per_w:
-                excel_formula_mat = f'={alph_col_mat}{line}&" ("&{alph_col_v_per_w}{line}&"v/w vs "&{alph_col_name_basis}{line}&")"'
+                excel_formula_mat = f'={alph_col_mat}{line}&" ("&{alph_col_v_per_w}{line}&"v/w vs "&{alph_col_name_basis}{line}&")"'               
             elif mat_input.metrics_unit == chgng.opt_mtrcs_wwpct:
                 excel_formula_mat = f'={alph_col_mat}{line}&" ("&{alph_col_wwpct}{line}&"w/w% vs "&{alph_col_name_basis}{line}&")"'
+
 
         self.put_line(time=time,
                       method=method,
@@ -376,14 +383,16 @@ class Flowsheet:
                       operator=operator,
                       witness=witness)
 
-#TODO: Please put the constants in the logic field by using __put_consts()
-
+        __put_consts(name_mat=mat_input.material_name,
+                mw=mat_input.mw,
+                dens=mat_input.density,
+                conc_assay=mat_input.conc_assay) 
 
         return line
 
 
 
-    def put_qty(self,
+    def put_range(self,
                 time: str ='',
                 method: str='',
                 record: str='',
