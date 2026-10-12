@@ -183,7 +183,7 @@ class Batch:
 
     def manual_load_json(self):
         for proc in self.list_proc:
-            proc.load_json()
+            proc.load_json_file()
 
     def ai_load_process_details(self):
         for proc in self.list_proc:

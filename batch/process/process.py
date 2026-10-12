@@ -289,7 +289,7 @@ class Process(GetMats, GetProcName, GetInputs):
 
         self.flowsheet.save(filename=self.process_name+".xlsx")
            
-    def interprit_dict(self, json_dict: dict[str, any]):
+    def interpret_dict(self, json_dict: dict[str, any]):
         # list_uo: list[type[uo.UnitOperation]] = list_uo_common
         self.seq_uo.clear()
 
@@ -325,6 +325,9 @@ class Process(GetMats, GetProcName, GetInputs):
         for step in self.seq_uo:
             step.output_unit_operation()
 
+        for single_input in self.list_inputs:
+            self.flowsheet.put_qty_material(inputs=self, id_input=single_input.id_input)
+
         input_tgt = chgng.Input(mats_data = self.mats_data, proc = self)
         input_tgt.mark_as_tgt()
         is_tgt_calcd = input_tgt.calc_qty()
@@ -351,11 +354,11 @@ class Process(GetMats, GetProcName, GetInputs):
 
         self.flowsheet.save(filename=self.process_name+".xlsx")
 
-    def load_json(self):
+    def load_json_file(self):
         file_name = self.process_name+"_proc.json"
         with open(file=file_name, mode='r', encoding = 'utf_8') as file_this:
             dict_proc = json.load(fp=file_this)
-            self.interprit_dict(json_dict=dict_proc)
+            self.interpret_dict(json_dict=dict_proc)
 
     def get_mats(self) -> mats:
         return self.mats_data

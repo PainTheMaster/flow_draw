@@ -972,7 +972,7 @@ class Test_40000_json_ai_interface(unittest.TestCase, trdef.GetMats):
         self.assertTrue(True)
 
     def test_40001_load_from_json(self):
-        self.obj_proc.interprit_dict(json_dict=self.test_json)
+        self.obj_proc.interpret_dict(json_dict=self.test_json)
         self.assertTrue(True)
 
 

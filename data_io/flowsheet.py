@@ -407,7 +407,7 @@ class Flowsheet:
 
         return line_qty
 
-    def put_qty(self, inputs:GetInputs=None, id_input:int=None)->int:
+    def put_qty_material(self, inputs:GetInputs=None, id_input:int=None)->int:
         if inputs is None:
             raise ValueError(f'{self.__class__.__name__}.put_qty(): Material input (inputs:GetInputs) must be provided.')
         if id_input is None:
