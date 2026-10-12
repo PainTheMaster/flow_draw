@@ -460,7 +460,18 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
                                                     record=lang_dict_chgng_specif[tag_part_rec_lot],
                                                     operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
                                                     witness=lang_dict_cmn[tag_flow_cmn_rec_sign],
+<<<<<<< HEAD
                                                     mat_input=temp_inpt)
+=======
+                                                    name_mat=temp_inpt.material_name,
+                                                    mw=temp_inpt.mw,
+                                                    dens=temp_inpt.density,
+                                                    assay_conc=temp_inpt.conc_assay,
+                                                    equiv=temp_inpt.metrics_val if temp_inpt.metrics_unit == opt_mtrcs_eq else None,
+                                                    v_per_w=temp_inpt.metrics_val if temp_inpt.metrics_unit == opt_mtrcs_v_per_w else None,
+                                                    err_rel_pct=temp_inpt.error_pct if temp_inpt.error_pct is not None else error_default)
+            temp_inpt.fs_line_mat = line_mat
+>>>>>>> 1d803f0d7d879fcd1b2b9ace3ce98cc8cc3aff78
 
             #line-2: QTY instruction and record
             self.flowsheet.put_range(record=lang_dict_chgng_specif[tag_part_rec_input],
@@ -548,7 +559,7 @@ class Input:
         """Molecular weight of the material."""
         self.density:float = None
         """Density of the material."""
-        self.assay_conc:float = None
+        self.conc_assay:float = None
         """Assay or concentration of the material."""
 
 
@@ -636,7 +647,7 @@ class Input:
             self.__calc_qty()
             self.mw = self.mats_data.get_mw(self.material_name)
             self.density = self.mats_data.get_density(self.material_name)
-            self.assay_conc = self.mats_data.get_conc_assay(self.material_name)
+            self.conc_assay = self.mats_data.get_conc_assay(self.material_name)
 
     def load_from_json_dict(self, json_dict: dict[str, any]):
         self.id_input =json_dict[id_input_json]
@@ -665,7 +676,7 @@ class Input:
             # self.calc_qty()
             self.mw = self.mats_data.get_mw(self.material_name)
             self.density = self.mats_data.get_density(self.material_name)
-            self.assay_conc = self.mats_data.get_conc_assay(self.material_name)
+            self.conc_assay = self.mats_data.get_conc_assay(self.material_name)
             if self.material_name == self.mats_data.get_name_sm():
                 self.material_class = cls_input_mat_sm
             elif self.material_name == self.mats_data.get_name_tgt():

@@ -352,34 +352,23 @@ class Flowsheet:
         if mat_input is None:
             raise ValueError("Flowsheet.put_material(): Material input (mat_input) must be provided.")
 
-        line = self.current_line
-        mat_input.fs_line_mat = line
+        line_this = mat_input.fs_line_mat
 
         excel_formula_mat:str=""
         if mat_input.material_class == chgng.cls_input_mat_sm:
-            excel_formula_mat = f'={alph_col_mat}{line}'
+            self.ws.cell(row=line_this, column=col_xlslog_mat).value = mat_input.material_name
+            self.ws.cell(row=line_this, column=col_xlslog_mw).value = mat_input.mw
+            self.ws.cell(row=line_this, column=col_xlslog_dens).value = mat_input.density if mat_input.density is not None else ""
+            self.ws.cell(row=line_this, column=col_xlslog_assay_conc).value = mat_input.assay_conc if mat_input.assay_conc is not None else 100.0
+            self.ws.cell(row=line_this, column=col_xlslog_mol).value = mat_input.mol
+            self.ws.cell(row=line_this, column=col_xlslog_kg_gro).value = mat_input.kg_gro
+            self.ws.cell(row=line_this, column=col_xlslog_err_rel).value = mat_input.err_rel
 
-        elif mat_input.material_class == chgng.cls_input_mat_tgt:
-            excel_formula_mat=''
-        else:
-            if mat_input.metrics_unit == chgng.opt_mtrcs_eq:
-                excel_formula_mat = f'={alph_col_mat}{line}&" ("&{alph_col_equiv}{line}&"equiv vs "&{alph_col_name_basis}{line}&")"'
-            elif mat_input.metrics_unit == chgng.opt_mtrcs_v_per_w:
-                excel_formula_mat = f'={alph_col_mat}{line}&" ("&{alph_col_v_per_w}{line}&"v/w vs "&{alph_col_name_basis}{line}&")"'
-            elif mat_input.metrics_unit == chgng.opt_mtrcs_wwpct:
-                excel_formula_mat = f'={alph_col_mat}{line}&" ("&{alph_col_wwpct}{line}&"w/w% vs "&{alph_col_name_basis}{line}&")"'
 
-        self.put_line(time=time,
-                      method=method,
-                      content=excel_formula_mat,
-                      record=record,
-                      operator=operator,
-                      witness=witness)
 
-        
-        return line
+        return line_this
 
-    def put_range(self,
+    def put_qty(self,
                 time: str ='',
                 method: str='',
                 record: str='',
