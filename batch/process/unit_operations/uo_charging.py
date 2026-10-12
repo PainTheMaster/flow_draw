@@ -460,18 +460,7 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
                                                     record=lang_dict_chgng_specif[tag_part_rec_lot],
                                                     operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
                                                     witness=lang_dict_cmn[tag_flow_cmn_rec_sign],
-<<<<<<< HEAD
                                                     mat_input=temp_inpt)
-=======
-                                                    name_mat=temp_inpt.material_name,
-                                                    mw=temp_inpt.mw,
-                                                    dens=temp_inpt.density,
-                                                    assay_conc=temp_inpt.conc_assay,
-                                                    equiv=temp_inpt.metrics_val if temp_inpt.metrics_unit == opt_mtrcs_eq else None,
-                                                    v_per_w=temp_inpt.metrics_val if temp_inpt.metrics_unit == opt_mtrcs_v_per_w else None,
-                                                    err_rel_pct=temp_inpt.error_pct if temp_inpt.error_pct is not None else error_default)
-            temp_inpt.fs_line_mat = line_mat
->>>>>>> 1d803f0d7d879fcd1b2b9ace3ce98cc8cc3aff78
 
             #line-2: QTY instruction and record
             self.flowsheet.put_range(record=lang_dict_chgng_specif[tag_part_rec_input],
