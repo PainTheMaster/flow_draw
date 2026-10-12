@@ -61,13 +61,15 @@ col_xlslog_kg_net_basis = 16
 col_xlslog_equiv = 17
 col_xlslog_v_per_w = 18
 col_xlslog_wwpct = 19
+col_xlslog_wt_abs_kg_gro =20
+col_xlslog_vol_abs =21
 
-col_xlslog_mol = 20
-col_xlslog_volume = 21
-col_xlslog_kg_net = 22
-col_xlslog_kg_gro = 23
-col_xlslog_err_rel = 24
-col_xlslog_err_abs = 25
+col_xlslog_mol = 22
+col_xlslog_volume = 23
+col_xlslog_kg_net = 24
+col_xlslog_kg_gro = 25
+col_xlslog_err_rel = 26
+col_xlslog_err_abs = 27
 
 # col_xlslog_name_basis = 23
 # col_xlslog_id_basis = 24
@@ -99,13 +101,17 @@ tag_part_hedr_v_per_w = "tag_hedr_v/w"
 """Tag for header volume per weight"""
 tag_part_hedr_wwpct = "tag_hedr_wwpct"
 """Tag for header weight percent"""
+tag_part_hedr_wt_gro_abs = 'tag_hedr_weight_kg_gro_abs'
+"""Tag for header kg gross absolute"""
+tag_part_hedr_vol_abs = 'tag_hedr_vol_abs'
+"""Tag for header volume absolute"""
 tag_part_hedr_mol = "tag_hedr_mol"
 """Tag for header mol"""
 tag_part_hedr_volume = "tag_hedr_volume"
 """Tag for header volume"""
 tag_part_hedr_kg_net = "tag_hedr_kg_net"
 """Tag for header net weight"""
-tag_part_hedr_kg_gro = "tag_hedr_kg_gro"
+tag_part_hedr_kg_gro = "tag_hedr_wt_kg_gro"
 """Tag for header gross weight""" 
 tag_part_hedr_err_rel = "tag_hedr_err_rel"
 """Tag for header relative error"""
@@ -132,7 +138,9 @@ dict_part_logic_jp ={tag_part_hedr_mat: "Material",
                      tag_part_hedr_kg_net_basis: "Basis_wt(kg-net)",
                      tag_part_hedr_equiv: "Equiv",
                      tag_part_hedr_v_per_w: "v/w",
-                     tag_part_hedr_wwpct: "wt(%)",
+                     tag_part_hedr_wwpct: "w/w%",
+                     tag_part_hedr_wt_gro_abs:"Wt_abs(kg-gross)",
+                     tag_part_hedr_vol_abs:'Vol_abs(L)',
                      tag_part_hedr_mol: "n(mol)",
                      tag_part_hedr_volume: "V(L)",
                      tag_part_hedr_kg_net: "Wt(kg-net)",
@@ -175,6 +183,9 @@ alph_col_kg_net_basis = num_to_alph(num_col = col_xlslog_kg_net_basis)
 alph_col_equiv = num_to_alph(num_col = col_xlslog_equiv)
 alph_col_v_per_w = num_to_alph(num_col = col_xlslog_v_per_w)
 alph_col_wwpct = num_to_alph(num_col = col_xlslog_wwpct)
+alph_col_kg_gro_abs = num_to_alph(num_col=col_xlslog_wt_abs_kg_gro)
+alph_col_vol_abs = num_to_alph(num_col=col_xlslog_vol_abs)
+
 
 alph_col_mol = num_to_alph(num_col = col_xlslog_mol)
 alph_col_volume = num_to_alph(num_col = col_xlslog_volume)
@@ -279,7 +290,7 @@ class Flowsheet:
         elif v_per_w is not None:
             excel_formular_mat = f'={alph_col_mat}{self.current_line}&" ("&{alph_col_v_per_w}{self.current_line}&" v/w vs "&{alph_col_name_basis}{self.current_line}&")"'
         elif wwpct is not None:
-            excel_formular_mat = f'={alph_col_mat}{self.current_line}&" ("&{alph_col_ww_pct}{self.current_line}&" wt% vs "&{alph_col_name_basis}{self.current_line}&")"'
+            excel_formular_mat = f'={alph_col_mat}{self.current_line}&" ("&{alph_col_wwpct}{self.current_line}&" wt% vs "&{alph_col_name_basis}{self.current_line}&")"'
         line_mat = self.put_line(time=time, method=method, content=excel_formular_mat, record=record, operator=operator, witness=witness)
 
         self.ws.cell(row=line_mat, column=col_xlslog_mat).value = name_mat
@@ -312,7 +323,7 @@ class Flowsheet:
             self.ws.cell(row=line_this, column=col_xlslog_assay_conc).value = mat_input.assay_conc if mat_input.assay_conc is not None else 100.0
             self.ws.cell(row=line_this, column=col_xlslog_mol).value = mat_input.mol
             self.ws.cell(row=line_this, column=col_xlslog_kg_gro).value = mat_input.kg_gro
-            self.ws.cell(row=line_this, column=col_xlslog_err_rel).value = mat_input.err_rel if mat_input.err_rel
+            self.ws.cell(row=line_this, column=col_xlslog_err_rel).value = mat_input.err_rel
 
 
 
@@ -448,10 +459,20 @@ class Flowsheet:
             self.ws.cell(row=line, column=col_xlslog_v_per_w).border = border_around
             self.ws.cell(row=line, column=col_xlslog_v_per_w).font = font_bold
 
-            self.ws.cell(row=line, column=col_xlslog_name_basis).value = dict_part_logic[tag_part_hedr_wwpct]
-            self.ws.cell(row=line, column=col_xlslog_name_basis).fill = fill_lighter_orange
-            self.ws.cell(row=line, column=col_xlslog_name_basis).border = border_around
-            self.ws.cell(row=line, column=col_xlslog_name_basis).font = font_bold
+            self.ws.cell(row=line, column=col_xlslog_wwpct).value = dict_part_logic[tag_part_hedr_wwpct]
+            self.ws.cell(row=line, column=col_xlslog_wwpct).fill = fill_lighter_orange
+            self.ws.cell(row=line, column=col_xlslog_wwpct).border = border_around
+            self.ws.cell(row=line, column=col_xlslog_wwpct).font = font_bold
+
+            self.ws.cell(row=line, column=col_xlslog_wt_abs_kg_gro).value = dict_part_logic[tag_part_hedr_wt_gro_abs]
+            self.ws.cell(row=line, column=col_xlslog_wt_abs_kg_gro).fill = fill_lighter_orange
+            self.ws.cell(row=line, column=col_xlslog_wt_abs_kg_gro).border = border_around
+            self.ws.cell(row=line, column=col_xlslog_wt_abs_kg_gro).font = font_bold
+
+            self.ws.cell(row=line, column=col_xlslog_vol_abs).value = dict_part_logic[tag_part_hedr_vol_abs]
+            self.ws.cell(row=line, column=col_xlslog_vol_abs).fill = fill_lighter_orange
+            self.ws.cell(row=line, column=col_xlslog_vol_abs).border = border_around
+            self.ws.cell(row=line, column=col_xlslog_vol_abs).font = font_bold
 
             self.ws.cell(row=line, column=col_xlslog_mol).value = dict_part_logic[tag_part_hedr_mol]
             self.ws.cell(row=line, column=col_xlslog_mol).fill = fill_light_blue
@@ -486,15 +507,41 @@ class Flowsheet:
         # elif line == line_standard + 1:
         #     pass
         else:
+            cell_equiv = f'{alph_col_equiv}{line}'
+            cell_v_per_w = f'{alph_col_v_per_w}{line}'
+            cell_wwpct = f'{alph_col_wwpct}{line}'
+            cell_wt_abs_gro = f'{alph_col_kg_gro_abs}{line}'
+            cell_vol_abs = f'{alph_col_vol_abs}{line}'
+
+            cell_mol_basis = f'{alph_col_mol_basis}{line}'
+            cell_kg_net_basis = f'{alph_col_kg_net_basis}{line}'
+            
+            cell_mw = f'{alph_col_mw}{line}'
+            cell_dens = f'{alph_col_dens}{line}'
+            cell_assay_conc = f'{alph_col_assay_conc}{line}'
+
+            cell_kg_gro=f'{alph_col_kg_gro}{line}'
+            cell_kg_net=f'{alph_col_kg_net}{line}'
+
+            cell_err_rel = f'{alph_col_err_rel}{line}'
+
             #mol
-            xls_formular_mol = (f'=_xlfn.IFS({alph_col_equiv}{line}<>"",{alph_col_mol_basis}{line}*{alph_col_equiv}{line},'
-                                f'AND(OR({alph_col_v_per_w}{line}<>"", {alph_col_wwpct}{line}<>""),{alph_col_mw}{line}<>""),{alph_col_kg_net}{line}*1000/{alph_col_mw}{line},'
+            xls_formular_mol = (f'=_xlfn.IFS({cell_equiv}<>"",{cell_mol_basis}*{cell_equiv},'
+                                f'AND({cell_v_per_w}<>"", {cell_mw}<>"", {cell_assay_conc}<>"", {cell_dens}<>""),{cell_kg_net_basis}*{cell_v_per_w}*{cell_dens}*{cell_assay_conc}*1000/{cell_mw},'
+                                #f'AND({cell_v_per_w}<>"", {cell_mw}<>"", {cell_assay_conc}<>"", {cell_dens}<>""),{cell_kg_net}*1000/{cell_mw},'
+                                f'AND({cell_wwpct}<>"", {cell_mw}<>""), {cell_kg_net_basis}*({cell_wwpct}/100)*1000/{cell_mw},'
+                                f'AND({cell_wt_abs_gro}<>"", {cell_assay_conc}<>"", {cell_mw}<>""), {cell_wt_abs_gro}*({cell_assay_conc}/100)*1000/{cell_mw},'
+                                f'AND({cell_vol_abs}<>"", {cell_dens}<>"", {cell_assay_conc}<>"", {cell_mw}<>""), {cell_vol_abs}*{cell_dens}*({cell_assay_conc}/100)*1000/{cell_mw},'
+                                #f'AND({cell_equiv}="",{cell_v_per_w}="",{cell_wwpct}="",{cell_assay_conc}<>"",{cell_mw}<>""),{cell_kg_gro}*({cell_assay_conc}/100)*1000/{cell_mw},'
                                  'TRUE,"")')
             self.ws.cell(row=line, column=col_xlslog_mol).value = xls_formular_mol
             #v/w
-            # xls_formular_volume = f'=IF({alph_col_v_per_w}{line}<>"",{alph_col_kg_net_basis}{line}*{alph_col_v_per_w}{line},"")'
-            xls_formular_volume = (f'=_xlfn.IFS({alph_col_v_per_w}{line}<>"",{alph_col_kg_net_basis}{line}*{alph_col_v_per_w}{line},'
-                                   f'AND(OR({alph_col_equiv}{line}<>"", {alph_col_wwpct}{line}), {alph_col_dens}{line}<>""),{alph_col_kg_gro}{line}/{alph_col_dens}{line},'
+            xls_formular_volume = (f'=_xlfn.IFS(AND({cell_equiv}<>"", {cell_mw}<>"", {cell_dens}<>""), {cell_mol_basis}*{cell_equiv}*{cell_mw}/1000/{cell_dens},'
+                                #    f'AND(OR({cell_equiv}<>"", {cell_wwpct}<>""),{cell_dens}>0, {cell_dens}<>""),{alph_col_kg_gro}{line}/{cell_dens},'
+                                   f'{cell_v_per_w}<>"",{cell_kg_net_basis}*{cell_v_per_w},'
+                                   f'AND({cell_wwpct}<>"",{cell_dens}<>""), {cell_kg_net_basis}*({cell_wwpct}/100)/{cell_dens},'
+                                   f'AND({cell_wt_abs_gro}<>"", {cell_dens}<>""), {cell_wt_abs_gro}/{cell_dens},'
+                                   f'{cell_vol_abs}<>"",{cell_vol_abs},'
                                  'TRUE,"")')
             self.ws.cell(row=line, column=col_xlslog_volume).value = xls_formular_volume
 
@@ -503,17 +550,23 @@ class Flowsheet:
             # self.ws.cell(row=line, column=col_xlslog_wwpct).value = xls_formular_wwpct
 
             #kg_net
-            xls_formular_kg_net = (f'=_xlfn.IFS({alph_col_equiv}{line}<>"",{alph_col_mol}{line}*{alph_col_mw}{line}/1000,'
-                               f'{alph_col_volume}{line}<>"",{alph_col_volume}{line}*{alph_col_dens}{line},'
-                               f'{alph_col_wwpct}{line}<>"",{alph_col_kg_net_basis}{line}*{alph_col_wwpct}{line}/100,'
-                               f'AND({alph_col_kg_gro}{line}<>"",{alph_col_assay_conc}{line}<>""),{alph_col_kg_gro}{line}*{alph_col_assay_conc}{line}/100,'
-                               'TRUE,"")')
+            xls_formular_kg_net = (f'=_xlfn.IFS(AND({cell_equiv}<>"",{cell_mw}<>""),{cell_mol_basis}*{cell_equiv}*{cell_mw}/1000,'
+                                           f'AND({cell_v_per_w}<>"",{cell_assay_conc}<>"", {cell_dens}<>""), {cell_kg_net_basis}*{cell_v_per_w}*{cell_dens}*({cell_assay_conc}/100),'
+                                           f'AND({cell_wwpct}<>"", {cell_assay_conc}<>""), {cell_kg_net_basis}*({cell_wwpct}/100),'
+                                           f'AND({cell_wt_abs_gro}<>"", {cell_assay_conc}<>""),{cell_wt_abs_gro}*({cell_assay_conc}/100),'
+                                           f'AND({cell_vol_abs}<>"", {cell_dens}<>"", {cell_assay_conc}<>""), {cell_vol_abs}*{cell_dens}*({cell_assay_conc}/100),'
+                                           'TRUE,"")')
             self.ws.cell(row=line, column=col_xlslog_kg_net).value = xls_formular_kg_net
             #kg_gro
-            xls_formular_kg_gro = (f'=IF({alph_col_kg_net}{line}<>"",{alph_col_kg_net}{line}/({alph_col_assay_conc}{line}/100),"")')
+            #xls_formular_kg_gro = (f'=IF({alph_col_kg_net}{line}<>"",{alph_col_kg_net}{line}/({alph_col_assay_conc}{line}/100),"")')
+            xls_formular_kg_gro = (f'=_xlfn.IFS(AND({cell_equiv}<>"", {cell_mw}<>"", {cell_assay_conc}<>""), {cell_mol_basis}*{cell_equiv}*{cell_mw}/({cell_assay_conc}/100)/1000,'
+                                   f'AND({cell_v_per_w}<>"",{cell_dens}<>""), {cell_kg_net_basis}*{cell_v_per_w}*{cell_dens},'
+                                   f'AND({cell_wt_abs_gro}<>""),{cell_wt_abs_gro},'
+                                   f'AND({cell_vol_abs}<>"", {cell_dens}<>""), {cell_vol_abs}*{cell_dens},'
+                                   'TRUE,"")')
             self.ws.cell(row=line, column=col_xlslog_kg_gro).value = xls_formular_kg_gro
             #err_abs
-            xls_formular_err_abs = f'=IF({alph_col_kg_gro}{line}<>"",{alph_col_kg_gro}{line}*{alph_col_err_rel}{line}/100,"")'
+            xls_formular_err_abs = f'=IF(AND({cell_kg_gro}<>"",{cell_err_rel}<>""),{cell_kg_gro}*{cell_err_rel}/100,"")'
             self.ws.cell(row=line, column=col_xlslog_err_abs).value = xls_formular_err_abs
 
             #Formatting
@@ -534,6 +587,15 @@ class Flowsheet:
 
             self.ws.cell(row=line, column=col_xlslog_v_per_w).fill = fill_lighter_orange
             self.ws.cell(row=line, column=col_xlslog_v_per_w).border = border_around
+
+            self.ws.cell(row=line, column=col_xlslog_wwpct).fill = fill_lighter_orange
+            self.ws.cell(row=line, column=col_xlslog_wwpct).border = border_around
+
+            self.ws.cell(row=line, column=col_xlslog_wt_abs_kg_gro).fill = fill_lighter_orange
+            self.ws.cell(row=line, column=col_xlslog_wt_abs_kg_gro).border = border_around
+
+            self.ws.cell(row=line, column=col_xlslog_vol_abs).fill = fill_lighter_orange
+            self.ws.cell(row=line, column=col_xlslog_vol_abs).border = border_around
 
             self.ws.cell(row=line, column=col_xlslog_mol).fill = fill_light_blue
             self.ws.cell(row=line, column=col_xlslog_mol).border = border_around

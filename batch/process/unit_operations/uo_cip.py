@@ -220,7 +220,7 @@ class CIP(uo.UnitOperation, uo_tag=defs.tag_uo_cip):
                                 required=True)
         cip_qty = Primitive(prim_type="number",
                             key=hedr_qty_kg,
-                            description='Quantity of the solvent in kg for cleaning in place.',
+                            description='Quantity of the solvent in kg for cleaning in place. If no information is provided in the data source, please put 9317 as the default value.',
                             required=True,
                             nullable=True)
         cip_via = Primitive(prim_type='string',
@@ -239,8 +239,8 @@ class CIP(uo.UnitOperation, uo_tag=defs.tag_uo_cip):
         
         json_cip = Objason(key=CIP.uo_tag,
                            props=list_cmn+[arr_unit],
-                           description='This is object for cleaning in place (CIP) during the process. '\
-                            'CIP is done to carry out the process with limited number of pieces of equipment by avoiding contamination.'\
+                           description='This is object for cleaning in place (CIP) during the process. '
+                            'CIP is done to carry out the process with limited number of pieces of equipment by avoiding contamination. '
                             'Please work with this object if the given process flow explicitly indicates the need for CIP.')
         return json_cip
 
