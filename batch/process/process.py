@@ -307,10 +307,8 @@ class Process(GetMats, GetProcName, GetInputs):
 
         if self.mats_data is None:
             raise RuntimeError(f"{self.__class__.__name__}.interprit_dict(): No material data provided.")
-        input_tgt = chgng.Input(mats_data = self.mats_data, proc = self)
-        input_tgt.mark_as_tgt()
+
         self.list_inputs.clear()
-        self.list_inputs.append(input_tgt)
         for step in self.seq_uo:
             if isinstance(step, chgng.Charging):
                 self.list_inputs += step.list_inputs
@@ -322,24 +320,33 @@ class Process(GetMats, GetProcName, GetInputs):
             if calc_complete:
                 break
         if not calc_complete:
-            raise RuntimeError(f"{self.__class__.__name__}.interprit_dict(): Quantity calculation did not converge within {num_max_iter_calc_qty} iterations.")
-        
+            raise RuntimeError(f'{self.__class__.__name__}.interprit_dict(): Quantity calculation did not converge within {num_max_iter_calc_qty} iterations.')
+
         for step in self.seq_uo:
             step.output_unit_operation()
 
+        input_tgt = chgng.Input(mats_data = self.mats_data, proc = self)
+        input_tgt.mark_as_tgt()
+        is_tgt_calcd = input_tgt.calc_qty()
+        if not is_tgt_calcd:
+            raise RuntimeError(f'{self.__class__.__name__}.interprit_dict(): Quantity calculation for "input_tgt" failed.')
         self.flowsheet.linefeed()
-        input_tgt = self.get_input(id_input=special_id_input_tgt)
-        line_fs_tgt =self.flowsheet.put_material(
-                                name_mat = input_tgt.name_mat,
-                                mw = input_tgt.mw,
-                                #dens = None,
-                                #assay_conc = None,
-                                equiv = None,
-                                v_per_w = None,
-                                wwpc = None,
-                                name_mat_basis = None,
-                                #err_rel_pct = 5
-                                )
+        self.flowsheet.put_material(mat_input=input_tgt)
+        self.list_inputs.append(input_tgt)   
+        
+
+        # input_tgt = self.get_input(id_input=special_id_input_tgt)
+        # line_fs_tgt =self.flowsheet.put_material(
+        #                         name_mat = input_tgt.name_mat,
+        #                         mw = input_tgt.mw,
+        #                         #dens = None,
+        #                         #assay_conc = None,
+        #                         equiv = None,
+        #                         v_per_w = None,
+        #                         wwpc = None,
+        #                         name_mat_basis = None,
+        #                         #err_rel_pct = 5
+        #                         )
 
 
         self.flowsheet.save(filename=self.process_name+".xlsx")

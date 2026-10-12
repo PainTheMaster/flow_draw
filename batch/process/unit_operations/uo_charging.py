@@ -110,8 +110,10 @@ list_temp_control = [temprctrl_none,
 opt_mtrcs_eq = "equiv"
 opt_mtrcs_v_per_w = "v/w"
 opt_mtrcs_wwpct = "w/w%"
+opt_mtrcs_wt_gro_abs = 'wt_gross_abs_kg'
+opt_mtrcs_vol_abs = 'vol_abs_kg'
 #list below
-list_metrics_unit = [opt_mtrcs_eq, opt_mtrcs_v_per_w, opt_mtrcs_wwpct]
+list_metrics_unit = [opt_mtrcs_eq, opt_mtrcs_v_per_w, opt_mtrcs_wwpct, opt_mtrcs_wt_gro_abs, opt_mtrcs_vol_abs]
 
 error_range_placeholder = 'placeholder'
 error_default = 5.0
@@ -323,13 +325,17 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
                               description=f'Unit to specify the relative quantity of the raw material, solvent, and other materials. This is for the unit only. '
                               f'"{opt_mtrcs_eq}": molar equivalent vs the selected calculation basis material input. '
                               f'"{opt_mtrcs_v_per_w}": volume (L) of liquid vs weight (kg) of the selected calculation basis material input. '
-                              f' "{opt_mtrcs_wwpct}": weight/weight percent vs the designated calculation basis material input. '
+                              f'"{opt_mtrcs_wwpct}": weight/weight percent vs the designated calculation basis material input. '
+                              f'"{opt_mtrcs_wt_gro_abs}": The gross weight (kg) of a material is directly specified by an absolute value. This is an exceptional case. '
+                              f'"{opt_mtrcs_vol_abs}": The volume (litre) of a non-solid material is directly specified by an absolute value. This is an exceptional case. '
+                              'In the JSON, it normally is assumed that evne the starting material is quantified by a relative metrics (equiv or weight percent) in relation to a basis value defined elsewhere. '
+                              'Please choose the absolute approac only when it is essential or instructed by the user. '
                               f'This item has to be consistent with the other entry "{hedr_metrics_value}"',
                               enum=list_metrics_unit)
         basis_input_single = Primitive(prim_type='integer',
                                 key=hedr_basis_input,
                                 description='The material input used as the basis for calculating the quantity of other material inputs.'
-                                f'If the target material is designated as the calculation basis, please put {self.caller.get_id_target()}.',
+                                f'If the target material is designated as the calculation basis, please put {mats_data.get_name_sm()}.',
                                 nullable=False,
                                 required=True)
         arr_basis_inputs = Array(key=hedr_basis_array,
@@ -348,7 +354,7 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
         charging_method = Primitive(prim_type='string',
                                     key=hedr_method,
                                     enum=list_charging_method,
-                                    description=f"Method to charge/dose a material."\
+                                    description=f"Method to charge/dose a material. "
                                         f'"{method_liq}" is charging solvent or liquid reagent through a pipe. This method is less frequently chosen. '
                                         f'"{method_shower}" is charging solvents by using a showering device in the reaction vessel to clean adhered solid material on the wall. '
                                         f'"{method_press}" is preferred for solvents and liquid reagents less than 10 liters. The liquid material is put in a container under some pressure. '
@@ -360,11 +366,11 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
         time_ctrl = Primitive(prim_type='string',
                               key=hedr_time_control,
                               enum=list_time_control,
-                              description=f'Constraint on time to dose/charge the material.'\
-                                f'"{timectrl_none}" means time control is no needed.'\
-                                f'"{timectrl_min}" should be selected when lower limit must be complied.'\
-                                f'"{timectrl_max}" should be selected when upper limit must be complied.'\
-                                f'"{timectrl_min_max}" should be selected when the event has to happen in a specific range of time.'\
+                              description=f'Constraint on time to dose/charge the material. '
+                                f'"{timectrl_none}" means time control is no needed. '
+                                f'"{timectrl_min}" should be selected when lower limit must be complied. '
+                                f'"{timectrl_max}" should be selected when upper limit must be complied. '
+                                f'"{timectrl_min_max}" should be selected when the event has to happen in a specific range of time. '
                                 f'"Please select {timectrl_placeholder}" if the right option cannot be chosen from the given information.')
         
         time_min = Primitive(prim_type="number",
@@ -380,11 +386,11 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
         temp_ctrl = Primitive(prim_type='string',
                               key=hedr_temp_control,
                               enum=list_temp_control,
-                              description=f'Constraint on temperature during dosing/charging of the material.'\
-                              f'"{temprctrl_none}" means no temperature control is needed.'\
-                              f'"{temprctrl_min}" is selected when the lower limit is set for the dosing/charging.'\
-                              f'"{temprctrl_max}" is selected when the upper limit is set for the dosing/charging.'\
-                              f'"{temprctrl_min_max}" is for a case where the charging/dosing have to take place in a certain specific temperature range.',
+                              description=f'Constraint on temperature during dosing/charging of the material. '
+                              f'"{temprctrl_none}" means no temperature control is needed. '
+                              f'"{temprctrl_min}" is selected when the lower limit is set for the dosing/charging. '
+                              f'"{temprctrl_max}" is selected when the upper limit is set for the dosing/charging. '
+                              f'"{temprctrl_min_max}" is for a case where the charging/dosing have to take place in a certain specific temperature range. ',
                               required=True)
         
         temp_min = Primitive(prim_type='number',
@@ -427,7 +433,6 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
             self.list_inputs.append(new_input)
             self.input_count += 1
 
-
     def output_unit_operation(self):
         #TODO: Leave explanatory comments here.
         self.flowsheet.header_organizer(op_nr=self.operation_seq, title=lang_dict_uo_titles[self.uo_tag])
@@ -436,22 +441,29 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
 
         for temp_inpt in self.list_inputs:
 
+            # line_mat = self.flowsheet.put_material(time=lang_dict_cmn[tag_flow_cmn_rec_time],
+            #                                         method=lang_dict_chgng_specif[temp_inpt.method],
+            #                                         record=lang_dict_chgng_specif[tag_part_rec_lot],
+            #                                         operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
+            #                                         witness=lang_dict_cmn[tag_flow_cmn_rec_sign],
+            #                                         name_mat=temp_inpt.material_name,
+            #                                         mw=temp_inpt.mw,
+            #                                         dens=temp_inpt.density,
+            #                                         assay_conc=temp_inpt.assay_conc,
+            #                                         equiv=temp_inpt.metrics_val if temp_inpt.metrics_unit == opt_mtrcs_eq else None,
+            #                                         v_per_w=temp_inpt.metrics_val if temp_inpt.metrics_unit == opt_mtrcs_v_per_w else None,
+            #                                         err_rel_pct=temp_inpt.error_pct if temp_inpt.error_pct is not None else error_default)
+            # temp_inpt.fs_line_mat = line_mat
+
             line_mat = self.flowsheet.put_material(time=lang_dict_cmn[tag_flow_cmn_rec_time],
                                                     method=lang_dict_chgng_specif[temp_inpt.method],
                                                     record=lang_dict_chgng_specif[tag_part_rec_lot],
                                                     operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
                                                     witness=lang_dict_cmn[tag_flow_cmn_rec_sign],
-                                                    name_mat=temp_inpt.material_name,
-                                                    mw=temp_inpt.mw,
-                                                    dens=temp_inpt.density,
-                                                    assay_conc=temp_inpt.assay_conc,
-                                                    equiv=temp_inpt.metrics_val if temp_inpt.metrics_unit == opt_mtrcs_eq else None,
-                                                    v_per_w=temp_inpt.metrics_val if temp_inpt.metrics_unit == opt_mtrcs_v_per_w else None,
-                                                    err_rel_pct=temp_inpt.error_pct if temp_inpt.error_pct is not None else error_default)
-            temp_inpt.fs_line_mat = line_mat
+                                                    mat_input=temp_inpt)
 
             #line-2: QTY instruction and record
-            self.flowsheet.put_qty(record=lang_dict_chgng_specif[tag_part_rec_input],
+            self.flowsheet.put_range(record=lang_dict_chgng_specif[tag_part_rec_input],
                                    line_mat=line_mat)
 
             #For liquid only, flex ID 
@@ -552,7 +564,7 @@ class Input:
         self.metrics_val:float = None
         """User input float. Factor to the main material as in x eq or y v/w"""
         self.arr_basis_input:list[int] = None
-        """Array of basis input values for the material."""
+        """Array of basis input IDs for the material."""
         self.error_pct:float = None
         """User input float. Permissible error percentage. 5.0% for most of materials."""
         self.qty_kg_gross:float = None
@@ -645,9 +657,10 @@ class Input:
         if (self.temp_control == temprctrl_max or self.temp_control == temprctrl_min_max): #and hedr_temp_max in json_dict:
             self.temp_max = json_dict[hedr_temp_max]
         if self.mats_data is None:
-            warnings.warn(message=f"{__class__.__name}: mats_data is None",
-                          category=RuntimeWarning)
+            # warnings.warn(message=f"{__class__.__name}: mats_data is None",
+            #               category=RuntimeWarning)
             #raise RuntimeWarning(f"{__class__.__name}: mats_data is None")
+            raise RuntimeError(f"{__class__.__name__}: mats_data is None")
         else:
             # self.calc_qty()
             self.mw = self.mats_data.get_mw(self.material_name)
@@ -718,8 +731,7 @@ class Input:
         self.id_input = opt_special_id_basis_tgt
         self.material_name = self.mats_data.get_name_tgt()
         self.material_class = cls_input_mat_tgt
-        if self.mats_data.get_mw(material_name=self.material_name) is not None:
-            self.mw = self.mats_data.get_mw(material_name=self.material_name)
+        self.mw = self.mats_data.get_mw(material_name=self.material_name)
         if self.mats_data.get_density(material_name=self.material_name) is not None:
             self.density = self.mats_data.get_density(material_name=self.material_name)
 
@@ -728,14 +740,34 @@ class Input:
             return True
         
         if self.mats_data is None:
-            raise RuntimeError(f"{__class__.__name__}.calc_qty() (input of \"{self.material_name}\"): No material data for provided in the material input worksheet.")
+            raise RuntimeError(f"{self.__class__.__name__}.calc_qty() (input of \"{self.material_name}\"): No material data for provided in the material input worksheet.")
         # if self.proc is None:
         #     raise RuntimeError(f"{__class__.__name__}.calc_qty() (input of \"{self.material_name}\"): No process data provided.")
         if self.arr_basis_input is None or len(self.arr_basis_input) == 0:
             if self.material_class != cls_input_mat_sm and self.material_class != cls_input_mat_tgt:
-                raise RuntimeError(f"{__class__.__name__}.calc_qty() (input of \"{self.material_name}\"): No quantity calculation basis specified.")
-        
+                raise RuntimeError(f"{self.__class__.__name__}.calc_qty() (input of \"{self.material_name}\"): No quantity calculation basis specified.")
+
+        def __is_pos_num(something=None)->bool:
+            if something is not None and isinstance(something, (float, int)) and something > 0:
+                return True
+            else:
+                return False
+
+        def __calc_vol():
+            dens_sm = self.mats_data.get_density(material_name=self.material_name)
+            if not __is_pos_num(dens_sm):
+                dens_sm = 1.0
+                warnings.warn(f'{self.__class__.__name__}.calc_qty() (input of \"{self.material_name}\"): No density information provided for this material.'
+                              '1.0 is assumed to estimate the volume.')
+            self.vol_litre = self.qty_kg_gross / dens_sm
+
+          
+
         if self.material_class == cls_input_mat_sm:
+            def __set_metrcs_wt_abs_kg(self):
+                self.metrics_val = self.qty_kg_gross
+                self.metrics_unit = opt_mtrcs_wt_gro_abs  
+        
             total_mol_sm = self.mats_data.get_mol_sm()
             total_kg_net_sm = self.mats_data.get_kg_net_sm()
             total_kg_gross_sm = self.mats_data.get_gross_kg_sm()
@@ -744,21 +776,42 @@ class Input:
                 self.qty_kg_net = total_kg_net_sm * self.metrics_val
                 self.qty_kg_gross = total_kg_gross_sm * self.metrics_val
                 self.error_kg_gross = self.qty_kg_gross * (self.error_pct/100.0)
+                __calc_vol()
+                __set_metrcs_wt_abs_kg()
             elif self.metrics_unit == opt_mtrcs_wwpct:
                 self.mol = total_mol_sm * (self.metrics_val/100.0)
                 self.qty_kg_net = total_kg_net_sm * (self.metrics_val/100.0)
                 self.qty_kg_gross = total_kg_gross_sm * (self.metrics_val/100.0)
                 self.error_kg_gross = self.qty_kg_gross * (self.error_pct/100.0)
+                __calc_vol()
+                __set_metrcs_wt_abs_kg()
+            elif self.metrics_unit == opt_mtrcs_wt_gro_abs:
+                self.qty_kg_gross = self.metrics_val
+                self.error_kg_gross = self.qty_kg_gross * (self.error_pct/100.0)
+                if __is_pos_num(self.assay_conc):
+                    self.qty_kg_net = self.qty_kg_gross * (self.assay_conc/100.0)
+                if __is_pos_num(self.mw):
+                    self.mol = self.qty_kg_net * 1000 / self.mw
+                __calc_vol()
+            elif self.metrics_unit == opt_mtrcs_vol_abs:
+                self.vol_litre = self.metrics_val
+                if __is_pos_num(self.density):
+                    self.qty_kg_gross = self.vol_litre * self.density
+                if __is_pos_num(self.assay_conc) and __is_pos_num(self.qty_kg_gross):
+                    self.qty_kg_net = self.qty_kg_gross * (self.assay_conc / 100.0)
+                if __is_pos_num(self.mw) and __is_pos_num(self.qty_kg_net):
+                    self.mol = self.qty_kg_net * 1000 / self.mw
             else:
                 raise ValueError(f'{__class__.__name__}.calc_qty(): Invalid metrics_unit "{self.metrics_unit}" for the starting material "{self.material_name}". '
                                  'The quantity must be specified either in equivalents or weight percent.')
-            
-            dens_sm = self.mats_data.get_density(material_name=self.material_name)
-            if dens_sm is None or not isinstance(dens_sm, (float, int)) or dens_sm <= 0:
-                dens_sm = 1.0
-                warnings.warn(f'{__class__.__name__}.calc_qty() (input of \"{self.material_name}\"): No density information provided for this material.'
-                              '1.0 is assumed to estimate the volume.')
-            self.vol_litre = self.qty_kg_gross / dens_sm
+             
+            # dens_sm = self.mats_data.get_density(material_name=self.material_name)
+            # if dens_sm is None or not isinstance(dens_sm, (float, int)) or dens_sm <= 0:
+            #     dens_sm = 1.0
+            #     warnings.warn(f'{__class__.__name__}.calc_qty() (input of \"{self.material_name}\"): No density information provided for this material.'
+            #                   '1.0 is assumed to estimate the volume.')
+            # self.vol_litre = self.qty_kg_gross / dens_sm
+
             self.qty_calc_compltd = True
             return True
 
@@ -768,12 +821,16 @@ class Input:
 
         if self.material_class == cls_input_mat_tgt:
             self.arr_basis_input = [opt_special_id_basis_tgt]
+            self.metrics_val = self.proc.get_tgt_stoichiometry()
+            self.metrics_unit = opt_mtrcs_eq
             self.mol = self.mats_data.get_mol_sm() * self.proc.get_tgt_stoichiometry() * (self.proc.get_assumed_yield_pct() / 100.0)
             mw_this = self.mats_data.get_mw(material_name = self.material_name)
-            if mw_this is None or not isinstance(mw_this, (float, int)) or mw_this <= 0:
+            if not __is_pos_num(mw_this):
                 raise RuntimeError(f"{__class__.__name__}.calc_qty() (input of \"{self.material_name}\"): Invalid molecular weight for this material.")
-            self.qty_kg_net = mw_this * (self.mol / 1000)
+            self.mw = mw_this
+            self.qty_kg_net = self.mw * self.mol / 1000
             self.qty_kg_gross = self.qty_kg_net
+
             self.qty_calc_compltd = True
             return True
 
