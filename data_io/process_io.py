@@ -296,7 +296,7 @@ class ProcessIO:
         self.__manage_io()
         self.wb.remove(worksheet=self.wb[self.title_summary_ws])
         self.wb.remove(worksheet=self.wb[self.title_detail_ws])
-        options_dv: str = f'\"{defs.itm_io_mats_sm},,\"'
+        options_dv: str = f'\"{defs.itm_io_mats_sm},{defs.itm_io_mats_tgt},\"'
         dv_main = DataValidation(
             type='list',
             formula1=options_dv,

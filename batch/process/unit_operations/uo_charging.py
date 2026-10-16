@@ -6,7 +6,9 @@ from typing import Optional
 from flow_draw.batch.process.unit_operations import unit_operation as uo
 from flow_draw.data_io import process_io
 from flow_draw.materials import materials as mats
-from flow_draw.data_io.flowsheet import Flowsheet as fsht
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from flow_draw.data_io.flowsheet import Flowsheet
 from flow_draw.trait_def.trait_def import GetMats, GetInputs
 from flow_draw.data_io.json_io import Objason, Primitive, Array
 
@@ -250,7 +252,7 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
     TODO: Make some comment here.
     """
     
-    def __init__(self, caller: GetMats|GetInputs=None, flowsheet:fsht.Flowsheet=None, operation_seq:int=None, num_subitems: int =None, edit_comment:str=None):
+    def __init__(self, caller: GetMats|GetInputs=None, flowsheet:"Flowsheet"=None, operation_seq:int=None, num_subitems: int =None, edit_comment:str=None):
         """
         Initialises the newly created instance of the class Charging.
 
@@ -428,7 +430,7 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
         super().load_from_json_dict(json_dict=json_dict)
         arr_input: list[dict[str, str|float]] = json_dict[arry_inputs_json]
         for single_input in arr_input:
-            new_input = Input(mats_data=self.mats_data)
+            new_input = Input(mats_data=self.mats_data, proc=self.caller)
             new_input.load_from_json_dict(json_dict=single_input)
             self.list_inputs.append(new_input)
             self.input_count += 1
@@ -734,6 +736,7 @@ class Input:
         self.mw = self.mats_data.get_mw(material_name=self.material_name)
         if self.mats_data.get_density(material_name=self.material_name) is not None:
             self.density = self.mats_data.get_density(material_name=self.material_name)
+        self.error_pct = None
 
     def calc_qty(self)->bool:
         if self.qty_calc_compltd:
@@ -746,7 +749,7 @@ class Input:
         if self.arr_basis_input is None or len(self.arr_basis_input) == 0:
             if self.material_class != cls_input_mat_sm and self.material_class != cls_input_mat_tgt:
                 raise RuntimeError(f"{self.__class__.__name__}.calc_qty() (input of \"{self.material_name}\"): No quantity calculation basis specified.")
-
+        
         def __is_pos_num(something=None)->bool:
             if something is not None and isinstance(something, (float, int)) and something > 0:
                 return True
@@ -764,7 +767,7 @@ class Input:
           
 
         if self.material_class == cls_input_mat_sm:
-            def __set_metrcs_wt_abs_kg(self):
+            def __set_metrcs_wt_abs_kg():
                 self.metrics_val = self.qty_kg_gross
                 self.metrics_unit = opt_mtrcs_wt_gro_abs  
         
@@ -820,7 +823,7 @@ class Input:
             raise RuntimeError(f"{__class__.__name__}.calc_qty() (input of \"{self.material_name}\"): No process data provided.")
 
         if self.material_class == cls_input_mat_tgt:
-            self.arr_basis_input = [opt_special_id_basis_tgt]
+            self.arr_basis_input = self.proc.get_id_input_sm()
             self.metrics_val = self.proc.get_tgt_stoichiometry()
             self.metrics_unit = opt_mtrcs_eq
             self.mol = self.mats_data.get_mol_sm() * self.proc.get_tgt_stoichiometry() * (self.proc.get_assumed_yield_pct() / 100.0)
@@ -934,6 +937,15 @@ class Input:
             raise RuntimeError(f"{__class__.__name__}.calc_qty() (input of \"{self.material_name}\"): Unsupported metrics unit \"{self.metrics_unit}\".")
 
 
-            
+    def get_basis_name(self)->str|None:
+        if not self.arr_basis_input:
+            return None
+        
+        first_id_basis = self.arr_basis_input[0]
+        input_depended = self.proc.get_input(first_id_basis)
+        if input_depended is None:
+            raise RuntimeError(f"{__class__.__name__}.get_basis_name() (input of \"{self.material_name}\"): Dependent input with ID \"{first_id_basis}\" not found.")
+        return input_depended.material_name
+        
 
     

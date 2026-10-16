@@ -1,7 +1,9 @@
 from abc import ABC, abstractmethod
 import flow_draw.materials.materials
-import flow_draw.batch.process.process as proc
-import flow_draw.batch.process.unit_operations.uo_charging as chgng
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    import flow_draw.batch.process.process as proc
+    import flow_draw.batch.process.unit_operations.uo_charging as chgng
 
 class UniversalTrait(ABC):
     pass
@@ -56,7 +58,7 @@ class GetInputs(UniversalTrait):
     By calling the object, the caller can acquire the input values used in the process.
     """
     @abstractmethod
-    def get_input(self, id_input: int = None) -> chgng.Input:
+    def get_input(self, id_input: int = None) -> "chgng.Input":
         """
         Expected to return an instance of chgng.Input representing the input values for the process.
 
@@ -76,6 +78,22 @@ class GetInputs(UniversalTrait):
     # @abstractmethod
     # def get_dependencies(self) -> list[proc.Dependency]:
     #     pass
+
+    @abstractmethod
+    def get_id_input_sm(self) -> list[int]:
+        """
+        Expected to return a list of IDs for the starting material inputs in the process.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        ----------
+        list_id_input_sm: list[int]
+            This shall be a list of integers representing the IDs of the starting material inputs.
+        """
+        pass
 
     @abstractmethod
     def get_assumed_yield_pct(self) -> float:

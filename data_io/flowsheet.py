@@ -310,8 +310,7 @@ class Flowsheet:
                      record: str='',
                      operator: str='',
                      witness: str='',
-                     mat_input: Input=None,
-                     inputs: GetInputs=None)->int:
+                     mat_input: Input=None)->int:
 
         def __put_consts(name_mat:str=None,
                          mw:float=None,
@@ -322,31 +321,34 @@ class Flowsheet:
                          v_per_w:float=None,
                          wwpct:float=None,
                          wt_abs_kg_gro:float=None,
-                         vol_abs_litre:float=None):
-            count_qty_input = sum(x is not None for x in (equiv, v_per_w, wwpct, wt_abs_kg_gro, vol_abs_litre))
-            if count_qty_input != 1:
-                raise RuntimeError(f'{self.__class__.__name__}.put_material().__put_constants(): Zero or multiple quantifier {count_qty_input}')
+                         vol_abs_litre:float=None,
+                         error_rel:float=None):
+            # count_qty_input = sum(x is not None for x in (equiv, v_per_w, wwpct, wt_abs_kg_gro, vol_abs_litre))
+            # if count_qty_input != 1:
+            #     raise RuntimeError(f'{self.__class__.__name__}.put_material().__put_constants(): Zero or multiple quantifier {count_qty_input}')
 
             if name_mat is not None:
-                self.ws.cell(low=line, column=col_xlslog_mat).value = name_mat
+                self.ws.cell(row=line, column=col_xlslog_mat).value = name_mat
             if mw is not None:
-                self.ws.cell(low=line, column=col_xlslog_mw).value = mw
+                self.ws.cell(row=line, column=col_xlslog_mw).value = mw
             if dens is not None:
-                self.ws.cell(low=line, column=col_xlslog_dens).value = dens
+                self.ws.cell(row=line, column=col_xlslog_dens).value = dens
             if conc_assay is not None:
-                self.ws.cell(low=line, column=col_xlslog_assay_conc).value = conc_assay
+                self.ws.cell(row=line, column=col_xlslog_assay_conc).value = conc_assay
             if name_basis is not None:
-                self.ws.cell(low=line, column=col_xlslog_name_basis).value = name_basis
+                self.ws.cell(row=line, column=col_xlslog_name_basis).value = name_basis
             if equiv is not None:
-                self.ws.cell(low=line, column=col_xlslog_equiv).value = equiv
+                self.ws.cell(row=line, column=col_xlslog_equiv).value = equiv
             if v_per_w is not None:
-                self.ws.cell(low=line, column=col_xlslog_v_per_w).value = v_per_w
+                self.ws.cell(row=line, column=col_xlslog_v_per_w).value = v_per_w
             if wwpct is not None:
-                self.ws.cell(low=line, column=col_xlslog_wwpct).value = wwpct
+                self.ws.cell(row=line, column=col_xlslog_wwpct).value = wwpct
             if wt_abs_kg_gro is not None:
-                self.ws.cell(low=line, column=col_xlslog_wt_abs_kg_gro).value = wt_abs_kg_gro
+                self.ws.cell(row=line, column=col_xlslog_wt_abs_kg_gro).value = wt_abs_kg_gro
             if vol_abs_litre is not None:
-                self.ws.cell(low=line, column=col_xlslog_vol_abs).value = vol_abs_litre
+                self.ws.cell(row=line, column=col_xlslog_vol_abs).value = vol_abs_litre
+            if error_rel is not None:
+                self.ws.cell(row=line, column=col_xlslog_err_rel).value = error_rel
 
         
         if mat_input is None:
@@ -364,17 +366,68 @@ class Flowsheet:
         excel_formula_mat:str=""
         if mat_input.material_class == chgng.cls_input_mat_sm:
             excel_formula_mat = f'={alph_col_mat}{line}'
-
         elif mat_input.material_class == chgng.cls_input_mat_tgt:
             excel_formula_mat=''
-        else:
-            if mat_input.metrics_unit == chgng.opt_mtrcs_eq:
-                excel_formula_mat = f'={alph_col_mat}{line}&" ("&{alph_col_equiv}{line}&"equiv vs "&{alph_col_name_basis}{line}&")"'
-            elif mat_input.metrics_unit == chgng.opt_mtrcs_v_per_w:
-                excel_formula_mat = f'={alph_col_mat}{line}&" ("&{alph_col_v_per_w}{line}&"v/w vs "&{alph_col_name_basis}{line}&")"'               
-            elif mat_input.metrics_unit == chgng.opt_mtrcs_wwpct:
-                excel_formula_mat = f'={alph_col_mat}{line}&" ("&{alph_col_wwpct}{line}&"w/w% vs "&{alph_col_name_basis}{line}&")"'
+        elif mat_input.metrics_unit == chgng.opt_mtrcs_eq:
+            excel_formula_mat = f'={alph_col_mat}{line}&" ("&{alph_col_equiv}{line}&"equiv vs "&{alph_col_name_basis}{line}&")"'
+        elif mat_input.metrics_unit == chgng.opt_mtrcs_v_per_w:
+            excel_formula_mat = f'={alph_col_mat}{line}&" ("&{alph_col_v_per_w}{line}&"v/w vs "&{alph_col_name_basis}{line}&")"'               
+        elif mat_input.metrics_unit == chgng.opt_mtrcs_wwpct:
+            excel_formula_mat = f'={alph_col_mat}{line}&" ("&{alph_col_wwpct}{line}&"w/w% vs "&{alph_col_name_basis}{line}&")"'
 
+        #Constants
+        if mat_input.metrics_unit == chgng.opt_mtrcs_wt_gro_abs:
+            __put_consts(name_mat=mat_input.material_name,
+                         mw=mat_input.mw,
+                         dens=mat_input.density,
+                         conc_assay=mat_input.conc_assay,
+                         error_rel=mat_input.error_pct)
+        elif mat_input.metrics_unit == chgng.opt_mtrcs_vol_abs:
+            __put_consts(name_mat=mat_input.material_name,
+                         mw=mat_input.mw,
+                         dens=mat_input.density,
+                         conc_assay=mat_input.conc_assay,
+                         vol_abs_litre=mat_input.vol_abs_litre,
+                         error_rel=mat_input.error_pct)
+
+        elif mat_input.metrics_unit == chgng.opt_mtrcs_eq:
+            if mat_input.arr_basis_input:
+                name_basis = mat_input.get_basis_name()
+            else:
+                raise ValueError(f"Flowsheet.put_material(): No basis input provided for material ({mat_input.material_name}).")                    
+            __put_consts(name_mat=mat_input.material_name,
+                        mw=mat_input.mw,
+                        dens=mat_input.density,
+                        conc_assay=mat_input.conc_assay,
+                        name_basis=name_basis,
+                        equiv=mat_input.metrics_val,
+                        error_rel=mat_input.error_pct)
+        elif mat_input.metrics_unit == chgng.opt_mtrcs_v_per_w:
+            if mat_input.arr_basis_input:
+                name_basis = mat_input.get_basis_name()
+            else:
+                raise ValueError(f"Flowsheet.put_material(): No basis input provided for material ({mat_input.material_name}).")                    
+            __put_consts(name_mat=mat_input.material_name,
+                        mw=mat_input.mw,
+                        dens=mat_input.density,
+                        conc_assay=mat_input.conc_assay,
+                        name_basis=name_basis,
+                        v_per_w=mat_input.metrics_val,
+                        error_rel=mat_input.error_pct)
+        elif mat_input.metrics_unit == chgng.opt_mtrcs_wwpct:
+            if mat_input.arr_basis_input:
+                name_basis = mat_input.get_basis_name()
+            else:
+                raise ValueError(f"Flowsheet.put_material(): No basis input provided for material ({mat_input.material_name}).")                    
+            __put_consts(name_mat=mat_input.material_name,
+                        mw=mat_input.mw,
+                        dens=mat_input.density,
+                        conc_assay=mat_input.conc_assay,
+                        name_basis=name_basis,
+                        ww_pct=mat_input.metrics_val,
+                        error_rel=mat_input.error_pct)
+        else:
+            raise ValueError(f"Flowsheet.put_material(): Unsupported metrics unit ({mat_input.metrics_unit}) for material ({mat_input.material_name}).")
 
         self.put_line(time=time,
                       method=method,
@@ -383,10 +436,11 @@ class Flowsheet:
                       operator=operator,
                       witness=witness)
 
-        __put_consts(name_mat=mat_input.material_name,
-                mw=mat_input.mw,
-                dens=mat_input.density,
-                conc_assay=mat_input.conc_assay) 
+    # #TODO: This part is buggy! Missing argument (one of the quantifiers). Pleaese implement a aproper logic.
+    #     __put_consts(name_mat=mat_input.material_name,
+    #             mw=mat_input.mw,
+    #             dens=mat_input.density,
+    #             conc_assay=mat_input.conc_assay) 
 
         return line
 
@@ -629,12 +683,12 @@ class Flowsheet:
             self.ws.cell(row=line, column=col_xlslog_name_basis).font = font_bold
 
             self.ws.cell(row=line, column=col_xlslog_mol_basis).value = dict_part_logic[tag_part_hedr_mol_basis]
-            self.ws.cell(row=line, column=col_xlslog_mol_basis).fill = fill_light_orange
+            self.ws.cell(row=line, column=col_xlslog_mol_basis).fill = fill_lighter_orange
             self.ws.cell(row=line, column=col_xlslog_mol_basis).border = border_around
             self.ws.cell(row=line, column=col_xlslog_mol_basis).font = font_bold
 
             self.ws.cell(row=line, column=col_xlslog_kg_net_basis).value = dict_part_logic[tag_part_hedr_kg_net_basis]
-            self.ws.cell(row=line, column=col_xlslog_kg_net_basis).fill = fill_light_orange
+            self.ws.cell(row=line, column=col_xlslog_kg_net_basis).fill = fill_lighter_orange
             self.ws.cell(row=line, column=col_xlslog_kg_net_basis).border = border_around
             self.ws.cell(row=line, column=col_xlslog_kg_net_basis).font = font_bold
 
@@ -770,6 +824,15 @@ class Flowsheet:
 
             self.ws.cell(row=line, column=col_xlslog_assay_conc).fill = fill_light_orange
             self.ws.cell(row=line, column=col_xlslog_assay_conc).border = border_around
+
+            self.ws.cell(row=line, column=col_xlslog_name_basis).fill = fill_light_orange
+            self.ws.cell(row=line, column=col_xlslog_name_basis).border = border_around
+
+            self.ws.cell(row=line, column=col_xlslog_mol_basis).fill = fill_lighter_orange
+            self.ws.cell(row=line, column=col_xlslog_mol_basis).border = border_around
+
+            self.ws.cell(row=line, column=col_xlslog_kg_net_basis).fill = fill_lighter_orange
+            self.ws.cell(row=line, column=col_xlslog_kg_net_basis).border = border_around
 
             self.ws.cell(row=line, column=col_xlslog_equiv).fill = fill_lighter_orange
             self.ws.cell(row=line, column=col_xlslog_equiv).border = border_around

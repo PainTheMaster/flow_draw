@@ -313,6 +313,13 @@ class Process(GetMats, GetProcName, GetInputs):
             if isinstance(step, chgng.Charging):
                 self.list_inputs += step.list_inputs
 
+        input_tgt = chgng.Input(mats_data = self.mats_data, proc = self)
+        input_tgt.mark_as_tgt()
+        is_tgt_calcd = input_tgt.calc_qty()
+        if not is_tgt_calcd:
+            raise RuntimeError(f'{self.__class__.__name__}.interprit_dict(): Quantity calculation for "input_tgt" failed.')
+        self.list_inputs.append(input_tgt)
+
         for _ in range(num_max_iter_calc_qty):
             calc_complete = True
             for input_item in self.list_inputs:
@@ -325,17 +332,21 @@ class Process(GetMats, GetProcName, GetInputs):
         for step in self.seq_uo:
             step.output_unit_operation()
 
+        # self.flowsheet.linefeed()
+        self.flowsheet.put_material(mat_input=input_tgt)
+
         for single_input in self.list_inputs:
             self.flowsheet.put_qty_material(inputs=self, id_input=single_input.id_input)
 
-        input_tgt = chgng.Input(mats_data = self.mats_data, proc = self)
-        input_tgt.mark_as_tgt()
-        is_tgt_calcd = input_tgt.calc_qty()
-        if not is_tgt_calcd:
-            raise RuntimeError(f'{self.__class__.__name__}.interprit_dict(): Quantity calculation for "input_tgt" failed.')
-        self.flowsheet.linefeed()
-        self.flowsheet.put_material(mat_input=input_tgt)
-        self.list_inputs.append(input_tgt)   
+        # input_tgt = chgng.Input(mats_data = self.mats_data, proc = self)
+        # input_tgt.mark_as_tgt()
+        # is_tgt_calcd = input_tgt.calc_qty()
+        # if not is_tgt_calcd:
+        #     raise RuntimeError(f'{self.__class__.__name__}.interprit_dict(): Quantity calculation for "input_tgt" failed.')
+        # self.list_inputs.append(input_tgt)
+        # self.flowsheet.linefeed()
+        # self.flowsheet.put_material(mat_input=input_tgt)
+        # self.list_inputs.append(input_tgt)   
         
 
         # input_tgt = self.get_input(id_input=special_id_input_tgt)
@@ -376,6 +387,13 @@ class Process(GetMats, GetProcName, GetInputs):
             if input_item.id_input == id_input:
                 return input_item
         raise LookupError(f"{self.__class__.__name__}.get_inputs(): No input found with id_input={id_input}.")
+
+    def get_id_input_sm(self) -> list[int]:
+        list_id_input_sm = []
+        for input_item in self.list_inputs:
+            if input_item.material_class == chgng.cls_input_mat_sm:
+                list_id_input_sm.append(input_item.id_input)
+        return list_id_input_sm
 
     # def __organize_dependencies(self):
     #     self.list_dependencies.clear()
