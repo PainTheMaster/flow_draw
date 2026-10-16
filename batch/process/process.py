@@ -117,12 +117,10 @@ class Process(GetMats, GetProcName, GetInputs):
             Hence the object is like a collection of placeholders for unit operations. A specific sequence is knwon when self.load_uo_summary() is called. The details for each unit operation is loaded when load_unitop_detail() is called.
             """
         
-        #self.str_json_proc: str = self.data_input.json_uo(caller=self, )
         self.mats_data: mats = None #mats_data is stored when load_materials_data() is called.
         self.seq_uo: list[uo.UnitOperation] = []
         """Sequene of the constituting unit operations. This will be populated when self.load_uo_summary() is called."""
         self.list_inputs: list[chgng.Input] = []
-        # self.list_dependencies: list[Dependency] = []
         self.flowsheet: fsht.Flowsheet = fsht.Flowsheet()
 
         
@@ -218,13 +216,7 @@ class Process(GetMats, GetProcName, GetInputs):
         None
         """
         self.mats_data = self.data_io.load_mats()
-        # self.flowsheet.set_standards(mol_std=self.mats_data.mol_sm,
-        #                              wt_net_std=self.mats_data.net_kg_sm)
-        # input_tgt = chgng.Input(mats_data = self.mats_data,
-        #                         proc = self)
-        # input_tgt.mark_as_tgt()
-        # self.list_inputs.clear()
-        # self.list_inputs.append(input_tgt)
+
 
     #TODO: Create the process detail input form, for each unit operation in teh list_uo, get the uo-specific header and feed it to ProcessIO.generate_proc_detail_form()
 
@@ -332,36 +324,10 @@ class Process(GetMats, GetProcName, GetInputs):
         for step in self.seq_uo:
             step.output_unit_operation()
 
-        # self.flowsheet.linefeed()
         self.flowsheet.put_material(mat_input=input_tgt)
 
         for single_input in self.list_inputs:
             self.flowsheet.put_qty_material(inputs=self, id_input=single_input.id_input)
-
-        # input_tgt = chgng.Input(mats_data = self.mats_data, proc = self)
-        # input_tgt.mark_as_tgt()
-        # is_tgt_calcd = input_tgt.calc_qty()
-        # if not is_tgt_calcd:
-        #     raise RuntimeError(f'{self.__class__.__name__}.interprit_dict(): Quantity calculation for "input_tgt" failed.')
-        # self.list_inputs.append(input_tgt)
-        # self.flowsheet.linefeed()
-        # self.flowsheet.put_material(mat_input=input_tgt)
-        # self.list_inputs.append(input_tgt)   
-        
-
-        # input_tgt = self.get_input(id_input=special_id_input_tgt)
-        # line_fs_tgt =self.flowsheet.put_material(
-        #                         name_mat = input_tgt.name_mat,
-        #                         mw = input_tgt.mw,
-        #                         #dens = None,
-        #                         #assay_conc = None,
-        #                         equiv = None,
-        #                         v_per_w = None,
-        #                         wwpc = None,
-        #                         name_mat_basis = None,
-        #                         #err_rel_pct = 5
-        #                         )
-
 
         self.flowsheet.save(filename=self.process_name+".xlsx")
 
@@ -376,9 +342,6 @@ class Process(GetMats, GetProcName, GetInputs):
 
     def get_proc_name(self) -> str:
         return self.process_name
-
-    # def get_id_target(self) -> int:
-    #     return id_special_basis_tgt
     
     def get_input(self, id_input: int = None) -> chgng.Input:
         if id_input is None:
@@ -394,39 +357,6 @@ class Process(GetMats, GetProcName, GetInputs):
             if input_item.material_class == chgng.cls_input_mat_sm:
                 list_id_input_sm.append(input_item.id_input)
         return list_id_input_sm
-
-    # def __organize_dependencies(self):
-    #     self.list_dependencies.clear()
-    #     #Add the new dependency
-    #     for mat_input in self.list_inputs:
-    #         depended_this = mat_input.arr_basis_input
-    #         match = False
-    #         for comp in self.list_dependencies:
-    #             depended_comp = comp.list_id
-    #             if set(depended_this) == set(depended_comp):
-    #                 match = True
-    #                 break
-    #         if not match:
-    #             id_input = depended_this[0]
-    #             input_depended = self.get_input(id_input=id_input)
-    #             name_depended = input_depended.material_name
-    #             if input_depended.material_class == chgng.cls_input_mat_sm or input_depended.material_class == chgng.cls_input_mat_tgt:
-                    
-
-
-    #             new_dep = Dependency(name=name_depended,
-    #                                  list_id=depended_this,
-    #                                  input_class=,
-    #                                  mol=,
-    #                                  wt_kg_gross=,
-    #                                  conc_assay=)
-
-            
-
-            
-        
-    # def get_dependencies(self) -> list[Dependency]:
-    #     pass
 
     def get_assumed_yield_pct(self) -> float:
         assumed_yield_pct = self.assumed_yield_pct

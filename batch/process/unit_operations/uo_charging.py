@@ -442,21 +442,6 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
             self.flowsheet.put_body_comments(self.pre_comment)
 
         for temp_inpt in self.list_inputs:
-
-            # line_mat = self.flowsheet.put_material(time=lang_dict_cmn[tag_flow_cmn_rec_time],
-            #                                         method=lang_dict_chgng_specif[temp_inpt.method],
-            #                                         record=lang_dict_chgng_specif[tag_part_rec_lot],
-            #                                         operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
-            #                                         witness=lang_dict_cmn[tag_flow_cmn_rec_sign],
-            #                                         name_mat=temp_inpt.material_name,
-            #                                         mw=temp_inpt.mw,
-            #                                         dens=temp_inpt.density,
-            #                                         assay_conc=temp_inpt.assay_conc,
-            #                                         equiv=temp_inpt.metrics_val if temp_inpt.metrics_unit == opt_mtrcs_eq else None,
-            #                                         v_per_w=temp_inpt.metrics_val if temp_inpt.metrics_unit == opt_mtrcs_v_per_w else None,
-            #                                         err_rel_pct=temp_inpt.error_pct if temp_inpt.error_pct is not None else error_default)
-            # temp_inpt.fs_line_mat = line_mat
-
             line_mat = self.flowsheet.put_material(time=lang_dict_cmn[tag_flow_cmn_rec_time],
                                                     method=lang_dict_chgng_specif[temp_inpt.method],
                                                     record=lang_dict_chgng_specif[tag_part_rec_lot],
@@ -633,7 +618,6 @@ class Input:
         if self.mats_data is None:
             warnings.warn(message=f"{__class__.__name}: mats_data is None",
                           category=RuntimeWarning)
-            #raise RuntimeWarning(f"{__class__.__name}: mats_data is None")
         else:
             self.__calc_qty()
             self.mw = self.mats_data.get_mw(self.material_name)
@@ -659,9 +643,6 @@ class Input:
         if (self.temp_control == temprctrl_max or self.temp_control == temprctrl_min_max): #and hedr_temp_max in json_dict:
             self.temp_max = json_dict[hedr_temp_max]
         if self.mats_data is None:
-            # warnings.warn(message=f"{__class__.__name}: mats_data is None",
-            #               category=RuntimeWarning)
-            #raise RuntimeWarning(f"{__class__.__name}: mats_data is None")
             raise RuntimeError(f"{__class__.__name__}: mats_data is None")
         else:
             # self.calc_qty()
@@ -704,30 +685,6 @@ class Input:
         self.temp_max = 25
         self.calc_qty()
 
-    # def __calc_qty(self):
-    #     """
-    #     Calculates the quantity of the material and permissible error in "kg" unit.
-    #     For this function to work, instance/values of mats_data, metrics unit (equiv or v/w), metrics value (a factor to the main starting material) have to have been let to the instance variable.
-    #     The calculated result is set to the self.qty_kg, self.error_kg, and returns nothing.
-
-    #     Parameters
-    #     -----------
-    #     None
-
-    #     Returns
-    #     -----------
-    #     None
-    #     """
-    #     if self.mats_data is None:
-    #         raise RuntimeError(f"{__class__.__name__}.__calc_qty() (input of \"{self.material_name}\"): No material data provided.")
-    #     if self.metrics_unit == opt_mtrcs_eq:
-    #         self.qty_kg_gross = self.mats_data.to_kilogram(material_name = self.material_name, equiv=self.metrics_val)
-    #         self.error_kg_gross = self.qty_kg_gross * (self.error_pct/100.0)
-    #     elif self.metrics_unit == opt_mtrcs_v_per_w:
-    #         self.qty_kg_gross = self.mats_data.to_kilogram(material_name = self.material_name, vol_per_weight=self.metrics_val)
-    #         self.error_kg_gross = self.qty_kg_gross * (self.error_pct/100.0)
-    #     else:
-    #         raise ValueError(f'{__class__.__name__}.__calc_qty(): metrics_unit (eq or v/w) for \"{self.material_name}\" not defined in the detail input worksheet.')
 
     def mark_as_tgt(self):
         self.id_input = opt_special_id_basis_tgt
@@ -744,8 +701,7 @@ class Input:
         
         if self.mats_data is None:
             raise RuntimeError(f"{self.__class__.__name__}.calc_qty() (input of \"{self.material_name}\"): No material data for provided in the material input worksheet.")
-        # if self.proc is None:
-        #     raise RuntimeError(f"{__class__.__name__}.calc_qty() (input of \"{self.material_name}\"): No process data provided.")
+
         if self.arr_basis_input is None or len(self.arr_basis_input) == 0:
             if self.material_class != cls_input_mat_sm and self.material_class != cls_input_mat_tgt:
                 raise RuntimeError(f"{self.__class__.__name__}.calc_qty() (input of \"{self.material_name}\"): No quantity calculation basis specified.")
@@ -807,13 +763,6 @@ class Input:
             else:
                 raise ValueError(f'{__class__.__name__}.calc_qty(): Invalid metrics_unit "{self.metrics_unit}" for the starting material "{self.material_name}". '
                                  'The quantity must be specified either in equivalents or weight percent.')
-             
-            # dens_sm = self.mats_data.get_density(material_name=self.material_name)
-            # if dens_sm is None or not isinstance(dens_sm, (float, int)) or dens_sm <= 0:
-            #     dens_sm = 1.0
-            #     warnings.warn(f'{__class__.__name__}.calc_qty() (input of \"{self.material_name}\"): No density information provided for this material.'
-            #                   '1.0 is assumed to estimate the volume.')
-            # self.vol_litre = self.qty_kg_gross / dens_sm
 
             self.qty_calc_compltd = True
             return True
