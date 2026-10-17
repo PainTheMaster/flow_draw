@@ -930,6 +930,7 @@ class Input:
         if self.metrics_unit == opt_mtrcs_wt_gro_abs:
             self.flowsheet.put_material_new(time=time,
                                             method=method,
+                                            content=excel_formula_mat,
                                             record=record,
                                             operator=operator,
                                             witness=witness,
@@ -942,6 +943,7 @@ class Input:
         elif self.metrics_unit == opt_mtrcs_vol_abs:
             self.flowsheet.put_material_new(time=time,
                                             method=method,
+                                            content=excel_formula_mat,
                                             record=record,
                                             operator=operator,
                                             witness=witness,
@@ -954,6 +956,7 @@ class Input:
         elif self.metrics_unit == opt_mtrcs_eq:
             self.flowsheet.put_material_new(time=time,
                                             method=method,
+                                            content=excel_formula_mat,
                                             record=record,
                                             operator=operator,
                                             witness=witness,
@@ -966,6 +969,7 @@ class Input:
         elif self.metrics_unit == opt_mtrcs_v_per_w:
             self.flowsheet.put_material_new(time=time,
                                             method=method,
+                                            content=excel_formula_mat,
                                             record=record,
                                             operator=operator,
                                             witness=witness,
@@ -978,6 +982,7 @@ class Input:
         elif self.metrics_unit == opt_mtrcs_wwpct:
             self.flowsheet.put_material_new(time=time,
                                             method=method,
+                                            content=excel_formula_mat,
                                             record=record,
                                             operator=operator,
                                             witness=witness,
