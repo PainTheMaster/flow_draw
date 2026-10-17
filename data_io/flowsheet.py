@@ -380,100 +380,205 @@ class Flowsheet:
 
 
     def __put_excel_logic(self, line:int=None)->None:
+        def __cell_input_config(column:int=None,
+                                value:str|int|float=None,
+                                fill:PatternFill=None,
+                                border:Border=None,
+                                font:Font=None):
+            if not column:
+                raise RuntimeError(f'{self.__class__.__name__}.__put_excel_logic.__cell_input_config(): colum is not given.')
+            if value:
+                self.ws.cell(row=line, column=column).value = value
+            if fill:
+                self.ws.cell(row=line, column=column).fill = fill
+            if border:
+                self.ws.cell(row=line, column=column).border = border
+            if font:
+                self.ws.cell(row=line, column=column).font = font
+
         #Background
         if line == line_xlslog_hedr:
             
             #Header
-            self.ws.cell(row=line, column=col_xlslog_mat).value = dict_part_logic[tag_part_hedr_mat]
-            self.ws.cell(row=line, column=col_xlslog_mat).fill = fill_light_orange
-            self.ws.cell(row=line, column=col_xlslog_mat).border = border_around
-            self.ws.cell(row=line, column=col_xlslog_mat).font = font_bold
+            # self.ws.cell(row=line, column=col_xlslog_mat).value = dict_part_logic[tag_part_hedr_mat]
+            # self.ws.cell(row=line, column=col_xlslog_mat).fill = fill_light_orange
+            # self.ws.cell(row=line, column=col_xlslog_mat).border = border_around
+            # self.ws.cell(row=line, column=col_xlslog_mat).font = font_bold
+            __cell_input_config(column=col_xlslog_mat,
+                                value=dict_part_logic[tag_part_hedr_mat],
+                                fill=fill_light_orange,
+                                border=border_around,
+                                font=font_bold)
             
-            self.ws.cell(row=line, column=col_xlslog_mw).value = dict_part_logic[tag_part_hedr_mw]
-            self.ws.cell(row=line, column=col_xlslog_mw).fill = fill_light_orange
-            self.ws.cell(row=line, column=col_xlslog_mw).border = border_around
-            self.ws.cell(row=line, column=col_xlslog_mw).font = font_bold
+            # self.ws.cell(row=line, column=col_xlslog_mw).value = dict_part_logic[tag_part_hedr_mw]
+            # self.ws.cell(row=line, column=col_xlslog_mw).fill = fill_light_orange
+            # self.ws.cell(row=line, column=col_xlslog_mw).border = border_around
+            # self.ws.cell(row=line, column=col_xlslog_mw).font = font_bold
+            __cell_input_config(column=col_xlslog_mw,
+                                value=dict_part_logic[tag_part_hedr_mw],
+                                fill=fill_light_orange,
+                                border=border_around,
+                                font=font_bold)            
 
-            self.ws.cell(row=line, column=col_xlslog_dens).value = dict_part_logic[tag_part_hedr_dens]
-            self.ws.cell(row=line, column=col_xlslog_dens).fill = fill_light_orange
-            self.ws.cell(row=line, column=col_xlslog_dens).border = border_around
-            self.ws.cell(row=line, column=col_xlslog_dens).font = font_bold
-
-            self.ws.cell(row=line, column=col_xlslog_assay_conc).value = dict_part_logic[tag_part_hedr_assay_conc]
-            self.ws.cell(row=line, column=col_xlslog_assay_conc).fill = fill_light_orange
-            self.ws.cell(row=line, column=col_xlslog_assay_conc).border = border_around
-            self.ws.cell(row=line, column=col_xlslog_assay_conc).font = font_bold
+            # self.ws.cell(row=line, column=col_xlslog_dens).value = dict_part_logic[tag_part_hedr_dens]
+            # self.ws.cell(row=line, column=col_xlslog_dens).fill = fill_light_orange
+            # self.ws.cell(row=line, column=col_xlslog_dens).border = border_around
+            # self.ws.cell(row=line, column=col_xlslog_dens).font = font_bold
+            __cell_input_config(column=col_xlslog_dens,
+                                value=dict_part_logic[tag_part_hedr_dens],
+                                fill=fill_light_orange,
+                                border=border_around,
+                                font=font_bold)
+            
+            # self.ws.cell(row=line, column=col_xlslog_assay_conc).value = dict_part_logic[tag_part_hedr_assay_conc]
+            # self.ws.cell(row=line, column=col_xlslog_assay_conc).fill = fill_light_orange
+            # self.ws.cell(row=line, column=col_xlslog_assay_conc).border = border_around
+            # self.ws.cell(row=line, column=col_xlslog_assay_conc).font = font_bold
+            __cell_input_config(column=col_xlslog_assay_conc,
+                                value=dict_part_logic[tag_part_hedr_assay_conc],
+                                fill=fill_light_orange,
+                                border=border_around,
+                                font=font_bold)
 
             self.ws.cell(row=line, column=col_xlslog_name_basis).value = dict_part_logic[tag_part_hedr_name_basis]
             self.ws.cell(row=line, column=col_xlslog_name_basis).fill = fill_light_orange
             self.ws.cell(row=line, column=col_xlslog_name_basis).border = border_around
             self.ws.cell(row=line, column=col_xlslog_name_basis).font = font_bold
-
+            __cell_input_config(column=,
+                                value=,
+                                fill=,
+                                border=,
+                                font=)
+            
             self.ws.cell(row=line, column=col_xlslog_mol_basis).value = dict_part_logic[tag_part_hedr_mol_basis]
             self.ws.cell(row=line, column=col_xlslog_mol_basis).fill = fill_lighter_orange
             self.ws.cell(row=line, column=col_xlslog_mol_basis).border = border_around
             self.ws.cell(row=line, column=col_xlslog_mol_basis).font = font_bold
-
+            __cell_input_config(column=,
+                                value=,
+                                fill=,
+                                border=,
+                                font=)
+            
             self.ws.cell(row=line, column=col_xlslog_kg_net_basis).value = dict_part_logic[tag_part_hedr_kg_net_basis]
             self.ws.cell(row=line, column=col_xlslog_kg_net_basis).fill = fill_lighter_orange
             self.ws.cell(row=line, column=col_xlslog_kg_net_basis).border = border_around
             self.ws.cell(row=line, column=col_xlslog_kg_net_basis).font = font_bold
-
+            __cell_input_config(column=,
+                                value=,
+                                fill=,
+                                border=,
+                                font=)
+            
             self.ws.cell(row=line, column=col_xlslog_equiv).value = dict_part_logic[tag_part_hedr_equiv]
             self.ws.cell(row=line, column=col_xlslog_equiv).fill = fill_lighter_orange
             self.ws.cell(row=line, column=col_xlslog_equiv).border = border_around
             self.ws.cell(row=line, column=col_xlslog_equiv).font = font_bold
-
+            __cell_input_config(column=,
+                                value=,
+                                fill=,
+                                border=,
+                                font=)
+            
             self.ws.cell(row=line, column=col_xlslog_v_per_w).value = dict_part_logic[tag_part_hedr_v_per_w]
             self.ws.cell(row=line, column=col_xlslog_v_per_w).fill = fill_lighter_orange
             self.ws.cell(row=line, column=col_xlslog_v_per_w).border = border_around
             self.ws.cell(row=line, column=col_xlslog_v_per_w).font = font_bold
-
+            __cell_input_config(column=,
+                                value=,
+                                fill=,
+                                border=,
+                                font=)
+            
             self.ws.cell(row=line, column=col_xlslog_wwpct).value = dict_part_logic[tag_part_hedr_wwpct]
             self.ws.cell(row=line, column=col_xlslog_wwpct).fill = fill_lighter_orange
             self.ws.cell(row=line, column=col_xlslog_wwpct).border = border_around
             self.ws.cell(row=line, column=col_xlslog_wwpct).font = font_bold
-
+            __cell_input_config(column=,
+                                value=,
+                                fill=,
+                                border=,
+                                font=)
+            
             self.ws.cell(row=line, column=col_xlslog_wt_abs_kg_gro).value = dict_part_logic[tag_part_hedr_wt_gro_abs]
             self.ws.cell(row=line, column=col_xlslog_wt_abs_kg_gro).fill = fill_lighter_orange
             self.ws.cell(row=line, column=col_xlslog_wt_abs_kg_gro).border = border_around
             self.ws.cell(row=line, column=col_xlslog_wt_abs_kg_gro).font = font_bold
-
+            __cell_input_config(column=,
+                                value=,
+                                fill=,
+                                border=,
+                                font=)
+            
             self.ws.cell(row=line, column=col_xlslog_vol_abs).value = dict_part_logic[tag_part_hedr_vol_abs]
             self.ws.cell(row=line, column=col_xlslog_vol_abs).fill = fill_lighter_orange
             self.ws.cell(row=line, column=col_xlslog_vol_abs).border = border_around
             self.ws.cell(row=line, column=col_xlslog_vol_abs).font = font_bold
-
+            __cell_input_config(column=,
+                                value=,
+                                fill=,
+                                border=,
+                                font=)
+            
             self.ws.cell(row=line, column=col_xlslog_mol).value = dict_part_logic[tag_part_hedr_mol]
             self.ws.cell(row=line, column=col_xlslog_mol).fill = fill_light_blue
             self.ws.cell(row=line, column=col_xlslog_mol).border = border_around
             self.ws.cell(row=line, column=col_xlslog_mol).font = font_bold
-
+            __cell_input_config(column=,
+                                value=,
+                                fill=,
+                                border=,
+                                font=)
+            
             self.ws.cell(row=line, column=col_xlslog_volume).value = dict_part_logic[tag_part_hedr_volume]
             self.ws.cell(row=line, column=col_xlslog_volume).fill = fill_light_blue
             self.ws.cell(row=line, column=col_xlslog_volume).border = border_around
             self.ws.cell(row=line, column=col_xlslog_volume).font = font_bold
-
+            __cell_input_config(column=,
+                                value=,
+                                fill=,
+                                border=,
+                                font=)
+            
             self.ws.cell(row=line, column=col_xlslog_kg_net).value = dict_part_logic[tag_part_hedr_kg_net]
             self.ws.cell(row=line, column=col_xlslog_kg_net).fill = fill_light_blue
             self.ws.cell(row=line, column=col_xlslog_kg_net).border = border_around
             self.ws.cell(row=line, column=col_xlslog_kg_net).font = font_bold
-
+            __cell_input_config(column=,
+                                value=,
+                                fill=,
+                                border=,
+                                font=)
+            
             self.ws.cell(row=line, column=col_xlslog_kg_gro).value = dict_part_logic[tag_part_hedr_kg_gro]
             self.ws.cell(row=line, column=col_xlslog_kg_gro).fill = fill_light_blue
             self.ws.cell(row=line, column=col_xlslog_kg_gro).border = border_around
             self.ws.cell(row=line, column=col_xlslog_kg_gro).font = font_bold
-
+            __cell_input_config(column=,
+                                value=,
+                                fill=,
+                                border=,
+                                font=)
+            
             self.ws.cell(row=line, column=col_xlslog_err_rel).value = dict_part_logic[tag_part_hedr_err_rel]
             self.ws.cell(row=line, column=col_xlslog_err_rel).fill = fill_light_orange
             self.ws.cell(row=line, column=col_xlslog_err_rel).border = border_around
             self.ws.cell(row=line, column=col_xlslog_err_rel).font = font_bold
-
+            __cell_input_config(column=,
+                                value=,
+                                fill=,
+                                border=,
+                                font=)
+            
             self.ws.cell(row=line, column=col_xlslog_err_abs).value = dict_part_logic[tag_part_hedr_err_abs]
             self.ws.cell(row=line, column=col_xlslog_err_abs).fill = fill_light_blue
             self.ws.cell(row=line, column=col_xlslog_err_abs).border = border_around
             self.ws.cell(row=line, column=col_xlslog_err_abs).font = font_bold
-            
+              __cell_input_config(column=,
+                                value=,
+                                fill=,
+                                border=,
+                                font=)          
 
         else:
             cell_equiv = f'{alph_col_equiv}{line}'
