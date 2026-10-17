@@ -120,7 +120,7 @@ class Process(GetMats, GetProcName, GetInputs):
         self.mats_data: mats = None #mats_data is stored when load_materials_data() is called.
         self.seq_uo: list[uo.UnitOperation] = []
         """Sequene of the constituting unit operations. This will be populated when self.load_uo_summary() is called."""
-        self.list_inputs: list[chgng.Input] = []
+        self.list_inpts: list[chgng.Input] = []
         self.flowsheet: fsht.Flowsheet = fsht.Flowsheet()
 
         
@@ -300,21 +300,21 @@ class Process(GetMats, GetProcName, GetInputs):
         if self.mats_data is None:
             raise RuntimeError(f"{self.__class__.__name__}.interprit_dict(): No material data provided.")
 
-        self.list_inputs.clear()
+        self.list_inpts.clear()
         for step in self.seq_uo:
             if isinstance(step, chgng.Charging):
-                self.list_inputs += step.list_inputs
+                self.list_inpts += step.list_inputs
 
-        input_tgt = chgng.Input(mats_data = self.mats_data, proc = self)
+        input_tgt = chgng.Input(mats_data = self.mats_data, proc = self, flowsheet=self.flowsheet)
         input_tgt.mark_as_tgt()
         is_tgt_calcd = input_tgt.calc_qty()
         if not is_tgt_calcd:
             raise RuntimeError(f'{self.__class__.__name__}.interprit_dict(): Quantity calculation for "input_tgt" failed.')
-        self.list_inputs.append(input_tgt)
+        self.list_inpts.append(input_tgt)
 
         for _ in range(num_max_iter_calc_qty):
             calc_complete = True
-            for input_item in self.list_inputs:
+            for input_item in self.list_inpts:
                 calc_complete &= input_item.calc_qty()
             if calc_complete:
                 break
@@ -324,10 +324,12 @@ class Process(GetMats, GetProcName, GetInputs):
         for step in self.seq_uo:
             step.output_unit_operation()
 
-        self.flowsheet.put_material(mat_input=input_tgt)
+        # self.flowsheet.put_material(mat_input=input_tgt)
+        input_tgt.put_material()
 
-        for single_input in self.list_inputs:
-            self.flowsheet.put_qty_material(inputs=self, id_input=single_input.id_input)
+        for inpt in self.list_inpts:
+            # self.flowsheet.put_qty_material(inputs=self, id_input=single_input.id_input)
+            inpt.link_inputs()
 
         self.flowsheet.save(filename=self.process_name+".xlsx")
 
@@ -346,14 +348,14 @@ class Process(GetMats, GetProcName, GetInputs):
     def get_input(self, id_input: int = None) -> chgng.Input:
         if id_input is None:
             raise ValueError(f"{self.__class__.__name__}.get_inputs(): No id_input is provided.")
-        for input_item in self.list_inputs:
+        for input_item in self.list_inpts:
             if input_item.id_input == id_input:
                 return input_item
         raise LookupError(f"{self.__class__.__name__}.get_inputs(): No input found with id_input={id_input}.")
 
     def get_id_input_sm(self) -> list[int]:
         list_id_input_sm = []
-        for input_item in self.list_inputs:
+        for input_item in self.list_inpts:
             if input_item.material_class == chgng.cls_input_mat_sm:
                 list_id_input_sm.append(input_item.id_input)
         return list_id_input_sm

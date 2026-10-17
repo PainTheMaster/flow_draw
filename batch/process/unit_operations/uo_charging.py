@@ -6,9 +6,9 @@ from typing import Optional
 from flow_draw.batch.process.unit_operations import unit_operation as uo
 from flow_draw.data_io import process_io
 from flow_draw.materials import materials as mats
-from typing import TYPE_CHECKING
-if TYPE_CHECKING:
-    from flow_draw.data_io.flowsheet import Flowsheet
+# from typing import TYPE_CHECKING
+# if TYPE_CHECKING:
+from flow_draw.data_io.flowsheet import Flowsheet
 import flow_draw.data_io.flowsheet as fsht
 from flow_draw.trait_def.trait_def import GetMats, GetInputs
 from flow_draw.data_io.json_io import Objason, Primitive, Array
@@ -442,38 +442,40 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
         if not (self.pre_comment == None or self.pre_comment == ''):
             self.flowsheet.put_body_comments(self.pre_comment)
 
-        for temp_inpt in self.list_inputs:
+        for inpt in self.list_inputs:
             # line_mat = self.flowsheet.put_material(time=lang_dict_cmn[tag_flow_cmn_rec_time],
             #                                         method=lang_dict_chgng_specif[temp_inpt.method],
             #                                         record=lang_dict_chgng_specif[tag_part_rec_lot],
             #                                         operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
             #                                         witness=lang_dict_cmn[tag_flow_cmn_rec_sign],
             #                                         mat_input=temp_inpt)
-            line_mat = temp_inpt.put_material(time=lang_dict_cmn[tag_flow_cmn_rec_time],
-                                              method=lang_dict_chgng_specif[temp_inpt.method],
+
+            #line-1: Material name and relative quantity
+            line_mat = inpt.put_material(time=lang_dict_cmn[tag_flow_cmn_rec_time],
+                                              method=lang_dict_chgng_specif[inpt.method],
                                               record=lang_dict_chgng_specif[tag_part_rec_lot],
                                               operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
                                               witness=lang_dict_cmn[tag_flow_cmn_rec_sign],)
 
             #line-2: QTY instruction and record
-            temp_inpt.put_range(record=lang_dict_chgng_specif[tag_part_rec_input],
+            inpt.instruct_qty_range(record=lang_dict_chgng_specif[tag_part_rec_input],
                                    line_mat=line_mat)
 
             #For liquid only, flex ID 
-            if (temp_inpt.method == method_liq or
+            if (inpt.method == method_liq or
                 # temp_inpt.method == method_press or
-                temp_inpt.method == method_shower or
-                temp_inpt.method == method_mobile_tank):
+                inpt.method == method_shower or
+                inpt.method == method_mobile_tank):
                 self.flowsheet.put_line(record=lang_dict_chgng_specif[tag_part_rec_hose],
                                          operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
                                          witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
             
             #for both liq and solid; temp and time control.
-            if not (temp_inpt.time_control == timectrl_none or temp_inpt.time_control is None):
-                self.__put_time_control(input=temp_inpt)
+            if not (inpt.time_control == timectrl_none or inpt.time_control is None):
+                self.__put_time_control(input=inpt)
 
-            if not (temp_inpt.temp_control == temprctrl_none or temp_inpt.temp_control is None):
-                self.__put_temp_control(input=temp_inpt)              
+            if not (inpt.temp_control == temprctrl_none or inpt.temp_control is None):
+                self.__put_temp_control(input=inpt)              
      
             self.__put_end_of_dosing()
             self.flowsheet.linefeed()
@@ -557,7 +559,7 @@ class Input:
         """Holds one of the options in list_metrics_unit. Metrics unit suc as eq or v/w"""
         self.metrics_val:float = None
         """User input float. Factor to the main material as in x eq or y v/w"""
-        self.arr_basis_input:list[int] = None
+        self.list_id_basis_input:list[int] = None
         """Array of basis input IDs for the material."""
         self.error_pct:float = None
         """User input float. Permissible error percentage. 5.0% for most of materials."""
@@ -587,7 +589,7 @@ class Input:
         """User input float. Lower temperature limit."""
         self.temp_max:float = None
         """User input float. Upper temperature limit."""
-        self.fs_line_mat:int = None
+        self.line_fs:int = None
         """Flowsheet line of the qty. """
     
   
@@ -636,7 +638,7 @@ class Input:
         self.material_name = json_dict[hedr_material_name]
         self.metrics_unit = json_dict[hedr_metrics_unit]
         self.metrics_val = json_dict[hedr_metrics_value]
-        self.arr_basis_input = json_dict[hedr_basis_array]
+        self.list_id_basis_input = json_dict[hedr_basis_array]
         self.error_pct = json_dict[hedr_error_pct]
         self.method = json_dict[hedr_method]
         self.time_control = json_dict[hedr_time_control]
@@ -709,7 +711,7 @@ class Input:
         if self.mats_data is None:
             raise RuntimeError(f"{self.__class__.__name__}.calc_qty() (input of \"{self.material_name}\"): No material data for provided in the material input worksheet.")
 
-        if self.arr_basis_input is None or len(self.arr_basis_input) == 0:
+        if self.list_id_basis_input is None or len(self.list_id_basis_input) == 0:
             if self.material_class != cls_input_mat_sm and self.material_class != cls_input_mat_tgt:
                 raise RuntimeError(f"{self.__class__.__name__}.calc_qty() (input of \"{self.material_name}\"): No quantity calculation basis specified.")
         
@@ -779,7 +781,7 @@ class Input:
             raise RuntimeError(f"{__class__.__name__}.calc_qty() (input of \"{self.material_name}\"): No process data provided.")
 
         if self.material_class == cls_input_mat_tgt:
-            self.arr_basis_input = self.proc.get_id_input_sm()
+            self.list_id_basis_input = self.proc.get_id_input_sm()
             self.metrics_val = self.proc.get_tgt_stoichiometry()
             self.metrics_unit = opt_mtrcs_eq
             self.mol = self.mats_data.get_mol_sm() * self.proc.get_tgt_stoichiometry() * (self.proc.get_assumed_yield_pct() / 100.0)
@@ -795,7 +797,7 @@ class Input:
 
         if self.metrics_unit == opt_mtrcs_eq:
             mol_basis = 0.0
-            for dep_id in self.arr_basis_input:
+            for dep_id in self.list_id_basis_input:
                 input_depended = self.proc.get_input(dep_id)
                 if input_depended is None:
                     raise RuntimeError(f"{__class__.__name__}.calc_qty() (input of \"{self.material_name}\"): Dependent input with ID \"{dep_id}\" not found.")
@@ -826,7 +828,7 @@ class Input:
         
         elif self.metrics_unit == opt_mtrcs_v_per_w:
             net_wt_basis = 0.0
-            for dep_id in self.arr_basis_input:
+            for dep_id in self.list_id_basis_input:
                 input_depended = self.proc.get_input(dep_id)
                 if input_depended is None:
                     raise RuntimeError(f"{__class__.__name__}.calc_qty() (input of \"{self.material_name}\"): Dependent input with ID \"{dep_id}\" not found.")
@@ -859,7 +861,7 @@ class Input:
 
         elif self.metrics_unit == opt_mtrcs_wwpct:
             net_wt_basis = 0.0
-            for dep_id in self.arr_basis_input:
+            for dep_id in self.list_id_basis_input:
                 input_depended = self.proc.get_input(dep_id)
                 if input_depended is None:
                     raise RuntimeError(f"{__class__.__name__}.calc_qty() (input of \"{self.material_name}\"): Dependent input with ID \"{dep_id}\" not found.")
@@ -894,10 +896,10 @@ class Input:
 
 
     def get_basis_name(self)->str|None:
-        if not self.arr_basis_input:
+        if not self.list_id_basis_input:
             return None
         
-        first_id_basis = self.arr_basis_input[0]
+        first_id_basis = self.list_id_basis_input[0]
         input_depended = self.proc.get_input(first_id_basis)
         if input_depended is None:
             raise RuntimeError(f"{__class__.__name__}.get_basis_name() (input of \"{self.material_name}\"): Dependent input with ID \"{first_id_basis}\" not found.")
@@ -910,8 +912,10 @@ class Input:
                      operator=None,
                      witness=None):
 
-        excel_formula_mat:str=""
         line = self.flowsheet.get_current_line()
+        self.line_fs = line
+
+        excel_formula_mat:str=""
         if self.material_class == cls_input_mat_sm:
             excel_formula_mat = f'={fsht.alph_col_mat}{line}'
         elif self.material_class == cls_input_mat_tgt:
@@ -929,6 +933,10 @@ class Input:
                                             record=record,
                                             operator=operator,
                                             witness=witness,
+                                            name_mat=self.material_name,
+                                            mw=self.mw,
+                                            dens=self.density,
+                                            conc_assay=self.conc_assay,
                                             wt_abs_kg_gro=self.metrics_val,
                                             error_rel=self.error_pct)
         elif self.metrics_unit == opt_mtrcs_vol_abs:
@@ -937,6 +945,10 @@ class Input:
                                             record=record,
                                             operator=operator,
                                             witness=witness,
+                                            name_mat=self.material_name,
+                                            mw=self.mw,
+                                            dens=self.density,
+                                            conc_assay=self.conc_assay,
                                             vol_abs_litre=self.metrics_val,
                                             error_rel=self.error_pct)
         elif self.metrics_unit == opt_mtrcs_eq:
@@ -945,6 +957,10 @@ class Input:
                                             record=record,
                                             operator=operator,
                                             witness=witness,
+                                            name_mat=self.material_name,
+                                            mw=self.mw,
+                                            dens=self.density,
+                                            conc_assay=self.conc_assay,
                                             equiv=self.metrics_val,
                                             error_rel=self.error_pct)
         elif self.metrics_unit == opt_mtrcs_v_per_w:
@@ -953,6 +969,10 @@ class Input:
                                             record=record,
                                             operator=operator,
                                             witness=witness,
+                                            name_mat=self.material_name,
+                                            mw=self.mw,
+                                            dens=self.density,
+                                            conc_assay=self.conc_assay,
                                             v_per_w=self.metrics_val,
                                             error_rel=self.error_pct)
         elif self.metrics_unit == opt_mtrcs_wwpct:
@@ -961,15 +981,18 @@ class Input:
                                             record=record,
                                             operator=operator,
                                             witness=witness,
+                                            name_mat=self.material_name,
+                                            mw=self.mw,
+                                            dens=self.density,
+                                            conc_assay=self.conc_assay,
                                             wwpct=self.metrics_val,
                                             error_rel=self.error_pct)
         else:
             raise ValueError(f'{self.__class__.__name__}.put_material(): Unsupported metrics unit ({self.metrics_unit}) for material ({self.material_name}).')
 
-
         return line
 
-    def put_range(self,
+    def instruct_qty_range(self,
                   time: str =None,
                   method: str=None,
                   record: str=None,
@@ -980,10 +1003,96 @@ class Input:
             raise ValueError(f'{self.__class__.__name__}.put_range(): Material line (line_mat) must be provided.')
         
         excel_formular_qty = f'=TEXT({fsht.alph_col_kg_gro}{line_mat},"0.00")&" ± "&TEXT({fsht.alph_col_err_abs}{line_mat},"0.00")&" kg"'
-        line_qty = self.put_line(time=time, method=method, content=excel_formular_qty, record=record, operator=operator, witness=witness)
+        line_qty = self.flowsheet.put_line(time=time, method=method, content=excel_formular_qty, record=record, operator=operator, witness=witness)
 
         return line_qty
-        
+
+
+    def link_inputs(self):
+        if self.proc is None:
+            raise ValueError(f'{self.__class__.__name__}.put_qty_material(): Material input (inputs:GetInputs) must be provided.')
+        if self.line_fs is None:
+            raise RuntimeError(f'{self.__class__.__name__}.put_qty_material(): '
+                    f'Input "{self.material_name}" (ID {self.id_input}) has an empty fs_line_mat.')
+
+
+        #>>>>>>>>>>>>>>>>>>>> func in func from here >>>>>>>>>>>>>>>>>>>>
+
+        def __prep_ref(alph_col:str=None, list_rows:list[int]=None)->str:
+            if alph_col is None:
+                raise ValueError(f'{self.__class__.__name__}.put_qty_material().__prep_ref(): An argument "alph_col" is None. Alphabet column identifier is needed.')
+            if not list_rows:
+                raise ValueError(f'{self.__class__.__name__}.put_qty_material().__prep_ref(): An argument "list_rows" is None or len(list_rows)==0. A list of depended row is needed.')
+            
+            if len(list_rows) == 1:
+                return f'={alph_col}{list_rows[0]}'
+            else:
+                list_cell:list[str] = []
+                for row in list_rows:
+                    list_cell.append(f'{alph_col}{row}')
+
+                str_all_ref = ','.join(list_cell)
+                xls_formula = f'=SUM({str_all_ref})'
+                return xls_formula        
+
+        def __basis_ids_to_lines(list_ids:list[int]=None)->list[int]:
+            if not list_ids:
+                raise RuntimeError(f'{self.__class__.__name__}.put_qty().__basis_ids_to_lines(): '
+                                   '"list_ids" is None or empty.')
+            list_lines:list[int]=[]
+            for single_id in list_ids:
+                basis = self.proc.get_input(id_input=single_id)
+                list_lines.append(basis.line_fs)
+            return list_lines
+
+        #<<<<<<<<<<<<<<<<<<<< func in func to here <<<<<<<<<<<<<<<<<<<<<<<
+
+        if self.metrics_unit in (opt_mtrcs_wt_gro_abs, opt_mtrcs_vol_abs):
+            self.flowsheet.put_links(line_fs_this=self.line_fs,
+                                     name_basis='(absolute)')
+        else:
+            if not self.list_id_basis_input:
+                raise RuntimeError(f'{self.__class__.__name__}.put_qty_materials():'
+                                   f'No basis specified for "{self.material_name}" (input ID: {self.id_input}). '
+                                   f'Although it metrics_unit is {self.metrics_unit}, which requires at least one basis input.')
+
+            first_id_input = self.list_id_basis_input[0]
+            name_basis = self.proc.get_input(id_input=first_id_input).material_name
+
+            list_lines_basis = __basis_ids_to_lines(list_ids=self.list_id_basis_input)
+
+            if self.metrics_unit == opt_mtrcs_eq:
+                # __put_values(name_basis=name_basis,
+                #             list_rows_basis_mol=__basis_ids_to_lines(list_basis),
+                #             equiv=mat_input.metrics_val)
+                # return line_fs_this
+                self.flowsheet.put_links(line_fs_this=self.line_fs,
+                                         name_basis=name_basis,
+                                         ref_mol_basis=__prep_ref(alph_col=fsht.alph_col_mol, list_rows=list_lines_basis))
+            elif self.metrics_unit == opt_mtrcs_v_per_w:
+                # __put_values(name_basis=name_basis,
+                #             list_rows_basis_kg_net=__basis_ids_to_lines(list_basis),
+                #             v_per_w=mat_input.metrics_val)
+                # return line_fs_this
+                self.flowsheet.put_links(line_fs_this=self.line_fs,
+                                         name_basis=name_basis,
+                                         ref_kg_net_basis=__prep_ref(alph_col=fsht.alph_col_kg_net, list_rows=list_lines_basis))
+            elif self.metrics_unit == opt_mtrcs_wwpct:
+                # __put_values(name_basis=name_basis,
+                #             list_rows_basis_kg_net=__basis_ids_to_lines(list_basis),
+                #             wwpct=mat_input.metrics_val)
+                # return line_fs_this
+                self.flowsheet.put_links(line_fs_this=self.line_fs,
+                                         name_basis=name_basis,
+                                         ref_kg_net_basis=__prep_ref(alph_col=fsht.alph_col_kg_net, list_rows=list_lines_basis))
+            else:
+                raise RuntimeError(f'{self.__class__.__name__}: Invalid metrics unit "{self.metrics_unit}" for the input ID {self.id_input} of "{self.material_name}".')
+
+
+
+            
+            
+
 
 
     
