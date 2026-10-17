@@ -9,6 +9,7 @@ from flow_draw.materials import materials as mats
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from flow_draw.data_io.flowsheet import Flowsheet
+import flow_draw.data_io.flowsheet as fsht
 from flow_draw.trait_def.trait_def import GetMats, GetInputs
 from flow_draw.data_io.json_io import Objason, Primitive, Array
 
@@ -430,7 +431,7 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
         super().load_from_json_dict(json_dict=json_dict)
         arr_input: list[dict[str, str|float]] = json_dict[arry_inputs_json]
         for single_input in arr_input:
-            new_input = Input(mats_data=self.mats_data, proc=self.caller)
+            new_input = Input(mats_data=self.mats_data, proc=self.caller, flowsheet=self.flowsheet)
             new_input.load_from_json_dict(json_dict=single_input)
             self.list_inputs.append(new_input)
             self.input_count += 1
@@ -442,15 +443,20 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
             self.flowsheet.put_body_comments(self.pre_comment)
 
         for temp_inpt in self.list_inputs:
-            line_mat = self.flowsheet.put_material(time=lang_dict_cmn[tag_flow_cmn_rec_time],
-                                                    method=lang_dict_chgng_specif[temp_inpt.method],
-                                                    record=lang_dict_chgng_specif[tag_part_rec_lot],
-                                                    operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
-                                                    witness=lang_dict_cmn[tag_flow_cmn_rec_sign],
-                                                    mat_input=temp_inpt)
+            # line_mat = self.flowsheet.put_material(time=lang_dict_cmn[tag_flow_cmn_rec_time],
+            #                                         method=lang_dict_chgng_specif[temp_inpt.method],
+            #                                         record=lang_dict_chgng_specif[tag_part_rec_lot],
+            #                                         operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
+            #                                         witness=lang_dict_cmn[tag_flow_cmn_rec_sign],
+            #                                         mat_input=temp_inpt)
+            line_mat = temp_inpt.put_material(time=lang_dict_cmn[tag_flow_cmn_rec_time],
+                                              method=lang_dict_chgng_specif[temp_inpt.method],
+                                              record=lang_dict_chgng_specif[tag_part_rec_lot],
+                                              operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
+                                              witness=lang_dict_cmn[tag_flow_cmn_rec_sign],)
 
             #line-2: QTY instruction and record
-            self.flowsheet.put_range(record=lang_dict_chgng_specif[tag_part_rec_input],
+            temp_inpt.put_range(record=lang_dict_chgng_specif[tag_part_rec_input],
                                    line_mat=line_mat)
 
             #For liquid only, flex ID 
@@ -526,10 +532,11 @@ class Input:
     """
     This class is for each material charged, each instance correspnds to each dosage in a charging operation.
     """
-    def __init__(self, mats_data: mats.Materials = None, proc: GetInputs = None):
+    def __init__(self, mats_data: mats.Materials = None, proc: GetInputs = None, flowsheet:Flowsheet=None):
         #Material constants
         self.mats_data: mats.Materials = mats_data
         self.proc: GetInputs = proc
+        self.flowsheet = flowsheet
 
         self.mw:float = None
         """Molecular weight of the material."""
@@ -895,6 +902,88 @@ class Input:
         if input_depended is None:
             raise RuntimeError(f"{__class__.__name__}.get_basis_name() (input of \"{self.material_name}\"): Dependent input with ID \"{first_id_basis}\" not found.")
         return input_depended.material_name
+
+    def put_material(self,
+                     time=None,
+                     method=None,
+                     record=None,
+                     operator=None,
+                     witness=None):
+
+        excel_formula_mat:str=""
+        line = self.flowsheet.get_current_line()
+        if self.material_class == cls_input_mat_sm:
+            excel_formula_mat = f'={fsht.alph_col_mat}{line}'
+        elif self.material_class == cls_input_mat_tgt:
+            excel_formula_mat=''
+        elif self.metrics_unit == opt_mtrcs_eq:
+            excel_formula_mat = f'={fsht.alph_col_mat}{line}&" ("&{fsht.alph_col_equiv}{line}&"equiv vs "&{fsht.alph_col_name_basis}{line}&")"'
+        elif self.metrics_unit == opt_mtrcs_v_per_w:
+            excel_formula_mat = f'={fsht.alph_col_mat}{line}&" ("&{fsht.alph_col_v_per_w}{line}&"v/w vs "&{fsht.alph_col_name_basis}{line}&")"'               
+        elif self.metrics_unit == opt_mtrcs_wwpct:
+            excel_formula_mat = f'={fsht.alph_col_mat}{line}&" ("&{fsht.alph_col_wwpct}{line}&"w/w% vs "&{fsht.alph_col_name_basis}{line}&")"'
+
+        if self.metrics_unit == opt_mtrcs_wt_gro_abs:
+            self.flowsheet.put_material_new(time=time,
+                                            method=method,
+                                            record=record,
+                                            operator=operator,
+                                            witness=witness,
+                                            wt_abs_kg_gro=self.metrics_val,
+                                            error_rel=self.error_pct)
+        elif self.metrics_unit == opt_mtrcs_vol_abs:
+            self.flowsheet.put_material_new(time=time,
+                                            method=method,
+                                            record=record,
+                                            operator=operator,
+                                            witness=witness,
+                                            vol_abs_litre=self.metrics_val,
+                                            error_rel=self.error_pct)
+        elif self.metrics_unit == opt_mtrcs_eq:
+            self.flowsheet.put_material_new(time=time,
+                                            method=method,
+                                            record=record,
+                                            operator=operator,
+                                            witness=witness,
+                                            equiv=self.metrics_val,
+                                            error_rel=self.error_pct)
+        elif self.metrics_unit == opt_mtrcs_v_per_w:
+            self.flowsheet.put_material_new(time=time,
+                                            method=method,
+                                            record=record,
+                                            operator=operator,
+                                            witness=witness,
+                                            v_per_w=self.metrics_val,
+                                            error_rel=self.error_pct)
+        elif self.metrics_unit == opt_mtrcs_wwpct:
+            self.flowsheet.put_material_new(time=time,
+                                            method=method,
+                                            record=record,
+                                            operator=operator,
+                                            witness=witness,
+                                            wwpct=self.metrics_val,
+                                            error_rel=self.error_pct)
+        else:
+            raise ValueError(f'{self.__class__.__name__}.put_material(): Unsupported metrics unit ({self.metrics_unit}) for material ({self.material_name}).')
+
+
+        return line
+
+    def put_range(self,
+                  time: str =None,
+                  method: str=None,
+                  record: str=None,
+                  operator: str=None,
+                  witness: str=None,
+                 line_mat:int=None)->int:
+        if line_mat is None:
+            raise ValueError(f'{self.__class__.__name__}.put_range(): Material line (line_mat) must be provided.')
         
+        excel_formular_qty = f'=TEXT({fsht.alph_col_kg_gro}{line_mat},"0.00")&" ± "&TEXT({fsht.alph_col_err_abs}{line_mat},"0.00")&" kg"'
+        line_qty = self.put_line(time=time, method=method, content=excel_formular_qty, record=record, operator=operator, witness=witness)
+
+        return line_qty
+        
+
 
     

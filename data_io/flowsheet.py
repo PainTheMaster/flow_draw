@@ -240,69 +240,86 @@ class Flowsheet:
         self.current_line += 1
         return self.current_line-1
 
-    def put_line(self, time: str ='', method: str='', content: str='', record: str='', operator: str='', witness: str='')->int:
-        self.ws.cell(row=self.current_line, column=col_time).value = time
-        self.ws.cell(row=self.current_line, column=col_method).value = method
-        self.ws.cell(row=self.current_line, column=col_content).value = content
-        self.ws.cell(row=self.current_line, column=col_record).value = record
-        self.ws.cell(row=self.current_line, column=col_operator).value = operator
-        self.ws.cell(row=self.current_line, column=col_witness).value = witness
+    def put_line(self, time: str =None, method: str=None, content: str=None, record: str=None, operator: str=None, witness: str=None)->int:
+        if time:
+            self.ws.cell(row=self.current_line, column=col_time).value = time
+        if method:
+            self.ws.cell(row=self.current_line, column=col_method).value = method
+        if content:
+            self.ws.cell(row=self.current_line, column=col_content).value = content
+        if record:
+            self.ws.cell(row=self.current_line, column=col_record).value = record
+        if operator:
+            self.ws.cell(row=self.current_line, column=col_operator).value = operator
+        if witness:
+            self.ws.cell(row=self.current_line, column=col_witness).value = witness
         self.ws.cell(row=self.current_line, column=col_method).border = border_left
         self.__put_excel_logic(line=self.current_line)
 
         self.current_line += 1
         return self.current_line-1
 
-    # def put_material(self,
-    #                  time: str ='',
-    #                  method: str='',
-    #                  record: str='',
-    #                  operator: str='',
-    #                  witness: str='',
-    #                  name_mat:str=None,
-    #                  mw:float=None,
-    #                  dens:float=None,
-    #                  assay_conc:float=None,
-    #                  equiv:float=None,
-    #                  v_per_w:float=None,
-    #                  wwpct:float=None,
-    #                  name_mat_basis: str=None,
-    #                  err_rel_pct:float=5)->int:
 
-    #     if name_mat is None:
-    #         raise ValueError("Flowsheet.put_material(): Material name must be provided.")
-    #     if name_mat_basis is None:
-    #         raise ValueError("Flowsheet.put_material(): The name of the basis material must be provided.")
-    #     # if equiv is None and v_per_w is None:
-    #     #     raise ValueError("Flowsheet.put_material(): Either equivalent (equiv) or volume per weight (v_per_w) must be provided.")
-    #     # if equiv is not None and v_per_w is not None:
-    #     #     raise ValueError("Flowsheet.put_material(): Dual input. Only one of equivalent (equiv) or volume per weight (v_per_w) should be provided.")
-    #     count_qty_rel:int = sum(x is not None for x in (equiv, v_per_w, wwpct))
-    #     if count_qty_rel == 0:
-    #         raise ValueError("Flowsheet.put_material(): One of equivalent (equiv), volume per weight (v_per_w), or weight percent (ww_pct) must be provided.")
-    #     elif count_qty_rel > 1:
-    #         raise ValueError("Flowsheet.put_material(): Only one of equivalent (equiv), volume per weight (v_per_w), or weight percent (ww_pct) should be provided.")
+    def put_material_new(self,
+                         time: str ='',
+                         method: str='',
+                         content:str='',
+                         record: str='',
+                         operator: str='',
+                         witness: str='',
+                         name_mat:str=None,
+                         mw:float=None,
+                         dens:float=None,
+                         conc_assay:float=None,
+                         name_basis:float=None,
+                         equiv:float=None,
+                         v_per_w:float=None,
+                         wwpct:float=None,
+                         wt_abs_kg_gro:float=None,
+                         vol_abs_litre:float=None,
+                         error_rel:float=None)->int:
 
+        if sum(x is not None for x in (equiv, v_per_w, wwpct,wt_abs_kg_gro,vol_abs_litre)) !=1:
+            raise RuntimeError(f'{self.__class__.__name__}.put_material(): For a material "{name_mat}", non-unity non-None imput(s) among the quantifiers. Only one of them has to have a value.\n'
+                               f'"equiv": {equiv}\n'
+                               f'"v_per_w": {v_per_w}\n'
+                               f'"wwpct": {wwpct}\n'
+                               f'"wt_abs_kg_gro": {wt_abs_kg_gro}\n'
+                               f'"vol_abs_litre": {vol_abs_litre}')
 
-    #     excel_formular_mat:str=None
-    #     if equiv is not None:
-    #         excel_formular_mat = f'={alph_col_mat}{self.current_line}&" ("&{alph_col_equiv}{self.current_line}&" equiv vs "&{alph_col_name_basis}{self.current_line}&")"'
-    #     elif v_per_w is not None:
-    #         excel_formular_mat = f'={alph_col_mat}{self.current_line}&" ("&{alph_col_v_per_w}{self.current_line}&" v/w vs "&{alph_col_name_basis}{self.current_line}&")"'
-    #     elif wwpct is not None:
-    #         excel_formular_mat = f'={alph_col_mat}{self.current_line}&" ("&{alph_col_wwpct}{self.current_line}&" wt% vs "&{alph_col_name_basis}{self.current_line}&")"'
-    #     line_mat = self.put_line(time=time, method=method, content=excel_formular_mat, record=record, operator=operator, witness=witness)
+        line = self.put_line(time = time,
+                             method=method,
+                             content=content,
+                             record=record,
+                             operator=operator,
+                             witness=witness)
 
-    #     self.ws.cell(row=line_mat, column=col_xlslog_mat).value = name_mat
-    #     self.ws.cell(row=line_mat, column=col_xlslog_mw).value = mw if mw is not None else ""
-    #     self.ws.cell(row=line_mat, column=col_xlslog_dens).value = dens if dens is not None else ""
-    #     self.ws.cell(row=line_mat, column=col_xlslog_assay_conc).value = assay_conc if assay_conc is not None else 100.0
-    #     self.ws.cell(row=line_mat, column=col_xlslog_equiv).value = equiv if equiv is not None else ""
-    #     self.ws.cell(row=line_mat, column=col_xlslog_v_per_w).value = v_per_w if v_per_w is not None else ""
-    #     self.ws.cell(row=line_mat, column=col_xlslog_wwpct).value = wwpct if wwpct is not None else ""
-    #     self.ws.cell(row=line_mat, column=col_xlslog_err_rel).value = err_rel_pct
+        if name_mat:
+            self.ws.cell(row=line, column=col_xlslog_mat).value = name_mat
+        if mw is not None:
+            self.ws.cell(row=line, column=col_xlslog_mw).value = mw
+        if dens is not None:
+            self.ws.cell(row=line, column=col_xlslog_dens).value = dens
+        if conc_assay is not None:
+            self.ws.cell(row=line, column=col_xlslog_assay_conc).value = conc_assay
+        if name_basis:
+            self.ws.cell(row=line, column=col_xlslog_name_basis).value = name_basis
+        if equiv is not None:
+            self.ws.cell(row=line, column=col_xlslog_equiv).value = equiv
+        if v_per_w is not None:
+            self.ws.cell(row=line, column=col_xlslog_v_per_w).value = v_per_w
+        if wwpct is not None:
+            self.ws.cell(row=line, column=col_xlslog_wwpct).value = wwpct
+        if wt_abs_kg_gro  is not None:
+            self.ws.cell(row=line, column=col_xlslog_wt_abs_kg_gro).value = wt_abs_kg_gro
+        if vol_abs_litre is not None:
+            self.ws.cell(row=line, column=col_xlslog_vol_abs).value = vol_abs_litre
+        if error_rel is not None:
+            self.ws.cell(row=line, column=col_xlslog_err_rel).value = error_rel
 
-    #     return line_mat
+        return line
+
+        
 
     def put_material(self,
                      time: str ='',
@@ -310,7 +327,8 @@ class Flowsheet:
                      record: str='',
                      operator: str='',
                      witness: str='',
-                     mat_input: Input=None)->int:
+                     mat_input: Input=None,
+                     )->int:
 
         def __put_consts(name_mat:str=None,
                          mw:float=None,
@@ -387,7 +405,7 @@ class Flowsheet:
                          mw=mat_input.mw,
                          dens=mat_input.density,
                          conc_assay=mat_input.conc_assay,
-                         vol_abs_litre=mat_input.vol_abs_litre,
+                         vol_abs_litre=mat_input.metrics_val,
                          error_rel=mat_input.error_pct)
 
         elif mat_input.metrics_unit == chgng.opt_mtrcs_eq:
@@ -424,7 +442,7 @@ class Flowsheet:
                         dens=mat_input.density,
                         conc_assay=mat_input.conc_assay,
                         name_basis=name_basis,
-                        ww_pct=mat_input.metrics_val,
+                        wwpct=mat_input.metrics_val,
                         error_rel=mat_input.error_pct)
         else:
             raise ValueError(f"Flowsheet.put_material(): Unsupported metrics unit ({mat_input.metrics_unit}) for material ({mat_input.material_name}).")
@@ -435,12 +453,6 @@ class Flowsheet:
                       record=record,
                       operator=operator,
                       witness=witness)
-
-    # #TODO: This part is buggy! Missing argument (one of the quantifiers). Pleaese implement a aproper logic.
-    #     __put_consts(name_mat=mat_input.material_name,
-    #             mw=mat_input.mw,
-    #             dens=mat_input.density,
-    #             conc_assay=mat_input.conc_assay) 
 
         return line
 
@@ -874,6 +886,9 @@ class Flowsheet:
         self.__put_excel_logic(self.current_line)
         self.current_line += 1
         return self.current_line-1
+
+    def get_current_line(self) -> int:
+        return self.current_line
 
     def save(self, filename: str):
         self.wb.save(filename=filename)
