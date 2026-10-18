@@ -102,7 +102,7 @@ class Objason(JsonEntity):
         if self.description is not None:
             list_json_str.append(f' "description":{self.json_literal(self.description)},')
         if self.nullable:
-            list_json_str.append(' "type":["object", "null"]')
+            list_json_str.append(' "type":["object", "null"],')
         else:
             list_json_str.append(' "type":"object",')
         list_json_str.append(' "properties":{')
@@ -115,17 +115,17 @@ class Objason(JsonEntity):
                 required += f'{self.json_literal(single_prop.key)},'
     
         list_json_str[-1]=list_json_str[-1].removesuffix(',')
-        list_json_str.append(' }')
+        list_json_str.append(' },')
 
         required=required.removesuffix(',')
         if required != '':
-            list_json_str[-1]+=','
+            # list_json_str[-1]+=',' (expl) ',' addition was newly added ca. 4 lines above (list_json_str.apped(' },')). Hence, comma addition here is no longer needed.
             list_json_str.append(f' "required":[{required}],')
         
         if len(self.list_cond) > 0:
             self.__put_condition(list_json_str=list_json_str)
         list_json_str.append(' "additionalProperties":false')
-        list_json_str[-1] = list_json_str[-1].removesuffix(',')
+        #list_json_str[-1] = list_json_str[-1].removesuffix(',')
         list_json_str.append('}')
 
         return list_json_str

@@ -284,6 +284,7 @@ class Process(GetMats, GetProcName, GetInputs):
     def interpret_dict(self, json_dict: dict[str, any]):
         # list_uo: list[type[uo.UnitOperation]] = list_uo_common
         self.seq_uo.clear()
+        self.flowsheet = fsht.Flowsheet()
 
         arr_steps:list[dict] = json_dict[defs.json_key_arr_uo_params]
         uo_reg = uo.registry_uo_cls
@@ -304,6 +305,8 @@ class Process(GetMats, GetProcName, GetInputs):
         for step in self.seq_uo:
             if isinstance(step, chgng.Charging):
                 self.list_inpts += step.list_inputs
+
+        self.__check_inpt_id_invalid()
 
         input_tgt = chgng.Input(mats_data = self.mats_data, proc = self, flowsheet=self.flowsheet)
         input_tgt.mark_as_tgt()
@@ -373,6 +376,19 @@ class Process(GetMats, GetProcName, GetInputs):
             tgt_stoichiometry = 1.0
             warnings.warn(f"{self.__class__.__name__}.get_tgt_stoichiometry(): Invalid tgt_stoichiometry value. Defaulting to 1.0.", RuntimeWarning)
         return tgt_stoichiometry
+
+
+    def __check_inpt_id_invalid(self):
+        """Use this function before adding tgt"""
+        ids = [inpt.id_input for inpt in self.list_inpts]
+        dup = sorted({x for x in ids if ids.count(x) > 1})
+        if dup:
+            raise RuntimeError(f'{self.__class__.__name__}.__check_inputs_id_invalid():\n'
+                               f'Duplicated {chgng.id_input_json}: {dup}')
+        if any(x is None or x < 0 for x in ids):
+            raise RuntimeError(f'{self.__class__.__name__}.__check_inputs_id_invalid():\n'
+                                           f'Invalid {chgng.id_input_json}: An ID for input must be a non-negative integer.')
+
 
 @dataclass
 class Dependency:

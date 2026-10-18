@@ -171,7 +171,7 @@ tag_stc_flow_press_range = "instruct stc template press range"
 stc_flow_press_range_jp = "圧力:{P_min}~{P_max} {P_unit}"
 """an instruction sentence template: pressure range; includes placeholder {P_min}, {P_max}, and {P_unit}"""
 
-tag_stc_flow_press_single = "instruct stc template press range"
+tag_stc_flow_press_single = "instruct stc template press single"
 """tag for an instruction sentence template: single point pressure; includes placeholder {P} and {P_unit}"""
 stc_flow_press_single_jp = "圧力目安:{P} {P_unit}"
 """an instruction sentence template: single point pressure; includes placeholder {P} and {P_unit}"""

@@ -245,22 +245,15 @@ class Tare(uo.UnitOperation, uo_tag=defs.tag_uo_tare_pkg):
             self.flowsheet.put_body_comments(self.pre_comment)
             self.flowsheet.linefeed()
 
-        if self.location is not None:
-            self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
-                                    method=self.location,
-                                    content=dict_parts_stcs[tag_stc_instr_tare].format(pkg=self.pkg_material),
-                                    record=dict_parts_stcs[tag_part_id_balance],
-                                    operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
-                                    witness=lang_dict_cmn[tag_flow_cmn_rec_sign],
-                                    )
-        else:
-            self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
-                                    method='',
-                                    content=self.dict_parts_stcs[tag_stc_instr_tare].format(pkg=self.pkg_material),
-                                    record=dict_parts_stcs[tag_part_id_balance],
-                                    operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
-                                    witness=lang_dict_cmn[tag_flow_cmn_rec_sign],
-                                    )
+        method_location = self.location if self.location else ''
+        self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
+                                method=method_location,
+                                content=dict_parts_stcs[tag_stc_instr_tare].format(pkg=self.pkg_material),
+                                record=dict_parts_stcs[tag_part_id_balance],
+                                operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
+                                witness=lang_dict_cmn[tag_flow_cmn_rec_sign],
+                                )
+
         for i in range(1, self.num_pkg+1):
             self.flowsheet.put_line(record=dict_parts_stcs[tag_stc_rec_tare].format(count_pkg=i))
 

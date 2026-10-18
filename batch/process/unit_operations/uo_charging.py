@@ -107,7 +107,8 @@ temprctrl_placeholder = 'placeholder'
 list_temp_control = [temprctrl_none,
                     temprctrl_min,
                     temprctrl_max,
-                    temprctrl_min_max]
+                    temprctrl_min_max,
+                    temprctrl_placeholder]
 
 #list_metrics_unit = [defs.tag_metrics_equiv, defs.tag_metrics_vol]
 opt_mtrcs_eq = "equiv"
@@ -119,8 +120,8 @@ opt_mtrcs_vol_abs = 'vol_abs_kg'
 list_metrics_unit = [opt_mtrcs_eq, opt_mtrcs_v_per_w, opt_mtrcs_wwpct, opt_mtrcs_wt_gro_abs, opt_mtrcs_vol_abs]
 
 error_range_placeholder = 'placeholder'
-error_default = 5.0
-list_error_range = [None, 1.0, None, None, None, error_default, error_range_placeholder]
+error_pct_default = 5.0
+list_error_range = [None, 1.0, None, None, None, error_pct_default, error_range_placeholder]
 
 dict_dtil_drpdwn = {hedr_metrics_unit : list_metrics_unit,
                     hedr_method : list_charging_method,
@@ -194,6 +195,11 @@ tag_part_mthd_pwdr = method_pow
 tag_part_mthd_plchldr = method_placeholder
 # part_mthd_plchldr_jp = "<Placeholder: charging method>"
 """Flowsheet component for class Charging. A place holder. An ption for Liquid charging."""
+tag_part_instr_timectrl_plchldr = 'input_time_control_placeholder'
+"""Flowsheet component for class Charging. A placeholdr for time control. """
+tag_part_instr_temprctrl_plchldr = 'input_temperature_control_placeholder'
+"""Flowsheet component for class Charging. A placeholdr for temperature control. """
+
 
 
 dict_jp_parts={tag_part_instr_ini : '仕込み開始',
@@ -212,9 +218,10 @@ dict_jp_parts={tag_part_instr_ini : '仕込み開始',
                 tag_part_mthd_prssvesl : "圧送容器",
                 tag_part_mthd_mobile_tank : "液体コンテナ",
                 tag_part_mthd_pwdr : "粉体投入口",
-                tag_part_mthd_plchldr : "<Placeholder: charging method>"
+                tag_part_mthd_plchldr : "<Placeholder: charging method>",
+                tag_part_instr_timectrl_plchldr : "<Placeholder: time control>",
+                tag_part_instr_temprctrl_plchldr : '<Placeholder: temperature control>'
                 }
-
 
 #Language dictionary for the unit operation
 lang_dict_chgng_specif = dict_jp_parts
@@ -338,7 +345,7 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
         basis_input_single = Primitive(prim_type='integer',
                                 key=hedr_basis_input,
                                 description='The material input used as the basis for calculating the quantity of other material inputs.'
-                                f'If the target material is designated as the calculation basis, please put {mats_data.get_name_sm()}.',
+                                f'If the target material is designated as the calculation basis, please put {opt_special_id_basis_tgt}.',
                                 nullable=False,
                                 required=True)
         arr_basis_inputs = Array(key=hedr_basis_array,
@@ -374,7 +381,7 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
                                 f'"{timectrl_min}" should be selected when lower limit must be complied. '
                                 f'"{timectrl_max}" should be selected when upper limit must be complied. '
                                 f'"{timectrl_min_max}" should be selected when the event has to happen in a specific range of time. '
-                                f'"Please select {timectrl_placeholder}" if the right option cannot be chosen from the given information.')
+                                f'"Please select {timectrl_placeholder}" if the right option cannot be chosen based on the given information.')
         
         time_min = Primitive(prim_type="number",
                              key=hedr_time_min,
@@ -393,7 +400,8 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
                               f'"{temprctrl_none}" means no temperature control is needed. '
                               f'"{temprctrl_min}" is selected when the lower limit is set for the dosing/charging. '
                               f'"{temprctrl_max}" is selected when the upper limit is set for the dosing/charging. '
-                              f'"{temprctrl_min_max}" is for a case where the charging/dosing have to take place in a certain specific temperature range. ',
+                              f'"{temprctrl_min_max}" is for a case where the charging/dosing have to take place in a certain specific temperature range. '
+                              f'Please select "{temprctrl_placeholder}" if the right option cannot be chosen based on the given infomation.',
                               required=True)
         
         temp_min = Primitive(prim_type='number',
@@ -491,6 +499,9 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
 
         elif (input.time_control == timectrl_min_max):
             sentence_instruction = lang_dict_instr_stcs[tag_stc_time_min_max].format(min=input.time_min, max=input.time_max)
+
+        elif input.time_control == timectrl_placeholder:
+            sentence_instruction = lang_dict_chgng_specif[tag_part_instr_timectrl_plchldr]
         
         self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
                                 method=lang_dict_chgng_specif[tag_part_instr_ini],
@@ -514,6 +525,13 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
 
         elif input.temp_control == temprctrl_min_max:
             sentence = lang_dict_instr_stcs[tag_stc_temp_min_max].format(min=input.temp_min, max=input.temp_max)
+            self.flowsheet.put_line(content=sentence, record=lang_dict_chgng_specif[tag_part_rec_temprini])
+            self.flowsheet.put_line(record=lang_dict_chgng_specif[tag_part_rec_temprmin])
+            self.flowsheet.put_line(record=lang_dict_chgng_specif[tag_part_rec_temprmax])
+            self.flowsheet.put_line(record=lang_dict_chgng_specif[tag_part_rec_temprend])
+
+        elif input.temp_control == temprctrl_placeholder:
+            sentence = lang_dict_chgng_specif[tag_part_instr_temprctrl_plchldr]
             self.flowsheet.put_line(content=sentence, record=lang_dict_chgng_specif[tag_part_rec_temprini])
             self.flowsheet.put_line(record=lang_dict_chgng_specif[tag_part_rec_temprmin])
             self.flowsheet.put_line(record=lang_dict_chgng_specif[tag_part_rec_temprmax])
@@ -621,10 +639,10 @@ class Input:
         if self.temp_control == temprctrl_max or self.temp_control == temprctrl_min_max:
             self.temp_max = ser[hedr_temp_max]
         if self.mats_data is None:
-            warnings.warn(message=f"{__class__.__name}: mats_data is None",
+            warnings.warn(message=f"{__class__.__name__}: mats_data is None",
                           category=RuntimeWarning)
         else:
-            self.__calc_qty()
+            self.calc_qty()
             self.mw = self.mats_data.get_mw(self.material_name)
             self.density = self.mats_data.get_density(self.material_name)
             self.conc_assay = self.mats_data.get_conc_assay(self.material_name)
@@ -635,7 +653,11 @@ class Input:
         self.metrics_unit = json_dict[hedr_metrics_unit]
         self.metrics_val = json_dict[hedr_metrics_value]
         self.list_id_basis_input = json_dict[hedr_basis_array]
-        self.error_pct = json_dict[hedr_error_pct]
+        if json_dict.get(hedr_error_pct):
+            self.error_pct = json_dict[hedr_error_pct]
+        else:
+            self.error_pct = error_pct_default
+            warnings.warn(f'{self.__class__.__name__}.load_from_json_dict(): The given error is empty or zero. {error_pct_default}% as the default value is put for now.', UserWarning)
         self.method = json_dict[hedr_method]
         self.time_control = json_dict[hedr_time_control]
         if (self.time_control == timectrl_min or self.time_control == timectrl_min_max): #and hedr_time_min in json_dict:
@@ -698,6 +720,7 @@ class Input:
         self.mw = self.mats_data.get_mw(material_name=self.material_name)
         if self.mats_data.get_density(material_name=self.material_name) is not None:
             self.density = self.mats_data.get_density(material_name=self.material_name)
+        self.conc_assay = 100.0 #This doesn't make a chemical sence, but do no harm. Just to suppress an annoying message on Excel. 
         self.error_pct = None
 
     def calc_qty(self)->bool:
@@ -708,7 +731,9 @@ class Input:
             raise RuntimeError(f"{self.__class__.__name__}.calc_qty() (input of \"{self.material_name}\"): No material data for provided in the material input worksheet.")
 
         if self.list_id_basis_input is None or len(self.list_id_basis_input) == 0:
-            if self.material_class != cls_input_mat_sm and self.material_class != cls_input_mat_tgt:
+            # if self.material_class != cls_input_mat_sm and self.material_class != cls_input_mat_tgt:
+            if (self.material_class not in (cls_input_mat_sm, cls_input_mat_tgt)
+                and self.metrics_unit not in (opt_mtrcs_wt_gro_abs, opt_mtrcs_vol_abs)):
                 raise RuntimeError(f"{self.__class__.__name__}.calc_qty() (input of \"{self.material_name}\"): No quantity calculation basis specified.")
         
         def __is_pos_num(something=None)->bool:
@@ -749,22 +774,50 @@ class Input:
                 self.error_kg_gross = self.qty_kg_gross * (self.error_pct/100.0)
                 __calc_vol()
                 __set_metrcs_wt_abs_kg()
+
+
             elif self.metrics_unit == opt_mtrcs_wt_gro_abs:
                 self.qty_kg_gross = self.metrics_val
                 self.error_kg_gross = self.qty_kg_gross * (self.error_pct/100.0)
-                if __is_pos_num(self.assay_conc):
-                    self.qty_kg_net = self.qty_kg_gross * (self.assay_conc/100.0)
+                if __is_pos_num(self.conc_assay):
+                    self.qty_kg_net = self.qty_kg_gross * (self.conc_assay/100.0)
+                else:
+                    self.qty_kg_net = self.qty_kg_gross
+                    warnings.warn(f'{self.__class__.__name__}.calc_qty(): No valid assay provided for "{self.material_name}" (input ID {self.id_input}) '
+                                  'where the quantity is directly specified by gross weight. '
+                                  'Assay=100% is assumed to estimate the net weight from the gross one.',
+                                  UserWarning)
                 if __is_pos_num(self.mw):
                     self.mol = self.qty_kg_net * 1000 / self.mw
+                else:
+                    warnings.warn(f'{self.__class__.__name__}.calc_qty(): No valid molecule weight provided for "{self.material_name}" (input ID {self.id_input}) ', UserWarning)
                 __calc_vol()
+
+
             elif self.metrics_unit == opt_mtrcs_vol_abs:
                 self.vol_litre = self.metrics_val
                 if __is_pos_num(self.density):
                     self.qty_kg_gross = self.vol_litre * self.density
-                if __is_pos_num(self.assay_conc) and __is_pos_num(self.qty_kg_gross):
-                    self.qty_kg_net = self.qty_kg_gross * (self.assay_conc / 100.0)
-                if __is_pos_num(self.mw) and __is_pos_num(self.qty_kg_net):
+                else:
+                    self.qty_kg_gross = self.vol_litre * 1.0
+                    warnings.warn(f'{self.__class__.__name__}.calc_qty(): No valid density provided for "{self.material_name}" (input ID {self.id_input}) '
+                                  'where the quantity is directly specified by volume.'
+                                  'd=1 kg/L is assumed to estimate the gross weight for internal purpose.',
+                                  UserWarning)    
+                if __is_pos_num(self.conc_assay):
+                    self.qty_kg_net = self.qty_kg_gross * (self.conc_assay / 100.0)
+                else:
+                    self.qty_kg_net = self.qty_kg_gross
+                    warnings.warn(f'{self.__class__.__name__}.calc_qty(): No valid assay provided for "{self.material_name}" (input ID {self.id_input}) '
+                                'where the quantity is directly specified by volume.'
+                                'assay=100% is assumed to estimate the net weight for internal purpose.',
+                                UserWarning) 
+                if __is_pos_num(self.mw):
                     self.mol = self.qty_kg_net * 1000 / self.mw
+                else:
+                    warnings.warn(f'{self.__class__.__name__}.calc_qty(): No valid molecule weight provided for "{self.material_name}" (input ID {self.id_input}) ', UserWarning)
+
+                        
             else:
                 raise ValueError(f'{__class__.__name__}.calc_qty(): Invalid metrics_unit "{self.metrics_unit}" for the starting material "{self.material_name}". '
                                  'The quantity must be specified either in equivalents or weight percent.')
@@ -803,17 +856,20 @@ class Input:
                     mol_basis += input_depended.mol
             self.mol = mol_basis * self.metrics_val
             mw_this = self.mats_data.get_mw(material_name = self.material_name)
-            if mw_this is None or not isinstance(mw_this, (float, int)) or mw_this <= 0:
+            # if mw_this is None or not isinstance(mw_this, (float, int)) or mw_this <= 0:
+            if not __is_pos_num(mw_this):
                 raise RuntimeError(f"{__class__.__name__}.calc_qty() (input of \"{self.material_name}\"): Invalid molecular weight for this material.")
             conc_assay_this = self.mats_data.get_conc_assay(material_name = self.material_name)
-            if conc_assay_this is None or not isinstance(conc_assay_this, (float, int)) or conc_assay_this <= 0:
+            # if conc_assay_this is None or not isinstance(conc_assay_this, (float, int)) or conc_assay_this <= 0:
+            if not __is_pos_num(conc_assay_this):
                 raise RuntimeError(f"{__class__.__name__}.calc_qty() (input of \"{self.material_name}\"): Invalid assay for this material.")
             self.qty_kg_net = self.mol * mw_this/1000
             self.qty_kg_gross = self.qty_kg_net / (conc_assay_this/100.0)
             self.error_kg_gross = self.qty_kg_gross * (self.error_pct/100.0)
 
             dens_this = self.mats_data.get_density(material_name=self.material_name)
-            if dens_this is None or not isinstance(dens_this, (float, int)) or dens_this <= 0:
+            # if dens_this is None or not isinstance(dens_this, (float, int)) or dens_this <= 0:
+            if not __is_pos_num(dens_this):
                 dens_this = 1.0
                 warnings.warn(f'{__class__.__name__}.calc_qty() (input of \"{self.material_name}\"): No density information provided tor this material.'
                               '1.0 is assumed to estimate the volume.',
@@ -824,6 +880,8 @@ class Input:
         
         elif self.metrics_unit == opt_mtrcs_v_per_w:
             net_wt_basis = 0.0
+
+            #First, we need the sum of net weight of the basis material.
             for dep_id in self.list_id_basis_input:
                 input_depended = self.proc.get_input(dep_id)
                 if input_depended is None:
@@ -832,9 +890,12 @@ class Input:
                     return False
                 else:
                     net_wt_basis += input_depended.qty_kg_net
+            
+            # volume -> gross weight -> permissible error
             self.vol_litre = net_wt_basis * self.metrics_val
             dens_this = self.mats_data.get_density(material_name=self.material_name)
-            if dens_this is None or not isinstance(dens_this, (float, int)) or dens_this <= 0:
+            # if dens_this is None or not isinstance(dens_this, (float, int)) or dens_this <= 0:
+            if not __is_pos_num(dens_this):
                 dens_this = 1.0
                 warnings.warn(f'{__class__.__name__}.calc_qty() (input of \"{self.material_name}\"): No density information provided tor this material.'
                               '1.0 is assumed to estimate the volume.',
@@ -842,13 +903,23 @@ class Input:
             self.qty_kg_gross = self.vol_litre * dens_this
             self.error_kg_gross = self.qty_kg_gross * (self.error_pct/100.0)
             self.qty_calc_compltd = True
+
+            # Next, net weight
             conc_assay_this = self.mats_data.get_conc_assay(material_name = self.material_name)
-            if conc_assay_this is None or not isinstance(conc_assay_this, (float, int)) or conc_assay_this <= 0:
-                self.qty_calc_compltd = True
-                return True
+            #if conc_assay_this is None or not isinstance(conc_assay_this, (float, int)) or conc_assay_this <= 0:
+            if not __is_pos_num(conc_assay_this):
+                conc_assay_this = 100.0
+                warnings.warn(f'{self.__class__.__name__}.calc_qty() (input of "{self.material_name}"): No valid assay information provided for this material. '
+                              '100.0 is assumed to estimate the net weight for internal purpose.',
+                              RuntimeWarning)
+                # self.qty_calc_compltd = True
+                # return True
             self.qty_kg_net = self.qty_kg_gross * (conc_assay_this/100.0)
+
+            # Mol
             mw_this = self.mats_data.get_mw(material_name = self.material_name)
-            if mw_this is None or not isinstance(mw_this, (float, int)) or mw_this <= 0:
+            # if mw_this is None or not isinstance(mw_this, (float, int)) or mw_this <= 0:
+            if not __is_pos_num(mw_this):
                 self.qty_calc_compltd = True
                 return True
             self.mol = self.qty_kg_net*1000 / mw_this
@@ -867,23 +938,87 @@ class Input:
                     net_wt_basis += input_depended.qty_kg_net
             self.qty_kg_net = net_wt_basis * self.metrics_val / 100
             assay_this = self.mats_data.get_conc_assay(material_name = self.material_name)
-            if assay_this is None or not isinstance(assay_this, (float, int)) or assay_this <= 0:
+            # if assay_this is None or not isinstance(assay_this, (float, int)) or assay_this <= 0:
+            if not __is_pos_num(assay_this):
                 assay_this = 100.0
                 warnings.warn(f'{__class__.__name__}.calc_qty() (input of \"{self.material_name}\"): No valid assay information provided for this material. 100.0 is assumed.',
                               RuntimeWarning)
             self.qty_kg_gross = self.qty_kg_net / (assay_this/100)
             self.error_kg_gross = self.qty_kg_gross * (self.error_pct/100.0)
             dens_this = self.mats_data.get_density(material_name=self.material_name)
-            if dens_this is None or not isinstance(dens_this, (float, int)) or dens_this <= 0:
+            # if dens_this is None or not isinstance(dens_this, (float, int)) or dens_this <= 0:
+            if not __is_pos_num(dens_this):
                 dens_this = 1.0
                 warnings.warn(f'{__class__.__name__}.calc_qty() (input of \"{self.material_name}\"): No density information provided for this material. 1.0 is assumed to estimate the volume.',
                               RuntimeWarning)
             self.vol_litre = self.qty_kg_gross / dens_this
             mw_this = self.mats_data.get_mw(material_name=self.material_name)
-            if mw_this is None or not isinstance(mw_this, (float, int)) or mw_this <= 0:
+            # if mw_this is None or not isinstance(mw_this, (float, int)) or mw_this <= 0:
+            if not __is_pos_num(mw_this):
                 self.qty_calc_compltd = True
                 return True
             self.mol = self.qty_kg_net*1000 / mw_this
+            self.qty_calc_compltd = True
+            return True
+
+        elif self.metrics_unit == opt_mtrcs_wt_gro_abs:
+            # The gross weight (kg) is directly given. No basis input is needed.
+            if not __is_pos_num(self.metrics_val):
+                raise ValueError(f'{self.__class__.__name__}.calc_qty() (input of "{self.material_name}"): '
+                                 f'"{opt_mtrcs_wt_gro_abs}" requires a positive "{hedr_metrics_value}", but got {self.metrics_val}.')
+            self.qty_kg_gross = self.metrics_val
+            self.error_kg_gross = self.qty_kg_gross * (self.error_pct/100.0)
+
+            # Net weight
+            if __is_pos_num(self.conc_assay):
+                self.qty_kg_net = self.qty_kg_gross * (self.conc_assay/100.0)
+            else:
+                self.qty_kg_net = self.qty_kg_gross
+                warnings.warn(f'{self.__class__.__name__}.calc_qty(): No valid assay provided for "{self.material_name}" (input ID {self.id_input}) '
+                              'where the quantity is directly specified by gross weight. '
+                              'Assay=100% is assumed to estimate the net weight for internal purpose.',
+                              UserWarning)
+
+            # Mol (only when MW is available)
+            if __is_pos_num(self.mw):
+                self.mol = self.qty_kg_net * 1000 / self.mw
+
+            __calc_vol()
+            self.qty_calc_compltd = True
+            return True
+
+        elif self.metrics_unit == opt_mtrcs_vol_abs:
+            # The volume (L) is directly given. No basis input is needed.
+            if not __is_pos_num(self.metrics_val):
+                raise ValueError(f'{self.__class__.__name__}.calc_qty() (input of "{self.material_name}"): '
+                                 f'"{opt_mtrcs_vol_abs}" requires a positive "{hedr_metrics_value}", but got {self.metrics_val}.')
+            self.vol_litre = self.metrics_val
+
+            # Gross weight -> permissible error
+            if __is_pos_num(self.density):
+                self.qty_kg_gross = self.vol_litre * self.density
+            else:
+                self.qty_kg_gross = self.vol_litre * 1.0
+                warnings.warn(f'{self.__class__.__name__}.calc_qty(): No valid density provided for "{self.material_name}" (input ID {self.id_input}) '
+                              'where the quantity is directly specified by volume. '
+                              'd=1 kg/L is assumed to estimate the gross weight for internal purpose.',
+                              UserWarning)
+            self.error_kg_gross = self.qty_kg_gross * (self.error_pct/100.0)
+
+            # Net weight
+            if __is_pos_num(self.conc_assay):
+                self.qty_kg_net = self.qty_kg_gross * (self.conc_assay/100.0)
+            else:
+                self.qty_kg_net = self.qty_kg_gross
+                warnings.warn(f'{self.__class__.__name__}.calc_qty(): No valid assay provided for "{self.material_name}" (input ID {self.id_input}) '
+                              'where the quantity is directly specified by volume. '
+                              'Assay=100% is assumed to estimate the net weight for internal purpose.',
+                              UserWarning)
+
+            # Mol (only when MW is available)
+            if __is_pos_num(self.mw):
+                self.mol = self.qty_kg_net * 1000 / self.mw
+
             self.qty_calc_compltd = True
             return True
 

@@ -81,16 +81,19 @@ Language dictionary for common parts.
 """
 
 #lang_dict_<this unit operation> = defs.dict_jp_part_<this unit operation>
-tag_part_flow_gas_N2 = defs.opt_uo_inert_gas_N2
+tag_part_flow_gas_N2 = opt_gas_N2
 """Tag for replacing gas N2 on the flowsheet"""
-tag_part_flow_gas_Ar = defs.opt_uo_inert_gas_Ar
+tag_part_flow_gas_Ar = opt_gas_Ar
 """Tag for replacing gas argon on the flowsheet"""
-tag_part_flow_gas_plchldr = defs.opt_uo_inert_gas_plchldr
+tag_part_flow_gas_He = opt_gas_He
+"""Tag for replacing gas argon on the flowsheet"""
+tag_part_flow_gas_plchldr = opt_gas_plchldr
 """Tag for replacing gas placeholder on the flowsheet"""
 tag_part_flow_rplace_complete = "replacement_complete"
 """tag for inert gas replacement complete check-box"""
 dict_jp_part_flow = {tag_part_flow_gas_N2: '窒素',
                      tag_part_flow_gas_Ar: 'アルゴン',
+                     tag_part_flow_gas_He: 'ヘリウム',
                      tag_part_flow_gas_plchldr: '<gas: placeholder>',
                      tag_part_flow_rplace_complete: '□ 置換実施'}
 """JP language dictionary for flowsheet parts for the unit operation inert gas replacement"""

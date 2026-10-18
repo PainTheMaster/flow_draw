@@ -556,39 +556,52 @@ class Flowsheet:
             cell_err_rel = f'{alph_col_err_rel}{line}'
 
             #mol
-            xls_formular_mol = (f'=_xlfn.IFS({cell_equiv}<>"",{cell_mol_basis}*{cell_equiv},'
+            xls_formula_mol = (f'=_xlfn.IFS({cell_equiv}<>"",{cell_mol_basis}*{cell_equiv},'
                                 f'AND({cell_v_per_w}<>"", {cell_mw}<>"", {cell_assay_conc}<>"", {cell_dens}<>""),{cell_kg_net_basis}*{cell_v_per_w}*{cell_dens}*({cell_assay_conc}/100)*1000/{cell_mw},'
                                 f'AND({cell_wwpct}<>"", {cell_mw}<>""), {cell_kg_net_basis}*({cell_wwpct}/100)*1000/{cell_mw},'
                                 f'AND({cell_wt_abs_gro}<>"", {cell_assay_conc}<>"", {cell_mw}<>""), {cell_wt_abs_gro}*({cell_assay_conc}/100)*1000/{cell_mw},'
                                 f'AND({cell_vol_abs}<>"", {cell_dens}<>"", {cell_assay_conc}<>"", {cell_mw}<>""), {cell_vol_abs}*{cell_dens}*({cell_assay_conc}/100)*1000/{cell_mw},'
-                                 'TRUE,"")')
-            self.ws.cell(row=line, column=col_xlslog_mol).value = xls_formular_mol
-            #v/w
-            xls_formular_volume = (f'=_xlfn.IFS(AND({cell_equiv}<>"", {cell_mw}<>"", {cell_dens}<>""), {cell_mol_basis}*{cell_equiv}*{cell_mw}/1000/{cell_dens},'
+                                f'AND(OR({cell_v_per_w}<>"", {cell_vol_abs}<>""), OR({cell_assay_conc}="", {cell_dens}="")),"(Assay and/or density empty)",'
+                                f'AND({cell_wt_abs_gro}<>"", {cell_assay_conc}=""),"(Assay empty)",'
+                                f'AND(OR({cell_v_per_w}<>"", {cell_wwpct}<>"",{cell_wt_abs_gro}<>"",{cell_vol_abs}<>""), {cell_mw}=""),"(MW empty)",'
+                                'TRUE,"")')
+            self.ws.cell(row=line, column=col_xlslog_mol).value = xls_formula_mol
+            #volume
+            xls_formula_volume = (f'=_xlfn.IFS('
+                                   f'AND({cell_equiv}<>"", {cell_mw}<>"", {cell_dens}<>"",{cell_assay_conc}<>""), {cell_mol_basis}*{cell_equiv}*{cell_mw}/({cell_assay_conc}/100)/1000/{cell_dens},'
                                    f'{cell_v_per_w}<>"",{cell_kg_net_basis}*{cell_v_per_w},'
-                                   f'AND({cell_wwpct}<>"",{cell_dens}<>""), {cell_kg_net_basis}*({cell_wwpct}/100)/{cell_dens},'
+                                   f'AND({cell_wwpct}<>"",{cell_dens}<>"",{cell_assay_conc}<>""), {cell_kg_net_basis}*({cell_wwpct}/100)/({cell_assay_conc}/100)/{cell_dens},'
                                    f'AND({cell_wt_abs_gro}<>"", {cell_dens}<>""), {cell_wt_abs_gro}/{cell_dens},'
                                    f'{cell_vol_abs}<>"",{cell_vol_abs},'
-                                 'TRUE,"")')
-            self.ws.cell(row=line, column=col_xlslog_volume).value = xls_formular_volume
+                                   f'AND(OR({cell_equiv}<>"", {cell_wwpct}<>""), OR({cell_dens}="",{cell_assay_conc}="")), "(Assay and/or density empty)",'
+                                   f'AND({cell_wt_abs_gro}<>"", {cell_dens}=""), "(Density empty)",'
+                                   'TRUE,"")')
+            self.ws.cell(row=line, column=col_xlslog_volume).value = xls_formula_volume
 
 
             #kg_net
-            xls_formular_kg_net = (f'=_xlfn.IFS(AND({cell_equiv}<>"",{cell_mw}<>""),{cell_mol_basis}*{cell_equiv}*{cell_mw}/1000,'
-                                           f'AND({cell_v_per_w}<>"",{cell_assay_conc}<>"", {cell_dens}<>""), {cell_kg_net_basis}*{cell_v_per_w}*{cell_dens}*({cell_assay_conc}/100),'
-                                           f'AND({cell_wwpct}<>"", {cell_assay_conc}<>""), {cell_kg_net_basis}*({cell_wwpct}/100),'
-                                           f'AND({cell_wt_abs_gro}<>"", {cell_assay_conc}<>""),{cell_wt_abs_gro}*({cell_assay_conc}/100),'
-                                           f'AND({cell_vol_abs}<>"", {cell_dens}<>"", {cell_assay_conc}<>""), {cell_vol_abs}*{cell_dens}*({cell_assay_conc}/100),'
-                                           'TRUE,"")')
-            self.ws.cell(row=line, column=col_xlslog_kg_net).value = xls_formular_kg_net
+            xls_formula_kg_net = (f'=_xlfn.IFS('
+                                   f'AND({cell_equiv}<>"",{cell_mw}<>""),{cell_mol_basis}*{cell_equiv}*{cell_mw}/1000,'
+                                   f'AND({cell_v_per_w}<>"",{cell_assay_conc}<>"", {cell_dens}<>""), {cell_kg_net_basis}*{cell_v_per_w}*{cell_dens}*({cell_assay_conc}/100),'
+                                   f'{cell_wwpct}<>"", {cell_kg_net_basis}*({cell_wwpct}/100),'
+                                   f'AND({cell_wt_abs_gro}<>"", {cell_assay_conc}<>""),{cell_wt_abs_gro}*({cell_assay_conc}/100),'
+                                   f'AND({cell_vol_abs}<>"", {cell_dens}<>"", {cell_assay_conc}<>""), {cell_vol_abs}*{cell_dens}*({cell_assay_conc}/100),'
+                                   f'AND(OR({cell_v_per_w}<>"", {cell_vol_abs}<>""), OR({cell_assay_conc}="", {cell_dens}="")), "(Assay and/or density empty)",'
+                                   f'AND({cell_wt_abs_gro}<>"", {cell_assay_conc}=""), "(Assay empty)",'
+                                   'TRUE,"")')
+            self.ws.cell(row=line, column=col_xlslog_kg_net).value = xls_formula_kg_net
             
             #kg_gro
-            xls_formular_kg_gro = (f'=_xlfn.IFS(AND({cell_equiv}<>"", {cell_mw}<>"", {cell_assay_conc}<>""), {cell_mol_basis}*{cell_equiv}*{cell_mw}/({cell_assay_conc}/100)/1000,'
+            xls_formula_kg_gro = (f'=_xlfn.IFS('
+                                   f'AND({cell_equiv}<>"", {cell_mw}<>"", {cell_assay_conc}<>""), {cell_mol_basis}*{cell_equiv}*{cell_mw}/({cell_assay_conc}/100)/1000,'
                                    f'AND({cell_v_per_w}<>"",{cell_dens}<>""), {cell_kg_net_basis}*{cell_v_per_w}*{cell_dens},'
+                                   f'AND({cell_wwpct}<>"", {cell_assay_conc}<>""), {cell_kg_net_basis}*({cell_wwpct}/100)/({cell_assay_conc}/100),'
                                    f'AND({cell_wt_abs_gro}<>""),{cell_wt_abs_gro},'
                                    f'AND({cell_vol_abs}<>"", {cell_dens}<>""), {cell_vol_abs}*{cell_dens},'
+                                   f'AND(OR({cell_equiv}<>"",{cell_wwpct}<>""), {cell_assay_conc}=""), "(Assay empty)",'
+                                   f'AND(OR({cell_v_per_w}<>"",{cell_vol_abs}<>""), {cell_dens}=""), "(Density empty)",'
                                    'TRUE,"")')
-            self.ws.cell(row=line, column=col_xlslog_kg_gro).value = xls_formular_kg_gro
+            self.ws.cell(row=line, column=col_xlslog_kg_gro).value = xls_formula_kg_gro
             #err_abs
             xls_formular_err_abs = f'=IF(AND({cell_kg_gro}<>"",{cell_err_rel}<>""),{cell_kg_gro}*{cell_err_rel}/100,"")'
             self.ws.cell(row=line, column=col_xlslog_err_abs).value = xls_formular_err_abs

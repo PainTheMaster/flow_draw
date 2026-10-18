@@ -293,11 +293,11 @@ class Settling(uo.UnitOperation, uo_tag=defs.tag_uo_settling):
         super().load_from_json_dict(json_dict)
         self.time_min = json_dict.get(hedr_time_min, None)
         self.time_max = json_dict.get(hedr_time_max, None)
-        self.time_unit = json_dict.get(hedr_time_unit, opt_time_unit_minute)
+        # self.time_unit = json_dict.get(hedr_time_unit, opt_time_unit_minute)
 
-        if self.time_min is not None or self.time_max is not None and json_dict.get(hedr_time_unit, None) is not None:
+        if (self.time_min is not None or self.time_max is not None) and json_dict.get(hedr_time_unit, None) is not None:
             self.time_unit = json_dict.get(hedr_time_unit, None)
-        elif self.time_min is not None or self.time_max is not None and json_dict.get(hedr_time_unit, None) is None:
+        elif (self.time_min is not None or self.time_max is not None) and json_dict.get(hedr_time_unit, None) is None:
             self.time_unit = opt_time_unit_minute
             warnings.warn(message=f"{self.__class__.__name__}: No time unit is designated for Op. Seq {self.operation_seq} "
                                  "even though the minimum and/or maximum time has been provided. Time unit of minute is put "

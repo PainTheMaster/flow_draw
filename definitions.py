@@ -138,9 +138,9 @@ tag_uo_cake_rinse: str = "rinse"
 part_uo_title_cake_rinse_jp = "湿性末リンス"
 """JP expression of rinsing filter cake rinsing"""
 
-tag_uo_reslurry: str = "reslurry"
-"""Tag for an unit operation reslurry washing of obtained crystals (wet cake)"""
-part_uo_title_reslurry_jp = "結晶洗浄"
+tag_uo_cryst_wash: str = "crystal_washing"
+"""Tag for an unit operation crystal washing of obtained crystals (wet cake)"""
+part_uo_title_cryst_wash_jp = "結晶洗浄"
 """JP expression of reslurry wash of the obtained crystals (wet cake)"""
 
 tag_uo_drying: str = "drying"
@@ -183,7 +183,7 @@ dict_jp_part_uo_titles = {tag_uo_alloc: part_uo_title_alloc_jp,
                           tag_uo_filt : part_uo_title_filt_jp,
                           tag_uo_filt_setup: part_uo_title_filt_setup_jp,
                           tag_uo_cake_rinse : part_uo_title_cake_rinse_jp,
-                          tag_uo_reslurry : part_uo_title_reslurry_jp,
+                          tag_uo_cryst_wash : part_uo_title_cryst_wash_jp,
                           tag_uo_drying : part_uo_title_drying_jp,
                           tag_uo_tare_pkg : part_uo_title_tare_pkg_jp,
                           tag_uo_prod_disch : part_uo_title_prod_disch_jp,
@@ -467,19 +467,19 @@ list_hedr_uo_inert = [hedr_uo_inert_gas, hedr_uo_inert_neg_press, hedr_uo_inert_
 
         #>>>>>>>>>>Option items, lists, and a dictionary for drop-down list in detail input form<<<<<<<<<<<<<<
 
-opt_uo_inert_gas_N2 = "N2"
-"""Drop-down option item: choice of gas for inertization. Nitrogen gas"""
-opt_uo_inert_gas_Ar = "Ar"
-"""Drop-down option item: choice of gas for inertization. Argon gas"""
-opt_uo_inert_gas_plchldr = "(placeholder)"
-"""Drop-down option item: choice of gas for inertization. Placeholder"""
-list_opt_uo_inert_gas = [opt_uo_inert_gas_N2,
-                          opt_uo_inert_gas_Ar,
-                          opt_uo_inert_gas_plchldr]
-"""List for a drop-down list in the detail input table"""
+# opt_uo_inert_gas_N2 = "N2"
+# """Drop-down option item: choice of gas for inertization. Nitrogen gas"""
+# opt_uo_inert_gas_Ar = "Ar"
+# """Drop-down option item: choice of gas for inertization. Argon gas"""
+# opt_uo_inert_gas_plchldr = "(placeholder)"
+# """Drop-down option item: choice of gas for inertization. Placeholder"""
+# list_opt_uo_inert_gas = [opt_uo_inert_gas_N2,
+#                           opt_uo_inert_gas_Ar,
+#                           opt_uo_inert_gas_plchldr]
+# """List for a drop-down list in the detail input table"""
 
-dict_opt_uo_inert = {hedr_uo_inert_gas : list_opt_uo_inert_gas}
-"""Dictionary for drop-down lists in detail input form"""
+# dict_opt_uo_inert = {hedr_uo_inert_gas : list_opt_uo_inert_gas}
+# """Dictionary for drop-down lists in detail input form"""
 
 ######################################################
 ##      TEMPR_ HEADER ITEMS AND OPTIONS      ##
@@ -1030,28 +1030,28 @@ dict_jp_stcs_flow_chgng = {tag_stc_flow_chgng_qty : stc_flow_chgng_qty_err_jp,
 #part_flow_<unit operation>_<sort: instr, rec, mthod, etc>_<descr>_<lang> = str
 #Follwed by 
 #dict_<lang>_part_flow_<unit operation> = {<tag> : <component loc. lang>}
-tag_part_flow_uo_inert_gas_N2 = opt_uo_inert_gas_N2
-"""Tag for replacing gas N2 on the flowsheet"""
-part_flow_uo_inert_gas_N2_jp = "窒素"
-"""Flow sheet part Nitorgen"""
-tag_part_flow_uo_inert_gas_Ar = opt_uo_inert_gas_Ar
-"""Tag for replacing gas argon on the flowsheet"""
-part_flow_uo_inert_gas_Ar_jp = "アルゴン"
-"""Flow sheet part argon"""
-tag_part_flow_uo_inert_gas_plchldr = opt_uo_inert_gas_plchldr
-"""Tag for replacing gas placeholder on the flowsheet"""
-part_flow_uo_inert_gas_plchldr_jp = "<gas: placeholder>"
-"""Flow sheet part placeholder"""
+# tag_part_flow_uo_inert_gas_N2 = opt_uo_inert_gas_N2
+# """Tag for replacing gas N2 on the flowsheet"""
+# part_flow_uo_inert_gas_N2_jp = "窒素"
+# """Flow sheet part Nitorgen"""
+# tag_part_flow_uo_inert_gas_Ar = opt_uo_inert_gas_Ar
+# """Tag for replacing gas argon on the flowsheet"""
+# part_flow_uo_inert_gas_Ar_jp = "アルゴン"
+# """Flow sheet part argon"""
+# tag_part_flow_uo_inert_gas_plchldr = opt_uo_inert_gas_plchldr
+# """Tag for replacing gas placeholder on the flowsheet"""
+# part_flow_uo_inert_gas_plchldr_jp = "<gas: placeholder>"
+# """Flow sheet part placeholder"""
 
-tag_part_flow_uo_inert_rplace_complete = "replacement_complete"
-"""tag for inert gas replacement complete check-box"""
-part_flow_uo_inert_rplace_complete_jp = "□ 置換実施"
-"""Flow sheet part for inert gas replacement complete check-box"""
+# tag_part_flow_uo_inert_rplace_complete = "replacement_complete"
+# """tag for inert gas replacement complete check-box"""
+# part_flow_uo_inert_rplace_complete_jp = "□ 置換実施"
+# """Flow sheet part for inert gas replacement complete check-box"""
 
-dict_jp_part_flow_uo_inert = {tag_part_flow_uo_inert_gas_N2 : part_flow_uo_inert_gas_N2_jp,
-                                tag_part_flow_uo_inert_gas_Ar : part_flow_uo_inert_gas_Ar_jp,
-                                tag_part_flow_uo_inert_gas_plchldr : part_flow_uo_inert_gas_plchldr_jp,
-                                tag_part_flow_uo_inert_rplace_complete : part_flow_uo_inert_rplace_complete_jp}
+# dict_jp_part_flow_uo_inert = {tag_part_flow_uo_inert_gas_N2 : part_flow_uo_inert_gas_N2_jp,
+#                                 tag_part_flow_uo_inert_gas_Ar : part_flow_uo_inert_gas_Ar_jp,
+#                                 tag_part_flow_uo_inert_gas_plchldr : part_flow_uo_inert_gas_plchldr_jp,
+#                                 tag_part_flow_uo_inert_rplace_complete : part_flow_uo_inert_rplace_complete_jp}
 """JP language dictionary for flowsheet parts for the unit operation inert gas replacement"""
 
 

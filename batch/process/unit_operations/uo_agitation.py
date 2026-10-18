@@ -430,25 +430,11 @@ class Agitation(uo.UnitOperation, uo_tag=defs.tag_uo_agitation):
                                     '"agitation" is an unit operation where a solution/reaction mixture/slurry is agitated. '
                                     f'If controlled heating/cooling (temperature ramp-up/down) is required, please consider prioritising "{defs.tag_uo_tempr_ctrl}" over this unit operation.',
                                  required=False)
-        # json_agitation.if_then_else(prop = spec_agit.key,
-        #                             val_if= [opt_spec_specif, opt_spec_guide],
-        #                             props_then=[rpm])
-        # json_agitation.if_then_else(prop=time_min.key,
-        #                             props_then=[time_unit])
-        # json_agitation.if_then_else(prop=time_max.key,
-        #                             props_then=[time_unit])
         return json_agitation
         
         
         
     def load_from_json_dict(self, json_dict: dict[str, any]):
-        # self.operation_seq=json_dict[defs.hedr_cmn_io_dtil_seq]
-        # if defs.hedr_cmn_io_dtil_edt_cmnt in json_dict:
-        #     self.edit_comment = json_dict[defs.hedr_cmn_io_dtil_edt_cmnt]
-        # if defs.hedr_cmn_io_dtil_precmnt in json_dict:
-        #     self.pre_comment = json_dict[defs.hedr_cmn_io_dtil_precmnt]
-        # if defs.hedr_cmn_io_dtil_postcmnt in json_dict:
-        #     self.post_comment = json_dict[defs.hedr_cmn_io_dtil_postcmnt]
         super().load_from_json_dict(json_dict=json_dict)
 
         self.spec_agit = json_dict[hedr_spec_agit]
@@ -458,6 +444,9 @@ class Agitation(uo.UnitOperation, uo_tag=defs.tag_uo_agitation):
         self.time_min = json_dict[hedr_time_min]
         self.time_max = json_dict[hedr_time_max]
         self.time_unit = json_dict[hedr_time_unit]
+        if (self.time_min or self.time_max) and not self.time_unit:
+            raise RuntimeError(f'{self.__class__.__name__}.load_from_json_dict(): "time_min" and/or "time_max" given without specifying "time_unit".')
+
         if json_dict[hedr_dissolution_check] == opt_yes:
             self.dissolution_check = True
         else:

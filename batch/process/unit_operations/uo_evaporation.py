@@ -273,7 +273,7 @@ tag_stc_flow_rec_press = "record field for evaporation pressure/vacuum"
 dict_jp_stcs_flow = {tag_stc_flow_Tj_range : "外温範囲:{Tj_min}～{Tj_max}℃",
                      tag_stc_flow_Tj_min : "外温{Tj_min}℃以上",
                      tag_stc_flow_Tj_max : "外温{Tj_max}℃以下",
-                     tag_stc_flow_T_brine_range : "外温範囲:{Tj_min}～{Tj_max}℃",
+                     tag_stc_flow_T_brine_range : "ブライン温度範囲:{Tbr_min}～{Tbr_max}℃",
                      tag_stc_flow_T_brine_min : "ブライン温度{Tbr_min}℃以上",
                      tag_stc_flow_T_brine_max : "ブライン温度{Tbr_max}℃以下",
                      tag_stc_flow_press_spec_range : "真空度:{P_min}～{P_max} {P_unit}",
@@ -625,7 +625,7 @@ class Evaporation(uo.UnitOperation, uo_tag=defs.tag_uo_evap):
             elif self.P_min is not None:
                 sentence = dict_stcs_flow[tag_stc_flow_press_spec_min].format(P_min=self.P_min, P_unit=self.P_unit)
             elif self.P_max is not None:
-                sentence = dict_stcs_flow[tag_stc_flow_press_spec_max].format(P_min=self.P_max, P_unit=self.P_unit)
+                sentence = dict_stcs_flow[tag_stc_flow_press_spec_max].format(P_max=self.P_max, P_unit=self.P_unit)
             else:
                 raise RuntimeError(f"{self.__class__.__name__}.__put_press(): This branch is not supposed to be reached.\
                                    This runtime error is raised for the sake of debug.\
@@ -639,7 +639,7 @@ class Evaporation(uo.UnitOperation, uo_tag=defs.tag_uo_evap):
             elif self.P_min is not None:
                 sentence = dict_stcs_flow[tag_stc_flow_press_guide_min].format(P_min=self.P_min, P_unit=self.P_unit)
             elif self.P_max is not None:
-                sentence = dict_stcs_flow[tag_stc_flow_press_guide_max].format(P_min=self.P_max, P_unit=self.P_unit)
+                sentence = dict_stcs_flow[tag_stc_flow_press_guide_max].format(P_max=self.P_max, P_unit=self.P_unit)
             else:
                 raise RuntimeError(f"{self.__class__.__name__}__put_press(): This branch is not supposed to be reached.\
                                    This runtime error is raised for the sake of debug. \
