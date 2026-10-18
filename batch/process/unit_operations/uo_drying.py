@@ -595,12 +595,14 @@ class Drying(uo.UnitOperation, uo_tag=defs.tag_uo_drying):
         self.__put_vac_ctrl()
         self.__put_rot_ctrl()
         self.flowsheet.linefeed()
-        self.__terminate_drying()
+
         self.flowsheet.put_line(content=dict_parts[tag_part_content_instr_intermission])
         self.flowsheet.put_line(content=dict_parts[tag_part_content_instr_sampling_intermission])
         self.flowsheet.put_line(content=dict_stc[tag_stc_content_instr_sample_name_intermission].format(proc_name=self.caller.get_proc_name()))
         self.flowsheet.put_line(content=dict_parts[tag_part_content_instr_digging])
         self.flowsheet.linefeed()
+
+        self.__terminate_drying()
 
         if not (self.post_comment == None or self.post_comment == ''):
             self.flowsheet.put_body_comments(self.post_comment)

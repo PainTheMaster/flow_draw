@@ -171,8 +171,8 @@ class Materials:
         # if math.isnan(conc_assay_this) or conc_assay_this==0.0:
         if pd.isna(conc_assay_this) or conc_assay_this==0.0:
             conc_assay_this = 100.0
-            warnings.warn(f"{self.__class__.__name__}.to_kilogram(): The concentration or assay for the material \"{material_name}\" is empty or zero.",
-                          "For this run, 100%% is assumed.", UserWarning)
+            warnings.warn(f'{self.__class__.__name__}.to_kilogram(): The concentration or assay for the material \"{material_name}\" is empty or zero. '
+                          'For this run, 100% is assumed.', UserWarning)
         
         mw_this = self.df_mats[self.df_mats[defs.hedr_io_mats_mat]==material_name][defs.hedr_io_mats_mw].item()
         # if math.isnan(mw_this):

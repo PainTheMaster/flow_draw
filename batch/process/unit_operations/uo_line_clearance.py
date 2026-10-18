@@ -60,12 +60,31 @@ Language dictionary for common parts.
 """
 
 #language dictionary for lne-clearance-specific componen and keys (tags) thereof
-tag_lnclrnc_compltd = defs.tag_part_flow_lnclrnc_rec_cmpltd
-lang_dict_parts = defs.dict_jp_part_lnclrnce
+tag_cntnt_check_cleaned = "content_instruction_cleaning_check"
+"""Tag for a flowsheet component: instruction to check the cleaning status"""
+tag_cntnt_check_items = 'content_instr_check_items'
+"""Tag for a flowsheet component: check items for line clearance, e.g., unnecessary docs, records, equip, product, etc."""
+tag_rec_lnclrnc_compltd = "record_checkbox_line_clearance_completed"
+"""Tag for a flowsheet component: check box to record line clearance"""
+tag_rec_clean_check = "record_checkbox_cleaned"
+"""Tag for a flowsheet component: check box to record cleaning status"""
+
+dict_jp_parts = {tag_cntnt_check_cleaned:'洗浄が完了していること。',
+                 tag_cntnt_check_items : '他検体の文書、点検等の記録、用具、機器、製品、部品等がないことを確認する。',
+                    tag_rec_lnclrnc_compltd:"□ラインクリアランス完了",
+                    tag_rec_clean_check : "□洗浄済み"}
+
+lang_dict_parts = dict_jp_parts
+"""Multilingual language dictionary for fixed flowsheet components"""
+
 
 #Language dictionary for line-clearance-specific sentence(s) with placeholder
-tag_stc_instr = defs.tag_stc_flow_lnclrnc_instr
-lang_dict_stcs_lnclrnc = defs.dict_jp_stcs_flow_lnclrnc
+tag_stc_instr = "tag_line_clearance_instruction"
+"""Tag for a instruction sentence: instruction to carry out line clearance operation. Includes a placeholder {sop}."""
+
+dict_jp_stcs_flow_lnclrnc = {tag_stc_instr : "{sop}に従ってラインクリアランスを実施する。"}
+
+lang_dict_stcs_lnclrnc = dict_jp_stcs_flow_lnclrnc
 
 
 
@@ -144,9 +163,13 @@ class LineClearance(uo.UnitOperation, uo_tag=defs.tag_uo_line_clearance):
         sentence = lang_dict_stcs_lnclrnc[tag_stc_instr].format(sop=self.sop)
         self.flowsheet.put_line(time = lang_dict_cmn[tag_flow_cmn_rec_time],
                                 content=sentence,
-                                record=lang_dict_parts[tag_lnclrnc_compltd],
+                                record=lang_dict_parts[tag_rec_lnclrnc_compltd],
                                 operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
                                 witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
+        self.flowsheet.put_line(content=lang_dict_parts[tag_cntnt_check_items])
+        self.flowsheet.put_line(content=lang_dict_parts[tag_cntnt_check_cleaned],
+                                record=lang_dict_parts[tag_rec_clean_check])
+        
         self.flowsheet.linefeed()
 
         if not (self.post_comment == None or self.post_comment == ''):

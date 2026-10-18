@@ -144,75 +144,75 @@ tag_flow_cmn_rec_sign : part_flow_cmn_rec_sign_jp
 
 #Tags for translation of UO-specific parts
 tag_part_instr_ini = "tag_chgng_instr_ini"
-part_instr_ini_jp = '仕込み開始'
+# part_instr_ini_jp = '仕込み開始'
 """Flowseet component for class Charging. An action item of commencement of charging/dosing"""
 tag_part_instr_end = "tag_chgng_instr_end"
-part_instr_end_jp = '仕込み終了'
+# part_instr_end_jp = '仕込み終了'
 """Flowseet component for class Charging. An action item of end of charging/dosing"""
-tag_part_rec_input = "tag_chgng_rec_input"
-part_rec_input_jp = '仕込み量__________kg'
+tag_part_rec_qyt_input = "tag_chgng_rec_input"
+# part_rec_input_jp = '仕込み量__________kg'
 """Flowseet component for class Charging. A recording element for dispensed amount"""
 tag_part_rec_lot = "tag_chgng_rec_lot"
-part_rec_lot_jp = 'ロット番号__________'
+# part_rec_lot_jp = 'ロット番号__________'
 """Flowseet component for class Charging. A recording element for the lot number of a material"""
-
-#TODO: Add container ID!
-
-tag_part_rec_hose = "tag_chgng_rec_hose"
-part_rec_hose_jp ='溶媒用フレキID__________'
-"""Flowseet component for class Charging. A recording element for the ID of flexible tube for solvents"""
+tag_part_rec_cntnr_id = 'tag_chgng_rec_ID_container'
+"""Flowsheet component for class Charging. A recording element for the ID of liquid containers."""
+tag_part_rec_hose = "tag_chgng_rec_ID_hose"
+# part_rec_hose_jp ='フレキID__________'
+"""Flowseet component for class Charging. A recording element for the ID of flexible hose for solvents"""
 tag_part_rec_temprini = "tag_chgng_rec_temprini"
-part_rec_temprini_jp = '開始時内温_______℃'
+# part_rec_temprini_jp = '開始時内温_______℃'
 """Flowseet component for class Charging. A recording element for initial temperature of a certain action"""
 tag_part_rec_temprmax = "tag_chgng_rec_temprmax"
-part_temprmax_jp = '仕込み時最高内温_______℃'
+# part_temprmax_jp = '仕込み時最高内温_______℃'
 """Flowseet component for class Charging. A recording element for the maximum temperature"""
 tag_part_rec_temprmin = "tag_chgng_rec_temprmin"
-part_temprmin_jp = '仕込み時最低内温_______℃'
+# part_temprmin_jp = '仕込み時最低内温_______℃'
 """Flowseet component for class Charging. A recording element for the minimum"""
 tag_part_rec_temprend = "tag_chgng_rec_temprend"
-part_temprend_jp = '終了時内温_______℃'
+# part_temprend_jp = '終了時内温_______℃'
 """Flowseet component for class Charging. A recording element for the terminal temperature"""
 tag_part_rec_cmpltd = "tag_chgng_rec_cmpltd"
-part_cmpltd_jp ='□ 仕込み実施'
+# part_cmpltd_jp ='□ 仕込み実施'
 """Flowseet component for class Charging. A check box for complete charging/dosing"""
 
 tag_part_mthd_liq = method_liq
-part_mthd_liq_jp = "液体投入口"
+# part_mthd_liq_jp = "液体投入口"
 """Flowsheet component for class Charging. Charging through liquid charging port. An ption for Liquid charging."""
 tag_part_mthd_shower = method_shower
-part_mthd_shower_jp = "常設シャワー"
+# part_mthd_shower_jp = "常設シャワー"
 """Flowsheet component for class Charging. Charging through the fixed shower. An ption for Liquid charging."""
 tag_part_mthd_prssvesl = method_press
-part_mthd_prssvesl_jp = "圧送容器"
+# part_mthd_prssvesl_jp = "圧送容器"
 """Flowsheet component for class Charging. Charging from a pressure vessel. An ption for Liquid charging."""
 tag_part_mthd_mobile_tank = method_mobile_tank
-part_mthd_mobile_tank_jp = "液体コンテナ"
+# part_mthd_mobile_tank_jp = "液体コンテナ"
 """Flowsheet component for class Charging. Charging from a mobile tank. An option for large volume liquid charging."""
 tag_part_mthd_pwdr = method_pow
-part_mthd_pwdr_jp = "粉体投入口"
+# part_mthd_pwdr_jp = "粉体投入口"
 """Flowsheet component for class Charging. Charging through the power port. An ption for powder charging."""
 tag_part_mthd_plchldr = method_placeholder
-part_mthd_plchldr_jp = "<Placeholder: charging method>"
+# part_mthd_plchldr_jp = "<Placeholder: charging method>"
 """Flowsheet component for class Charging. A place holder. An ption for Liquid charging."""
 
 
-dict_jp_parts={tag_part_instr_ini : part_instr_ini_jp,
-                tag_part_instr_end : part_instr_end_jp,
-                tag_part_rec_input : part_rec_input_jp,
-                tag_part_rec_lot : part_rec_lot_jp,
-                tag_part_rec_hose : part_rec_hose_jp,
-                tag_part_rec_temprini : part_rec_temprini_jp,
-                tag_part_rec_temprmax : part_temprmax_jp,
-                tag_part_rec_temprmin : part_temprmin_jp,
-                tag_part_rec_temprend : part_temprend_jp,
-                tag_part_rec_cmpltd : part_cmpltd_jp,
-                tag_part_mthd_liq : part_mthd_liq_jp,
-                tag_part_mthd_shower : part_mthd_shower_jp,
-                tag_part_mthd_prssvesl : part_mthd_prssvesl_jp,
-                tag_part_mthd_mobile_tank : part_mthd_mobile_tank_jp,
-                tag_part_mthd_pwdr : part_mthd_pwdr_jp,
-                tag_part_mthd_plchldr : part_mthd_plchldr_jp
+dict_jp_parts={tag_part_instr_ini : '仕込み開始',
+                tag_part_instr_end : '仕込み終了',
+                tag_part_rec_qyt_input : '仕込み量__________kg',
+                tag_part_rec_lot : 'ロット番号__________',
+                tag_part_rec_cntnr_id : '容器ID__________',
+                tag_part_rec_hose : 'フレキID__________',
+                tag_part_rec_temprini : '開始時内温_______℃',
+                tag_part_rec_temprmax : '仕込み時最高内温_______℃',
+                tag_part_rec_temprmin : '仕込み時最低内温_______℃',
+                tag_part_rec_temprend : '終了時内温_______℃',
+                tag_part_rec_cmpltd :'□ 仕込み実施',
+                tag_part_mthd_liq : "液体投入口",
+                tag_part_mthd_shower : "常設シャワー",
+                tag_part_mthd_prssvesl : "圧送容器",
+                tag_part_mthd_mobile_tank : "液体コンテナ",
+                tag_part_mthd_pwdr : "粉体投入口",
+                tag_part_mthd_plchldr : "<Placeholder: charging method>"
                 }
 
 
@@ -452,17 +452,19 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
                                               witness=lang_dict_cmn[tag_flow_cmn_rec_sign],)
 
             #line-2: QTY instruction and record
-            inpt.instruct_qty_range(record=lang_dict_chgng_specif[tag_part_rec_input],
+            inpt.instruct_qty_range(record=lang_dict_chgng_specif[tag_part_rec_qyt_input],
                                    line_mat=line_mat)
 
-            #For liquid only, flex ID 
-            if (inpt.method == method_liq or
-                # temp_inpt.method == method_press or
-                inpt.method == method_shower or
-                inpt.method == method_mobile_tank):
+            #For liquid only, container ID, flex ID 
+            if inpt.method in (method_liq, method_shower, method_mobile_tank):
+                self.flowsheet.put_line(record=lang_dict_chgng_specif[tag_part_rec_cntnr_id])
                 self.flowsheet.put_line(record=lang_dict_chgng_specif[tag_part_rec_hose],
                                          operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
                                          witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
+            elif inpt.method == method_press:
+                self.flowsheet.put_line(record=lang_dict_chgng_specif[tag_part_rec_cntnr_id],
+                                        operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
+                                        witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
             
             #for both liq and solid; temp and time control.
             if not (inpt.time_control == timectrl_none or inpt.time_control is None):

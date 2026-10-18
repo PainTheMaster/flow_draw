@@ -1010,14 +1010,14 @@ dict_jp_stcs_flow_chgng = {tag_stc_flow_chgng_qty : stc_flow_chgng_qty_err_jp,
 #        PARTS FOR UO_LINE_CLEARANCE            #
 ###################################################
 """Flowsheet component for flowsheets. Simple ones without a placeholders."""
-tag_part_flow_lnclrnc_rec_cmpltd = "line clearance completed"
-part_flow_lnclrance_rec_cmpltd_jp = "□ラインクリアランス完了"
-dict_jp_part_lnclrnce = {tag_part_flow_lnclrnc_rec_cmpltd : part_flow_lnclrance_rec_cmpltd_jp}
+# tag_part_flow_lnclrnc_rec_cmpltd = "line clearance completed"
+# part_flow_lnclrance_rec_cmpltd_jp = "□ラインクリアランス完了"
+# dict_jp_part_lnclrnce = {tag_part_flow_lnclrnc_rec_cmpltd : part_flow_lnclrance_rec_cmpltd_jp}
 
 """Instruction sentences with placeholders etc for flowsheets."""
-tag_stc_flow_lnclrnc_instr = "line clearance instruction"
-stc_flow_lnclrnc_instr = "{sop}に従ってラインクリアランスを実施する。"
-dict_jp_stcs_flow_lnclrnc = {tag_stc_flow_lnclrnc_instr : stc_flow_lnclrnc_instr}
+# tag_stc_flow_lnclrnc_instr = "line clearance instruction"
+# stc_flow_lnclrnc_instr = "{sop}に従ってラインクリアランスを実施する。"
+# dict_jp_stcs_flow_lnclrnc = {tag_stc_flow_lnclrnc_instr : stc_flow_lnclrnc_instr}
 
 
 ###################################################

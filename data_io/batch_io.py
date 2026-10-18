@@ -56,7 +56,8 @@ class BatchIO:
             self.ws = self.wb.create_sheet(title=self.title_outline_ws)
         else:
             self.wb = xl.load_workbook(filename=self.outline_file_path)
-            if not self.title_outline_ws in self.wb.worksheets:
+            # if not self.title_outline_ws in self.wb.worksheets:
+            if self.title_outline_ws not in self.wb.sheetnames:
                 self.ws = self.wb.create_sheet(title=self.title_outline_ws)
             else:
                 self.ws = self.wb[self.title_outline_ws]
