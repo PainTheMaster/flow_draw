@@ -818,6 +818,31 @@ dict_opt_uo_evap = {hedr_uo_evap_press_ctrl : list_opt_uo_evap_press_ctrl,
 ###########################################################################################################################################
 
 ################################################################
+#                      STC PLACE HOLDERS                       #
+################################################################
+plchld_flow_col_mat = 'plchldr_col_mat'
+'''Key to a module-wide placeholder: placeholder for alphabetical column identifier in Excel.'''
+plchld_flow_col_equiv = 'plchldr_col_equiv'
+'''Key to a module-wide placeholder: placeholder for alphabetical equiv. column identifier in Excel.'''
+plchld_flow_col_v_per_w = 'plchldr_col_v_per_w'
+'''Key to a module-wide placeholder: placeholder for alphabetical v_per_w column identifier in Excel.'''
+plchld_flow_col_wwpct = 'plchldr_col_wwpct'
+'''Key to a module-wide placeholder: placeholder for alphabetical wwpct column identifier in Excel.'''
+plchld_flow_col_name_basis = 'plchldr_col_name_basis'
+'''Key to a module-wide placeholder: placeholder for alphabetical name_basis column identifier in Excel.'''
+plchld_flow_col_kg_gro = 'plchldr_col_kg_gro'
+'''Key to a module-wide placeholder: placeholder for alphabetical kg_gro column identifier in Excel.'''
+plchld_flow_col_err_abs = 'plchldr_col_err_abs'
+'''Key to a module-wide placeholder: placeholder for alphabetical err_abs column identifier in Excel.'''
+plchld_flow_col_mol = 'plchldr_col_mol'
+'''Key to a module-wide placeholder: placeholder for alphabetical mol column identifier in Excel.'''
+plchld_flow_col_kg_net = 'plchldr_col_kg_net'
+'''Key to a module-wide placeholder: placeholder for alphabetical kg_net column identifier in Excel.'''
+
+
+
+
+################################################################
 #            PARTS FOR FLOW SHEETS: COMMON                     #
 ################################################################
 

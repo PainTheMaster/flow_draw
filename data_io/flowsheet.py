@@ -229,6 +229,9 @@ class Flowsheet:
         return self.current_line-1
 
     def put_line(self, time: str =None, method: str=None, content: str=None, record: str=None, operator: str=None, witness: str=None)->int:
+        
+        content = self.replace_plchld(content)
+        
         if time:
             self.ws.cell(row=self.current_line, column=col_time).value = time
         if method:
@@ -248,7 +251,7 @@ class Flowsheet:
         return self.current_line-1
 
 
-    def put_material_new(self,
+    def put_material(self,
                          time: str ='',
                          method: str='',
                          content:str='',
@@ -273,6 +276,12 @@ class Flowsheet:
                                f'"wwpct": {wwpct}\n'
                                f'"wt_abs_kg_gro": {wt_abs_kg_gro}\n'
                                f'"vol_abs_litre": {vol_abs_litre}')
+
+        # content = content.replace(f'{{{defs.plchld_flow_col_mat}}}', alph_col_mat)
+        # content = content.replace(f'{{{defs.plchld_flow_col_equiv}}}', alph_col_equiv)
+        # content = content.replace(f'{{{defs.plchld_flow_col_v_per_w}}}', alph_col_v_per_w)
+        # content = content.replace(f'{{{defs.plchld_flow_col_wwpct}}}', alph_col_wwpct)
+        # content = content.replace(f'{{{defs.plchld_flow_col_name_basis}}}', alph_col_wwpct)
 
         line = self.put_line(time = time,
                              method=method,
@@ -318,8 +327,10 @@ class Flowsheet:
         if name_basis is not None:
             self.ws.cell(row=line_fs_this, column=col_xlslog_name_basis).value = name_basis
         if ref_mol_basis is not None:
+            ref_mol_basis = self.replace_plchld(ref_mol_basis)
             self.ws.cell(row=line_fs_this, column=col_xlslog_mol_basis).value = ref_mol_basis
         if ref_kg_net_basis is not None:
+            ref_kg_net_basis = self.replace_plchld(ref_kg_net_basis)
             self.ws.cell(row=line_fs_this, column=col_xlslog_kg_net_basis).value = ref_kg_net_basis
 
         return line_fs_this
@@ -377,7 +388,22 @@ class Flowsheet:
         self.current_line += max_length
         return self.current_line-1
 
+    @staticmethod
+    def replace_plchld(template:str|None)->str|None:
+        if template:
+            template = template.replace(f'{{{defs.plchld_flow_col_mat}}}', alph_col_mat)
+            template = template.replace(f'{{{defs.plchld_flow_col_equiv}}}', alph_col_equiv)
+            template = template.replace(f'{{{defs.plchld_flow_col_v_per_w}}}', alph_col_v_per_w)
+            template = template.replace(f'{{{defs.plchld_flow_col_wwpct}}}', alph_col_wwpct)
+            template = template.replace(f'{{{defs.plchld_flow_col_name_basis}}}', alph_col_name_basis)
+            template = template.replace(f'{{{defs.plchld_flow_col_kg_gro}}}', alph_col_kg_gro)
+            template = template.replace(f'{{{defs.plchld_flow_col_err_abs}}}', alph_col_err_abs )
+            template = template.replace(f'{{{defs.plchld_flow_col_mol}}}', alph_col_mol)
+            template = template.replace(f'{{{defs.plchld_flow_col_kg_net}}}', alph_col_kg_net )
 
+        # template = template.replace(f'{{{}}}', )
+
+        return template        
 
     def __put_excel_logic(self, line:int=None)->None:
         def __cell_input_config(column:int=None,

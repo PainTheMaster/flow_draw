@@ -9,7 +9,7 @@ from flow_draw.materials import materials as mats
 # from typing import TYPE_CHECKING
 # if TYPE_CHECKING:
 from flow_draw.data_io.flowsheet import Flowsheet
-import flow_draw.data_io.flowsheet as fsht
+# import flow_draw.data_io.flowsheet as fsht
 from flow_draw.trait_def.trait_def import GetMats, GetInputs
 from flow_draw.data_io.json_io import Objason, Primitive, Array
 
@@ -443,12 +443,6 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
             self.flowsheet.put_body_comments(self.pre_comment)
 
         for inpt in self.list_inputs:
-            # line_mat = self.flowsheet.put_material(time=lang_dict_cmn[tag_flow_cmn_rec_time],
-            #                                         method=lang_dict_chgng_specif[temp_inpt.method],
-            #                                         record=lang_dict_chgng_specif[tag_part_rec_lot],
-            #                                         operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
-            #                                         witness=lang_dict_cmn[tag_flow_cmn_rec_sign],
-            #                                         mat_input=temp_inpt)
 
             #line-1: Material name and relative quantity
             line_mat = inpt.put_material(time=lang_dict_cmn[tag_flow_cmn_rec_time],
@@ -917,18 +911,18 @@ class Input:
 
         excel_formula_mat:str=""
         if self.material_class == cls_input_mat_sm:
-            excel_formula_mat = f'={fsht.alph_col_mat}{line}'
+            excel_formula_mat = f'={{{defs.plchld_flow_col_mat}}}{line}'
         elif self.material_class == cls_input_mat_tgt:
             excel_formula_mat=''
         elif self.metrics_unit == opt_mtrcs_eq:
-            excel_formula_mat = f'={fsht.alph_col_mat}{line}&" ("&{fsht.alph_col_equiv}{line}&"equiv vs "&{fsht.alph_col_name_basis}{line}&")"'
+            excel_formula_mat = f'={{{defs.plchld_flow_col_mat}}}{line}&" ("&{{{defs.plchld_flow_col_equiv}}}{line}&"equiv vs "&{{{defs.plchld_flow_col_name_basis}}}{line}&")"'
         elif self.metrics_unit == opt_mtrcs_v_per_w:
-            excel_formula_mat = f'={fsht.alph_col_mat}{line}&" ("&{fsht.alph_col_v_per_w}{line}&"v/w vs "&{fsht.alph_col_name_basis}{line}&")"'               
+            excel_formula_mat = f'={{{defs.plchld_flow_col_mat}}}{line}&" ("&{{{defs.plchld_flow_col_v_per_w}}}{line}&"v/w vs "&{{{defs.plchld_flow_col_name_basis}}}{line}&")"'               
         elif self.metrics_unit == opt_mtrcs_wwpct:
-            excel_formula_mat = f'={fsht.alph_col_mat}{line}&" ("&{fsht.alph_col_wwpct}{line}&"w/w% vs "&{fsht.alph_col_name_basis}{line}&")"'
+            excel_formula_mat = f'={{{defs.plchld_flow_col_mat}}}{line}&" ("&{{{defs.plchld_flow_col_wwpct}}}{line}&"w/w% vs "&{{{defs.plchld_flow_col_name_basis}}}{line}&")"'
 
         if self.metrics_unit == opt_mtrcs_wt_gro_abs:
-            self.flowsheet.put_material_new(time=time,
+            self.flowsheet.put_material(time=time,
                                             method=method,
                                             content=excel_formula_mat,
                                             record=record,
@@ -941,7 +935,7 @@ class Input:
                                             wt_abs_kg_gro=self.metrics_val,
                                             error_rel=self.error_pct)
         elif self.metrics_unit == opt_mtrcs_vol_abs:
-            self.flowsheet.put_material_new(time=time,
+            self.flowsheet.put_material(time=time,
                                             method=method,
                                             content=excel_formula_mat,
                                             record=record,
@@ -954,7 +948,7 @@ class Input:
                                             vol_abs_litre=self.metrics_val,
                                             error_rel=self.error_pct)
         elif self.metrics_unit == opt_mtrcs_eq:
-            self.flowsheet.put_material_new(time=time,
+            self.flowsheet.put_material(time=time,
                                             method=method,
                                             content=excel_formula_mat,
                                             record=record,
@@ -967,7 +961,7 @@ class Input:
                                             equiv=self.metrics_val,
                                             error_rel=self.error_pct)
         elif self.metrics_unit == opt_mtrcs_v_per_w:
-            self.flowsheet.put_material_new(time=time,
+            self.flowsheet.put_material(time=time,
                                             method=method,
                                             content=excel_formula_mat,
                                             record=record,
@@ -980,7 +974,7 @@ class Input:
                                             v_per_w=self.metrics_val,
                                             error_rel=self.error_pct)
         elif self.metrics_unit == opt_mtrcs_wwpct:
-            self.flowsheet.put_material_new(time=time,
+            self.flowsheet.put_material(time=time,
                                             method=method,
                                             content=excel_formula_mat,
                                             record=record,
@@ -1007,7 +1001,8 @@ class Input:
         if line_mat is None:
             raise ValueError(f'{self.__class__.__name__}.put_range(): Material line (line_mat) must be provided.')
         
-        excel_formular_qty = f'=TEXT({fsht.alph_col_kg_gro}{line_mat},"0.00")&" ± "&TEXT({fsht.alph_col_err_abs}{line_mat},"0.00")&" kg"'
+        # excel_formular_qty = f'=TEXT({fsht.alph_col_kg_gro}{line_mat},"0.00")&" ± "&TEXT({fsht.alph_col_err_abs}{line_mat},"0.00")&" kg"'
+        excel_formular_qty = f'=TEXT({{{defs.plchld_flow_col_kg_gro}}}{line_mat},"0.00")&" ± "&TEXT({{{defs.plchld_flow_col_err_abs}}}{line_mat},"0.00")&" kg"'
         line_qty = self.flowsheet.put_line(time=time, method=method, content=excel_formular_qty, record=record, operator=operator, witness=witness)
 
         return line_qty
@@ -1023,18 +1018,18 @@ class Input:
 
         #>>>>>>>>>>>>>>>>>>>> func in func from here >>>>>>>>>>>>>>>>>>>>
 
-        def __prep_ref(alph_col:str=None, list_rows:list[int]=None)->str:
-            if alph_col is None:
+        def __prep_ref(plchld_alph_col:str=None, list_rows:list[int]=None)->str:
+            if plchld_alph_col is None:
                 raise ValueError(f'{self.__class__.__name__}.put_qty_material().__prep_ref(): An argument "alph_col" is None. Alphabet column identifier is needed.')
             if not list_rows:
                 raise ValueError(f'{self.__class__.__name__}.put_qty_material().__prep_ref(): An argument "list_rows" is None or len(list_rows)==0. A list of depended row is needed.')
             
             if len(list_rows) == 1:
-                return f'={alph_col}{list_rows[0]}'
+                return f'={plchld_alph_col}{list_rows[0]}'
             else:
                 list_cell:list[str] = []
                 for row in list_rows:
-                    list_cell.append(f'{alph_col}{row}')
+                    list_cell.append(f'{plchld_alph_col}{row}')
 
                 str_all_ref = ','.join(list_cell)
                 xls_formula = f'=SUM({str_all_ref})'
@@ -1067,29 +1062,18 @@ class Input:
             list_lines_basis = __basis_ids_to_lines(list_ids=self.list_id_basis_input)
 
             if self.metrics_unit == opt_mtrcs_eq:
-                # __put_values(name_basis=name_basis,
-                #             list_rows_basis_mol=__basis_ids_to_lines(list_basis),
-                #             equiv=mat_input.metrics_val)
-                # return line_fs_this
                 self.flowsheet.put_links(line_fs_this=self.line_fs,
                                          name_basis=name_basis,
-                                         ref_mol_basis=__prep_ref(alph_col=fsht.alph_col_mol, list_rows=list_lines_basis))
+                                         ref_mol_basis=__prep_ref(plchld_alph_col=f'{{{defs.plchld_flow_col_mol}}}', list_rows=list_lines_basis))
             elif self.metrics_unit == opt_mtrcs_v_per_w:
-                # __put_values(name_basis=name_basis,
-                #             list_rows_basis_kg_net=__basis_ids_to_lines(list_basis),
-                #             v_per_w=mat_input.metrics_val)
-                # return line_fs_this
                 self.flowsheet.put_links(line_fs_this=self.line_fs,
                                          name_basis=name_basis,
-                                         ref_kg_net_basis=__prep_ref(alph_col=fsht.alph_col_kg_net, list_rows=list_lines_basis))
+                                         ref_kg_net_basis=__prep_ref(plchld_alph_col=f'{{{defs.plchld_flow_col_kg_net}}}', list_rows=list_lines_basis))
             elif self.metrics_unit == opt_mtrcs_wwpct:
-                # __put_values(name_basis=name_basis,
-                #             list_rows_basis_kg_net=__basis_ids_to_lines(list_basis),
-                #             wwpct=mat_input.metrics_val)
-                # return line_fs_this
+
                 self.flowsheet.put_links(line_fs_this=self.line_fs,
                                          name_basis=name_basis,
-                                         ref_kg_net_basis=__prep_ref(alph_col=fsht.alph_col_kg_net, list_rows=list_lines_basis))
+                                         ref_kg_net_basis=__prep_ref(plchld_alph_col=f'{{{defs.plchld_flow_col_kg_net}}}', list_rows=list_lines_basis))
             else:
                 raise RuntimeError(f'{self.__class__.__name__}: Invalid metrics unit "{self.metrics_unit}" for the input ID {self.id_input} of "{self.material_name}".')
 
