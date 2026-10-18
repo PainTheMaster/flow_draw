@@ -6,9 +6,7 @@ import pandas as pd
 
 from flow_draw import definitions as defs
 #from flow_draw import chemistry as chem
-from typing import TYPE_CHECKING
-if TYPE_CHECKING:
-    from flow_draw.data_io import flowsheet as fsht
+from flow_draw.data_io import flowsheet as fsht
 from flow_draw.trait_def import trait_def as trdef
 from flow_draw.data_io.json_io import JsonEntity, Array, Objason, Primitive
 

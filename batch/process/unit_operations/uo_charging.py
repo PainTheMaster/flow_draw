@@ -156,6 +156,11 @@ tag_part_rec_qyt_input = "tag_chgng_rec_input"
 tag_part_rec_lot = "tag_chgng_rec_lot"
 # part_rec_lot_jp = 'ロット番号__________'
 """Flowseet component for class Charging. A recording element for the lot number of a material"""
+
+tag_part_rec_balance_id = "tag_chgng_rec_ID_balance"
+"""Flowsheet component for class Charging. A recording element for the ID of the balance."""
+#TODO: Please implement the printing logic of the balance ID record.
+
 tag_part_rec_cntnr_id = 'tag_chgng_rec_ID_container'
 """Flowsheet component for class Charging. A recording element for the ID of liquid containers."""
 tag_part_rec_hose = "tag_chgng_rec_ID_hose"
@@ -206,6 +211,7 @@ dict_jp_parts={tag_part_instr_ini : '仕込み開始',
                 tag_part_instr_end : '仕込み終了',
                 tag_part_rec_qyt_input : '仕込み量__________kg',
                 tag_part_rec_lot : 'ロット番号__________',
+                tag_part_rec_balance_id : '秤量器ID__________', #TODO: Please implement the printing logic of the balance ID record.
                 tag_part_rec_cntnr_id : '容器ID__________',
                 tag_part_rec_hose : 'フレキID__________',
                 tag_part_rec_temprini : '開始時内温_______℃',
@@ -270,7 +276,6 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
             The calling object. In the case of the class Charging, GetMats class is expected. From the given caller object, Charging expects materials.Materials passed by get_mats() method.
         """
         super().__init__(caller=caller, flowsheet=flowsheet, operation_seq=operation_seq, num_subitems=num_subitems, edit_comment=edit_comment)
-        # self.mats_data: mats.Materials = GetMats(self.caller).get_mats() #なんかやだからキャストする。
         self.mats_data: mats.Materials = None
         if caller is not None:
             self.mats_data = (self.caller).get_mats()

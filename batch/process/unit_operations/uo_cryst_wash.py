@@ -9,6 +9,7 @@ from flow_draw.batch.process.unit_operations import unit_operation as uo
 from flow_draw.data_io import process_io as procio
 from flow_draw.materials import materials as mats
 from flow_draw.trait_def import trait_def as trdef
+from flow_draw.batch.process.unit_operations.uo_charging import Input
 #from flow_draw.trait_def.trait_def import GetMats
 from flow_draw.data_io.json_io import Objason, Array, Primitive
 
@@ -82,11 +83,55 @@ Language dictionary for common parts.
     tag_flow_cmn_time_unit_hour : part_flow_cmn_time_unit_hour
 """
 
-tag_part_something:str = "tag_part_something"
+tag_part_rec_qty_input:str = "tag_input_qty"
+"""The key to a flowsheet part: the input quantity of washing solvent."""
+tag_part_rec_qty_lot:str = 'tag_lot'
+"""The key to a flowsheet part: the lot number of the input material."""
+tag_part_rec_id_balance:str = "tag_balance_id"
+"""The key to a flowsheet part: the ID of the balance."""
+tag_part_rec_id_cntnr:str = "tag_container_id"
+"""The key to a flowsheet part: the ID of the container of the input material."""
+tag_part_rec_hose:str = "tag_hose_id"
+"""The key to a flowsheet part: the hose of the input material."""
+tag_part_val_agit_rate_arbit:str = "tag_opt_agit_rate_arbit"
+"""The key to a flowsheet part: arbitrary agitation rate."""
+tag_part_unit_agit_rpm:str = "tag_unit_agit_rpm"
+"""The key to a flowsheet part: rpm, an unit of agitation rate."""
+tag_part_mthd_agitation:str = "tag_method_agit"
+"""The key to a flowsheet part: subtitle for reslurry washing."""
+tag_part_cntnt_instr_obs:str = "tag_content_instr_observation"
+"""The key to a flowsheet part: instruction for observation during agitation."""
+tag_part_cntnt_instr_init_agit:str = "tag_content_instr_init_agit"
+"""The key to a flowsheet part: instruction to start agitation."""
+tag_part_cntnt_instr_end_agit:str = "tag_content_instr_end_agit"
+"""The key to a flowsheet part: instruction to stop agitation."""
+tag_part_rec_rech_agit_complt:str = "tag_reach_agit_complt"
+"""The key to a flowsheet part: record field component. Check box to record the completion of agitation."""
 
-tag_stc_something:str = "tag_stc_something"
 
-dict_parts_stcs_jp = {}
+tag_stc_cntnt_instr_detail:str = "tag_stc_instr_detail"
+"""The key to a flowsheet sentence template: detailed instruction. Includes place holders "{time_val}" and "{time_unit}". """
+tag_stc_cntnt_agit_rate:str = "tag_stc_agit_rate"
+"""The key to a flowsheet sentence template: instruction for agitation rate. Includes place holders "{rot_value}" and "{rot_unit}". """
+tag_stc_rec_agit_duration:str = "tag_stc_agit_duration"
+"""The key to a flowsheet sentence template: record field for agitation duration. Includes a place holder "{time_unit}". """
+
+
+dict_parts_stcs_jp = {tag_part_rec_qty_input : '仕込み量__________kg',
+                      tag_part_rec_qty_lot : 'ロット番号__________',
+                      tag_part_rec_id_balance : '秤量器ID__________',
+                      tag_part_rec_id_cntnr : '容器ID__________',
+                      tag_part_rec_hose: 'フレキID__________',
+                      tag_part_val_agit_rate_arbit: '現場調整',
+                      tag_part_unit_agit_rpm: 'rpm',
+                      tag_part_mthd_agitation : '懸濁攪拌',
+                      tag_part_cntnt_instr_obs : 'FD内の状態を確認しながら操作すること',
+                      tag_part_cntnt_instr_init_agit : '攪拌開始',
+                      tag_part_cntnt_instr_end_agit : '攪拌終了',
+                      tag_part_rec_rech_agit_complt : '□ 実施確認',
+                      tag_stc_cntnt_instr_detail :'再下端まで攪拌しながら掘り下げ後{time_val}{time_unit}以上攪拌して攪拌翼を最上端まで上げて次ステップに移行する。',
+                      tag_stc_cntnt_agit_rate : '攪拌数: {rot_value}{rot_unit}',
+                      tag_stc_rec_agit_duration : '攪拌時間:__________{time_unit}'}
 
 dict_parts_stcs = dict_parts_stcs_jp
 
@@ -115,6 +160,13 @@ class ClassName(uo.UnitOperation, uo_tag=defs.tag_uo_reslurry):
                  num_subitems: int = None,
                  edit_comment:str=None):
         super().__init__(caller=caller, flowsheet=flowsheet, operation_seq=operation_seq, num_subitems=num_subitems, edit_comment=edit_comment)
+        self.buffer_tank:list[str] = []
+        self.arr_inputs:list[Input] = []
+        self.val_time_agit:float = None
+        self.unit_time_agit:str = None
+        self.rpm_agit:float = None
+
+
     
     def load_params_from_df(self, df: pd.DataFrame):
         """
