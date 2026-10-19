@@ -267,7 +267,7 @@ class FiltSetup(uo.UnitOperation, uo_tag=defs.tag_uo_filt_setup):
     def get_detail_option_menu(self) -> Optional[dict[str, list[str]]]:
         return dict_opt
     
-
+    @staticmethod
     def get_json_schema(caller: trdef.UniversalTrait=None)->Objason:
         common_schema:list[Primitive] = FiltSetup.json_common()
 

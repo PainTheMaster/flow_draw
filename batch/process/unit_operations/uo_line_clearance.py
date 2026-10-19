@@ -137,6 +137,7 @@ class LineClearance(uo.UnitOperation, uo_tag=defs.tag_uo_line_clearance):
     def get_detail_option_menu(self) -> Optional[dict[str, list[str]]]:
         return None
 
+    @staticmethod
     def get_json_schema(caller: trdef.UniversalTrait=None)->Objason:
         common_schema:list[Primitive] = LineClearance.json_common()
         sop = Primitive(prim_type = "string",

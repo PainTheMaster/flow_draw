@@ -426,6 +426,7 @@ class Drying(uo.UnitOperation, uo_tag=defs.tag_uo_drying):
     def get_detail_option_menu(self) -> Optional[dict[str, list[str]]]:
         return dict_opt
 
+    @staticmethod
     def get_json_schema(caller: type[trdef.UniversalTrait]=None)->Objason:
         common_schema:list[Primitive] = Drying.json_common()
         Tj_ctrl_cat:Primitive = Primitive(prim_type="string",

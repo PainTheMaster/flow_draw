@@ -240,7 +240,8 @@ class Filtration(uo.UnitOperation, uo_tag=defs.tag_uo_filt):
         self.press_max:float = None
         self.unit_press:str = None
         self.integ_test:bool = False
-    
+
+    @staticmethod
     def get_json_schema(caller:trdef.UniversalTrait = None):
         cmn_schema = Filtration.json_common()
         filt_device = Primitive(prim_type='string',

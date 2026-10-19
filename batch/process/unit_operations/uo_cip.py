@@ -205,6 +205,7 @@ class CIP(uo.UnitOperation, uo_tag=defs.tag_uo_cip):
             self.cip_operations.append(obj_unit)
 
 
+    @staticmethod
     def get_json_schema(caller:trdef.GetMats = None)->json_io.Objason:
         # list_cmn = Agitation.json_common(arg_name_uo=Agitation.uo_tag)
         list_mats = (caller.get_mats()).get_list_mats()

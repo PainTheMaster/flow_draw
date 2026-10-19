@@ -4,6 +4,7 @@
 import pandas as pd
 import flow_draw.definitions as defs
 import flow_draw.data_io.flowsheet as fsht
+import flow_draw.batch.process.unit_operations.uo_charging as chgng
 from typing import Optional
 from flow_draw.batch.process.unit_operations import unit_operation as uo
 from flow_draw.data_io import process_io as procio
@@ -42,6 +43,18 @@ opt_time_unit_hour:str = defs.tag_flow_cmn_time_unit_hour
 #hedr_<something> = defs.hedr_<unit operation>_<specification item>
 #list_hedr = defs.list_hedr_<list of header items for the uo>
 #dict_dtil_drpdwn = defs.dict_opt_<unit operation>
+hedr_solvent_via:str = 'solvent_via'
+"""Header item for the vessels via which the solvent is added."""
+
+
+
+
+
+hedr_solvent_volume:str = 'solvent_volume'
+"""Header item for the volume of the solvent added."""
+hedr_solvent_qty:str = 'solvent_metrics_value'
+"""Header item for the quantity of the solvent added."""
+
 
 list_hedr = []
 
@@ -183,6 +196,7 @@ class ClassName(uo.UnitOperation, uo_tag=defs.tag_uo_reslurry):
             self.post_comment = first_row[hedr_postcomment]
         for _, subitem in df.iterrows():
             #<uo-specific process>
+            pass
 
 
 
@@ -193,6 +207,7 @@ class ClassName(uo.UnitOperation, uo_tag=defs.tag_uo_reslurry):
     def get_detail_option_menu(self) -> Optional[dict[str, list[str]]]:
         return dict_opt
     
+    @staticmethod
     def get_json_schema(caller: trdef.UniversalTrait=None)->Objason:
         common_schema:list[Primitive] = ThisClass.json_common()
 

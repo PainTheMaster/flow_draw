@@ -305,6 +305,7 @@ class Transfer(uo.UnitOperation, uo_tag=defs.tag_uo_transfer):
         
         self.flowsheet.linefeed()
 
+    @staticmethod
     def get_json_schema(caller: trdef.UniversalTrait=None)->Objason:
         common_schema:list[Primitive] = Transfer.json_common()
         instruction_type = Primitive(prim_type='string',

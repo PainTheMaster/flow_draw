@@ -268,7 +268,8 @@ class Sampling(uo.UnitOperation, uo_tag=defs.tag_uo_sampling):
         if not (self.post_comment == None or self.post_comment == ''):
             self.flowsheet.put_body_comments(self.post_comment)
             self.flowsheet.linefeed()
-    
+
+    @staticmethod
     def get_json_schema(caller:trdef.UniversalTrait = None) -> Objason:
         common = Sampling.json_common()
         sample_name:Primitive = Primitive(prim_type='string',

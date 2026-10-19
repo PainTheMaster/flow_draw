@@ -365,6 +365,7 @@ class TempControl(uo.UnitOperation, uo_tag=defs.tag_uo_tempr_ctrl):
         self.endpoint_check = (first_row[hedr_endpoint_check] == opt_yes)
         """first_row[hedr_endpoint_check] shall has a value of 'Yes', 'No', NaN or something else. Only 'Yes' is regarded as the affirmative choice."""
 
+    @staticmethod
     def get_json_schema(caller: trdef.UniversalTrait=None)->Objason:
         common_schema:list[Primitive] = TempControl.json_common()
         mode = Primitive(prim_type='string',

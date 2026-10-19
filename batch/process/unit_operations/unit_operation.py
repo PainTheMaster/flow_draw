@@ -122,7 +122,7 @@ class UnitOperation(ABC):
         self.edit_comment:str = edit_comment
         self.pre_comment: str = None
         self.post_comment: str = None
-    
+
     @abstractmethod
     def get_detail_header(self) -> list[str]:
         """
@@ -239,7 +239,8 @@ class UnitOperation(ABC):
                             nullable=True)
         
         return [seq_uo, name_uo, edtcmnt, precmnt, postcmnt]
-    
+
+    @staticmethod
     @abstractmethod
     def get_json_schema(caller:type[trdef.UniversalTrait] = None)->Objason:
         raise NotImplementedError()

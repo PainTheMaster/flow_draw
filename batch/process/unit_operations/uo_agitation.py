@@ -376,7 +376,7 @@ class Agitation(uo.UnitOperation, uo_tag=defs.tag_uo_agitation):
     def get_detail_option_menu(self) -> Optional[dict[str, list[str]]]:
         return dict_opt
     
-
+    @staticmethod
     def get_json_schema(caller:trdef.UniversalTrait = None)->json_io.Objason:
         # list_cmn = Agitation.json_common(arg_name_uo=Agitation.uo_tag)
         list_cmn = Agitation.json_common()

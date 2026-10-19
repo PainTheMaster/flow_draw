@@ -166,7 +166,7 @@ class InertReplacement(uo.UnitOperation, uo_tag=defs.tag_uo_inert_replace):
     def get_detail_option_menu(self) -> Optional[dict[str, list[str]]]:
         return dict_opt
 
-
+    @staticmethod
     def get_json_schema(caller: trdef.UniversalTrait=None)->procio.Objason:
         common_schema:list = InertReplacement.json_common()
         inert_gas = Primitive(prim_type='string',

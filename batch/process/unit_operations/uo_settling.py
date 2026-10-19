@@ -241,6 +241,7 @@ class Settling(uo.UnitOperation, uo_tag=defs.tag_uo_settling):
     def get_detail_option_menu(self) -> Optional[dict[str, list[str]]]:
         return dict_opt
 
+    @staticmethod
     def get_json_schema(caller: trdef.UniversalTrait=None)->Objason:
         common_schema:list[Primitive] = Settling.json_common()
         time_min:Primitive = Primitive(prim_type='number',

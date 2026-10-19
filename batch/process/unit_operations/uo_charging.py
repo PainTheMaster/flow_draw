@@ -48,7 +48,7 @@ id_input_json = 'Material_Input_ID'
 hedr_basis_input = 'Calc_Basis_Material_Input_ID'
 """The key to the calculation basis material input ID for JSON data exchange."""
 
-hedr_basis_array = 'Array_Calc_Basis'
+hedr_basis_array_json = 'Array_Calc_Basis'
 """The key to the array of calculation basis material input IDs for JSON data exchange."""
 
 entry_input_json = 'charging_input_entry'
@@ -57,7 +57,7 @@ entry_input_json = 'charging_input_entry'
 arry_inputs_json = 'arr_charging_input_entry'
 """The key to a list of material input entries."""
 
-obj_charging_json = 'charging_stage'
+# obj_charging_json = 'charging_stage'
 """The key to the unit operation of charging."""
 
 opt_special_id_basis_tgt = defs.id_special_tgt_uo_chgng
@@ -310,123 +310,10 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
             self.list_inputs.append(new_input)
             self.input_count += 1
 
-
+    @staticmethod
     def get_json_schema(caller: GetMats=None)-> Objason:
-        mats_data: mats.Materials = caller.get_mats() 
-        list_mats=mats_data.get_list_mats()
-        #common=Charging.json_common(arg_name_uo=defs.tag_uo_charging)
-        common=Charging.json_common()
-        id_input = Primitive(prim_type='integer',
-                             key=id_input_json,
-                             description='A unique serial number (positive or zero) for the material input. '
-                             'This value must be unique for each material input and this rule applies throughout the process. '
-                             'Regardless of the input sequence, please assign 0 for (the first input of) the starting material (the key building block of the process). '
-                             'This value is used to identify an instance of material input to calculate the quantity of other material inputs when this instance is used as the basis.',
-                             nullable=False,
-                             required=True)
-        name_mats = Primitive(prim_type="string",
-                              key=hedr_material_name,
-                              enum=list_mats,
-                              description='The name of the raw material, solvent, etc., charged.')
-        qty_mats = Primitive(prim_type="number",
-                             key=hedr_metrics_value,
-                             description=f'Relative quantity of the raw material, solvent, and other materials. This object is for the value only.'
-                             f'The unit is selected in another entry. '
-                             'As a special case, if this instance is one of the split charges of the starting material (the key building block), please put the fraction of the total quantity. '
-                             f'For example, if the starting material is split into three charges, each charge should have a relative quantity of 0.333 {opt_mtrcs_eq}. '
-                             f'Otherwise (single charge), please put 1.0 {opt_mtrcs_eq} for the relative quantity of the starting material.')
-        unit_mats = Primitive(prim_type="string",
-                              key=hedr_metrics_unit,
-                              description=f'Unit to specify the relative quantity of the raw material, solvent, and other materials. This is for the unit only. '
-                              f'"{opt_mtrcs_eq}": molar equivalent vs the selected calculation basis material input. '
-                              f'"{opt_mtrcs_v_per_w}": volume (L) of liquid vs weight (kg) of the selected calculation basis material input. '
-                              f'"{opt_mtrcs_wwpct}": weight/weight percent vs the designated calculation basis material input. '
-                              f'"{opt_mtrcs_wt_gro_abs}": The gross weight (kg) of a material is directly specified by an absolute value. This is an exceptional case. '
-                              f'"{opt_mtrcs_vol_abs}": The volume (litre) of a non-solid material is directly specified by an absolute value. This is an exceptional case. '
-                              'In the JSON, it normally is assumed that evne the starting material is quantified by a relative metrics (equiv or weight percent) in relation to a basis value defined elsewhere. '
-                              'Please choose the absolute approac only when it is essential or instructed by the user. '
-                              f'This item has to be consistent with the other entry "{hedr_metrics_value}"',
-                              enum=list_metrics_unit)
-        basis_input_single = Primitive(prim_type='integer',
-                                key=hedr_basis_input,
-                                description='The material input used as the basis for calculating the quantity of other material inputs.'
-                                f'If the target material is designated as the calculation basis, please put {opt_special_id_basis_tgt}.',
-                                nullable=False,
-                                required=True)
-        arr_basis_inputs = Array(key=hedr_basis_array,
-                           content = basis_input_single,
-                           description='Array of material input IDs used as the basis for calculating the quantity of other material inputs. '
-                           'In most cases, only one material input ID (the key building block) is used as the basis. '
-                           'However, multiple input IDs are allowed. For a rare example, when the key raw material is split and charged in multiple steps. '
-                           f'If the target material is designated as the calculation basis, please put {opt_special_id_basis_tgt}. '
-                           'If this input depends on nothing, e.g., the starting material, please leave this null.',
-                           nullable=True,
-                           required = True)
-        permiss_error = Primitive(prim_type="number",
-                                  key=hedr_error_pct,
-                                  description="Permissible error of the material quantity indicated in percent (%). If not specified in the data source, "
-                                    "please use the default value of 1 percent for the key raw material, and 5 percent for other materials.")
-        charging_method = Primitive(prim_type='string',
-                                    key=hedr_method,
-                                    enum=list_charging_method,
-                                    description=f"Method to charge/dose a material. "
-                                        f'"{method_liq}" is charging solvent or liquid reagent through a pipe. This method is less frequently chosen. '
-                                        f'"{method_shower}" is charging solvents by using a showering device in the reaction vessel to clean adhered solid material on the wall. '
-                                        f'"{method_press}" is preferred for solvents and liquid reagents less than 10 liters. The liquid material is put in a container under some pressure. '
-                                        f'The liquid is transferred to the reaction vessel at a controlled rate. '
-                                        f'"{method_mobile_tank}" is choses when a large volume of liquid, e.g. two-digit liters of solvent, needs to be measured and charged. '
-                                        f'"{method_pow}" is for solid material. A solid material is charged through an opening on the top of the reactor. '
-                                        'As a special case, slurry of crystal seed is charged by this method.'
-                                        f'If you can\'t choose the right option, please select "{method_placeholder}"')
-        time_ctrl = Primitive(prim_type='string',
-                              key=hedr_time_control,
-                              enum=list_time_control,
-                              description=f'Constraint on time to dose/charge the material. '
-                                f'"{timectrl_none}" means time control is no needed. '
-                                f'"{timectrl_min}" should be selected when lower limit must be complied. '
-                                f'"{timectrl_max}" should be selected when upper limit must be complied. '
-                                f'"{timectrl_min_max}" should be selected when the event has to happen in a specific range of time. '
-                                f'"Please select {timectrl_placeholder}" if the right option cannot be chosen based on the given information.')
-        
-        time_min = Primitive(prim_type="number",
-                             key=hedr_time_min,
-                             description=f'Lower limit of charging/dosing time in minutes unit. Necessary if "{hedr_time_control}" is "{timectrl_min}" or "{timectrl_min_max}"; nullable otherwise',
-                             nullable=True)
-        
-        time_max = Primitive(prim_type="number",
-                             key=hedr_time_max,
-                             description=f'Upper limit of charging/dosing time in minutes unit. Necessary if "{hedr_time_control}" is "{timectrl_max}" or "{timectrl_min_max}"',
-                             nullable=True)
-        
-        temp_ctrl = Primitive(prim_type='string',
-                              key=hedr_temp_control,
-                              enum=list_temp_control,
-                              description=f'Constraint on temperature during dosing/charging of the material. '
-                              f'"{temprctrl_none}" means no temperature control is needed. '
-                              f'"{temprctrl_min}" is selected when the lower limit is set for the dosing/charging. '
-                              f'"{temprctrl_max}" is selected when the upper limit is set for the dosing/charging. '
-                              f'"{temprctrl_min_max}" is for a case where the charging/dosing have to take place in a certain specific temperature range. '
-                              f'Please select "{temprctrl_placeholder}" if the right option cannot be chosen based on the given infomation.',
-                              required=True)
-        
-        temp_min = Primitive(prim_type='number',
-                             key=hedr_temp_min,
-                             description= f'An optional lower limit for internal temperature during dosing/charging.'
-                             f'This is necessary if "{hedr_temp_control}" is "{temprctrl_min}" or "{temprctrl_min_max}". Nullable, otherwise.',
-                             nullable=True,
-                             required=True)
-        temp_max = Primitive(prim_type='number',
-                             key=hedr_temp_max,
-                             description=f'An optional upper limit for internal temperature during dosing/charging.'
-                             f'This is necessary if "{hedr_temp_control}" is "{temprctrl_max}" or "{temprctrl_min_max}". Nullable, otherwise.',
-                             nullable=True,
-                             required=True)
-        
-        input_entry = Objason(key=entry_input_json,
-                              props=[id_input, name_mats, qty_mats, unit_mats, arr_basis_inputs, permiss_error, charging_method, time_ctrl, time_min, time_max, temp_ctrl, temp_min, temp_max],
-                              description='Combination of material, quantity, permissible quantity error, charging method, time constraints, temperature range to define each charging/dosing operation.'
-                             )
-
+        common=Charging.json_common()        
+        input_entry = Input.get_json_schema(caller=caller)
         arr_input = Array(key=arry_inputs_json,
                           content=input_entry,
                           description='A list of material input entries. A single material or more is put in the reactor vessel in a charging/dosing stage.',
@@ -652,12 +539,130 @@ class Input:
             self.density = self.mats_data.get_density(self.material_name)
             self.conc_assay = self.mats_data.get_conc_assay(self.material_name)
 
+    @staticmethod
+    def get_json_schema(caller: GetMats=None)-> Objason:
+        mats_data: mats.Materials = caller.get_mats() 
+        list_mats=mats_data.get_list_mats()
+        id_input = Primitive(prim_type='integer',
+                             key=id_input_json,
+                             description='A unique serial number (positive or zero) for the material input. '
+                             'This value must be unique for each material input and this rule applies throughout the process. '
+                             'Regardless of the input sequence, please assign 0 for (the first input of) the starting material (the key building block of the process). '
+                             'This value is used to identify an instance of material input to calculate the quantity of other material inputs when this instance is used as the basis.',
+                             nullable=False,
+                             required=True)
+        name_mats = Primitive(prim_type="string",
+                              key=hedr_material_name,
+                              enum=list_mats,
+                              description='The name of the raw material, solvent, etc., charged.')
+        qty_mats = Primitive(prim_type="number",
+                             key=hedr_metrics_value,
+                             description=f'Relative quantity of the raw material, solvent, and other materials. This object is for the value only.'
+                             f'The unit is selected in another entry. '
+                             'As a special case, if this instance is one of the split charges of the starting material (the key building block), please put the fraction of the total quantity. '
+                             f'For example, if the starting material is split into three charges, each charge should have a relative quantity of 0.333 {opt_mtrcs_eq}. '
+                             f'Otherwise (single charge), please put 1.0 {opt_mtrcs_eq} for the relative quantity of the starting material.')
+        unit_mats = Primitive(prim_type="string",
+                              key=hedr_metrics_unit,
+                              description=f'Unit to specify the relative quantity of the raw material, solvent, and other materials. This is for the unit only. '
+                              f'"{opt_mtrcs_eq}": molar equivalent vs the selected calculation basis material input. '
+                              f'"{opt_mtrcs_v_per_w}": volume (L) of liquid vs weight (kg) of the selected calculation basis material input. '
+                              f'"{opt_mtrcs_wwpct}": weight/weight percent vs the designated calculation basis material input. '
+                              f'"{opt_mtrcs_wt_gro_abs}": The gross weight (kg) of a material is directly specified by an absolute value. This is an exceptional case. '
+                              f'"{opt_mtrcs_vol_abs}": The volume (litre) of a non-solid material is directly specified by an absolute value. This is an exceptional case. '
+                              'In the JSON, it normally is assumed that evne the starting material is quantified by a relative metrics (equiv or weight percent) in relation to a basis value defined elsewhere. '
+                              'Please choose the absolute approac only when it is essential or instructed by the user. '
+                              f'This item has to be consistent with the other entry "{hedr_metrics_value}"',
+                              enum=list_metrics_unit)
+        basis_input_single = Primitive(prim_type='integer',
+                                key=hedr_basis_input,
+                                description='The material input used as the basis for calculating the quantity of other material inputs.'
+                                f'If the target material is designated as the calculation basis, please put {opt_special_id_basis_tgt}.',
+                                nullable=False,
+                                required=True)
+        arr_basis_inputs = Array(key=hedr_basis_array_json,
+                           content = basis_input_single,
+                           description='Array of material input IDs used as the basis for calculating the quantity of other material inputs. '
+                           'In most cases, only one material input ID (the key building block) is used as the basis. '
+                           'However, multiple input IDs are allowed. For a rare example, when the key raw material is split and charged in multiple steps. '
+                           f'If the target material is designated as the calculation basis, please put {opt_special_id_basis_tgt}. '
+                           'If this input depends on nothing, e.g., the starting material, please leave this null.',
+                           nullable=True,
+                           required = True)
+        permiss_error = Primitive(prim_type="number",
+                                  key=hedr_error_pct,
+                                  description="Permissible error of the material quantity indicated in percent (%). If not specified in the data source, "
+                                    "please use the default value of 1 percent for the key raw material, and 5 percent for other materials.")
+        charging_method = Primitive(prim_type='string',
+                                    key=hedr_method,
+                                    enum=list_charging_method,
+                                    description=f"Method to charge/dose a material. "
+                                        f'"{method_liq}" is charging solvent or liquid reagent through a pipe. This method is less frequently chosen. '
+                                        f'"{method_shower}" is charging solvents by using a showering device in the reaction vessel to clean adhered solid material on the wall. '
+                                        f'"{method_press}" is preferred for solvents and liquid reagents less than 10 liters. The liquid material is put in a container under some pressure. '
+                                        f'The liquid is transferred to the reaction vessel at a controlled rate. '
+                                        f'"{method_mobile_tank}" is choses when a large volume of liquid, e.g. two-digit liters of solvent, needs to be measured and charged. '
+                                        f'"{method_pow}" is for solid material. A solid material is charged through an opening on the top of the reactor. '
+                                        'As a special case, slurry of crystal seed is charged by this method.'
+                                        f'If you can\'t choose the right option, please select "{method_placeholder}"')
+        time_ctrl = Primitive(prim_type='string',
+                              key=hedr_time_control,
+                              enum=list_time_control,
+                              description=f'Constraint on time to dose/charge the material. '
+                                f'"{timectrl_none}" means time control is no needed. '
+                                f'"{timectrl_min}" should be selected when lower limit must be complied. '
+                                f'"{timectrl_max}" should be selected when upper limit must be complied. '
+                                f'"{timectrl_min_max}" should be selected when the event has to happen in a specific range of time. '
+                                f'"Please select {timectrl_placeholder}" if the right option cannot be chosen based on the given information.')
+        
+        time_min = Primitive(prim_type="number",
+                             key=hedr_time_min,
+                             description=f'Lower limit of charging/dosing time in minutes unit. Necessary if "{hedr_time_control}" is "{timectrl_min}" or "{timectrl_min_max}"; nullable otherwise',
+                             nullable=True)
+        
+        time_max = Primitive(prim_type="number",
+                             key=hedr_time_max,
+                             description=f'Upper limit of charging/dosing time in minutes unit. Necessary if "{hedr_time_control}" is "{timectrl_max}" or "{timectrl_min_max}"',
+                             nullable=True)
+        
+        temp_ctrl = Primitive(prim_type='string',
+                              key=hedr_temp_control,
+                              enum=list_temp_control,
+                              description=f'Constraint on temperature during dosing/charging of the material. '
+                              f'"{temprctrl_none}" means no temperature control is needed. '
+                              f'"{temprctrl_min}" is selected when the lower limit is set for the dosing/charging. '
+                              f'"{temprctrl_max}" is selected when the upper limit is set for the dosing/charging. '
+                              f'"{temprctrl_min_max}" is for a case where the charging/dosing have to take place in a certain specific temperature range. '
+                              f'Please select "{temprctrl_placeholder}" if the right option cannot be chosen based on the given infomation.',
+                              required=True)
+        
+        temp_min = Primitive(prim_type='number',
+                             key=hedr_temp_min,
+                             description= f'An optional lower limit for internal temperature during dosing/charging.'
+                             f'This is necessary if "{hedr_temp_control}" is "{temprctrl_min}" or "{temprctrl_min_max}". Nullable, otherwise.',
+                             nullable=True,
+                             required=True)
+        temp_max = Primitive(prim_type='number',
+                             key=hedr_temp_max,
+                             description=f'An optional upper limit for internal temperature during dosing/charging.'
+                             f'This is necessary if "{hedr_temp_control}" is "{temprctrl_max}" or "{temprctrl_min_max}". Nullable, otherwise.',
+                             nullable=True,
+                             required=True)
+        
+        input_entry = Objason(key=entry_input_json,
+                              props=[id_input, name_mats, qty_mats, unit_mats, arr_basis_inputs, permiss_error, charging_method, time_ctrl, time_min, time_max, temp_ctrl, temp_min, temp_max],
+                              description='Combination of material, quantity, permissible quantity error, charging method, time constraints, temperature range to define each charging/dosing operation.'
+                             )
+
+        return input_entry
+
+        
     def load_from_json_dict(self, json_dict: dict[str, any]):
         self.id_input =json_dict[id_input_json]
         self.material_name = json_dict[hedr_material_name]
         self.metrics_unit = json_dict[hedr_metrics_unit]
         self.metrics_val = json_dict[hedr_metrics_value]
-        self.list_id_basis_input = json_dict[hedr_basis_array]
+        self.list_id_basis_input = json_dict[hedr_basis_array_json]
         if json_dict.get(hedr_error_pct):
             self.error_pct = json_dict[hedr_error_pct]
         else:

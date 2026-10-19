@@ -79,6 +79,7 @@ class Placeholder(uo.UnitOperation, uo_tag=defs.tag_uo_placeholder):
     def get_detail_option_menu(self) -> Optional[dict[str, list[str]]]:
         return None
 
+    @staticmethod
     def get_json_schema(caller: trdef.UniversalTrait=None)->Objason:
         seq_uo = Primitive(prim_type="integer",
                             key=defs.hedr_cmn_io_dtil_seq,

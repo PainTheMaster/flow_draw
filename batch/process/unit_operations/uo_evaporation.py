@@ -343,6 +343,7 @@ class Evaporation(uo.UnitOperation, uo_tag=defs.tag_uo_evap):
         self.end_vw_guide_max:float = None
         self.end_volume_guide_max:float = None
 
+    @staticmethod
     def get_json_schema(caller = None):
         json_common = Evaporation.json_common()
         Tj_min = Primitive(prim_type='number',

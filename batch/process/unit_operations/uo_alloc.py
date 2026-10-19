@@ -155,7 +155,8 @@ class Alloc(uo.UnitOperation, uo_tag=defs.tag_uo_alloc):
 
     def get_detail_option_menu(self) -> Optional[dict[str, list[str]]]:
         pass
-    
+
+    @staticmethod
     def get_json_schema(caller: trdef.UniversalTrait=None)->Objason:
         common_schema:list[Primitive] = Alloc.json_common()
         prim_prod_cell = Primitive(prim_type='string',
