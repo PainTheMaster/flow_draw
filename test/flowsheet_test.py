@@ -5,6 +5,7 @@ import flow_draw.batch.batch as batch
 import flow_draw.batch.process.process as proc
 import flow_draw.batch.process.unit_operations.unit_operation as uo_module
 import flow_draw.batch.process.unit_operations.uo_charging as chgng
+import flow_draw.batch.process.unit_operations.material_input as matinp
 import flow_draw.batch.process.unit_operations.uo_placeholder as plchldr
 import flow_draw.batch.process.unit_operations.uo_line_clearance as lnclnc
 import flow_draw.batch.process.unit_operations.uo_inert_replacement as inert
@@ -90,34 +91,34 @@ def SetChgngForSaltWater() -> pd.DataFrame:
                     defs.hedr_cmn_io_dtil_edt_cmnt : "put salt and water",
                     defs.hedr_cmn_io_dtil_precmnt : "Too much salt is harm",
                     defs.hedr_cmn_io_dtil_postcmnt : "Take care of your kidney",
-                    chgng.hedr_material_name : "NaCl",
-                    chgng.hedr_metrics_value : 1.0,
-                    chgng.hedr_metrics_unit: chgng.opt_mtrcs_eq,
-                    chgng.hedr_error_pct : 5.0,
-                    chgng.hedr_method : defs.opt_uo_chgng_method_pwdr,
-                    chgng.hedr_time_control : defs.opt_uo_chgng_timctrl_none,
-                    chgng.hedr_time_min : None,
-                    chgng.hedr_time_max : None,
-                    chgng.hedr_temp_control : defs.opt_uo_chgng_temprctrl_none,
-                    chgng.hedr_temp_min : None,
-                    chgng.hedr_temp_max : None}
+                    matinp.hedr_material_name : "NaCl",
+                    matinp.hedr_metrics_value : 1.0,
+                    matinp.hedr_metrics_unit: matinp.opt_mtrcs_eq,
+                    matinp.hedr_error_pct : 5.0,
+                    matinp.hedr_method : defs.opt_uo_chgng_method_pwdr,
+                    matinp.hedr_time_control : defs.opt_uo_chgng_timctrl_none,
+                    matinp.hedr_time_min : None,
+                    matinp.hedr_time_max : None,
+                    matinp.hedr_temp_control : defs.opt_uo_chgng_temprctrl_none,
+                    matinp.hedr_temp_min : None,
+                    matinp.hedr_temp_max : None}
     
     dict_input2 = {defs.hedr_cmn_io_dtil_seq : "1",
                     defs.hedr_cmn_io_dtil_uo : defs.tag_uo_charging,
                     defs.hedr_cmn_io_dtil_edt_cmnt : "put salt and water",
                     defs.hedr_cmn_io_dtil_precmnt : "Water is dangerous.",
                     defs.hedr_cmn_io_dtil_postcmnt : "Don't dive in.",
-                    chgng.hedr_material_name : "Water",
-                    chgng.hedr_metrics_value : 10.0,
-                    chgng.hedr_metrics_unit: chgng.opt_mtrcs_v_per_w,
-                    chgng.hedr_error_pct : 10.0,
-                    chgng.hedr_method : defs.opt_uo_chgng_method_shower,
-                    chgng.hedr_time_control : defs.opt_uo_chgng_timctrl_min,
-                    chgng.hedr_time_min : "1 hr",
-                    chgng.hedr_time_max : None,
-                    chgng.hedr_temp_control : defs.opt_uo_chgng_temprctrl_min_max,
-                    chgng.hedr_temp_min : 4.0,
-                    chgng.hedr_temp_max :100.0 }
+                    matinp.hedr_material_name : "Water",
+                    matinp.hedr_metrics_value : 10.0,
+                    matinp.hedr_metrics_unit: matinp.opt_mtrcs_v_per_w,
+                    matinp.hedr_error_pct : 10.0,
+                    matinp.hedr_method : defs.opt_uo_chgng_method_shower,
+                    matinp.hedr_time_control : defs.opt_uo_chgng_timctrl_min,
+                    matinp.hedr_time_min : "1 hr",
+                    matinp.hedr_time_max : None,
+                    matinp.hedr_temp_control : defs.opt_uo_chgng_temprctrl_min_max,
+                    matinp.hedr_temp_min : 4.0,
+                    matinp.hedr_temp_max :100.0 }
     df_input = pd.DataFrame([dict_input1, dict_input2])
     return df_input
 

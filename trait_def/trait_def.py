@@ -3,7 +3,7 @@ import flow_draw.materials.materials
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     import flow_draw.batch.process.process as proc
-    import flow_draw.batch.process.unit_operations.uo_charging as chgng
+    import flow_draw.batch.process.unit_operations.material_input as matinput
 
 class UniversalTrait(ABC):
     pass
@@ -58,9 +58,9 @@ class GetInputs(UniversalTrait):
     By calling the object, the caller can acquire the input values used in the process.
     """
     @abstractmethod
-    def get_input(self, id_input: int = None) -> "chgng.Input":
+    def get_input(self, id_input: int = None) -> "matinput.Input":
         """
-        Expected to return an instance of chgng.Input representing the input values for the process.
+        Expected to return an instance of matinput.Input representing the input values for the process.
 
         Parameters
         ----------
@@ -69,7 +69,7 @@ class GetInputs(UniversalTrait):
 
         Returns
         ----------
-        inputs: chgng.Input
+        inputs: matinput.Input
             This shall be an instance of chgng.Input containing all the necessary input values for the process.
         """
         pass
