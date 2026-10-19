@@ -11,6 +11,7 @@ from dataclasses import dataclass
 import flow_draw.batch.process.unit_operations.unit_operation as uo
 import flow_draw.batch.process.unit_operations.uo_alloc as alloc
 import flow_draw.batch.process.unit_operations.uo_charging as chgng
+import flow_draw.batch.process.unit_operations.material_input as matinp
 import flow_draw.batch.process.unit_operations.uo_sampling as smplng
 import flow_draw.batch.process.unit_operations.uo_cip as cip
 import flow_draw.batch.process.unit_operations.uo_agitation as agit
@@ -59,7 +60,7 @@ list_uo_common: list[type[uo.UnitOperation]] = [chgng.Charging,
                                                 ]
 
 
-special_id_input_tgt = chgng.opt_special_id_basis_tgt
+special_id_input_tgt = matinp.opt_special_id_basis_tgt
 """A special ID to designate the target compound to use as the quantity calculation basis."""
 
 id_special_basis_tgt = defs.id_special_tgt_uo_chgng
@@ -120,7 +121,7 @@ class Process(GetMats, GetProcName, GetInputs):
         self.mats_data: mats = None #mats_data is stored when load_materials_data() is called.
         self.seq_uo: list[uo.UnitOperation] = []
         """Sequene of the constituting unit operations. This will be populated when self.load_uo_summary() is called."""
-        self.list_inpts: list[chgng.Input] = []
+        self.list_inpts: list[matinp.Input] = []
         self.flowsheet: fsht.Flowsheet = fsht.Flowsheet()
 
         
@@ -308,7 +309,7 @@ class Process(GetMats, GetProcName, GetInputs):
 
         self.__check_inpt_id_invalid()
 
-        input_tgt = chgng.Input(mats_data = self.mats_data, proc = self, flowsheet=self.flowsheet)
+        input_tgt = matinp.Input(mats_data = self.mats_data, proc = self, flowsheet=self.flowsheet)
         input_tgt.mark_as_tgt()
         is_tgt_calcd = input_tgt.calc_qty()
         if not is_tgt_calcd:
@@ -348,7 +349,7 @@ class Process(GetMats, GetProcName, GetInputs):
     def get_proc_name(self) -> str:
         return self.process_name
     
-    def get_input(self, id_input: int = None) -> chgng.Input:
+    def get_input(self, id_input: int = None) -> matinp.Input:
         if id_input is None:
             raise ValueError(f"{self.__class__.__name__}.get_inputs(): No id_input is provided.")
         for input_item in self.list_inpts:
@@ -359,7 +360,7 @@ class Process(GetMats, GetProcName, GetInputs):
     def get_id_input_sm(self) -> list[int]:
         list_id_input_sm = []
         for input_item in self.list_inpts:
-            if input_item.material_class == chgng.cls_input_mat_sm:
+            if input_item.material_class == matinp.cls_input_mat_sm:
                 list_id_input_sm.append(input_item.id_input)
         return list_id_input_sm
 
@@ -384,10 +385,10 @@ class Process(GetMats, GetProcName, GetInputs):
         dup = sorted({x for x in ids if ids.count(x) > 1})
         if dup:
             raise RuntimeError(f'{self.__class__.__name__}.__check_inputs_id_invalid():\n'
-                               f'Duplicated {chgng.id_input_json}: {dup}')
+                               f'Duplicated {matinp.id_input_json}: {dup}')
         if any(x is None or x < 0 for x in ids):
             raise RuntimeError(f'{self.__class__.__name__}.__check_inputs_id_invalid():\n'
-                                           f'Invalid {chgng.id_input_json}: An ID for input must be a non-negative integer.')
+                                           f'Invalid {matinp.id_input_json}: An ID for input must be a non-negative integer.')
 
 
 @dataclass
