@@ -2,6 +2,7 @@ import pandas as pd
 import math
 import warnings
 from flow_draw import definitions as defs
+from flow_draw.trait_def.trait_def import MaterialsTrait
 
 
 op_list = None
@@ -26,7 +27,7 @@ desig_tgt = defs.itm_io_mats_tgt
 mol_main_sm = 1.0 #mol, placeholder
 kg_main_sm = 10 #kg, placeholder
 
-class Materials:
+class Materials(MaterialsTrait):
     def __init__(self,df_mats:pd.DataFrame=None):
         """
         Sets a pandas.DataFrame object containing data for all the chemical materials used in the process and quantity information of the starting material. 
@@ -238,8 +239,8 @@ class Materials:
 
 
 
-    @classmethod
-    def generate_mats_df(cls)->pd.DataFrame:
+    @staticmethod
+    def generate_mats_df()->pd.DataFrame:
         """
         DataFrame generator for test. The header items of the new df is as follows.<br>
             defs.hedr_io_mats_mat<br>
@@ -261,9 +262,8 @@ class Materials:
         return empty_df
     
 
-    @classmethod
-    def add_to_mats_df(cls,
-                       mats_df:pd.DataFrame = None,
+    @staticmethod
+    def add_to_mats_df(mats_df:pd.DataFrame = None,
                        material:str = None,
                        main_star:bool = False,
                        mw:float = None,

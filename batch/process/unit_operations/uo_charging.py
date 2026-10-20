@@ -259,38 +259,38 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
             self.flowsheet.put_body_comments(self.pre_comment)
 
         for inpt in self.list_inputs:
+            inpt.print_input()
+            # #line-1: Material name and relative quantity
+            # line_mat = inpt.put_material(time=lang_dict_cmn[tag_flow_cmn_rec_time],
+            #                                   method=lang_dict_chgng_specif[inpt.method],
+            #                                   record=lang_dict_chgng_specif[tag_part_rec_lot],
+            #                                   operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
+            #                                   witness=lang_dict_cmn[tag_flow_cmn_rec_sign],)
 
-            #line-1: Material name and relative quantity
-            line_mat = inpt.put_material(time=lang_dict_cmn[tag_flow_cmn_rec_time],
-                                              method=lang_dict_chgng_specif[inpt.method],
-                                              record=lang_dict_chgng_specif[tag_part_rec_lot],
-                                              operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
-                                              witness=lang_dict_cmn[tag_flow_cmn_rec_sign],)
+            # #line-2: QTY instruction and record
+            # inpt.instruct_qty_range(record=lang_dict_chgng_specif[tag_part_rec_qyt_input],
+            #                        line_mat=line_mat)
 
-            #line-2: QTY instruction and record
-            inpt.instruct_qty_range(record=lang_dict_chgng_specif[tag_part_rec_qyt_input],
-                                   line_mat=line_mat)
-
-            #For liquid only, container ID, flex ID 
-            if inpt.method in (method_liq, method_shower, method_mobile_tank):
-                self.flowsheet.put_line(record=lang_dict_chgng_specif[tag_part_rec_cntnr_id])
-                self.flowsheet.put_line(record=lang_dict_chgng_specif[tag_part_rec_hose],
-                                         operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
-                                         witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
-            elif inpt.method == method_press:
-                self.flowsheet.put_line(record=lang_dict_chgng_specif[tag_part_rec_cntnr_id],
-                                        operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
-                                        witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
+            # #For liquid only, container ID, flex ID 
+            # if inpt.method in (method_liq, method_shower, method_mobile_tank):
+            #     self.flowsheet.put_line(record=lang_dict_chgng_specif[tag_part_rec_cntnr_id])
+            #     self.flowsheet.put_line(record=lang_dict_chgng_specif[tag_part_rec_hose],
+            #                              operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
+            #                              witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
+            # elif inpt.method == method_press:
+            #     self.flowsheet.put_line(record=lang_dict_chgng_specif[tag_part_rec_cntnr_id],
+            #                             operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
+            #                             witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
             
-            #for both liq and solid; temp and time control.
-            if not (inpt.time_control == timectrl_none or inpt.time_control is None):
-                self.__put_time_control(input=inpt)
+            # #for both liq and solid; temp and time control.
+            # if not (inpt.time_control == timectrl_none or inpt.time_control is None):
+            #     self.__put_time_control(input=inpt)
 
-            if not (inpt.temp_control == temprctrl_none or inpt.temp_control is None):
-                self.__put_temp_control(input=inpt)              
+            # if not (inpt.temp_control == temprctrl_none or inpt.temp_control is None):
+            #     self.__put_temp_control(input=inpt)              
      
-            self.__put_end_of_dosing()
-            self.flowsheet.linefeed()
+            # self.__put_end_of_dosing()
+            # self.flowsheet.linefeed()
 
         if not (self.post_comment == None or self.post_comment == ''):
             self.flowsheet.put_body_comments(self.post_comment)

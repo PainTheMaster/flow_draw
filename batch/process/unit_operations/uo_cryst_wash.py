@@ -4,13 +4,14 @@
 import pandas as pd
 import flow_draw.definitions as defs
 import flow_draw.data_io.flowsheet as fsht
-import flow_draw.batch.process.unit_operations.uo_charging as chgng
+
 from typing import Optional
 from flow_draw.batch.process.unit_operations import unit_operation as uo
 from flow_draw.data_io import process_io as procio
 from flow_draw.materials import materials as mats
 from flow_draw.trait_def import trait_def as trdef
-from flow_draw.batch.process.unit_operations.uo_charging import Input
+import flow_draw.batch.process.unit_operations.material_input as matin
+from flow_draw.batch.process.unit_operations.material_input import Input
 #from flow_draw.trait_def.trait_def import GetMats
 from flow_draw.data_io.json_io import Objason, Array, Primitive
 
@@ -49,11 +50,17 @@ hedr_solvent_via:str = 'solvent_via'
 
 
 
-
-hedr_solvent_volume:str = 'solvent_volume'
-"""Header item for the volume of the solvent added."""
-hedr_solvent_qty:str = 'solvent_metrics_value'
-"""Header item for the quantity of the solvent added."""
+# hedr_material_name
+# hedr_metrics_value
+# hedr_metrics_unit'
+# hedr_error_pct
+# hedr_method = 'Charging_Method'
+# hedr_time_control = 'Time_Control'
+# hedr_time_min = 'Minimum_Time(min)'
+# hedr_time_max = 'Maximum_Time(min)'
+# hedr_temp_control = 'Temp_Control'
+# hedr_temp_min = 'Minimum_Temp(deg-C)'
+# hedr_temp_max = 'Maximum_Temp(deg-C)'
 
 
 list_hedr = []
@@ -165,7 +172,7 @@ dict_parts_stcs = dict_parts_stcs_jp
 # output_unit_operation(self)
 #
 #########################################################
-class ClassName(uo.UnitOperation, uo_tag=defs.tag_uo_reslurry):
+class Reslurry(uo.UnitOperation, uo_tag=defs.tag_uo_reslurry):
     def __init__(self,
                  caller: type[trdef.UniversalTrait] =None,
                  flowsheet:fsht.Flowsheet=None,
@@ -209,7 +216,7 @@ class ClassName(uo.UnitOperation, uo_tag=defs.tag_uo_reslurry):
     
     @staticmethod
     def get_json_schema(caller: trdef.UniversalTrait=None)->Objason:
-        common_schema:list[Primitive] = ThisClass.json_common()
+        common_schema:list[Primitive] = Reslurry.json_common()
 
 
     def load_from_json_dict(self, json_dict: dict[str, any]):
