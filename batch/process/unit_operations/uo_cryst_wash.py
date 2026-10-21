@@ -216,7 +216,13 @@ class Reslurry(uo.UnitOperation, uo_tag=defs.tag_uo_reslurry):
     
     @staticmethod
     def get_json_schema(caller: trdef.UniversalTrait=None)->Objason:
-        common_schema:list[Primitive] = Reslurry.json_common()
+        common_schema = Reslurry.json_common()
+        input_entry = Input.get_json_schema(caller=caller)
+        arr_input = Array(key=arry_inputs_json,
+                          content=input_entry,
+                          description='A list of material input entries for the reslurry operation.',
+                          required=True)
+        
 
 
     def load_from_json_dict(self, json_dict: dict[str, any]):

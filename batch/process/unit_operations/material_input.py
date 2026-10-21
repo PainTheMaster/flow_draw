@@ -2,7 +2,7 @@
 Material input (one charge/dose of a material) and the constants that describe it.
 Split out of uo_charging.py so that unit operations other than Charging can reuse Input.
 """
-from typing import Any
+from typing import Any, Callable
 
 import pandas as pd
 import warnings
@@ -18,6 +18,8 @@ hedr_metrics_value = 'Metrics_Value'
 hedr_metrics_unit = 'Metrics_Unit'
 hedr_error_pct = 'Permissible_Error(%)'
 hedr_method = 'Charging_Method'
+hedr_vessel = "Vessel"
+hedr_train_vessel = 'Vessel_Train'
 hedr_time_control = 'Time_Control'
 hedr_time_min = 'Minimum_Time(min)'
 hedr_time_max = 'Maximum_Time(min)'
@@ -285,6 +287,8 @@ class Input(InputTrait):
         """Indicates whether the quantity has been calculated."""
         self.method = ""
         """Holds one of the options in list_charging_method. Input method."""
+        self.vessel_train:list[str] = None
+        """List corresponding to the vessel train."""
         self.time_control:str = None
         """Holds one of the options in list list_time_control. Demand for temperature control"""
         self.time_min:str = None
@@ -407,6 +411,20 @@ class Input(InputTrait):
                                         f'"{method_pow}" is for solid material. A solid material is charged through an opening on the top of the reactor. '
                                         'As a special case, slurry of crystal seed is charged by this method.'
                                         f'If you can\'t choose the right option, please select "{method_placeholder}"')
+        
+        vessel = Primitive(prim_type='string',
+                           key=hedr_vessel,
+                           description='Target vessel of the charging/dosing operation.')
+        
+        vessel_train =  Array(key=hedr_train_vessel,
+                              content=vessel,
+                             description='A train of vessels. In some cases, not only a single vessel/reactor comes into play, but a sequence of vessels is used. '
+                             'For example, two or more solvents are pre-mixed in a mobile tank before being charged to the reaction vessel. '
+                             'In another scenario, solvent is charged into a reactor, from which recrystallized slurry has been transferred to a filter dryer. '
+                             'Then the rinse is transferred to the filter dryer as well to minimize material loss. ',
+                             required=True,
+                             nullable=True)
+        
         time_ctrl = Primitive(prim_type='string',
                               key=hedr_time_control,
                               enum=list_time_control,
@@ -452,7 +470,7 @@ class Input(InputTrait):
                              required=True)
         
         input_entry = Objason(key=entry_input_json,
-                              props=[id_input, name_mats, qty_mats, unit_mats, arr_basis_inputs, permiss_error, charging_method, time_ctrl, time_min, time_max, temp_ctrl, temp_min, temp_max],
+                              props=[id_input, name_mats, qty_mats, unit_mats, arr_basis_inputs, permiss_error, charging_method, vessel_train, time_ctrl, time_min, time_max, temp_ctrl, temp_min, temp_max],
                               description='Combination of material, quantity, permissible quantity error, charging method, time constraints, temperature range to define each charging/dosing operation.'
                              )
 
@@ -471,6 +489,7 @@ class Input(InputTrait):
             self.error_pct = error_pct_default
             warnings.warn(f'{self.__class__.__name__}.load_from_json_dict(): The given error is empty or zero. {error_pct_default}% as the default value is put for now.', UserWarning)
         self.method = json_dict[hedr_method]
+        self.vessel_train = json_dict.get(hedr_train_vessel)
         self.time_control = json_dict[hedr_time_control]
         if (self.time_control == timectrl_min or self.time_control == timectrl_min_max): #and hedr_time_min in json_dict:
             self.time_min = json_dict[hedr_time_min]
@@ -551,6 +570,24 @@ class Input(InputTrait):
                                      operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
                                     witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
 
+        def __get_fifo_train(list_vessels: list[str]|None)->Callable[[],str|None]:
+            list_this = list_vessels
+            if list_this is None:
+                list_this = []
+            len_this = len(list_this)
+            idx = 0
+            def fifo_train()->str|None:
+                nonlocal idx
+                if idx == len_this:
+                    return None 
+                elif idx == 0:
+                    idx += 1
+                    return list_this[idx-1]
+                else:
+                    idx += 1
+                    return 'to '+list_this[idx-1]
+            return fifo_train
+
         ##################################################################################################
         ##################################################################################################
 
@@ -561,21 +598,34 @@ class Input(InputTrait):
                                             record=lang_dict_chgng_specif[tag_part_rec_lot],
                                             operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
                                             witness=lang_dict_cmn[tag_flow_cmn_rec_sign],)
+        
+        fifo_train = __get_fifo_train(self.vessel_train)
 
         #line-2: QTY instruction and record
-        self.instruct_qty_range(record=lang_dict_chgng_specif[tag_part_rec_qyt_input],
+        self.instruct_qty_range(method=fifo_train(),
+                                record=lang_dict_chgng_specif[tag_part_rec_qyt_input],
                                 line_mat=line_mat)
 
         #For liquid only, container ID, flex ID 
         if self.method in (method_liq, method_shower, method_mobile_tank):
-            self.flowsheet.put_line(record=lang_dict_chgng_specif[tag_part_rec_cntnr_id])
-            self.flowsheet.put_line(record=lang_dict_chgng_specif[tag_part_rec_hose],
-                                        operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
-                                        witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
-        elif self.method == method_press:
-            self.flowsheet.put_line(record=lang_dict_chgng_specif[tag_part_rec_cntnr_id],
+            self.flowsheet.put_line(method=fifo_train(),
+                                     record=lang_dict_chgng_specif[tag_part_rec_cntnr_id])
+            self.flowsheet.put_line(method=fifo_train(),
+                                    record=lang_dict_chgng_specif[tag_part_rec_hose],
                                     operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
                                     witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
+        elif self.method == method_press:
+            self.flowsheet.put_line(method=fifo_train(),
+                                    record=lang_dict_chgng_specif[tag_part_rec_cntnr_id],
+                                    operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
+                                    witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
+
+        vessel_via = fifo_train()
+        while vessel_via is not None:
+            self.flowsheet.put_line(method=vessel_via)
+            vessel_via = fifo_train()
+        else:
+            self.flowsheet.linefeed()
         
         #for both liq and solid; temp and time control.
         if not (self.time_control == timectrl_none or self.time_control is None):

@@ -79,7 +79,7 @@ class GetMats(UniversalTrait):
     By calling the object, the caller can acquire the information of materials used in the process.
     """
     @abstractmethod
-    def get_mats(self)-> type[MaterialsTrait]:
+    def get_mats(self)-> MaterialsTrait:
         """
         Expected to return an instance of Materials, retaining information of materials used in the process.
         As materials are process-specific, an instance of Process and that of Materials are in one-on-one relationship.
@@ -91,7 +91,7 @@ class GetMats(UniversalTrait):
 
         Returns
         ----------
-        materials: type[MaterialsTrait]
+        materials: MaterialsTrait
             This shall have all the necessary information of the materials used in the process, including designation of the core building block and its quantity.
         """
         pass
@@ -168,6 +168,10 @@ class InputTrait(ABC):
     def link_inputs(self):
         pass
 
+    @abstractmethod
+    def print_input(self):
+        pass
+
 
 
 
@@ -177,7 +181,7 @@ class GetInputs(UniversalTrait):
     By calling the object, the caller can acquire the input values used in the process.
     """
     @abstractmethod
-    def get_input(self, id_input: int = None) -> type[InputTrait]:
+    def get_input(self, id_input: int = None) -> InputTrait:
         """
         Expected to return an instance of InputTrait representing the input values for the process.
 
