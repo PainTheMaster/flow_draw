@@ -2,8 +2,7 @@
 Material input (one charge/dose of a material) and the constants that describe it.
 Split out of uo_charging.py so that unit operations other than Charging can reuse Input.
 """
-from typing import Any, Callable
-
+from typing import Any, Callable, Optional
 import pandas as pd
 import warnings
 import flow_draw.definitions as defs
@@ -13,6 +12,10 @@ from flow_draw.trait_def.trait_def import GetMats, GetInputs, InputTrait
 from flow_draw.data_io.json_io import Objason, Primitive, Array
 
 
+
+##############################################
+#           Material Input Headers           #
+##############################################
 hedr_material_name = 'Material_Name'
 hedr_metrics_value = 'Metrics_Value'
 hedr_metrics_unit = 'Metrics_Unit'
@@ -29,20 +32,14 @@ hedr_temp_max = 'Maximum_Temp(deg-C)'
 
 id_input_json = 'Material_Input_ID'
 """The key to a material input ID for JSON data exchange."""
-
 hedr_basis_input = 'Calc_Basis_Material_Input_ID'
 """The key to the calculation basis material input ID for JSON data exchange."""
-
 hedr_basis_array_json = 'Array_Calc_Basis'
 """The key to the array of calculation basis material input IDs for JSON data exchange."""
-
 entry_input_json = 'charging_input_entry'
 """The key to a material input entry for JSON data exchange."""
-
 opt_special_id_basis_tgt = defs.id_special_tgt_uo_chgng
 """Special ID for the target compound used as the quantity calculation basis in the charging unit operation."""
-
-
 cls_input_mat_sm = 'cls_sm'
 """Material class identifier for the starting material."""
 cls_input_mat_tgt = 'cls_tgt'
@@ -50,7 +47,24 @@ cls_input_mat_tgt = 'cls_tgt'
 cls_input_mat_other = 'cls_other'
 """Material class identifier for other materials."""
 
+#------------list of header items--------------#
+list_hedr = [hedr_material_name,
+             hedr_metrics_value,
+             hedr_metrics_unit,
+             hedr_error_pct,
+             hedr_method,
+             hedr_vessel,
+             hedr_train_vessel,
+             hedr_time_control,
+             hedr_time_min,
+             hedr_time_max,
+             hedr_temp_control,
+             hedr_temp_min,
+             hedr_temp_max]
 
+############################################
+#                Options                   #
+############################################
 method_liq = 'liquid_port'
 method_shower = 'shower'
 method_press = 'press_vessel'
@@ -101,6 +115,18 @@ list_metrics_unit = [opt_mtrcs_eq, opt_mtrcs_v_per_w, opt_mtrcs_wwpct, opt_mtrcs
 error_range_placeholder = 'placeholder'
 error_pct_default = 5.0
 list_error_range = [None, 1.0, None, None, None, error_pct_default, error_range_placeholder]
+
+
+#------------header vs options dictionary-------------#
+dict_dropdown = {
+    hedr_method: list_charging_method,
+    hedr_time_control: list_time_control,
+    hedr_temp_control: list_temp_control,
+    hedr_metrics_unit: list_metrics_unit,
+    hedr_error_pct: list_error_range
+}
+
+
 
 
 ##########################################
@@ -304,7 +330,14 @@ class Input(InputTrait):
         self.line_fs:int = None
         """Flowsheet line of the qty. """
     
-  
+    
+    @staticmethod
+    def get_detai_header()->list[str]:
+        return list_hedr
+
+    @staticmethod
+    def get_detail_option_menu() -> Optional[dict[str, list[str]]]:
+        return dict_dropdown
 
     def load_params_from_series(self, ser: pd.Series):
         """
@@ -471,8 +504,11 @@ class Input(InputTrait):
         
         input_entry = Objason(key=entry_input_json,
                               props=[id_input, name_mats, qty_mats, unit_mats, arr_basis_inputs, permiss_error, charging_method, vessel_train, time_ctrl, time_min, time_max, temp_ctrl, temp_min, temp_max],
-                              description='Combination of material, quantity, permissible quantity error, charging method, time constraints, temperature range to define each charging/dosing operation.'
-                             )
+                              description='Combination of material, quantity, permissible quantity error, charging method, time constraints, temperature range to define each material input. '
+                              'Material input appears in various unit operations such as charging/dosing, reslurry washing, cleaning in place, etc. '
+                              'Maaterial input can be a part of those unit operations or can be regarded as a separate charging unit operation jsut before the step of interest, if appropriate.',
+                              required=False
+                              )
 
         return input_entry
 

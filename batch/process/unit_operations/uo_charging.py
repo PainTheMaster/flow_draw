@@ -12,7 +12,7 @@ from flow_draw.data_io.flowsheet import Flowsheet
 # import flow_draw.data_io.flowsheet as fsht
 from flow_draw.trait_def.trait_def import GetMats, GetInputs
 from flow_draw.data_io.json_io import Objason, Primitive, Array
-from flow_draw.batch.process.unit_operations.material_input import *  # Input and its constants; kept importable as chgng.<name> for existing callers
+from flow_draw.batch.process.unit_operations.material_input import Input  # Input and its constants; kept importable as chgng.<name> for existing callers
 
 
 header_precomment = defs.hedr_cmn_io_dtil_precmnt #Don't include this in the specific header list!!!
@@ -74,10 +74,12 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
         #self.output_unit_operation()
 
     def get_detail_header(self) -> list[str]:
-        return []
+        hedr_input = Input.get_detai_header()
+        return hedr_input
     
     def get_detail_option_menu(self) -> Optional[dict[str, list[str]]]:
-        return {}
+        opt_menu_input = Input.get_detail_option_menu()
+        return opt_menu_input
 
     def load_params_from_df(self, df: pd.DataFrame):
         """

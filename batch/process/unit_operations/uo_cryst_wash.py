@@ -44,23 +44,14 @@ opt_time_unit_hour:str = defs.tag_flow_cmn_time_unit_hour
 #hedr_<something> = defs.hedr_<unit operation>_<specification item>
 #list_hedr = defs.list_hedr_<list of header items for the uo>
 #dict_dtil_drpdwn = defs.dict_opt_<unit operation>
-hedr_solvent_via:str = 'solvent_via'
-"""Header item for the vessels via which the solvent is added."""
+hedr_equipment:str = 'equipment'
+"""Header item for the equipment used in the crystallization washing unit operation."""
 
+# hedr_solvent_via:str = 'solvent_via'
+# """Header item for the vessels via which the solvent is added."""
 
-
-
-# hedr_material_name
-# hedr_metrics_value
-# hedr_metrics_unit'
-# hedr_error_pct
-# hedr_method = 'Charging_Method'
-# hedr_time_control = 'Time_Control'
-# hedr_time_min = 'Minimum_Time(min)'
-# hedr_time_max = 'Maximum_Time(min)'
-# hedr_temp_control = 'Temp_Control'
-# hedr_temp_min = 'Minimum_Temp(deg-C)'
-# hedr_temp_max = 'Maximum_Temp(deg-C)'
+key_arr_solvent_json:str = 'Solvent_Input_Array'
+"""Key for the material input JSON object in the crystallization washing unit operation."""
 
 
 list_hedr = []
@@ -218,12 +209,18 @@ class Reslurry(uo.UnitOperation, uo_tag=defs.tag_uo_reslurry):
     def get_json_schema(caller: trdef.UniversalTrait=None)->Objason:
         common_schema = Reslurry.json_common()
         input_entry = Input.get_json_schema(caller=caller)
-        arr_input = Array(key=arry_inputs_json,
+        arr_input = Array(key=key_arr_solvent_json,
                           content=input_entry,
-                          description='A list of material input entries for the reslurry operation.',
-                          required=True)
+                          description='A list of material input entries for solvents used in incrystal washing operation. '
+                          f'Material input can be a part of this unit operations or can be an independed "{defs.tag_uo_charging}" before this step if more appropriate.',
+                          required=False)
         
-
+        equipment = Primitive(prim_type='string',
+                              key=hedr_equipment,
+                              description='Equipment used for the crystal washing operation. Normally, it is a filter dryer, but please follow the given information source. '
+                              'If cannot be specified, please put a placeholder "<placeholder: equipment>"',
+                              nullable=True,
+                              required=True)
 
     def load_from_json_dict(self, json_dict: dict[str, any]):
         super().load_from_json_dict(json_dict)
