@@ -270,10 +270,11 @@ class Input(InputTrait):
     """
     This class is for each material charged, each instance correspnds to each dosage in a charging operation.
     """
-    def __init__(self, mats_data: mats.Materials = None, proc: GetInputs = None, flowsheet:Flowsheet=None):
+    def __init__(self, get_mats: GetMats = None, get_inputs: GetInputs = None, flowsheet:Flowsheet=None):
         #Material constants
-        self.mats_data: mats.Materials = mats_data
-        self.proc: GetInputs = proc
+        # self.mats_data: mats.Materials = get_mats
+        self.mats_data: mats.Materials = get_mats.get_mats()
+        self.proc: GetInputs = get_inputs
         self.flowsheet = flowsheet
 
         self.mw:float = None
@@ -385,7 +386,7 @@ class Input(InputTrait):
         id_input = Primitive(prim_type='integer',
                              key=id_input_json,
                              description='A unique serial number (positive or zero) for the material input. '
-                             'This value must be unique for each material input and this rule applies throughout the process. '
+                             'This value must be unique throughout the process (the whole JSON file for a process). '
                              'Regardless of the input sequence, please assign 0 for (the first input of) the starting material (the key building block of the process). '
                              'This value is used to identify an instance of material input to calculate the quantity of other material inputs when this instance is used as the basis.',
                              nullable=False,
@@ -505,15 +506,17 @@ class Input(InputTrait):
         input_entry = Objason(key=entry_input_json,
                               props=[id_input, name_mats, qty_mats, unit_mats, arr_basis_inputs, permiss_error, charging_method, vessel_train, time_ctrl, time_min, time_max, temp_ctrl, temp_min, temp_max],
                               description='Combination of material, quantity, permissible quantity error, charging method, time constraints, temperature range to define each material input. '
-                              'Material input appears in various unit operations such as charging/dosing, reslurry washing, cleaning in place, etc. '
-                              'Maaterial input can be a part of those unit operations or can be regarded as a separate charging unit operation jsut before the step of interest, if appropriate.',
-                              required=False
+                              'Material input appears in various unit operations such as charging/dosing, reslurry washing, cleaning in place, etc. ',
+                              required=True
                               )
 
         return input_entry
 
         
     def load_from_json_dict(self, json_dict: dict[str, Any]):
+        """
+        Reads a dict object corresponding to the JSON Schema for Input class and sets each value to the object.
+        """
         self.id_input =json_dict[id_input_json]
         self.material_name = json_dict[hedr_material_name]
         self.metrics_unit = json_dict[hedr_metrics_unit]
@@ -525,7 +528,7 @@ class Input(InputTrait):
             self.error_pct = error_pct_default
             warnings.warn(f'{self.__class__.__name__}.load_from_json_dict(): The given error is empty or zero. {error_pct_default}% as the default value is put for now.', UserWarning)
         self.method = json_dict[hedr_method]
-        self.vessel_train = json_dict.get(hedr_train_vessel)
+        self.vessel_train = json_dict.get(hedr_train_vessel, [])
         self.time_control = json_dict[hedr_time_control]
         if (self.time_control == timectrl_min or self.time_control == timectrl_min_max): #and hedr_time_min in json_dict:
             self.time_min = json_dict[hedr_time_min]
@@ -549,7 +552,15 @@ class Input(InputTrait):
                 self.material_class = cls_input_mat_tgt
             else:
                 self.material_class = cls_input_mat_other
+
+    def get_name_this(self):
+        return self.material_name
     
+    def get_vessel_train(self) -> list[str]:
+        if self.vessel_train is None:
+            self.vessel_train = []
+        return self.vessel_train
+
 
     def print_input(self):
         def __put_time_control():

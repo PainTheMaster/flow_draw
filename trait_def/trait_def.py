@@ -138,6 +138,10 @@ class InputTrait(ABC):
         pass
 
     @abstractmethod
+    def get_name_this(self)->str:
+        pass
+
+    @abstractmethod
     def calc_qty(self)->bool:
         pass
 
@@ -166,6 +170,10 @@ class InputTrait(ABC):
 
     @abstractmethod
     def link_inputs(self):
+        pass
+
+    @abstractmethod
+    def get_vessel_train(self) -> list[str]:
         pass
 
     @abstractmethod

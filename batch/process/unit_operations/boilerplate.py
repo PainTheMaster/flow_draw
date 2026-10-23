@@ -4,7 +4,7 @@
 import pandas as pd
 import flow_draw.definitions as defs
 import flow_draw.data_io.flowsheet as fsht
-from typing import Optional
+from typing import Optional, Any
 from flow_draw.batch.process.unit_operations import unit_operation as uo
 from flow_draw.data_io import process_io as procio
 from flow_draw.materials import materials as mats
@@ -146,7 +146,7 @@ class ClassName(uo.UnitOperation, uo_tag=defs.tag_uo_"UO_NAME"):
         common_schema:list[Primitive] = ThisClass.json_common()
 
 
-    def load_from_json_dict(self, json_dict: dict[str, any]):
+    def load_from_json_dict(self, json_dict: dict[str, Any]):
         super().load_from_json_dict(json_dict)
         pass
 

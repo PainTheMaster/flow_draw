@@ -5,11 +5,12 @@ import pandas as pd
 import flow_draw.definitions as defs
 import flow_draw.data_io.flowsheet as fsht
 
-from typing import Optional
+from typing import Optional, Any
 from flow_draw.batch.process.unit_operations import unit_operation as uo
 from flow_draw.data_io import process_io as procio
 from flow_draw.materials import materials as mats
 from flow_draw.trait_def import trait_def as trdef
+from flow_draw.trait_def.trait_def import GetMats, GetInputs
 import flow_draw.batch.process.unit_operations.material_input as matin
 from flow_draw.batch.process.unit_operations.material_input import Input
 #from flow_draw.trait_def.trait_def import GetMats
@@ -44,12 +45,16 @@ opt_time_unit_hour:str = defs.tag_flow_cmn_time_unit_hour
 #hedr_<something> = defs.hedr_<unit operation>_<specification item>
 #list_hedr = defs.list_hedr_<list of header items for the uo>
 #dict_dtil_drpdwn = defs.dict_opt_<unit operation>
-hedr_equipment:str = 'equipment'
+hedr_equipment:str = 'Equipment'
 """Header item for the equipment used in the crystallization washing unit operation."""
 
-# hedr_solvent_via:str = 'solvent_via'
 # """Header item for the vessels via which the solvent is added."""
-
+hedr_mode_washing = 'Crystal_Washiing_Mode'
+"""Header item for the crystal washing mode."""
+hedr_duration_washing_minutes:str = 'Washing_Duration_minutes'
+"""Header item for the duration of the crystal washing."""
+hedr_agitation_rpm:str = 'Agitation_rpm'
+"""Header item for the agitation speed in revolutions per minute."""
 key_arr_solvent_json:str = 'Solvent_Input_Array'
 """Key for the material input JSON object in the crystallization washing unit operation."""
 
@@ -61,11 +66,18 @@ list_hedr = []
 # UO-specific options, list, header_item: list dictionry thereof (for data input and internalsignaling)
 #########################################################
 
-opt_something:str = "something"
+opt_washmode_reslurry:str = "mode_reslurry"
+"""Option for the crystal washing mode: reslurry."""
+opt_washmode_soak:str = "mode_static_soak_washing"
+"""Option for the crystal washing mode: static."""
+opt_washmode_displacement:str = "mode_static_displacement_washing"
+"""Option for the crystal washing mode: plug flow."""
+opt_washmode_placeholder:str = "mode_placeholder"
 
-list_opt_something = []
+list_opt_mode_washing = [opt_washmode_reslurry, opt_washmode_soak, opt_washmode_displacement, opt_washmode_placeholder]
+"""list of menues for hedr_mode_washing"""
 
-dict_opt: dict[str, list[str]]={}
+dict_opt: dict[str, list[str]]={hedr_mode_washing: list_opt_mode_washing}
 
 #########################################################
 # signal -> local language dictionary and tags for it
@@ -108,20 +120,28 @@ tag_part_val_agit_rate_arbit:str = "tag_opt_agit_rate_arbit"
 """The key to a flowsheet part: arbitrary agitation rate."""
 tag_part_unit_agit_rpm:str = "tag_unit_agit_rpm"
 """The key to a flowsheet part: rpm, an unit of agitation rate."""
-tag_part_mthd_agitation:str = "tag_method_agit"
+tag_part_mthd_reslurry:str = "tag_method_reslurry"
 """The key to a flowsheet part: subtitle for reslurry washing."""
+tag_part_mthd_soaking:str = "tag_method_soaking"
+"""The key to a flowsheet part: subtitle for soaking."""
+tag_part_mthd_displ_wash:str = "tag_method_displ_wash"
+"""The key to a flowsheet part: subtitle for displacement washing."""
 tag_part_cntnt_instr_obs:str = "tag_content_instr_observation"
 """The key to a flowsheet part: instruction for observation during agitation."""
 tag_part_cntnt_instr_init_agit:str = "tag_content_instr_init_agit"
 """The key to a flowsheet part: instruction to start agitation."""
 tag_part_cntnt_instr_end_agit:str = "tag_content_instr_end_agit"
 """The key to a flowsheet part: instruction to stop agitation."""
+tag_part_cntnt_instr_displ_wash:str = 'tag_content_instr_displacementwash'
+"""The key to a flowsheet part: instruction to carry out displacement washing."""
 tag_part_rec_rech_agit_complt:str = "tag_reach_agit_complt"
 """The key to a flowsheet part: record field component. Check box to record the completion of agitation."""
 
 
-tag_stc_cntnt_instr_detail:str = "tag_stc_instr_detail"
-"""The key to a flowsheet sentence template: detailed instruction. Includes place holders "{time_val}" and "{time_unit}". """
+tag_stc_cntnt_instr_reslurry:str = "tag_stc_instr_reslurry"
+"""The key to a flowsheet sentence template: instruction for reslurry. Includes place holders "{time_val}" and "{time_unit}". """
+tag_stc_cntnt_instr_soaking: str = 'tag_stc_instr_soaking'
+"""The key to a flowsheet sentence template: instruction for soaking. Includes place holders "{time_val}" and "{time_unit}". """
 tag_stc_cntnt_agit_rate:str = "tag_stc_agit_rate"
 """The key to a flowsheet sentence template: instruction for agitation rate. Includes place holders "{rot_value}" and "{rot_unit}". """
 tag_stc_rec_agit_duration:str = "tag_stc_agit_duration"
@@ -135,12 +155,15 @@ dict_parts_stcs_jp = {tag_part_rec_qty_input : '仕込み量__________kg',
                       tag_part_rec_hose: 'フレキID__________',
                       tag_part_val_agit_rate_arbit: '現場調整',
                       tag_part_unit_agit_rpm: 'rpm',
-                      tag_part_mthd_agitation : '懸濁攪拌',
-                      tag_part_cntnt_instr_obs : 'FD内の状態を確認しながら操作すること',
+                      tag_part_mthd_reslurry : '懸濁攪拌',
+                      tag_part_mthd_soaking : '浸漬洗浄',
+                      tag_part_mthd_displ_wash : 'かけ洗い',                      tag_part_cntnt_instr_obs : 'FD内の状態を確認しながら操作すること',
+                      tag_part_cntnt_instr_displ_wash: '洗浄溶媒を供給してかけ洗いする。',
                       tag_part_cntnt_instr_init_agit : '攪拌開始',
                       tag_part_cntnt_instr_end_agit : '攪拌終了',
                       tag_part_rec_rech_agit_complt : '□ 実施確認',
-                      tag_stc_cntnt_instr_detail :'再下端まで攪拌しながら掘り下げ後{time_val}{time_unit}以上攪拌して攪拌翼を最上端まで上げて次ステップに移行する。',
+                      tag_stc_cntnt_instr_reslurry :'最下端まで攪拌しながら掘り下げ後{time_val}{time_unit}以上攪拌して攪拌翼を最上端まで上げて次ステップに移行する。',
+                      tag_stc_cntnt_instr_soaking : 'ケークを{time_val}{time_unit}以上、洗浄溶媒に浸漬して次のステップに移行する。',
                       tag_stc_cntnt_agit_rate : '攪拌数: {rot_value}{rot_unit}',
                       tag_stc_rec_agit_duration : '攪拌時間:__________{time_unit}'}
 
@@ -163,19 +186,23 @@ dict_parts_stcs = dict_parts_stcs_jp
 # output_unit_operation(self)
 #
 #########################################################
-class Reslurry(uo.UnitOperation, uo_tag=defs.tag_uo_reslurry):
+class CrystWashing(uo.UnitOperation, uo_tag=defs.tag_uo_reslurry):
     def __init__(self,
-                 caller: type[trdef.UniversalTrait] =None,
-                 flowsheet:fsht.Flowsheet=None,
+                 caller: GetMats|GetInputs =None,
+                 flowsheet:fsht.Flowsheet=None, 
                  operation_seq: int=None,
                  num_subitems: int = None,
                  edit_comment:str=None):
         super().__init__(caller=caller, flowsheet=flowsheet, operation_seq=operation_seq, num_subitems=num_subitems, edit_comment=edit_comment)
-        self.buffer_tank:list[str] = []
-        self.arr_inputs:list[Input] = []
-        self.val_time_agit:float = None
-        self.unit_time_agit:str = None
+        # self.buffer_tank:list[str] = []
+        self.mats_data = caller.get_mats()
+        self.equipment:str = None
+        self.mode_washing:str = None
+        self.duration_washing_minutes:float = None
         self.rpm_agit:float = None
+        # self.solvents_json: list[dict[str, Any]] = {}
+        self.arr_inputs:list[Input] = []
+
 
 
     
@@ -206,25 +233,73 @@ class Reslurry(uo.UnitOperation, uo_tag=defs.tag_uo_reslurry):
         return dict_opt
     
     @staticmethod
-    def get_json_schema(caller: trdef.UniversalTrait=None)->Objason:
-        common_schema = Reslurry.json_common()
+    def get_json_schema(caller: GetMats=None)->Objason:
+        common_schema = CrystWashing.json_common()
+        equipment = Primitive(prim_type='string',
+                        key=hedr_equipment,
+                        description='Equipment used for the crystal washing operation. Normally, it is a filter dryer, but please follow the given information source. '
+                        'If cannot be specified, please put a placeholder "<placeholder: equipment>"',
+                        nullable=True,
+                        required=True)
+        mode_washing = Primitive(prim_type='string',
+                        key=hedr_mode_washing,
+                        description='Mode of the crystal washing operation.'
+                        f'"{opt_washmode_reslurry}": The mixture of the crystals and the washing solvent is agitated to form a slurry again. The most common mode of crystal wahing. '
+                        f'"{opt_washmode_soak}": The crystals are washed without agitation, typically by simply adding the washing solvent and '
+                        'soaking the wet cake in it for a certain period of time. '
+                        f'"{opt_washmode_displacement}": The washing solvent is supplied to the filtration device where the crystals are retained and pressurized to flow through the crystals. '
+                        f'"{opt_washmode_placeholder}": Placeholder for the crystal washing operation mode. If the mode cannot be specified, please select this option.',
+                        enum=list_opt_mode_washing,
+                        nullable=False,
+                        required=True)
+        washing_duration_minutes = Primitive(prim_type='number',
+                        key=hedr_duration_washing_minutes,
+                        description='Duration of the crystal washing operation expressed in minute unit. '
+                        f'Nullable if the "{hedr_mode_washing}" is "{opt_washmode_displacement}" or "{opt_washmode_placeholder}". '
+                        f'Please put null if the necessary duration cannot be specified from the given data source.',
+                        nullable=True,
+                        required=True)
+        agitation_rpm = Primitive(prim_type='number',
+                        key=hedr_agitation_rpm,
+                        description='Agitation speed in revolutions per minute during the crystal washing operation.',
+                        nullable=True,
+                        required=True)
         input_entry = Input.get_json_schema(caller=caller)
         arr_input = Array(key=key_arr_solvent_json,
                           content=input_entry,
                           description='A list of material input entries for solvents used in incrystal washing operation. '
                           f'Material input can be a part of this unit operations or can be an independed "{defs.tag_uo_charging}" before this step if more appropriate.',
                           required=False)
-        
-        equipment = Primitive(prim_type='string',
-                              key=hedr_equipment,
-                              description='Equipment used for the crystal washing operation. Normally, it is a filter dryer, but please follow the given information source. '
-                              'If cannot be specified, please put a placeholder "<placeholder: equipment>"',
-                              nullable=True,
-                              required=True)
+        obj_uo = Objason(key=CrystWashing.uo_tag,
+                         props=common_schema+[equipment, mode_washing, washing_duration_minutes, agitation_rpm, arr_input],
+                         description='Crystal washing unit operation. This is typically carried out once or multiple times after the filtration of the recrystallized slurry of the intermediate or API.',
+                         required=False,
+                         nullable=False)
+        return obj_uo
 
-    def load_from_json_dict(self, json_dict: dict[str, any]):
+
+    def load_from_json_dict(self, json_dict: dict[str, Any]):
         super().load_from_json_dict(json_dict)
-        pass
+        self.equipment = json_dict.get(key=hedr_equipment, default=None)
+        self.mode_washing = json_dict.get(key=hedr_mode_washing, default=None)
+        self.duration_washing_minutes = json_dict.get(key=hedr_duration_washing_minutes, default=None)
+        self.rpm_agit = json_dict.get(key=hedr_agitation_rpm, default=None)
+        solvents_json = json_dict.get(key=key_arr_solvent_json, default=None)
+        if solvents_json is None:
+            solvents_json = []
+        for solvent in solvents_json:
+            new_input = Input(get_mats=self.caller,
+                              get_inputs=self.caller,
+                              flowsheet=self.flowsheet)
+            new_input.load_from_json_dict(solvent)
+            vessel_train:list[str]=new_input.get_vessel_train()
+            if vessel_train is None:
+                raise RuntimeError(f'{self.__class__.__name__}.load_from_json_dict(): Vessel train of the new input ({new_input.get_name_this()}) is empty.')
+            if not vessel_train or vessel_train[-1] != self.equipment:
+                vessel_train.append(self.equipment)
+            self.arr_inputs.append(new_input)
+
+
 
     def output_unit_operation(self):
         self.flowsheet.header_organizer(op_nr=self.operation_seq, title=lang_dict_uo_titles[self.uo_tag])
@@ -232,7 +307,8 @@ class Reslurry(uo.UnitOperation, uo_tag=defs.tag_uo_reslurry):
             self.flowsheet.put_body_comments(self.pre_comment)
             self.flowsheet.linefeed()        
 
-        #<Operation-specific processes here>
+        for input_item in self.arr_inputs:
+            input_item.print_input()
 
         if not (self.post_comment == None or self.post_comment == ''):
             self.flowsheet.put_body_comments(self.post_comment)

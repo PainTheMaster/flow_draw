@@ -95,7 +95,7 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
             self.post_comment = first_row[header_postcomment]
         for _, subitem in df.iterrows():
             #mats_data contains information for all the materials used in the process. At the moment, newly created Material instance has not been differentiated.
-            new_input = Input(mats_data=self.mats_data)
+            new_input = Input(get_mats=self.caller, get_inputs=self.caller, flowsheet=self.flowsheet)
             #each line of the df = each input material, now, the Material instance is unique in terms of the content.
             new_input.load_params_from_series(subitem)
             self.list_inputs.append(new_input)
@@ -122,7 +122,7 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
         super().load_from_json_dict(json_dict=json_dict)
         arr_input: list[dict[str, str|float]] = json_dict[arry_inputs_json]
         for single_input in arr_input:
-            new_input = Input(mats_data=self.mats_data, proc=self.caller, flowsheet=self.flowsheet)
+            new_input = Input(get_mats=self.caller, get_inputs=self.caller, flowsheet=self.flowsheet)
             new_input.load_from_json_dict(json_dict=single_input)
             self.list_inputs.append(new_input)
             self.input_count += 1

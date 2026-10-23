@@ -309,7 +309,7 @@ class Process(GetMats, GetProcName, GetInputs):
 
         self.__check_inpt_id_invalid()
 
-        input_tgt = matinp.Input(mats_data = self.mats_data, proc = self, flowsheet=self.flowsheet)
+        input_tgt = matinp.Input(get_mats = self.mats_data, get_inputs = self, flowsheet=self.flowsheet)
         input_tgt.mark_as_tgt()
         is_tgt_calcd = input_tgt.calc_qty()
         if not is_tgt_calcd:
