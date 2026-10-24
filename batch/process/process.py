@@ -299,8 +299,20 @@ class Process(GetMats, GetProcName, GetInputs):
             new_uo_inst.load_from_json_dict(step)
             self.seq_uo.append(new_uo_inst)
 
+        self.output_flowsheet()
+
+    def output_flowsheet(self, file_name:str=None):
+        """
+        Calculates the quantities of all the material inputs and outputs the flowsheet of self.seq_uo.
+        self.seq_uo must be populated and each unit operation must have loaded its parameters beforehand, either from JSON or from DataFrame.
+
+        Parameters
+        -----------
+        file_name: str
+            File name of the flowsheet. self.process_name+".xlsx" if None.
+        """
         if self.mats_data is None:
-            raise RuntimeError(f"{self.__class__.__name__}.interprit_dict(): No material data provided.")
+            raise RuntimeError(f"{self.__class__.__name__}.output_flowsheet(): No material data provided.")
 
         self.list_inpts.clear()
         for step in self.seq_uo:
@@ -316,12 +328,12 @@ class Process(GetMats, GetProcName, GetInputs):
             input_tgt.mark_as_tgt()
             is_tgt_calcd = input_tgt.calc_qty()
             if not is_tgt_calcd:
-                raise RuntimeError(f'{self.__class__.__name__}.interprit_dict(): Quantity calculation for "input_tgt" failed.')
+                raise RuntimeError(f'{self.__class__.__name__}.output_flowsheet(): Quantity calculation for "input_tgt" failed.')
             self.list_inpts.append(input_tgt)
         else:
             for inpt in self.list_inpts:
                 if inpt.is_based_on_tgt():
-                    raise RuntimeError(f'{self.__class__.__name__}.interprit_dict(): "{inpt.material_name}" (input ID {inpt.id_input}) '
+                    raise RuntimeError(f'{self.__class__.__name__}.output_flowsheet(): "{inpt.material_name}" (input ID {inpt.id_input}) '
                                        f'uses the target material (ID {matinp.opt_special_id_basis_tgt}) as its calculation basis, '
                                        f'but no target material is designated in the materials table.')
 
@@ -332,7 +344,7 @@ class Process(GetMats, GetProcName, GetInputs):
             if calc_complete:
                 break
         if not calc_complete:
-            raise RuntimeError(f'{self.__class__.__name__}.interprit_dict(): Quantity calculation did not converge within {num_max_iter_calc_qty} iterations.')
+            raise RuntimeError(f'{self.__class__.__name__}.output_flowsheet(): Quantity calculation did not converge within {num_max_iter_calc_qty} iterations.')
 
         for step in self.seq_uo:
             step.print_unit_operation()
@@ -345,7 +357,9 @@ class Process(GetMats, GetProcName, GetInputs):
             # self.flowsheet.put_qty_material(inputs=self, id_input=single_input.id_input)
             inpt.link_inputs()
 
-        self.flowsheet.save(filename=self.process_name+".xlsx")
+        if file_name is None:
+            file_name = self.process_name+".xlsx"
+        self.flowsheet.save(filename=file_name)
 
     def load_json_file(self):
         file_name = self.process_name+"_proc.json"

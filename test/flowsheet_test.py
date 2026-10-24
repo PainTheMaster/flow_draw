@@ -1,11 +1,18 @@
+"""
+Flowsheet output tests.
+Every unit operation is loaded from a DataFrame, in the same shape as the detail input worksheet,
+and the flowsheet is output through Process.output_flowsheet() so that the material quantities are calculated as in production.
+The output files go to test/output_flowsheet/.
+"""
+import os
 import unittest
 import pandas as pd
 import flow_draw.definitions as defs
-import flow_draw.batch.batch as batch
 import flow_draw.batch.process.process as proc
-import flow_draw.batch.process.unit_operations.unit_operation as uo_module
+import flow_draw.batch.process.unit_operations.unit_operation as uo
+import flow_draw.batch.process.unit_operations.material_input as matin
 import flow_draw.batch.process.unit_operations.uo_charging as chgng
-import flow_draw.batch.process.unit_operations.material_input as matinp
+import flow_draw.batch.process.unit_operations.uo_cryst_wash as cwash
 import flow_draw.batch.process.unit_operations.uo_placeholder as plchldr
 import flow_draw.batch.process.unit_operations.uo_line_clearance as lnclnc
 import flow_draw.batch.process.unit_operations.uo_inert_replacement as inert
@@ -22,868 +29,376 @@ import flow_draw.batch.process.unit_operations.uo_filter_setup as fltsup
 import flow_draw.batch.process.unit_operations.uo_drying as drying
 import flow_draw.batch.process.unit_operations.uo_alloc as alloc
 import flow_draw.batch.process.unit_operations.uo_tare as tare
-import flow_draw.batch.process.unit_operations.uo_cryst_wash as crystwash
-import flow_draw.data_io.flowsheet  as fsht
-import flow_draw.materials.materials as mats
-import flow_draw.trait_def.trait_def as trdef
-import os
+from flow_draw.materials.materials import Materials
 
-class SaltyWaterFlow(unittest.TestCase):
+
+dir_output = os.path.join(os.path.dirname(os.path.abspath(__file__)), "output_flowsheet")
+"""Directory for the flowsheets output by the tests."""
+
+#Materials used throughout the tests
+name_sm = "SM-A"
+name_tgt = "TGT-B"
+name_meoh = "MeOH"
+name_water = "H2O"
+name_naoh = "NaOH"
+gross_kg_sm = 10.0
+assay_sm = 95.0
+mw_sm = 200.0
+mw_tgt = 250.0
+
+
+#########################################################
+# Helpers
+#########################################################
+def make_mats_df(with_tgt: bool = True) -> pd.DataFrame:
+    """Materials table for the tests. The target material is optional."""
+    df = Materials.generate_mats_df()
+    df = Materials.add_to_mats_df(mats_df=df, material=name_sm, sm_tgt=defs.itm_io_mats_sm,
+                                  mw=mw_sm, density=1.2, conc_assay=assay_sm, kg_sm=gross_kg_sm, remark="Starting material")
+    if with_tgt:
+        df = Materials.add_to_mats_df(mats_df=df, material=name_tgt, sm_tgt=defs.itm_io_mats_tgt,
+                                      mw=mw_tgt, remark="Target material")
+    df = Materials.add_to_mats_df(mats_df=df, material=name_meoh, mw=32.04, density=0.792, conc_assay=100.0)
+    df = Materials.add_to_mats_df(mats_df=df, material=name_water, mw=18.02, density=1.0, conc_assay=100.0)
+    df = Materials.add_to_mats_df(mats_df=df, material=name_naoh, mw=40.0, density=1.5, conc_assay=48.0, remark="48% aq.")
+    return df
+
+
+def make_detail_df(hedr: list[str], rows: list[dict]) -> pd.DataFrame:
+    """
+    Detail input DataFrame for a unit operation which has no generate_test_df().
+    hedr is the UO-specific header list. Each dict in rows is a row on the worksheet; missing items are left empty.
+    """
+    cols = defs.list_hedr_cmn_io_dtil + hedr
+    return pd.DataFrame([{col: row.get(col, None) for col in cols} for row in rows], columns=cols)
+
+
+#########################################################
+# Base class
+#########################################################
+class FlowsheetTestBase(unittest.TestCase):
+    """
+    Each test builds a Process, adds unit operations from DataFrames with add_uo() and calls output().
+    """
+    mats_with_tgt: bool = False
+    """
+    Set True in a derived class to put the target material in the materials table.
+    The target material is linked to the starting material inputs, hence the process needs to charge the starting material.
+    """
+
     def setUp(self):
-        return super().setUp()
-    
-    def test0000_OutputFlow(self):
-        batch_name = "flowtest000"
-        proc_name = "salt_water"
-        tst_proc = proc.Process(batch_name=batch_name, process_name=proc_name,num_uo=1, comment="comment for proc")
-        tst_proc.mats_data = mats.Materials(df_mats=PurchaseMaterials())
-        tst_chgng = chgng.Charging(caller=tst_proc,
-                                    flowsheet=tst_proc.flowsheet,
-                                    operation_seq=1,
-                                    num_subitems=2,
-                                    edit_comment="put salt and water")
-        tst_proc.seq_uo.append(tst_chgng)
-        tst_proc.seq_uo[0].load_params_from_df(SetChgngForSaltWater())
-        tst_proc.seq_uo[0].print_unit_operation()
-        tst_proc.flowsheet.save("test000_SaltWaterOutputFlow.xlsx")
-        self.assertTrue(True)
+        os.makedirs(dir_output, exist_ok=True)
+        self.test_name: str = self.id().split('.')[-1]
+        self.proc = proc.Process(process_name=self.test_name)
+        self.proc.mats_data = Materials(make_mats_df(with_tgt=self.mats_with_tgt))
 
-    def test0001_Batch(self):
-        wrong_batch_name = "wrong_batch_name"
-        right_batch_name = "right_batch_name"
-        proc_name = "salt_water"
-        test_batch = batch.Batch()
-        test_batch.batch_name = wrong_batch_name
-        test_batch.num_procs = 3
-        test_df = prep_batch_test_df(batch_name=right_batch_name, proc_name=proc_name, num_uo=1)
-        test_batch.load_outline(test_df)
-        sample_proc = test_batch.list_proc[0]
-        result:bool = ((test_batch.batch_comment=="Batch comment") and
-                       (test_batch.num_procs==1) and
-                       (len(test_batch.list_proc)==1) and
-                       (sample_proc.batch_name==right_batch_name) and
-                       (sample_proc.process_name==proc_name))
-        self.assertTrue(result)
+    def add_uo(self, uo_cls: type[uo.UnitOperation], df: pd.DataFrame,
+               precomment: str = None, postcomment: str = None, edit_comment: str = None) -> uo.UnitOperation:
+        """
+        Fills the common columns as the worksheet does, loads df to a new instance of uo_cls and appends it to the process.
+        """
+        seq = len(self.proc.seq_uo) + 1
+        inst = uo_cls(caller=self.proc,
+                      flowsheet=self.proc.flowsheet,
+                      operation_seq=seq,
+                      num_subitems=len(df),
+                      edit_comment=edit_comment)
+        df = df.copy()
+        for col in defs.list_hedr_cmn_io_dtil:
+            if col not in df.columns:
+                df[col] = None
+        df[defs.hedr_cmn_io_dtil_seq] = seq
+        df[defs.hedr_cmn_io_dtil_uo] = inst.uo_tag
+        df[defs.hedr_cmn_io_dtil_edt_cmnt] = edit_comment
+        if precomment is not None:
+            df.at[df.index[0], defs.hedr_cmn_io_dtil_precmnt] = precomment
+        if postcomment is not None:
+            df.at[df.index[0], defs.hedr_cmn_io_dtil_postcmnt] = postcomment
+        inst.load_params_from_df(df)
+        self.proc.seq_uo.append(inst)
+        return inst
 
-def PurchaseMaterials() -> pd.DataFrame:
-    dict_NaCl = {defs.hedr_io_mats_mat: "NaCl",
-                 defs.hedr_io_mats_sm_tgt: defs.itm_io_mats_sm,
-                 defs.hedr_io_mats_mw: 58.44,
-                 defs.hedr_io_mats_dnsty: 2.17,
-                 defs.hedr_io_mats_concasy: 100.0,
-                 defs.hedr_io_mats_kg_sm: 1.00,
-                 defs.hedr_io_mats_remark: "table salt"}
+    def output(self) -> str:
+        """Calculates the quantities and saves the flowsheet as <test name>.xlsx. Returns the path."""
+        path = os.path.join(dir_output, self.test_name + ".xlsx")
+        self.proc.output_flowsheet(file_name=path)
+        self.assertTrue(os.path.exists(path))
+        return path
 
-    dict_Water = {defs.hedr_io_mats_mat: "Water",
-                 defs.hedr_io_mats_sm_tgt: None,
-                 defs.hedr_io_mats_mw: 18.01,
-                 defs.hedr_io_mats_dnsty: 1.00,
-                 defs.hedr_io_mats_concasy: 100.0,
-                 defs.hedr_io_mats_kg_sm: None,
-                 defs.hedr_io_mats_remark: None}
-    
-    df_mats = pd.DataFrame([dict_NaCl, dict_Water])
-    return df_mats
+    def get_input(self, id_input: int) -> matin.Input:
+        return self.proc.get_input(id_input=id_input)
 
 
-def SetChgngForSaltWater() -> pd.DataFrame:
-    dict_input1 = {defs.hedr_cmn_io_dtil_seq : "1",
-                    defs.hedr_cmn_io_dtil_uo : defs.tag_uo_charging,
-                    defs.hedr_cmn_io_dtil_edt_cmnt : "put salt and water",
-                    defs.hedr_cmn_io_dtil_precmnt : "Too much salt is harm",
-                    defs.hedr_cmn_io_dtil_postcmnt : "Take care of your kidney",
-                    matinp.hedr_material_name : "NaCl",
-                    matinp.hedr_metrics_value : 1.0,
-                    matinp.hedr_metrics_unit: matinp.opt_mtrcs_eq,
-                    matinp.hedr_error_pct : 5.0,
-                    matinp.hedr_method : defs.opt_uo_chgng_method_pwdr,
-                    matinp.hedr_time_control : defs.opt_uo_chgng_timctrl_none,
-                    matinp.hedr_time_min : None,
-                    matinp.hedr_time_max : None,
-                    matinp.hedr_temp_control : defs.opt_uo_chgng_temprctrl_none,
-                    matinp.hedr_temp_min : None,
-                    matinp.hedr_temp_max : None}
-    
-    dict_input2 = {defs.hedr_cmn_io_dtil_seq : "1",
-                    defs.hedr_cmn_io_dtil_uo : defs.tag_uo_charging,
-                    defs.hedr_cmn_io_dtil_edt_cmnt : "put salt and water",
-                    defs.hedr_cmn_io_dtil_precmnt : "Water is dangerous.",
-                    defs.hedr_cmn_io_dtil_postcmnt : "Don't dive in.",
-                    matinp.hedr_material_name : "Water",
-                    matinp.hedr_metrics_value : 10.0,
-                    matinp.hedr_metrics_unit: matinp.opt_mtrcs_v_per_w,
-                    matinp.hedr_error_pct : 10.0,
-                    matinp.hedr_method : defs.opt_uo_chgng_method_shower,
-                    matinp.hedr_time_control : defs.opt_uo_chgng_timctrl_min,
-                    matinp.hedr_time_min : "1 hr",
-                    matinp.hedr_time_max : None,
-                    matinp.hedr_temp_control : defs.opt_uo_chgng_temprctrl_min_max,
-                    matinp.hedr_temp_min : 4.0,
-                    matinp.hedr_temp_max :100.0 }
-    df_input = pd.DataFrame([dict_input1, dict_input2])
-    return df_input
-
-
-def prep_batch_test_df(batch_name:str=None, proc_name:str=None, num_uo:int =0)-> pd.DataFrame:
-    dict0: dict[str, list[str|int]] ={defs.hedr_io_batch_value:[batch_name,
-                                    "Batch comment",
-                                    proc_name,
-                                    num_uo,
-                                    "Remark for process-1",
-                                    None,
-                                    num_uo,
-                                    "Remark for process-2"]}
-    
-    idx=[defs.item_io_batch_batch_name,
-        defs.item_io_batch_batch_remark,
-        defs.item_io_batch_proc_name_stem.format(1),
-        defs.item_io_batch_proc_count_uo_stem.format(1),
-        defs.item_io_batch_proc_remark_stem.format(1),
-        defs.item_io_batch_proc_name_stem.format(2),
-        defs.item_io_batch_proc_count_uo_stem.format(2),
-        defs.item_io_batch_proc_remark_stem.format(2)]
-
-    test_df = pd.DataFrame(dict0, index=idx)
-    print("in prep_test_df(): test_df")
-    print(test_df)
-    print("==========\n")
-    # test_df.index = test_df[0]
-    # print("in prep_test_df(): test_df re-indexed")
-    # print(test_df)
-    # print("==========\n")
-    # print("len(test_df): ", len(test_df))
-    # print("==========\n")
-    return test_df
-
-
-class UnitOperationOutputTest(unittest.TestCase):
-    def setUp(self):
-
-        return super().setUp()
-
+#########################################################
+# 1000: Unit operations without material inputs
+#########################################################
+class UnitOperationOutputTest1000(FlowsheetTestBase):
     def test_1001_placeholder(self):
-        sheet = fsht.Flowsheet()
-        uo_instance = plchldr.Placeholder(flowsheet=sheet, operation_seq=1, num_subitems=1)
-        uo_instance.pre_comment='Test 1001 precomment\nTest1001 additional precomment (line-2)'
-        uo_instance.num_lines = 0
-        uo_instance.post_comment='Test 1001 postcomment'
-        uo_instance.print_unit_operation()
-        sheet.save(filename='Test1001_flowsheet_out.xlsx')
-        self.assertTrue(True)
+        df = make_detail_df(plchldr.list_hedr, [{plchldr.hedr_lines: 3}])
+        self.add_uo(plchldr.Placeholder, df,
+                    precomment='Test 1001 precomment\nTest 1001 additional precomment (line-2)',
+                    postcomment='Test 1001 postcomment')
+        self.output()
 
     def test_1002_line_clearance(self):
-        sheet = fsht.Flowsheet()
-        uo_instance = lnclnc.LineClearance(flowsheet=sheet, operation_seq=2)
-        uo_instance.sop = "TEST SOP"
-        uo_instance.print_unit_operation()
-        sheet.save(filename='Test1002_flowsheet_out.xlsx')
-        self.assertTrue(True)
+        df = make_detail_df(lnclnc.list_hedr, [{lnclnc.hedr_sop: "TEST SOP"}])
+        self.add_uo(lnclnc.LineClearance, df)
+        self.output()
 
-    def test_1003_innert_replace(self):
-        sheet = fsht.Flowsheet()
-        uo_instance = inert.InnertReplacement(flowsheet=sheet, operation_seq=3)
-        uo_instance.innert_gas=inert.opt_gas_Ar
-        uo_instance.neg_pressure = -0.08
-        uo_instance.num_repeat = 2
-        uo_instance.output_unit_operation()
-        sheet.save(filename='Test1003_flowsheet_out.xlsx')
-        self.assertTrue(True)
+    def test_1003_inert_replace(self):
+        df = make_detail_df(inert.list_hedr, [{inert.hedr_gas: inert.opt_gas_Ar,
+                                               inert.hedr_neg_pres: -0.08,
+                                               inert.hedr_num_repeat: 2}])
+        self.add_uo(inert.InertReplacement, df)
+        self.output()
 
     def test_1004_temp_ctrl_prog_mode(self):
-        sheet = fsht.Flowsheet()
-        uo_instance = tempr.TempControl(flowsheet=sheet, operation_seq=1)
-        uo_instance.ctrl_mode = tempr.opt_mode_prog
-        uo_instance.Ti_sp = 10.0
-        uo_instance.time_val_prog = 1.0
-        uo_instance.time_unit_prog = defs.tag_flow_cmn_time_unit_hour
-        uo_instance.Ti_limit_low = 5.0
-        uo_instance.Ti_limit_high = 15.0
-        uo_instance.Tj_limit_high = 30.0
-        uo_instance.Tj_limit_low = 0.0
-
-        uo_instance.print_unit_operation()
-        sheet.save(filename="Test1004_temp_prog_mode.xlsx")
-        self.assertTrue(True)
+        df = make_detail_df(tempr.list_hedr, [{tempr.hedr_mode: tempr.opt_mode_prog,
+                                               tempr.hedr_Ti_sp: 10.0,
+                                               tempr.hedr_prog_time_val: 1.0,
+                                               tempr.hedr_prog_time_unit: tempr.opt_time_unit_hour,
+                                               tempr.hedr_Ti_limit_low: 5.0,
+                                               tempr.hedr_Ti_limit_high: 15.0,
+                                               tempr.hedr_Tj_limit_low: 0.0,
+                                               tempr.hedr_Tj_limit_high: 30.0}])
+        self.add_uo(tempr.TempControl, df)
+        self.output()
 
     def test_1005_temp_ctrl_TiTj_mode(self):
-        sheet = fsht.Flowsheet()
-        uo_instance = tempr.TempControl(flowsheet=sheet, operation_seq=1)
-        uo_instance.ctrl_mode = tempr.opt_mode_TiTj
-        uo_instance.pre_comment = "Pre-comment line-1\nPreComment line-2"
-        uo_instance.Ti_sp = 30.0
-        uo_instance.time_unit_prog = defs.tag_flow_cmn_time_unit_hour
-        uo_instance.Tj_limit_low = 20.0
-        uo_instance.Tj_limit_high = 35.0
-        
-        uo_instance.Ti_limit_low = 25.0
-        uo_instance.Ti_limit_high = 35.0
-        
-        uo_instance.Ti_tgt_low = 27.5
-        uo_instance.Ti_tgt_high = 32.5
+        df = make_detail_df(tempr.list_hedr, [{tempr.hedr_mode: tempr.opt_mode_TiTj,
+                                               tempr.hedr_Ti_sp: 30.0,
+                                               tempr.hedr_Tj_limit_low: 20.0,
+                                               tempr.hedr_Tj_limit_high: 35.0,
+                                               tempr.hedr_Ti_limit_low: 25.0,
+                                               tempr.hedr_Ti_limit_high: 35.0,
+                                               tempr.hedr_Ti_tgt_low: 27.5,
+                                               tempr.hedr_Ti_tgt_high: 32.5,
+                                               tempr.hedr_endpoint_check: tempr.opt_check_endpoint_yes}])
+        self.add_uo(tempr.TempControl, df, precomment="Pre-comment line-1\nPre-comment line-2")
+        self.output()
 
-        uo_instance.endpoint_check = True
-
-        print(uo_module.list_unit_ops)
-
-        uo_instance.print_unit_operation()
-        sheet.save(filename="Test1005_temp_TiTj_mode.xlsx")
-        self.assertTrue(True)
-        
     def test_1006_temp_ctrl_Tj_mode(self):
-        sheet = fsht.Flowsheet()
-        uo_instance = tempr.TempControl(flowsheet=sheet, operation_seq=1)
-        uo_instance.ctrl_mode = tempr.opt_mode_Tj
-        uo_instance.pre_comment = "Pre-comment line-1\nPreComment line-2"
-        uo_instance.Ti_sp = 30.0
-
-        uo_instance.Tj_sp = 30.0
-        
-        # uo_instance.Ti_limit_low = 25.0
-        # uo_instance.Ti_limit_high = 35.0
-        
-        # uo_instance.Ti_tgt_low = 27.5
-        # uo_instance.Ti_tgt_high = 30.0
-
-        uo_instance.endpoint_check = True
-
-        # print(uo_module.list_unit_ops)
-
-        uo_instance.print_unit_operation()
-        sheet.save(filename="Test1006_tempr_Tj_mode.xlsx")
-        self.assertTrue(True)
-
+        df = make_detail_df(tempr.list_hedr, [{tempr.hedr_mode: tempr.opt_mode_Tj,
+                                               tempr.hedr_Ti_sp: 30.0,
+                                               tempr.hedr_Tj_sp: 30.0,
+                                               tempr.hedr_endpoint_check: tempr.opt_check_endpoint_yes}])
+        self.add_uo(tempr.TempControl, df, precomment="Pre-comment line-1\nPre-comment line-2")
+        self.output()
 
     def test_1007_temp_ctrl_Ti_mode(self):
-        sheet = fsht.Flowsheet()
-        uo_instance = tempr.TempControl(flowsheet=sheet, operation_seq=1)
-        uo_instance.ctrl_mode = tempr.opt_mode_Ti
-        uo_instance.pre_comment = "Pre-comment line-1\nPreComment line-2"
-        uo_instance.Ti_sp = 40.0
+        df = make_detail_df(tempr.list_hedr, [{tempr.hedr_mode: tempr.opt_mode_Ti,
+                                               tempr.hedr_Ti_sp: 40.0,
+                                               tempr.hedr_Tj_sp: 30.0,
+                                               tempr.hedr_Ti_limit_low: 35.0,
+                                               tempr.hedr_Ti_limit_high: 45.0,
+                                               tempr.hedr_Ti_tgt_low: 37.5,
+                                               tempr.hedr_Ti_tgt_high: 42.5,
+                                               tempr.hedr_endpoint_check: tempr.opt_check_endpoint_yes}])
+        self.add_uo(tempr.TempControl, df, precomment="Pre-comment line-1\nPre-comment line-2")
+        self.output()
 
-        uo_instance.Tj_sp = 30.0
-        
-        uo_instance.Ti_limit_low = 35.0
-        uo_instance.Ti_limit_high = 45.0
-        
-        uo_instance.Ti_tgt_low = 37.5
-        uo_instance.Ti_tgt_high = 42.5
+    def test_1008_temp_ctrl_no_mode_err(self):
+        df = make_detail_df(tempr.list_hedr, [{tempr.hedr_Ti_sp: 40.0}])
+        with self.assertRaises(ValueError):
+            self.add_uo(tempr.TempControl, df)
 
-        uo_instance.endpoint_check = True
+    def test_1010_agit_full(self):
+        df = make_detail_df(agit.list_hedr, [{agit.hedr_spec_agit: agit.opt_spec_guide,
+                                              agit.hedr_rpm: 80.0,
+                                              agit.hedr_Ti_min: 35.0,
+                                              agit.hedr_Ti_max: 45.0,
+                                              agit.hedr_time_min: 1.0,
+                                              agit.hedr_time_max: 1.0,
+                                              agit.hedr_time_unit: agit.opt_time_unit_hour,
+                                              agit.hedr_dissolution_check: agit.opt_yes}])
+        self.add_uo(agit.Agitation, df)
+        self.output()
 
-        # print(uo_module.list_unit_ops)
+    def test_1011_agit_minimal(self):
+        df = make_detail_df(agit.list_hedr, [{agit.hedr_spec_agit: agit.opt_spec_guide,
+                                              agit.hedr_rpm: 80.0}])
+        self.add_uo(agit.Agitation, df)
+        self.output()
 
-        uo_instance.print_unit_operation()
-        sheet.save(filename="Test1007_tempr_Ti_mode.xlsx")
-        self.assertTrue(True)
+    def test_1012_agit_no_spec_err(self):
+        df = make_detail_df(agit.list_hedr, [{agit.hedr_rpm: 80.0}])
+        with self.assertRaises(RuntimeError):
+            self.add_uo(agit.Agitation, df)
 
-    def test_1008_agit_full(self):
-        sheet = fsht.Flowsheet()
-        uo_instance = agit.Agitation(flowsheet=sheet, operation_seq=1)
-        uo_instance.time_min = 1.0
-        uo_instance.time_max = 1.0
-        uo_instance.time_unit = agit.tag_flow_cmn_time_unit_hour
-        uo_instance.Ti_min = 35.0 
-        uo_instance.Ti_max = 45.0
-        uo_instance.spec_agit = agit.opt_spec_guide
-        uo_instance.rpm = 80.0
-        uo_instance.dissolution_check = True
+    def test_1020_settling_full(self):
+        df = make_detail_df(stlng.list_hedr, [{stlng.hedr_time_min: 1.0,
+                                               stlng.hedr_time_max: 1.0,
+                                               stlng.hedr_time_unit: stlng.opt_time_unit_second,
+                                               stlng.hedr_Ti_min: 20.0,
+                                               stlng.hedr_Ti_max: 30.0}])
+        self.add_uo(stlng.Settling, df)
+        self.output()
 
-        print(uo_module.list_unit_ops)
+    def test_1021_settling_minimal(self):
+        df = make_detail_df(stlng.list_hedr, [{}])
+        self.add_uo(stlng.Settling, df)
+        self.output()
 
-        uo_instance.print_unit_operation()
-        sheet.save(filename="Test1008_agitation_full.xlsx")
-        self.assertTrue(True)
+    def test_1030_phase_disch_full(self):
+        df = make_detail_df(phdisch.list_hedr, [{phdisch.hedr_origin: "RV_ORIG",
+                                                 phdisch.hedr_via: "Multiplexer",
+                                                 phdisch.hedr_destin: "Destin tank 1"},
+                                                {phdisch.hedr_destin: "Destin tank 2"}])
+        inst = self.add_uo(phdisch.PhaseDisch, df, precomment="Pre-comment-1\nPre-comment-2", postcomment="Post-comment")
+        self.assertEqual(inst.destin, ["Destin tank 1", "Destin tank 2"])
+        self.output()
 
-    def test_1009_agit_minimal(self):
-        sheet = fsht.Flowsheet()
-        uo_instance = agit.Agitation(flowsheet=sheet, operation_seq=1)
-        uo_instance.spec_agit = agit.opt_spec_guide
-        uo_instance.rpm = 80.0
-
-        print(uo_module.list_unit_ops)
-
-        uo_instance.print_unit_operation()
-        sheet.save(filename="Test1009_agitation_minimal.xlsx")
-        self.assertTrue(True)
-
-
-    def test_1010_settling_full(self):
-        sheet = fsht.Flowsheet()
-        uo_instance = stlng.Settling(flowsheet=sheet, operation_seq=1)
-        uo_instance.time_min = 1.0
-        uo_instance.time_max = 1.0
-        uo_instance.time_unit = stlng.opt_time_unit_second
-        uo_instance.Ti_min = 20.0
-        uo_instance.Ti_max = 30.0
-
-        print(uo_module.list_unit_ops)
-
-        uo_instance.print_unit_operation()
-        sheet.save(filename="Test1010_settling_full.xlsx")
-        self.assertTrue(True)
-
-    def test_1011_settling_minimal(self):
-        sheet = fsht.Flowsheet()
-        uo_instance = stlng.Settling(flowsheet=sheet, operation_seq=1)
-
-        print(uo_module.list_unit_ops)
-
-        uo_instance.print_unit_operation()
-        sheet.save(filename="Test1011_settling_minimal.xlsx")
-        self.assertTrue(True)
-    
-    def test_1012_phase_disch_full(self):
-        sheet = fsht.Flowsheet()
-        uo_instance = phdisch.PhaseDisch(flowsheet=sheet, operation_seq=10)
-        uo_instance.pre_comment = "Pre-comment-1\nPre-comment-2"
-        uo_instance.post_comment = "Post comennt"
-        uo_instance.origin = 'RV_ORIG'
-        uo_instance.via = 'Multiplexer'
-        uo_instance.destin.append('Destin tank 1')
-        uo_instance.destin.append('Destin tank 2')
-
-        print(uo_module.list_unit_ops)
-
-        uo_instance.print_unit_operation()
-        sheet.save(filename="Test1012_phase_disch_full.xlsx")
-        self.assertTrue(True)
+    def test_1031_phase_disch_minimal(self):
+        df = make_detail_df(phdisch.list_hedr, [{phdisch.hedr_destin: "Destin tank"}])
+        self.add_uo(phdisch.PhaseDisch, df)
+        self.output()
 
 
-    def test_1013_phase_disch_med(self):
-        sheet = fsht.Flowsheet()
-        uo_instance = phdisch.PhaseDisch(flowsheet=sheet, operation_seq=11)
+#########################################################
+# 2000: Evaporation
+#########################################################
+class EvaporationTest2000(FlowsheetTestBase):
+    def __full_df(self, **kwargs) -> pd.DataFrame:
+        params = dict(precomment="precomment for evaporation",
+                      postcomment="postcomment for evaporation",
+                      Tj_min=50.0, Tj_max=100.0,
+                      Tbr_min=-25, Tbr_max=5,
+                      press_ctrl=evap.opt_press_ctrl_specific,
+                      press_min=0.0, press_max=1.0,
+                      unit_press=evap.opt_press_unit_kPaA,
+                      agit_spec=evap.opt_agit_spec_guide, agit_rpm=30.0,
+                      vw_spec_min=10, vw_spec_max=15.0,
+                      vw_guide_min=11.0, vw_guide_max=12.0)
+        params.update(kwargs)
+        return evap.Evaporation.generate_test_df(**params)
 
-        uo_instance.destin.append('Destin tank')
+    def test_2000_full(self):
+        inst = self.add_uo(evap.Evaporation, self.__full_df())
+        #The end point volume is calculated from the net weight of the starting material.
+        self.assertAlmostEqual(inst.end_volume_spec_min, gross_kg_sm * assay_sm / 100.0 * 10)
+        self.output()
 
+    def test_2001_press_discrepancy_err(self):
+        with self.assertRaises(ValueError):
+            self.add_uo(evap.Evaporation, self.__full_df(press_min=None, press_max=None))
 
-        print(uo_module.list_unit_ops)
+    def test_2002_no_press_unit_err(self):
+        with self.assertRaises(ValueError):
+            self.add_uo(evap.Evaporation, self.__full_df(unit_press=None))
 
-        uo_instance.print_unit_operation()
-        sheet.save(filename="Test1013_phase_disch_med.xlsx")
-        self.assertTrue(True)
+    def test_2003_no_endpoint_err(self):
+        self.add_uo(evap.Evaporation, self.__full_df(vw_spec_min=None, vw_spec_max=None, vw_guide_min=None, vw_guide_max=None))
+        with self.assertRaises(ValueError):
+            self.output()
 
-
-    def test_1014_phase_disch_minimal(self):
-        sheet = fsht.Flowsheet()
-        uo_instance = phdisch.PhaseDisch(flowsheet=sheet, operation_seq=11)
-
-        print(uo_module.list_unit_ops)
-
-        uo_instance.print_unit_operation()
-        sheet.save(filename="Test1014_phase_disch_minimal.xlsx")
-        self.assertTrue(True)
-
-
-class AgitationTest2000(unittest.TestCase, trdef.GetMats):
-    def __init__(self, methodName = "runTest"):
-        self.mats: mats.Materials = None
-        super().__init__(methodName)
-    def setUp(self):
-        mats_df = mats.Materials.generate_mats_df()
-        mats_df = mats.Materials.add_to_mats_df(mats_df=mats_df,
-                                      material="ぎゅうにく",
-                                      sm_tgt=defs.itm_io_mats_sm,
-                                      mw=100.0,
-                                      density=1.1,
-                                      conc_assay=90.0,
-                                      kg_sm=2.0,
-                                      remark="残り10%は普通の肉が混入。何の肉かは聞いてはいけない。")
-        mats_df = mats.Materials.add_to_mats_df(mats_df=mats_df,
-                                      material="たまねぎ",
-                                      mw=50.0,
-                                      density=0.9,
-                                      conc_assay=100.0,
-                                      remark="淡路島産")
-        mats_df = mats.Materials.add_to_mats_df(mats_df=mats_df,
-                                      material="スパイス",
-                                      mw=10.0,
-                                      density=0.8,
-                                      conc_assay=100.0,
-                                      remark="これは上物のブツだぜ。")
-        print("testprint")
-        print(mats_df)       
-        self.mats = mats.Materials(df_mats = mats_df)
-        self.sheet = fsht.Flowsheet()
-
-        return super().setUp()
-    
-    def get_mats(self)-> mats.Materials:
-        return self.mats
-    
-    # def test_pretest_2000(self):
-    #     evap_instance:evap.Evaporation = evap.Evaporation(caller=self,
-    #                                                       flowsheet=self.sheet,
-    #                                                       operation_seq=1,
-    #                                                       num_subitems=1,
-    #                                                       edit_comment=None)
-    #     evap_instance.
-
-    #     self.assertTrue(True)
-
-    def test_full_dataset_2000(self):
-        test_df=evap.Evaporation.generate_test_df(precomment="precomment for test 2000",
-                                                  postcomment="postcomment for test 2000",
-                                                  Tj_min=50.0,
-                                                  Tj_max=100.0,
-                                                  Tbr_min=-25,
-                                                  Tbr_max=5,
-                                                  press_ctrl=evap.opt_press_ctrl_specific,
-                                                  press_min=0.0,
-                                                  press_max=1.0,
-                                                  unit_press=evap.opt_press_unit_kPaA,
-                                                  agit_spec=evap.opt_agit_spec_guide,
-                                                  agit_rpm=30.0,
-                                                  vw_spec_min=10,
-                                                  vw_spec_max=15.0,
-                                                  vw_guide_min=11.0,
-                                                  vw_guide_max=12.0)
-        print(test_df)
-        evap_instance:evap.Evaporation = evap.Evaporation(caller=self,
-                                                          flowsheet=self.sheet,
-                                                          operation_seq=1,
-                                                          num_subitems=1,
-                                                          edit_comment=None)
-        evap_instance.load_params_from_df(df=test_df)
-        evap_instance.print_unit_operation()
-        self.sheet.save("Test_2000_evap_flowsheet.xlsx")
-        self.assertTrue(True)
+    def test_2004_minimum(self):
+        df = evap.Evaporation.generate_test_df(Tj_min=50.0, Tbr_max=5, vw_guide_max=12.0)
+        self.add_uo(evap.Evaporation, df)
+        self.output()
 
 
+#########################################################
+# 3000: CIP
+#########################################################
+class CIPTest3000(FlowsheetTestBase):
+    def test_3000_full(self):
+        df = cip.CIP.generate_test_df(precomment="Pre-comment for test-3000",
+                                      postcomment="Post-comment for test-3000",
+                                      cip_tgt="大きな釜", solvent=name_water, qty_kg=10, via="multiplexer")
+        cip.CIP.add_to_test_df(df=df, cip_tgt="大きな釜", solvent=name_meoh, qty_kg=15, via="multiplexer")
+        self.add_uo(cip.CIP, df)
+        self.output()
 
-    def test_2001_press_discrepancy(self):
-        test_df=evap.Evaporation.generate_test_df(precomment="precomment for test 2001",
-                                                  postcomment="postcomment for test 2001",
-                                                  Tj_min=50.0,
-                                                  Tj_max=100.0,
-                                                  Tbr_min=-25,
-                                                  Tbr_max=5,
-                                                  press_ctrl=evap.opt_press_ctrl_specific,
-                                                  #press_min=0.0,
-                                                  #press_max=1.0,
-                                                  unit_press=evap.opt_press_unit_kPaA,
-                                                  agit_spec=evap.opt_agit_spec_guide,
-                                                  agit_rpm=30.0,
-                                                  vw_spec_min=10,
-                                                  vw_spec_max=15.0,
-                                                  vw_guide_min=11.0,
-                                                  vw_guide_max=12.0)
-        print(test_df)
-        evap_instance:evap.Evaporation = evap.Evaporation(caller=self,
-                                                          flowsheet=self.sheet,
-                                                          operation_seq=1,
-                                                          num_subitems=1,
-                                                          edit_comment=None)
-        #evap_instance.load_params_from_df(df=test_df)
-        # evap_instance.output_unit_operation()
-        # self.sheet.save("Test_2001_evap_flowsheet.xlsx")
-        with self.assertRaises(expected_exception=ValueError):
-            evap_instance.load_params_from_df(df=test_df)
-    
-
-    def test_2002_no_press_unit(self):
-        test_df=evap.Evaporation.generate_test_df(precomment="precomment for test 2002",
-                                                  postcomment="postcomment for test 2002",
-                                                  Tj_min=50.0,
-                                                  Tj_max=100.0,
-                                                  Tbr_min=-25,
-                                                  Tbr_max=5,
-                                                  press_ctrl=evap.opt_press_ctrl_specific,
-                                                  press_min=0.0,
-                                                  press_max=1.0,
-                                                  #unit_press=evap.opt_press_unit_kPaA,
-                                                  agit_spec=evap.opt_agit_spec_guide,
-                                                  agit_rpm=30.0,
-                                                  vw_spec_min=10,
-                                                  vw_spec_max=15.0,
-                                                  vw_guide_min=11.0,
-                                                  vw_guide_max=12.0)
-        print(test_df)
-        evap_instance:evap.Evaporation = evap.Evaporation(caller=self,
-                                                          flowsheet=self.sheet,
-                                                          operation_seq=1,
-                                                          num_subitems=1,
-                                                          edit_comment=None)
-        #evap_instance.load_params_from_df(df=test_df)
-        # evap_instance.output_unit_operation()
-        # self.sheet.save("Test_2001_evap_flowsheet.xlsx")
-        with self.assertRaises(expected_exception=ValueError):
-            evap_instance.load_params_from_df(df=test_df)
-            
-
-    def test_2003_no_evap_endpoint(self):
-        test_df=evap.Evaporation.generate_test_df(precomment="precomment for test 2003",
-                                                  postcomment="postcomment for test 2003",
-                                                  Tj_min=50.0,
-                                                  Tj_max=100.0,
-                                                  Tbr_min=-25,
-                                                  Tbr_max=5,
-                                                  press_ctrl=evap.opt_press_ctrl_specific,
-                                                  press_min=0.0,
-                                                  press_max=1.0,
-                                                  unit_press=evap.opt_press_unit_kPaA,
-                                                  agit_spec=evap.opt_agit_spec_guide,
-                                                  agit_rpm=30.0,
-                                                  #vw_spec_min=10,
-                                                  #vw_spec_max=15.0,
-                                                  #vw_guide_min=11.0,
-                                                  #vw_guide_max=12.0
-                                                  )
-        print(test_df)
-        evap_instance:evap.Evaporation = evap.Evaporation(caller=self,
-                                                          flowsheet=self.sheet,
-                                                          operation_seq=1,
-                                                          num_subitems=1,
-                                                          edit_comment=None)
-        #evap_instance.load_params_from_df(df=test_df)
-        # evap_instance.output_unit_operation()
-        # self.sheet.save("Test_2001_evap_flowsheet.xlsx")
-        evap_instance.load_params_from_df(df=test_df)
-        with self.assertRaises(expected_exception=ValueError):
-            evap_instance.print_unit_operation()
+    def test_3001_minimum(self):
+        df = cip.CIP.generate_test_df(cip_tgt="大きな釜", solvent=name_water, qty_kg=10)
+        cip.CIP.add_to_test_df(df=df, cip_tgt="大きな釜", solvent=name_meoh, qty_kg=15)
+        self.add_uo(cip.CIP, df)
+        self.output()
 
 
-    def test_2004_minimum_datasets(self):
-        test_df=evap.Evaporation.generate_test_df(#precomment="precomment for test 2004",
-                                                  #postcomment="postcomment for test 2004",
-                                                  Tj_min=50.0,
-                                                  #Tj_max=100.0,
-                                                  #Tbr_min=-25,
-                                                  Tbr_max=5,
-                                                  #press_ctrl=evap.opt_press_ctrl_specific,
-                                                  #press_min=0.0,
-                                                  #press_max=1.0,
-                                                  #unit_press=evap.opt_press_unit_kPaA,
-                                                  #agit_spec=evap.opt_agit_spec_guide,
-                                                  #agit_rpm=30.0,
-                                                  #vw_spec_min=10,
-                                                  #vw_spec_max=15.0,
-                                                  #vw_guide_min=11.0,
-                                                  vw_guide_max=12.0
-                                                  )
-        print(test_df)
-        evap_instance:evap.Evaporation = evap.Evaporation(caller=self,
-                                                          flowsheet=self.sheet,
-                                                          operation_seq=1,
-                                                          num_subitems=1,
-                                                          edit_comment=None)
-        evap_instance.load_params_from_df(df=test_df)
-        evap_instance.print_unit_operation()
-        self.sheet.save("Test_2004_evap_flowsheet.xlsx")
-        self.assertTrue(True)
+#########################################################
+# 4100: Transfer
+#########################################################
+class TransferTest4100(FlowsheetTestBase):
+    def test_4100_full(self):
+        self.add_uo(trsf.Transfer, trsf.Transfer.generate_test_df(operation=trsf.opt_operation_setup,
+                                                                  origin="Setup test origin",
+                                                                  via="Setup test waypoint",
+                                                                  destination="Setup test destination",
+                                                                  filter="Setup test filter"))
+        self.add_uo(trsf.Transfer, trsf.Transfer.generate_test_df(operation=trsf.opt_operation_transfer,
+                                                                  origin="Transf test origin",
+                                                                  via="Transf test waypoint",
+                                                                  destination="Transf test destination",
+                                                                  filter="Transf test filter"))
+        self.output()
 
-
-
-class CIPTest3000(unittest.TestCase, trdef.GetMats):
-    def __init__(self, methodName = "runTest"):
-        self.mats: mats.Materials = None
-        super().__init__(methodName)
-    def setUp(self):
-        mats_df = mats.Materials.generate_mats_df()
-        mats_df = mats.Materials.add_to_mats_df(mats_df=mats_df,
-                                      material="ぎゅうにく",
-                                      sm_tgt=defs.itm_io_mats_sm,
-                                      mw=100.0,
-                                      density=1.1,
-                                      conc_assay=90.0,
-                                      kg_sm=2.0,
-                                      remark="残り10%は普通の肉が混入。何の肉かは聞いてはいけない。")
-        mats_df = mats.Materials.add_to_mats_df(mats_df=mats_df,
-                                      material="たまねぎ",
-                                      mw=50.0,
-                                      density=0.9,
-                                      conc_assay=100.0,
-                                      remark="淡路島産")
-        mats_df = mats.Materials.add_to_mats_df(mats_df=mats_df,
-                                      material="スパイス",
-                                      mw=10.0,
-                                      density=0.8,
-                                      conc_assay=100.0,
-                                      remark="これは上物のブツだぜ。")
-        print("testprint")
-        print(mats_df)       
-        self.mats = mats.Materials(df_mats = mats_df)
-        self.sheet = fsht.Flowsheet()
-    
-    def get_mats(self)->mats.Materials:
-        return self.mats
-
-    def test_3000_full_datasets(self):
-        test_df=cip.CIP.generate_test_df(precomment="Pre-comment for test-3000",
-                                         postcomment="Post-comment for test-3000",
-                                         cip_tgt="大きな釜",
-                                         solvent="H2O",
-                                         qty_kg=10,
-                                         via="multiplexer")
-        cip.CIP.add_to_test_df(df=test_df,
-                               cip_tgt="大きな釜",
-                               solvent="MeOH",
-                               qty_kg=15,
-                               via="multiplexer")
-                                                  
-        print(test_df)
-        cip_instance:cip.CIP = cip.CIP(caller=self,
-                                       flowsheet=self.sheet,
-                                       operation_seq=1,
-                                       num_subitems=2,
-                                       edit_comment=None)
-        cip_instance.load_params_from_df(df=test_df)
-        cip_instance.print_unit_operation()
-        self.sheet.save("Test_3000_cip_flowsheet.xlsx")
-        self.assertTrue(True)
-
-    def test_3001_minimum_datasets(self):
-        test_df=cip.CIP.generate_test_df(precomment="Pre-comment for test-3000",
-                                         postcomment="Post-comment for test-3000",
-                                         cip_tgt="大きな釜",
-                                         solvent="H2O",
-                                         qty_kg=10)
-                                         #via="multiplexer"
-        cip.CIP.add_to_test_df(df=test_df,
-                               cip_tgt="大きな釜",
-                               solvent="MeOH",
-                               qty_kg=15)
-                               #via="multiplexer")
-                                                  
-        print(test_df)
-        cip_instance:cip.CIP = cip.CIP(caller=self,
-                                       flowsheet=self.sheet,
-                                       operation_seq=1,
-                                       num_subitems=2,
-                                       edit_comment=None)
-        cip_instance.load_params_from_df(df=test_df)
-        cip_instance.print_unit_operation()
-        self.sheet.save("Test_3001_cip_flowsheet.xlsx")
-        self.assertTrue(True)
-
-
-class TransfTest4100(unittest.TestCase, trdef.UniversalTrait):
-    def __init__(self, methodName = "runTest"):
-        super().__init__(methodName)
-
-    def setUp(self):
-        self.flowsheet = fsht.Flowsheet()
-
-    def test_4100_fullset(self):
-        test_inst_1=trsf.Transfer(caller=self,
-                                  flowsheet=self.flowsheet,
-                                  operation_seq=1,
-                                  num_subitems=1)
-        test_df_1 = trsf.Transfer.generate_test_df(operation=trsf.opt_operation_setup,
-                                                 origin="Setup test origin",
-                                                 via="Setup test waypoint",
-                                                 destination="Setup test destination",
-                                                 filter="Setup test filter")
-        test_inst_1.load_params_from_df(test_df_1)
-
-        test_inst_2 = trsf.Transfer(caller=self,
-                                    flowsheet=self.flowsheet,
-                                    operation_seq=2,
-                                    num_subitems=1)
-        test_df_2 = trsf.Transfer.generate_test_df(operation=trsf.opt_operation_transfer,
-                                                   origin="Transf test origin",
-                                                   via="Transf test waypoint",
-                                                   destination="Transf test destination",
-                                                   filter="Transf test filt")
-        test_inst_2.load_params_from_df(test_df_2)
-
-        test_inst_1.print_unit_operation()
-        test_inst_2.print_unit_operation()
-        self.flowsheet.save("Test_4100_setup_transf_fullset.xlsx")
-        self.assertTrue(True)
-    
     def test_4101_no_via(self):
-        test_inst_1=trsf.Transfer(caller=self,
-                                  flowsheet=self.flowsheet,
-                                  operation_seq=1,
-                                  num_subitems=1)
-        test_df_1 = trsf.Transfer.generate_test_df(operation=trsf.opt_operation_setup,
-                                                 origin="Setup test origin",
-                                                 #via="Setup test waypoint",
-                                                 destination="Setup test destination",
-                                                 filter="Setup test filter")
-        test_inst_1.load_params_from_df(test_df_1)
+        self.add_uo(trsf.Transfer, trsf.Transfer.generate_test_df(operation=trsf.opt_operation_setup,
+                                                                  origin="Setup test origin",
+                                                                  destination="Setup test destination",
+                                                                  filter="Setup test filter"))
+        self.add_uo(trsf.Transfer, trsf.Transfer.generate_test_df(operation=trsf.opt_operation_transfer,
+                                                                  origin="Transf test origin",
+                                                                  destination="Transf test destination",
+                                                                  filter="Transf test filter"))
+        self.output()
 
-        test_inst_2 = trsf.Transfer(caller=self,
-                                    flowsheet=self.flowsheet,
-                                    operation_seq=2,
-                                    num_subitems=1)
-        test_df_2 = trsf.Transfer.generate_test_df(operation=trsf.opt_operation_transfer,
-                                                   origin="Transf test origin",
-                                                   #via="Transf test waypoint",
-                                                   destination="Transf test destination",
-                                                   filter="Transf test filt")
-        test_inst_2.load_params_from_df(test_df_2)
-
-        test_inst_1.print_unit_operation()
-        test_inst_2.print_unit_operation()
-        self.flowsheet.save("Test_4101_setup_transf_no_via.xlsx")
-        self.assertTrue(True)
-
-       
     def test_4102_minimum(self):
-        test_inst_1=trsf.Transfer(caller=self,
-                                  flowsheet=self.flowsheet,
-                                  operation_seq=1,
-                                  num_subitems=1)
-        test_df_1 = trsf.Transfer.generate_test_df(operation=trsf.opt_operation_setup,
-                                                #  origin="Setup test origin",
-                                                #  via="Setup test waypoint",
-                                                 destination="Setup test destination"
-                                                #  filter="Setup test filter"
-                                                 )
-        test_inst_1.load_params_from_df(test_df_1)
+        self.add_uo(trsf.Transfer, trsf.Transfer.generate_test_df(operation=trsf.opt_operation_setup,
+                                                                  destination="Setup test destination"))
+        self.add_uo(trsf.Transfer, trsf.Transfer.generate_test_df(operation=trsf.opt_operation_transfer,
+                                                                  destination="Transf test destination"))
+        self.output()
 
-        test_inst_2 = trsf.Transfer(caller=self,
-                                    flowsheet=self.flowsheet,
-                                    operation_seq=2,
-                                    num_subitems=1)
-        test_df_2 = trsf.Transfer.generate_test_df(operation=trsf.opt_operation_transfer,
-                                                #    origin="Transf test origin",
-                                                #    via="Transf test waypoint",
-                                                   destination="Transf test destination"
-                                                #    filter="Transf test filt"
-                                                )
-        test_inst_2.load_params_from_df(test_df_2)
+    def test_4103_no_operation_err(self):
+        with self.assertRaises(ValueError):
+            self.add_uo(trsf.Transfer, trsf.Transfer.generate_test_df(destination="Setup test destination"))
 
-        test_inst_1.print_unit_operation()
-        test_inst_2.print_unit_operation()
-        self.flowsheet.save("Test_4102_setup_transf_minimum.xlsx")
-        self.assertTrue(True)
-
-    def test_4103_err_no_operation(self):
-        test_inst_1=trsf.Transfer(caller=self,
-                                flowsheet=self.flowsheet,
-                                operation_seq=1,
-                                num_subitems=1)
-        test_df_1 = trsf.Transfer.generate_test_df(#operation=trsf.opt_operation_setup
-                                                #  origin="Setup test origin",
-                                                #  via="Setup test waypoint",
-                                                destination="Setup test destination"
-                                                #  filter="Setup test filter"
-                                                )
-        
-        with self.assertRaises(expected_exception=ValueError):
-            test_inst_1.load_params_from_df(test_df_1)
-    
-    def test_4104_err_no_destin(self):
-        test_inst_1=trsf.Transfer(caller=self,
-                                flowsheet=self.flowsheet,
-                                operation_seq=1,
-                                num_subitems=1)
-        test_df_1 = trsf.Transfer.generate_test_df(#operation=trsf.opt_operation_setup
-                                                #  origin="Setup test origin",
-                                                #  via="Setup test waypoint",
-                                                destination="Setup test destination"
-                                                #  filter="Setup test filter"
-                                                )       
-        
-        with self.assertRaises(expected_exception=ValueError):
-            test_inst_1.load_params_from_df(test_df_1)
-    
+    def test_4104_no_destination_err(self):
+        with self.assertRaises(ValueError):
+            self.add_uo(trsf.Transfer, trsf.Transfer.generate_test_df(operation=trsf.opt_operation_setup,
+                                                                      origin="Setup test origin"))
 
 
-        # with self.assertRaises(expected_exception=ValueError):
-        #     evap_instance.output_unit_operation()
+#########################################################
+# 4200: Filtration
+#########################################################
+class FiltrationTest4200(FlowsheetTestBase):
+    def test_4201_full(self):
+        df = filt.Filtration.generate_test_df(equipment="test_4201_FD", Tj=25, P_min=100, P_max=100,
+                                              P_unit=filt.opt_hedr_press_kPa, integ_test=filt.opt_integ_test_yes)
+        self.add_uo(filt.Filtration, df)
+        self.output()
 
-class FiltTest4200(unittest.TestCase, trdef.UniversalTrait):
-    def __init__(self, methodName = "runTest"):
-        super().__init__(methodName)
+    def test_4202_p_max_only(self):
+        df = filt.Filtration.generate_test_df(equipment="test_4202_FD", Tj=25, P_max=100,
+                                              P_unit=filt.opt_hedr_press_kPa, integ_test=filt.opt_integ_test_yes)
+        self.add_uo(filt.Filtration, df)
+        self.output()
 
-    def setUp(self):
-        self.flowsheet = fsht.Flowsheet()
-    
-    def test_4201_filt_full(self):
-        test_inst = filt.Filtration(caller=self,
-                                    flowsheet=self.flowsheet,
-                                    operation_seq=1,
-                                    num_subitems=1)
-        df = filt.Filtration.generate_test_df(equipment="test_4201_FD",
-                                              Tj=25,
-                                              P_min=100,
-                                              P_max=100,
-                                              P_unit=filt.opt_hedr_press_kPa,
+    def test_4203_minimum(self):
+        self.add_uo(filt.Filtration, filt.Filtration.generate_test_df(equipment="test_4203_FD"))
+        self.output()
+
+    def test_4204_no_equipment_err(self):
+        df = filt.Filtration.generate_test_df(Tj=25, P_min=100, P_max=100,
+                                              P_unit=filt.opt_hedr_press_kPa, integ_test=filt.opt_integ_test_yes)
+        with self.assertRaises(ValueError):
+            self.add_uo(filt.Filtration, df)
+
+    def test_4205_no_press_unit_err(self):
+        df = filt.Filtration.generate_test_df(equipment="test_4205_FD", Tj=25, P_min=100, P_max=100,
                                               integ_test=filt.opt_integ_test_yes)
-        test_inst.load_params_from_df(df)
-        test_inst.print_unit_operation()
-        self.flowsheet.save("Test_4201_filt_full.xlsx")
-        self.assertTrue(True)
-
-    def test_4202_filt_p_max(self):
-        test_inst = filt.Filtration(caller=self,
-                                    flowsheet=self.flowsheet,
-                                    operation_seq=1,
-                                    num_subitems=1)
-        df = filt.Filtration.generate_test_df(equipment="test_4210_FD",
-                                              Tj=25,
-                                            #   P_min=100,
-                                              P_max=100,
-                                              P_unit=filt.opt_hedr_press_kPa,
-                                              integ_test=filt.opt_integ_test_yes)
-        test_inst.load_params_from_df(df)
-        test_inst.print_unit_operation()
-        self.flowsheet.save("Test_4202_filt_p_max.xlsx")
-        self.assertTrue(True)
-
-    def test_4203_filt_min(self):
-        test_inst = filt.Filtration(caller=self,
-                                    flowsheet=self.flowsheet,
-                                    operation_seq=1,
-                                    num_subitems=1)
-        df = filt.Filtration.generate_test_df(equipment="test_4210_FD")
-                                            #   Tj=25,
-                                            #   P_min=100,
-                                            #   P_max=100,
-                                            #   P_unit=filt.opt_hedr_press_kPa,
-                                            #   integ_test=filt.opt_integ_test_yes)
-        test_inst.load_params_from_df(df)
-        test_inst.print_unit_operation()
-        self.flowsheet.save("Test_4203_filt_minimum.xlsx")
-        self.assertTrue(True)
-
-    
-    def test_4204_no_equip(self):
-        test_inst = filt.Filtration(caller=self,
-                                    flowsheet=self.flowsheet,
-                                    operation_seq=1,
-                                    num_subitems=1)
-        df = filt.Filtration.generate_test_df(#equipment="test_4210_FD"
-                                              Tj=25,
-                                              P_min=100,
-                                              P_max=100,
-                                              P_unit=filt.opt_hedr_press_kPa,
-                                              integ_test=filt.opt_integ_test_yes)
-        
-        with self.assertRaises(expected_exception=ValueError):
-            test_inst.load_params_from_df(df)
-    
-    def test_4205_no_p_unit(self):
-        test_inst = filt.Filtration(caller=self,
-                                    flowsheet=self.flowsheet,
-                                    operation_seq=1,
-                                    num_subitems=1)
-        df = filt.Filtration.generate_test_df(equipment="test_4210_FD",
-                                              Tj=25,
-                                              P_min=100,
-                                              P_max=100,
-                                            #   P_unit=filt.opt_hedr_press_kPa,
-                                              integ_test=filt.opt_integ_test_yes)
-        
-        with self.assertRaises(expected_exception=ValueError):
-            test_inst.load_params_from_df(df)
+        with self.assertRaises(ValueError):
+            self.add_uo(filt.Filtration, df)
 
 
-class SamplingTest4300(unittest.TestCase, trdef.UniversalTrait):
-    def __init__(self, methodName = "runTest"):
-        super().__init__(methodName)
-
-    def setUp(self):
-        self.flowsheet = fsht.Flowsheet()
-    
+#########################################################
+# 4300: Sampling
+#########################################################
+class SamplingTest4300(FlowsheetTestBase):
     def test_4301_full(self):
-        test_inst = smplng.Sampling(caller=self,
-                                    flowsheet=self.flowsheet,
-                                    operation_seq=6,
-                                    num_subitems=2)
         df = smplng.Sampling.generate_test_df(sample_name="test sample 1",
                                               sampling_cat=smplng.opt_sampling_cat_both,
                                               ipc_criteria="残原料1:≦0.5%\n残原料2≦0.5%",
@@ -903,175 +418,91 @@ class SamplingTest4300(unittest.TestCase, trdef.UniversalTrait):
                                        monit_rec_items="酸性度2\n結晶形2",
                                        monit_rec_units="%\n",
                                        sample_comment="This is a comment for sample test 4301-2.")
-        test_inst.load_params_from_df(df=df)
-        test_inst.print_unit_operation()
-        self.flowsheet.save("Test_4301_sampling_full.xlsx")
-        self.assertTrue(True)
+        self.add_uo(smplng.Sampling, df)
+        self.output()
 
     def test_4302_ipc_only(self):
-        test_inst = smplng.Sampling(caller=self,
-                                    flowsheet=self.flowsheet,
-                                    operation_seq=6,
-                                    num_subitems=1)
         df = smplng.Sampling.generate_test_df(sample_name="test sample 1",
                                               sampling_cat=smplng.opt_sampling_cat_ipc,
                                               ipc_criteria="残原料1:≦0.5%",
                                               ipc_rec_titles="残原料1",
                                               ipc_rec_units="%",
                                               sample_comment="This is a comment for sample test 4302.")
-        test_inst.load_params_from_df(df=df)
-        test_inst.print_unit_operation()
-        self.flowsheet.save("Test_4302_ipc_only.xlsx")
-        self.assertTrue(True)
-    
+        self.add_uo(smplng.Sampling, df)
+        self.output()
+
     def test_4303_monit_only(self):
-        test_inst = smplng.Sampling(caller=self,
-                                    flowsheet=self.flowsheet,
-                                    operation_seq=6,
-                                    num_subitems=2)
         df = smplng.Sampling.generate_test_df(sample_name="test sample 1",
                                               sampling_cat=smplng.opt_sampling_cat_monit,
                                               monit_items="酸性度",
                                               monit_rec_items="pH",
                                               monit_rec_units="",
                                               sample_comment="This is a comment for sample test 4303.")
-        test_inst.load_params_from_df(df=df)
-        test_inst.print_unit_operation()
-        self.flowsheet.save("Test_4303_monit_only.xlsx")
-        self.assertTrue(True)
+        self.add_uo(smplng.Sampling, df)
+        self.output()
 
-    def test_4304_noname_err(self):
-        test_inst = smplng.Sampling(caller=self,
-                                    flowsheet=self.flowsheet,
-                                    operation_seq=6,
-                                    num_subitems=1)
-        df = smplng.Sampling.generate_test_df(#sample_name="test sample 1",
-                                              sampling_cat=smplng.opt_sampling_cat_monit,
+    def test_4304_no_name_err(self):
+        df = smplng.Sampling.generate_test_df(sampling_cat=smplng.opt_sampling_cat_monit,
                                               monit_items="酸性度",
                                               monit_rec_items="pH",
-                                              monit_rec_units="",
-                                              sample_comment="This is a comment for sample test 4304.")
-        with self.assertRaises(expected_exception=ValueError):
-            test_inst.load_params_from_df(df=df)
-        
-    def test_4305_no_ipc_crteria(self):
-        test_inst = smplng.Sampling(caller=self,
-                                    flowsheet=self.flowsheet,
-                                    operation_seq=6,
-                                    num_subitems=1)
+                                              monit_rec_units="")
+        with self.assertRaises(ValueError):
+            self.add_uo(smplng.Sampling, df)
+
+    def test_4305_no_ipc_criteria_err(self):
         df = smplng.Sampling.generate_test_df(sample_name="test sample 1",
                                               sampling_cat=smplng.opt_sampling_cat_ipc,
-                                              #ipc_criteria="残原料1:≦0.5%",
                                               ipc_rec_titles="残原料1",
-                                              ipc_rec_units="%",
-                                              sample_comment="This is a comment for sample test 4305.")
-        with self.assertRaises(expected_exception=ValueError):
-            test_inst.load_params_from_df(df=df)
+                                              ipc_rec_units="%")
+        with self.assertRaises(ValueError):
+            self.add_uo(smplng.Sampling, df)
 
-    def test_4306_ipc_item_unit_mismatch(self):
-        test_inst = smplng.Sampling(caller=self,
-                                    flowsheet=self.flowsheet,
-                                    operation_seq=6,
-                                    num_subitems=1)
+    def test_4306_ipc_item_unit_mismatch_err(self):
         df = smplng.Sampling.generate_test_df(sample_name="test sample 1",
                                               sampling_cat=smplng.opt_sampling_cat_ipc,
                                               ipc_criteria="残原料1:≦0.5%",
                                               ipc_rec_titles="残原料1\n残原料2",
-                                              ipc_rec_units="%",
-                                              sample_comment="This is a comment for sample test 4306.")
-        with self.assertRaises(expected_exception=ValueError):
-            test_inst.load_params_from_df(df=df)
-    
-    def test_4307_ipc_criteria_item_mismatch(self):
-        test_inst = smplng.Sampling(caller=self,
-                                    flowsheet=self.flowsheet,
-                                    operation_seq=6,
-                                    num_subitems=1)
+                                              ipc_rec_units="%")
+        with self.assertRaises(ValueError):
+            self.add_uo(smplng.Sampling, df)
+
+    def test_4307_ipc_criteria_item_mismatch_err(self):
         df = smplng.Sampling.generate_test_df(sample_name="test sample 1",
                                               sampling_cat=smplng.opt_sampling_cat_ipc,
                                               ipc_criteria="残原料1:≦0.5%\n残原料2≦0.1%",
                                               ipc_rec_titles="残原料1",
-                                              ipc_rec_units="%",
-                                              sample_comment="This is a comment for sample test 4307.")
-        with self.assertRaises(expected_exception=ValueError):
-            test_inst.load_params_from_df(df=df)
-    
-    def test_4308_monit_item_unit_mismatch(self):
-        test_inst = smplng.Sampling(caller=self,
-                                    flowsheet=self.flowsheet,
-                                    operation_seq=6,
-                                    num_subitems=1)
+                                              ipc_rec_units="%")
+        with self.assertRaises(ValueError):
+            self.add_uo(smplng.Sampling, df)
+
+    def test_4308_monit_item_unit_mismatch_err(self):
         df = smplng.Sampling.generate_test_df(sample_name="test sample 1",
                                               sampling_cat=smplng.opt_sampling_cat_monit,
                                               monit_items="酸性度",
-                                              monit_rec_items="pH",
-                                            #   monit_rec_units="",
-                                              sample_comment="This is a comment for sample test 4308.")
-        with self.assertRaises(expected_exception=ValueError):
-            test_inst.load_params_from_df(df=df)
+                                              monit_rec_items="pH")
+        with self.assertRaises(ValueError):
+            self.add_uo(smplng.Sampling, df)
 
 
-class FiltSetupTest4400(unittest.TestCase, trdef.UniversalTrait):
-    def __init__(self, methodName = "runTest"):
-        super().__init__(methodName)
-
-    def setUp(self):
-        self.flowsheet = fsht.Flowsheet()
-    
+#########################################################
+# 4400 - 4700: Filter setup, drying, allocation, tare
+#########################################################
+class FiltSetupTest4400(FlowsheetTestBase):
     def test_4400_full(self):
-        test_inst = fltsup.FiltSetup(caller=self,
-                                    flowsheet=self.flowsheet,
-                                    operation_seq=1,
-                                    num_subitems=1,
-                                    edit_comment="This is a comment for test 4400.")
         df = fltsup.FiltSetup.generate_test_df(equip_id="test_4400_FD",
-                                              filt_cloth = "FC-4400",
-                                              num_cloth=1,
-                                              bag_filter = "BF-4400",
-                                              press_leak_test = "0.1",
-                                              press_drop_leak_test = "0.01",
-                                              time_leak_test = "10",
-                                              unit_press='MPa')
-        test_inst.load_params_from_df(df)
-        test_inst.print_unit_operation()
-        self.flowsheet.save("Test_4400_filt_setup_full.xlsx")
-        self.assertTrue(True)
+                                               filt_cloth="FC-4400",
+                                               num_cloth=1,
+                                               bag_filter="BF-4400",
+                                               press_leak_test="0.1",
+                                               press_drop_leak_test="0.01",
+                                               time_leak_test="10",
+                                               unit_press='MPa')
+        self.add_uo(fltsup.FiltSetup, df, edit_comment="This is a comment for test 4400.")
+        self.output()
 
 
-class DryingTest4500(unittest.TestCase, trdef.GetProcName):
-    def __init__(self, methodName = "runTest"):
-        super().__init__(methodName)
-
-    def setUp(self):
-        self.flowsheet = fsht.Flowsheet()
-
-    def get_proc_name(self)->str:
-        return "TestProc4500"
-    
+class DryingTest4500(FlowsheetTestBase):
     def test_4500_full(self):
-        test_inst = drying.Drying(caller=self,
-                                    flowsheet=self.flowsheet,
-                                    operation_seq=1,
-                                    num_subitems=1,
-                                    edit_comment="This is a comment for test 4500.")
-        """
-            def generate_test_df(cls,
-                         precomment:str=None,
-                         postcomment:str=None,
-                         Tj_ctrl_cat:Literal["Tj_ctrl_spec", "Tj_ctrl_arbitrary", "Tj_ctrl_guide"]=None,
-                         Tj_low:float=None,
-                         Tj_high:float=None,
-                         Tbr_high:float=None,
-                         Tbr_low:float=None,
-                         mode_vac:Literal["arbitrary", "range", "full_vacuum"]=None,
-                         pres_low:float=None,
-                         pres_high:float=None,
-                         intermission:Literal["Yes", "No"]="Yes",
-                         test_cat:Literal["ipc", "monit_no_tgt", "monit_with_tgt", None]=None,
-                         test_item:str=None,
-                         test_val_tgt_criterion:float=None,
-                         test_unit_val:str=None)->pd.DataFrame:
-        """
         df = drying.Drying.generate_test_df(precomment="Pre-comment for test-4500",
                                             postcomment="Post-comment for test-4500",
                                             Tj_ctrl_cat="Tj_ctrl_arbitrary",
@@ -1087,92 +518,215 @@ class DryingTest4500(unittest.TestCase, trdef.GetProcName):
                                             test_item="KF",
                                             test_val_tgt_criterion=5.0,
                                             test_unit_val="%")
-        drying.Drying.add_to_test_df(df=df,
-                                     test_cat="monit_with_tgt",
-                                     test_item="THF",
-                                     test_val_tgt_criterion=100,
-                                     test_unit_val="ppm")
-        drying.Drying.add_to_test_df(df=df,
-                                     test_cat="monit_no_tgt",
-                                     test_item="pH")
+        drying.Drying.add_to_test_df(df=df, test_cat="monit_with_tgt", test_item="THF",
+                                     test_val_tgt_criterion=100, test_unit_val="ppm")
+        drying.Drying.add_to_test_df(df=df, test_cat="monit_no_tgt", test_item="pH")
+        self.add_uo(drying.Drying, df)
+        self.output()
 
-        test_inst.load_params_from_df(df)
-        test_inst.print_unit_operation()
-        self.flowsheet.save("Test_4500_drying_full.xlsx")
-        self.assertTrue(True)
 
-class AllocTest4600(unittest.TestCase, trdef.GetProcName):
-    def __init__(self, methodName = "runTest"):
-        super().__init__(methodName)
-
-    def setUp(self):
-        self.flowsheet = fsht.Flowsheet()
-
-    def get_proc_name(self)->str:
-        return "TestProc4600"
-    
+class AllocTest4600(FlowsheetTestBase):
     def test_4600_full(self):
-        # test_inst = drying.Drying(caller=self,
-        #                             flowsheet=self.flowsheet,
-        #                             operation_seq=1,
-        #                             num_subitems=1,
-        #                             edit_comment="This is a comment for test 4500.")
-        test_inst = alloc.Alloc(caller=self,
-                                flowsheet=self.flowsheet,
-                                operation_seq=1,
-                                num_subitems=1,
-                                edit_comment="This is a comment for test 4600.")
-        test_inst.print_unit_operation()
-        self.flowsheet.save("Test_4600_alloc_full.xlsx")
-        self.assertTrue(True)
+        df = alloc.Alloc.generate_test_df(precomment="Pre-comment for test-4600",
+                                          postcomment="Post-comment for test-4600",
+                                          prod_cell="Cell-4600",
+                                          op_resouce="Operator-4600")
+        self.add_uo(alloc.Alloc, df, edit_comment="This is a comment for test 4600.")
+        self.output()
 
 
-class TareTest4700(unittest.TestCase, trdef.GetProcName):
-    def __init__(self, methodName = "runTest"):
-        super().__init__(methodName)
-
-    def setUp(self):
-        self.flowsheet = fsht.Flowsheet()
-
-    def get_proc_name(self)->str:
-        return "TestProc4700"
-    
+class TareTest4700(FlowsheetTestBase):
     def test_4700_full(self):
-        test_inst = tare.Tare(caller=self,
-                              flowsheet=self.flowsheet,
-                              operation_seq=1,
-                              num_subitems=1,
-                              edit_comment="This is a comment for test 4700.")
-
         df = tare.Tare.generate_test_df(precomment="This is a pre-comment for test 4700.",
-                                   pkg_location="Some location",
-                                   pkg_material=tare.opt_pkg_polym_bag,
-                                   num_pkg=5,
-                                   postcomment="This is a post-comment for test 4700.")
-        test_inst.load_params_from_df(df)
-        test_inst.print_unit_operation()
-        self.flowsheet.save("Test_4700_tare_full.xlsx")
-        self.assertTrue(True)
+                                        pkg_location="Some location",
+                                        pkg_material=tare.opt_pkg_polym_bag,
+                                        num_pkg=5,
+                                        postcomment="This is a post-comment for test 4700.")
+        self.add_uo(tare.Tare, df, edit_comment="This is a comment for test 4700.")
+        self.output()
 
 
+#########################################################
+# 5000: Charging (material inputs)
+#########################################################
+def charge_sm_df(id_input: int = 0) -> pd.DataFrame:
+    """A charging DataFrame for the whole starting material (1.0 equiv)."""
+    return matin.Input.generate_test_df(material_name=name_sm, metrics_val=1.0, metrics_unit=matin.opt_mtrcs_eq,
+                                        error_pct=1.0, method=matin.method_pow, vessel_train=["R-1"],
+                                        id_input=id_input)
 
 
-def suite_0000_40000():
-    
+class ChargingTest5000(FlowsheetTestBase):
+    mats_with_tgt = True
+
+    def test_5000_sm_and_solvent(self):
+        df = charge_sm_df()
+        matin.Input.add_to_test_df(df=df, material_name=name_water, metrics_val=5.0, metrics_unit=matin.opt_mtrcs_v_per_w,
+                                   method=matin.method_liq, vessel_train=["R-1"], id_input=1, list_id_basis_input=[0],
+                                   temp_control=matin.temprctrl_min_max, temp_min=15.0, temp_max=25.0)
+        self.add_uo(chgng.Charging, df, precomment="Charge the starting material and water.")
+        self.output()
+        self.assertAlmostEqual(self.get_input(0).qty_kg_gross, gross_kg_sm)
+        #5 v/w against the net weight of SM. Water: density 1.0, assay 100%
+        self.assertAlmostEqual(self.get_input(1).qty_kg_gross, gross_kg_sm * assay_sm / 100.0 * 5.0)
+
+    def test_5001_equiv_with_time_control(self):
+        self.add_uo(chgng.Charging, charge_sm_df())
+        df = matin.Input.generate_test_df(material_name=name_naoh, metrics_val=2.0, metrics_unit=matin.opt_mtrcs_eq,
+                                          method=matin.method_press, vessel_train=["V-1", "R-1"], id_input=1, list_id_basis_input=[0],
+                                          time_control=matin.timectrl_min_max, time_min=30, time_max=60,
+                                          temp_control=matin.temprctrl_max, temp_max=30.0)
+        self.add_uo(chgng.Charging, df)
+        self.output()
+        #2.0 equiv of SM in mol, 48% aq. solution
+        mol_sm = gross_kg_sm * assay_sm / 100.0 * 1000.0 / mw_sm
+        self.assertAlmostEqual(self.get_input(1).qty_kg_gross, mol_sm * 2.0 * 40.0 / 1000.0 / 0.48)
+
+    def test_5002_based_on_tgt(self):
+        self.add_uo(chgng.Charging, charge_sm_df())
+        df = matin.Input.generate_test_df(material_name=name_meoh, metrics_val=3.0, metrics_unit=matin.opt_mtrcs_v_per_w,
+                                          method=matin.method_mobile_tank, vessel_train=["R-1"], id_input=1,
+                                          list_id_basis_input=[matin.opt_special_id_basis_tgt])
+        self.add_uo(chgng.Charging, df)
+        self.output()
+        self.assertIsNotNone(self.get_input(1).qty_kg_gross)
+
+    def test_5003_duplicated_id_err(self):
+        df = charge_sm_df()
+        matin.Input.add_to_test_df(df=df, material_name=name_water, metrics_val=5.0, metrics_unit=matin.opt_mtrcs_v_per_w,
+                                   method=matin.method_liq, id_input=0, list_id_basis_input=[0])
+        self.add_uo(chgng.Charging, df)
+        with self.assertRaises(RuntimeError):
+            self.output()
+
+
+class ChargingNoTgtTest5100(FlowsheetTestBase):
+    def test_5100_no_tgt(self):
+        df = charge_sm_df()
+        matin.Input.add_to_test_df(df=df, material_name=name_water, metrics_val=5.0, metrics_unit=matin.opt_mtrcs_v_per_w,
+                                   method=matin.method_liq, id_input=1, list_id_basis_input=[0])
+        self.add_uo(chgng.Charging, df)
+        self.output()
+        self.assertEqual(len(self.proc.list_inpts), 2)
+
+    def test_5101_based_on_missing_tgt_err(self):
+        df = charge_sm_df()
+        matin.Input.add_to_test_df(df=df, material_name=name_meoh, metrics_val=3.0, metrics_unit=matin.opt_mtrcs_v_per_w,
+                                   method=matin.method_liq, id_input=1, list_id_basis_input=[matin.opt_special_id_basis_tgt])
+        self.add_uo(chgng.Charging, df)
+        with self.assertRaises(RuntimeError):
+            self.output()
+
+
+#########################################################
+# 5200: Crystal washing (material inputs)
+#########################################################
+class CrystWashingTest5200(FlowsheetTestBase):
+    mats_with_tgt = True
+
+    def __wash_df(self, mode: str) -> pd.DataFrame:
+        df = cwash.CrystWashing.generate_test_df(precomment=f"Pre-comment for washing: {mode}",
+                                                 equipment="FD-1",
+                                                 mode_washing=mode,
+                                                 duration_minutes=30,
+                                                 agitation_rpm=60,
+                                                 material_name=name_meoh, metrics_val=2.0, metrics_unit=matin.opt_mtrcs_v_per_w,
+                                                 method=matin.method_shower, vessel_train=["R-1"],
+                                                 id_input=1, list_id_basis_input=[0])
+        cwash.CrystWashing.add_to_test_df(df=df, material_name=name_water, metrics_val=1.0, metrics_unit=matin.opt_mtrcs_v_per_w,
+                                          method=matin.method_liq, id_input=2, list_id_basis_input=[0])
+        return df
+
+    def __run_mode(self, mode: str):
+        self.add_uo(chgng.Charging, charge_sm_df())
+        inst = self.add_uo(cwash.CrystWashing, self.__wash_df(mode))
+        self.output()
+        self.assertEqual([i.material_name for i in inst.get_list_inputs()], [name_meoh, name_water])
+        #The washing equipment is appended to the vessel train.
+        self.assertEqual(self.get_input(1).vessel_train, ["R-1", "FD-1"])
+        self.assertAlmostEqual(self.get_input(2).qty_kg_gross, gross_kg_sm * assay_sm / 100.0 * 1.0)
+
+    def test_5200_reslurry(self):
+        self.__run_mode(cwash.opt_washmode_reslurry)
+
+    def test_5201_soak(self):
+        self.__run_mode(cwash.opt_washmode_soak)
+
+    def test_5202_displacement(self):
+        self.__run_mode(cwash.opt_washmode_displacement)
+
+    def test_5203_placeholder(self):
+        self.__run_mode(cwash.opt_washmode_placeholder)
+
+    def test_5204_no_equipment(self):
+        df = cwash.CrystWashing.generate_test_df(material_name=name_meoh, metrics_val=2.0, metrics_unit=matin.opt_mtrcs_v_per_w,
+                                                 method=matin.method_shower, id_input=1, list_id_basis_input=[0])
+        self.add_uo(chgng.Charging, charge_sm_df())
+        inst = self.add_uo(cwash.CrystWashing, df)
+        self.output()
+        self.assertEqual(inst.equipment, cwash.dict_parts_stcs[cwash.tag_part_val_equipment_plchldr])
+
+
+#########################################################
+# 6000: A process with several unit operations
+#########################################################
+class ProcessTest6000(FlowsheetTestBase):
+    mats_with_tgt = True
+
+    @unittest.expectedFailure
+    def test_6001_tgt_without_sm_input(self):
+        """
+        Current behaviour: the target material has no basis to link to when no starting material is charged in the process,
+        and Input.link_inputs() raises RuntimeError. Remove expectedFailure once the behaviour is decided and implemented.
+        """
+        self.add_uo(lnclnc.LineClearance, make_detail_df(lnclnc.list_hedr, [{lnclnc.hedr_sop: "SOP-001"}]))
+        self.output()
+
+    def test_6000_crystallization_and_isolation(self):
+        self.add_uo(lnclnc.LineClearance, make_detail_df(lnclnc.list_hedr, [{lnclnc.hedr_sop: "SOP-001"}]))
+        self.add_uo(inert.InertReplacement, make_detail_df(inert.list_hedr, [{inert.hedr_gas: inert.opt_gas_N2,
+                                                                               inert.hedr_neg_pres: -0.08,
+                                                                               inert.hedr_num_repeat: 3}]))
+        df = charge_sm_df()
+        matin.Input.add_to_test_df(df=df, material_name=name_meoh, metrics_val=8.0, metrics_unit=matin.opt_mtrcs_v_per_w,
+                                   method=matin.method_mobile_tank, vessel_train=["R-1"], id_input=1, list_id_basis_input=[0])
+        self.add_uo(chgng.Charging, df)
+        self.add_uo(tempr.TempControl, make_detail_df(tempr.list_hedr, [{tempr.hedr_mode: tempr.opt_mode_Ti,
+                                                                          tempr.hedr_Ti_sp: 60.0,
+                                                                          tempr.hedr_Ti_limit_low: 55.0,
+                                                                          tempr.hedr_Ti_limit_high: 65.0,
+                                                                          tempr.hedr_endpoint_check: tempr.opt_check_endpoint_yes}]))
+        self.add_uo(agit.Agitation, make_detail_df(agit.list_hedr, [{agit.hedr_spec_agit: agit.opt_spec_guide,
+                                                                      agit.hedr_rpm: 100.0,
+                                                                      agit.hedr_dissolution_check: agit.opt_yes}]))
+        self.add_uo(evap.Evaporation, evap.Evaporation.generate_test_df(Tj_min=50.0, Tj_max=70.0, Tbr_max=5,
+                                                                         vw_guide_min=4.0, vw_guide_max=5.0))
+        self.add_uo(trsf.Transfer, trsf.Transfer.generate_test_df(operation=trsf.opt_operation_transfer,
+                                                                  origin="R-1", destination="FD-1"))
+        self.add_uo(filt.Filtration, filt.Filtration.generate_test_df(equipment="FD-1"))
+        wash = cwash.CrystWashing.generate_test_df(equipment="FD-1", mode_washing=cwash.opt_washmode_reslurry,
+                                                   duration_minutes=30, agitation_rpm=60,
+                                                   material_name=name_meoh, metrics_val=2.0, metrics_unit=matin.opt_mtrcs_v_per_w,
+                                                   method=matin.method_shower, vessel_train=["R-1"],
+                                                   id_input=2, list_id_basis_input=[matin.opt_special_id_basis_tgt])
+        self.add_uo(cwash.CrystWashing, wash)
+        self.add_uo(drying.Drying, drying.Drying.generate_test_df(Tj_ctrl_cat="Tj_ctrl_arbitrary", Tj_low=40.0, Tj_high=60.0,
+                                                                  mode_vac="full_vacuum", test_cat="ipc", test_item="LOD",
+                                                                  test_val_tgt_criterion=0.5, test_unit_val="%"))
+        self.add_uo(tare.Tare, tare.Tare.generate_test_df(num_pkg=2))
+        self.output()
+        self.assertEqual(len(self.proc.seq_uo), 11)
+        #SM, MeOH for charging, MeOH for washing and TGT
+        self.assertEqual(len(self.proc.list_inpts), 4)
+
+
+def suite_selected() -> unittest.TestSuite:
+    """Test classes to run when this file is executed directly. Add or remove classes as needed."""
+    loader = unittest.TestLoader()
     suite = unittest.TestSuite()
-    #suite.addTest(FiltSetupTest4400("test_4400_full"))
-    #suite.addTest(DryingTest4500("test_4500_full"))
-    #suite.addTest(SaltyWaterFlow("test0000_OutputFlow"))
-    #suite.addTest(DryingTest4500("test_4500_full"))
-    # suite.addTest(AllocTest4600("test_4600_full"))
-    suite.addTest(TareTest4700("test_4700_full"))
-
-
+    suite.addTests(loader.loadTestsFromTestCase(CrystWashingTest5200))
     return suite
 
 
-if __name__=="__main__":
-    unittest.TextTestRunner(verbosity=2).run(suite_0000_40000())
-
-
-
+if __name__ == "__main__":
+    unittest.TextTestRunner(verbosity=2).run(suite_selected())

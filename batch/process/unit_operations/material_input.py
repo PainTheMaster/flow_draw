@@ -446,40 +446,46 @@ class Input(InputTrait):
                               key=hedr_material_name,
                               enum=list_mats,
                               description='The name of the raw material, solvent, etc., charged.')
+        basis_input_single = Primitive(prim_type='integer',
+                                        key=hedr_basis_input,
+                                        description='The material input used as the basis for calculating the quantity of other material inputs. '
+                                        f'If the target material is designated as the calculation basis, please put {opt_special_id_basis_tgt}. '
+                                        'Please select the basis input in a source-faithful manner. Preserve not only the value itself, '
+                                        'but also the basis or reference quantity against which the value is defined in the source. '
+                                        'Do not recalculate, convert, normalize, derive or rebase values even when doing so would provide a mathematically equivalent presentation.',
+                                        nullable=False,
+                                        required=True)
+        arr_basis_inputs = Array(key=hedr_basis_array_json,
+                            content = basis_input_single,
+                            description='Array of material input IDs used as the basis for calculating the quantity of other material inputs. '
+                            'Please select the basis input in a source-faithful manner. Please do not rebase. '
+                            'In most cases, only one material input ID (the key building block) is used as the basis. '
+                            'However, multiple input IDs are allowed. For a rare example, when the key raw material is split and charged in multiple steps. '
+                            f'If the target material is designated as the calculation basis, please put {opt_special_id_basis_tgt}. '
+                            'If this input depends on nothing, e.g., the starting material, please leave this null.',
+                            nullable=True,
+                            required = True)
         qty_mats = Primitive(prim_type="number",
                              key=hedr_metrics_value,
                              description=f'Relative quantity of the raw material, solvent, and other materials. This object is for the value only.'
                              f'The unit is selected in another entry. '
                              'As a special case, if this instance is one of the split charges of the starting material (the key building block), please put the fraction of the total quantity. '
                              f'For example, if the starting material is split into three charges, each charge should have a relative quantity of 0.333 {opt_mtrcs_eq}. '
-                             f'Otherwise (single charge), please put 1.0 {opt_mtrcs_eq} for the relative quantity of the starting material.')
+                             f'Otherwise (single charge), please put 1.0 {opt_mtrcs_eq} for the relative quantity of the starting material. '
+                             'Keep the value exactly as written in the source, together with its basis. Do not convert it to another basis.')
         unit_mats = Primitive(prim_type="string",
                               key=hedr_metrics_unit,
-                              description=f'Unit to specify the relative quantity of the raw material, solvent, and other materials. This is for the unit only. '
+                              description=f'Unit to specify the relative quantity of the raw material, solvent, and other materials. This property is for unit only. '
                               f'"{opt_mtrcs_eq}": molar equivalent vs the selected calculation basis material input. '
                               f'"{opt_mtrcs_v_per_w}": volume (L) of liquid vs weight (kg) of the selected calculation basis material input. '
                               f'"{opt_mtrcs_wwpct}": weight/weight percent vs the designated calculation basis material input. '
                               f'"{opt_mtrcs_wt_gro_abs}": The gross weight (kg) of a material is directly specified by an absolute value. This is an exceptional case. '
                               f'"{opt_mtrcs_vol_abs}": The volume (litre) of a non-solid material is directly specified by an absolute value. This is an exceptional case. '
-                              'In the JSON, it normally is assumed that evne the starting material is quantified by a relative metrics (equiv or weight percent) in relation to a basis value defined elsewhere. '
-                              'Please choose the absolute approac only when it is essential or instructed by the user. '
+                              'In the JSON, it is normally assumed that even the starting material is quantified by a relative metrics (equiv or weight percent) in relation to a basis value defined elsewhere. '
+                              'Please choose the absolute approach only when it is essential or instructed by the user. '
                               f'This item has to be consistent with the other entry "{hedr_metrics_value}"',
                               enum=list_metrics_unit)
-        basis_input_single = Primitive(prim_type='integer',
-                                key=hedr_basis_input,
-                                description='The material input used as the basis for calculating the quantity of other material inputs.'
-                                f'If the target material is designated as the calculation basis, please put {opt_special_id_basis_tgt}.',
-                                nullable=False,
-                                required=True)
-        arr_basis_inputs = Array(key=hedr_basis_array_json,
-                           content = basis_input_single,
-                           description='Array of material input IDs used as the basis for calculating the quantity of other material inputs. '
-                           'In most cases, only one material input ID (the key building block) is used as the basis. '
-                           'However, multiple input IDs are allowed. For a rare example, when the key raw material is split and charged in multiple steps. '
-                           f'If the target material is designated as the calculation basis, please put {opt_special_id_basis_tgt}. '
-                           'If this input depends on nothing, e.g., the starting material, please leave this null.',
-                           nullable=True,
-                           required = True)
+        
         permiss_error = Primitive(prim_type="number",
                                   key=hedr_error_pct,
                                   description="Permissible error of the material quantity indicated in percent (%). If not specified in the data source, "
@@ -555,7 +561,7 @@ class Input(InputTrait):
                              required=True)
         
         input_entry = Objason(key=entry_input_json,
-                              props=[id_input, name_mats, qty_mats, unit_mats, arr_basis_inputs, permiss_error, charging_method, vessel_train, time_ctrl, time_min, time_max, temp_ctrl, temp_min, temp_max],
+                              props=[id_input, name_mats, arr_basis_inputs, qty_mats, unit_mats, permiss_error, charging_method, vessel_train, time_ctrl, time_min, time_max, temp_ctrl, temp_min, temp_max],
                               description='Combination of material, quantity, permissible quantity error, charging method, time constraints, temperature range to define each material input. '
                               'Material input appears in various unit operations such as charging/dosing, reslurry washing, cleaning in place, etc. ',
                               required=True
@@ -599,8 +605,6 @@ class Input(InputTrait):
             self.conc_assay = self.mats_data.get_conc_assay(self.material_name)
             if self.material_name == self.mats_data.get_name_sm():
                 self.material_class = cls_input_mat_sm
-            # elif self.material_name == self.mats_data.get_name_tgt():
-            #     self.material_class = cls_input_mat_tgt
             else:
                 self.material_class = cls_input_mat_other
 
@@ -739,39 +743,8 @@ class Input(InputTrait):
         __put_end_of_dosing()
         self.flowsheet.linefeed()
 
-
-    # def test_data_creation1(self):
-    #     self.material_name = 'H2O'
-    #     self.metrics_unit = opt_mtrcs_v_per_w
-    #     self.metrics_val = 1.0
-    #     self.error_pct = 5.0
-    #     self.method = method_liq
-    #     self.time_control = timectrl_min
-    #     self.time_min = '1h'
-    #     self.time_max = None
-    #     self.temp_control = temprctrl_min_max
-    #     self.temp_min = 15
-    #     self.temp_max = 25
-    #     self.calc_qty()
-
-    # def test_data_creation2(self):
-    #     self.material_name = 'NaCl'
-    #     self.metrics_unit = opt_mtrcs_eq
-    #     self.metrics_val = 2.0
-    #     self.error_pct = 5.0
-    #     self.method = method_pow
-    #     self.time_control = timectrl_none
-    #     self.time_min = None
-    #     self.time_max = None
-    #     self.temp_control = temprctrl_min_max
-    #     self.temp_min = 15
-    #     self.temp_max = 25
-    #     self.calc_qty()
-
     @staticmethod
-    def generate_test_df(# precomment:str=None,
-                         # postcomment:str=None,
-                         material_name:str=None,
+    def generate_test_df(material_name:str=None,
                          metrics_val:float=None,
                          metrics_unit:str=None,
                          error_pct:float=error_pct_default,
@@ -789,8 +762,6 @@ class Input(InputTrait):
         content: list[any] = [None]*len(hedr)
         s:pd.Series = pd.Series(data=content, index=hedr)
         df = s.to_frame().T
-        # df.at[df.index[0], defs.hedr_cmn_io_dtil_precmnt]=precomment
-        # df.at[df.index[0], defs.hedr_cmn_io_dtil_postcmnt]=postcomment
         df.at[df.index[0], hedr_material_name]=material_name
         df.at[df.index[0], hedr_metrics_value]=metrics_val
         df.at[df.index[0], hedr_metrics_unit]=metrics_unit

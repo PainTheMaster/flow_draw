@@ -426,7 +426,6 @@ class CrystWashing(uo.UnitOperation, MaterialReceiver, uo_tag=defs.tag_uo_cryst_
             self.flowsheet.linefeed()        
         for input_item in self.arr_inputs:
             input_item.print_input()
-        self.flowsheet.linefeed()
 
         if self.mode_washing == opt_washmode_reslurry:
             print_reslurry()
