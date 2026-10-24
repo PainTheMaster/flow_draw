@@ -282,14 +282,13 @@ class CIP(uo.UnitOperation, uo_tag=defs.tag_uo_cip):
             self.flowsheet.put_body_comments(self.post_comment)
             self.flowsheet.linefeed()
 
-    @classmethod
-    def generate_test_df(cls,
-                       precomment:str=None,
-                       postcomment:str=None,
-                       cip_tgt:str=None,
-                       solvent:str=None,
-                       qty_kg:float=None,
-                       via:str=None)->pd.DataFrame:
+    @staticmethod
+    def generate_test_df(precomment:str=None,
+                         postcomment:str=None,
+                         cip_tgt:str=None,
+                         solvent:str=None,
+                         qty_kg:float=None,
+                         via:str=None)->pd.DataFrame:
         hedr:list[str] = defs.list_hedr_cmn_io_dtil + list_hedr
         content: list[any] = [None]*len(hedr)
         s:pd.Series = pd.Series(data=content, index=hedr)
@@ -303,9 +302,8 @@ class CIP(uo.UnitOperation, uo_tag=defs.tag_uo_cip):
 
         return df
     
-    @classmethod
-    def add_to_test_df(cls,
-                       df: pd.DataFrame=None,
+    @staticmethod
+    def add_to_test_df(df: pd.DataFrame=None,
                        precomment:str=None,
                        postcomment:str=None,
                        cip_tgt:str=None,

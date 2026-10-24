@@ -10,7 +10,7 @@ from flow_draw.batch.process.unit_operations import unit_operation as uo
 from flow_draw.data_io import process_io as procio
 from flow_draw.materials import materials as mats
 from flow_draw.trait_def import trait_def as trdef
-from flow_draw.trait_def.trait_def import GetMats, GetInputs, MaterialIn
+from flow_draw.trait_def.trait_def import GetMats, GetInputs, MaterialReceiver
 import flow_draw.batch.process.unit_operations.material_input as matin
 from flow_draw.batch.process.unit_operations.material_input import Input
 #from flow_draw.trait_def.trait_def import GetMats
@@ -47,8 +47,6 @@ opt_time_unit_hour:str = defs.tag_flow_cmn_time_unit_hour
 #dict_dtil_drpdwn = defs.dict_opt_<unit operation>
 hedr_equipment:str = 'Equipment'
 """Header item for the equipment used in the crystallization washing unit operation."""
-
-# """Header item for the vessels via which the solvent is added."""
 hedr_mode_washing = 'Crystal_Washing_Mode'
 """Header item for the crystal washing mode."""
 hedr_duration_washing_minutes:str = 'Washing_Duration_minutes'
@@ -59,7 +57,10 @@ key_arr_solvent_json:str = 'Solvent_Input_Array'
 """Key for the material input JSON object in the crystallization washing unit operation."""
 
 
-list_hedr = []
+list_hedr = [hedr_equipment,
+             hedr_mode_washing,
+             hedr_duration_washing_minutes,
+             hedr_agitation_rpm]
 
 
 #########################################################
@@ -106,16 +107,6 @@ Language dictionary for common parts.
     tag_flow_cmn_time_unit_hour : part_flow_cmn_time_unit_hour
 """
 
-# tag_part_rec_qty_input:str = "tag_input_qty"
-# """The key to a flowsheet part: the input quantity of washing solvent."""
-# tag_part_rec_qty_lot:str = 'tag_lot'
-# """The key to a flowsheet part: the lot number of the input material."""
-# tag_part_rec_id_balance:str = "tag_balance_id"
-# """The key to a flowsheet part: the ID of the balance."""
-# tag_part_rec_id_cntnr:str = "tag_container_id"
-# """The key to a flowsheet part: the ID of the container of the input material."""
-# tag_part_rec_hose:str = "tag_hose_id"
-# """The key to a flowsheet part: the hose of the input material."""
 tag_part_val_equipment_plchldr:str = "tag_placeholder_equipment"
 """The key to a flowsheet part: placeholder for equipment."""
 tag_part_val_agit_rate_arbit:str = "tag_opt_agit_rate_arbit"
@@ -164,12 +155,7 @@ tag_stc_rec_soaking_duration:str = 'tag_stc_soak_duration'
 tag_stc_rec_displ_duration:str = 'tag_stc_displwash_duration'
 """The key to a flowsheet sentence template: record field for dislwash duration. Includes a place holder "{time_unit}". """
 
-dict_parts_stcs_jp = {# tag_part_rec_qty_input : '仕込み量__________kg',
-                    #   tag_part_rec_qty_lot : 'ロット番号__________',
-                    #   tag_part_rec_id_balance : '秤量器ID__________',
-                    #   tag_part_rec_id_cntnr : '容器ID__________',
-                    #   tag_part_rec_hose: 'フレキID__________',
-                      tag_part_val_equipment_plchldr : '<placeholder: 機器>',
+dict_parts_stcs_jp = {tag_part_val_equipment_plchldr : '<placeholder: 機器>',
                       tag_part_val_agit_rate_arbit: '現場調整',
                       tag_part_val_agit_time_plchldr : '<placeholder: 攪拌時間>',
                       tag_part_unit_agit_rpm: 'rpm',
@@ -212,7 +198,7 @@ dict_parts_stcs = dict_parts_stcs_jp
 # output_unit_operation(self)
 #
 #########################################################
-class CrystWashing(uo.UnitOperation, MaterialIn, uo_tag=defs.tag_uo_cryst_wash):
+class CrystWashing(uo.UnitOperation, MaterialReceiver, uo_tag=defs.tag_uo_cryst_wash):
     def __init__(self,
                  caller: GetMats|GetInputs =None,
                  flowsheet:fsht.Flowsheet=None, 
@@ -220,7 +206,6 @@ class CrystWashing(uo.UnitOperation, MaterialIn, uo_tag=defs.tag_uo_cryst_wash):
                  num_subitems: int = None,
                  edit_comment:str=None):
         super().__init__(caller=caller, flowsheet=flowsheet, operation_seq=operation_seq, num_subitems=num_subitems, edit_comment=edit_comment)
-        # self.buffer_tank:list[str] = []
         if caller is None:
             raise ValueError(f'{self.__class__.__name__}._init_: "caller: GetMats|GetInputs"is required')
         self.mats_data = caller.get_mats()
@@ -228,7 +213,6 @@ class CrystWashing(uo.UnitOperation, MaterialIn, uo_tag=defs.tag_uo_cryst_wash):
         self.mode_washing:str = None
         self.duration_washing_minutes:float = None
         self.rpm_agit:float = None
-        # self.solvents_json: list[dict[str, Any]] = {}
         self.arr_inputs:list[Input] = []
 
 
@@ -237,19 +221,42 @@ class CrystWashing(uo.UnitOperation, MaterialIn, uo_tag=defs.tag_uo_cryst_wash):
     def load_params_from_df(self, df: pd.DataFrame):
         """
         Loads necessary parameters from a DataFrame object.
-        The header items must be in line with the definition the class Charging.
-        The header items can be passed from the get_detail_header() of each UnitOperation-drived class.
-        This is the overriding mehtod in the class Charging..
+        The header items must be in line with the definition the class CrystWashing.
+        The first row holds the UO-specific parameters as well as the first solvent input.
+        Each row, including the first one, corresponds to a solvent input.
+        This is the overriding mehtod in the class CrystWashing.
         """
+        def __val_or_none(ser: pd.Series, hedr: str):
+            val = ser.get(hedr, None)
+            if val is None or (not isinstance(val, (list, tuple)) and pd.isna(val)):
+                return None
+            return val
 
         first_row = df.iloc[0]
         if not pd.isna(first_row[hedr_precomment]):
             self.pre_comment = first_row[hedr_precomment]
         if not pd.isna(first_row[hedr_postcomment]):
             self.post_comment = first_row[hedr_postcomment]
+        self.equipment = __val_or_none(first_row, hedr_equipment)
+        if not self.equipment:
+            self.equipment = dict_parts_stcs[tag_part_val_equipment_plchldr]
+        self.mode_washing = __val_or_none(first_row, hedr_mode_washing)
+        self.duration_washing_minutes = __val_or_none(first_row, hedr_duration_washing_minutes)
+        self.rpm_agit = __val_or_none(first_row, hedr_agitation_rpm)
+
+        self.arr_inputs.clear()
         for _, subitem in df.iterrows():
-            #<uo-specific process>
-            pass
+            #Rows without a material name are regarded as empty.
+            if __val_or_none(subitem, matin.hedr_material_name) is None:
+                continue
+            new_input = Input(get_mats=self.caller,
+                              get_inputs=self.caller,
+                              flowsheet=self.flowsheet)
+            new_input.load_params_from_series(subitem)
+            vessel_train:list[str] = new_input.get_vessel_train()
+            if not vessel_train or vessel_train[-1] != self.equipment:
+                vessel_train.append(self.equipment)
+            self.arr_inputs.append(new_input)
 
 
 
@@ -434,32 +441,87 @@ class CrystWashing(uo.UnitOperation, MaterialIn, uo_tag=defs.tag_uo_cryst_wash):
             self.flowsheet.put_body_comments(self.post_comment)
             self.flowsheet.linefeed()
     
-    @classmethod
-    def generate_test_df(cls,
-                       precomment:str=None,
-                       postcomment:str=None, 
-                       PARAMETER=DEFALUT_VALUE)->pd.DataFrame:
-        hedr:list[str] = defs.list_hedr_cmn_io_dtil + list_hedr
-        content: list[any] = [None]*len(hedr)
-        s:pd.Series = pd.Series(data=content, index=hedr)
-        df = s.to_frame().T
+    @staticmethod
+    def generate_test_df(precomment:str|None=None,
+                       postcomment:str|None=None,
+                       equipment:str|None=None,
+                       mode_washing:str|None=opt_washmode_reslurry,
+                       duration_minutes:float|None=None,
+                       agitation_rpm:float|None=None,
+                       material_name:str=None,
+                       metrics_val:float=None,
+                       metrics_unit:str=None,
+                       error_pct:float=matin.error_pct_default,
+                       method:str=None,
+                       vessel_train:list[str]=None,
+                       time_control:str=matin.timectrl_none,
+                       time_min:float=None,
+                       time_max:float=None,
+                       temp_control:str=matin.temprctrl_none,
+                       temp_min:float=None,
+                       temp_max:float=None,
+                       id_input:int=None,
+                       list_id_basis_input:list[int]=None)->pd.DataFrame:
+        #The first row holds both the UO-specific parameters and the first solvent input.
+        df_inpt = Input.generate_test_df(material_name=material_name,
+                                         metrics_val=metrics_val,
+                                         metrics_unit=metrics_unit,
+                                         error_pct=error_pct,
+                                         method=method,
+                                         vessel_train=vessel_train,
+                                         time_control=time_control,
+                                         time_min=time_min,
+                                         time_max=time_max,
+                                         temp_control=temp_control,
+                                         temp_min=temp_min,
+                                         temp_max=temp_max,
+                                         id_input=id_input,
+                                         list_id_basis_input=list_id_basis_input)
+        hedr:list[str] = defs.list_hedr_cmn_io_dtil + list_hedr + matin.list_hedr
+        df = df_inpt.reindex(columns=hedr).astype(object)
+        df = df.where(pd.notna(df), None)
+
         df.at[df.index[0], hedr_precomment] = precomment
         df.at[df.index[0], hedr_postcomment] = postcomment
-        df.at[df.index[0], HEDR_ITEM]=PARAMETER
-        ...
+        df.at[df.index[0], hedr_equipment] = equipment
+        df.at[df.index[0], hedr_mode_washing] = mode_washing
+        df.at[df.index[0], hedr_duration_washing_minutes] = duration_minutes
+        df.at[df.index[0], hedr_agitation_rpm] = agitation_rpm
 
         return df
     
-    @classmethod
-    def add_to_test_df(cls,
-                       df: pd.DataFrame=None,
-                       PARAMETER=DEFALUT_VALUE)->None:
-        width:int = len(df.columns)
-        new_row:list[any] = [None]*width
-        row:int = len(df)
-        df.loc[row]=new_row
-        df.at[row, HEADER_ITEM]=PARAMETER
-        ...
+    @staticmethod
+    def add_to_test_df(df: pd.DataFrame=None,
+                       material_name:str=None,
+                       metrics_val:float=None,
+                       metrics_unit:str=None,
+                       error_pct:float=matin.error_pct_default,
+                       method:str=None,
+                       vessel_train:list[str]=None,
+                       time_control:str=matin.timectrl_none,
+                       time_min:float=None,
+                       time_max:float=None,
+                       temp_control:str=matin.temprctrl_none,
+                       temp_min:float=None,
+                       temp_max:float=None,
+                       id_input:int=None,
+                       list_id_basis_input:list[int]=None)->None:
+        """Adds another solvent input as a new row. The UO-specific parameters are held only in the first row."""
+        Input.add_to_test_df(df=df,
+                             material_name=material_name,
+                             metrics_val=metrics_val,
+                             metrics_unit=metrics_unit,
+                             error_pct=error_pct,
+                             method=method,
+                             vessel_train=vessel_train,
+                             time_control=time_control,
+                             time_min=time_min,
+                             time_max=time_max,
+                             temp_control=temp_control,
+                             temp_min=temp_min,
+                             temp_max=temp_max,
+                             id_input=id_input,
+                             list_id_basis_input=list_id_basis_input)
 
     def get_list_inputs(self) -> list[Input]:
         return self.arr_inputs

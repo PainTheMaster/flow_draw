@@ -390,14 +390,13 @@ class Filtration(uo.UnitOperation, uo_tag=defs.tag_uo_filt):
             self.flowsheet.put_body_comments(self.post_comment)
             self.flowsheet.linefeed()
     
-    @classmethod
-    def generate_test_df(cls,
-                       equipment:str = None,
-                       Tj:float = None,
-                       P_min:float = None,
-                       P_max:float = None,
-                       P_unit:str = None,
-                       integ_test:str = None)->pd.DataFrame:
+    @staticmethod
+    def generate_test_df(equipment:str = None,
+                         Tj:float = None,
+                         P_min:float = None,
+                         P_max:float = None,
+                         P_unit:str = None,
+                         integ_test:str = None)->pd.DataFrame:
         hedr:list[str] = defs.list_hedr_cmn_io_dtil + list_hedr
         content: list[any] = [None]*len(hedr)
         s:pd.Series = pd.Series(data=content, index=hedr)

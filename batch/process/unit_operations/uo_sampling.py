@@ -379,9 +379,8 @@ class Sampling(uo.UnitOperation, uo_tag=defs.tag_uo_sampling):
 
 
 
-    @classmethod
-    def generate_test_df(cls,
-                         sample_name:str = None,
+    @staticmethod
+    def generate_test_df(sample_name:str = None,
                          sampling_cat:str = None,
                          ipc_criteria:str = None,
                          ipc_rec_titles:str = None,
@@ -407,9 +406,8 @@ class Sampling(uo.UnitOperation, uo_tag=defs.tag_uo_sampling):
 
         return df
     
-    @classmethod
-    def add_to_test_df(cls,
-                       df: pd.DataFrame=None,
+    @staticmethod
+    def add_to_test_df(df: pd.DataFrame=None,
                        sample_name:str = None,
                        sampling_cat:str = None,
                        ipc_criteria:str = None,

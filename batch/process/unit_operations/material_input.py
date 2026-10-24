@@ -22,14 +22,21 @@ hedr_metrics_unit = 'Metrics_Unit'
 hedr_error_pct = 'Permissible_Error(%)'
 hedr_method = 'Charging_Method'
 hedr_vessel = "Vessel"
+"""JSON key for a single vessel constituting the vessel train."""
 hedr_train_vessel = 'Vessel_Train'
+"""JSON key/header for vessel train. This is not on the out-most level."""
 hedr_time_control = 'Time_Control'
+"""header for time control method"""
 hedr_time_min = 'Minimum_Time(min)'
+"""header for min time"""
 hedr_time_max = 'Maximum_Time(min)'
+"""header for max time"""
 hedr_temp_control = 'Temp_Control'
+"""header for temp control"""
 hedr_temp_min = 'Minimum_Temp(deg-C)'
+"""header for min temp"""
 hedr_temp_max = 'Maximum_Temp(deg-C)'
-
+"""header for max temp"""
 id_input_json = 'Material_Input_ID'
 """The key to a material input ID for JSON data exchange."""
 hedr_basis_input = 'Calc_Basis_Material_Input_ID'
@@ -38,6 +45,29 @@ hedr_basis_array_json = 'Array_Calc_Basis'
 """The key to the array of calculation basis material input IDs for JSON data exchange."""
 entry_input_json = 'charging_input_entry'
 """The key to a material input entry for JSON data exchange."""
+
+#------------list of header items--------------#
+list_hedr = [hedr_material_name,
+             hedr_metrics_value,
+             hedr_metrics_unit,
+             hedr_error_pct,
+             hedr_method,
+            #  hedr_vessel,
+             hedr_train_vessel,
+             hedr_time_control,
+             hedr_time_min,
+             hedr_time_max,
+             hedr_temp_control,
+             hedr_temp_min,
+             hedr_temp_max,
+             id_input_json,
+             hedr_basis_array_json,
+             ]
+
+############################################
+#                Options                   #
+############################################
+
 opt_special_id_basis_tgt = defs.id_special_tgt_uo_chgng
 """Special ID for the target compound used as the quantity calculation basis in the charging unit operation."""
 cls_input_mat_sm = 'cls_sm'
@@ -47,24 +77,6 @@ cls_input_mat_tgt = 'cls_tgt'
 cls_input_mat_other = 'cls_other'
 """Material class identifier for other materials."""
 
-#------------list of header items--------------#
-list_hedr = [hedr_material_name,
-             hedr_metrics_value,
-             hedr_metrics_unit,
-             hedr_error_pct,
-             hedr_method,
-             hedr_vessel,
-             hedr_train_vessel,
-             hedr_time_control,
-             hedr_time_min,
-             hedr_time_max,
-             hedr_temp_control,
-             hedr_temp_min,
-             hedr_temp_max]
-
-############################################
-#                Options                   #
-############################################
 method_liq = 'liquid_port'
 method_shower = 'shower'
 method_press = 'press_vessel'
@@ -160,7 +172,6 @@ tag_part_rec_lot = "tag_matin_rec_lot"
 
 tag_part_rec_balance_id = "tag_matin_rec_ID_balance"
 """Flowsheet component for class Charging. A recording element for the ID of the balance."""
-#TODO: Please implement the printing logic of the balance ID record.
 
 tag_part_rec_cntnr_id = 'tag_matin_rec_ID_container'
 """Flowsheet component for class Charging. A recording element for the ID of liquid containers."""
@@ -209,7 +220,7 @@ dict_jp_parts={tag_part_instr_ini : '仕込み開始',
                 tag_part_instr_end : '仕込み終了',
                 tag_part_rec_qyt_input : '仕込み量__________kg',
                 tag_part_rec_lot : 'ロット番号__________',
-                tag_part_rec_balance_id : '秤量器ID__________', #TODO: Please implement the printing logic of the balance ID record.
+                tag_part_rec_balance_id : '秤量器ID__________',
                 tag_part_rec_cntnr_id : '容器ID__________',
                 tag_part_rec_hose : 'フレキID__________',
                 tag_part_rec_temprini : '開始時内温_______℃',
@@ -355,11 +366,47 @@ class Input(InputTrait):
         --------------
         None
         """
+        def __is_blank(something=None)->bool:
+            return something is None or (not isinstance(something, (list, tuple)) and pd.isna(something))
+
+        def __to_list(something=None)->list:
+            if __is_blank(something):
+                return []
+            elif isinstance(something, (list, tuple)):
+                return list(something)
+            elif isinstance(something, str):
+                #A cell on a worksheet holds a list as a comma-separated string.
+                return [v.strip() for v in something.split(',') if v.strip() != '']
+            else:
+                return [something]
+
+        def __to_int(something=None)->int|None:
+            #Integers often come back from Excel as float, e.g. 0.0
+            try:
+                val = float(something)
+            except (TypeError, ValueError):
+                warnings.warn(f'{self.__class__.__name__}.load_params_from_series() (input of "{self.material_name}"): '
+                              f'"{something}" is not a valid material input ID. It is ignored.', UserWarning)
+                return None
+            if not val.is_integer():
+                warnings.warn(f'{self.__class__.__name__}.load_params_from_series() (input of "{self.material_name}"): '
+                              f'"{something}" is not a valid material input ID. It is ignored.', UserWarning)
+                return None
+            return int(val)
+
         self.material_name = ser[hedr_material_name]
+        if not __is_blank(ser.get(id_input_json)):
+            self.id_input = __to_int(ser[id_input_json])
+        self.list_id_basis_input = [i for i in map(__to_int, __to_list(ser.get(hedr_basis_array_json))) if i is not None]
         self.metrics_unit = ser[hedr_metrics_unit]
         self.metrics_val = ser[hedr_metrics_value]
-        self.error_pct = ser[hedr_error_pct]
+        if not __is_blank(ser.get(hedr_error_pct)) and ser[hedr_error_pct]:
+            self.error_pct = ser[hedr_error_pct]
+        else:
+            self.error_pct = error_pct_default
+            warnings.warn(f'{self.__class__.__name__}.load_params_from_series(): The given error is empty or zero. {error_pct_default}% as the default value is put for now.', UserWarning)
         self.method  = ser[hedr_method]
+        self.vessel_train = [str(v) for v in __to_list(ser.get(hedr_train_vessel))]
         self.time_control = ser[hedr_time_control]
         if self.time_control == timectrl_min or self.time_control == timectrl_min_max:
             self.time_min = ser[hedr_time_min]
@@ -374,10 +421,14 @@ class Input(InputTrait):
             warnings.warn(message=f"{__class__.__name__}: mats_data is None",
                           category=RuntimeWarning)
         else:
-            self.calc_qty()
+            #calc_qty() is called later by the process once all the inputs are loaded.
             self.mw = self.mats_data.get_mw(self.material_name)
             self.density = self.mats_data.get_density(self.material_name)
             self.conc_assay = self.mats_data.get_conc_assay(self.material_name)
+            if self.material_name == self.mats_data.get_name_sm():
+                self.material_class = cls_input_mat_sm
+            else:
+                self.material_class = cls_input_mat_other
 
     @staticmethod
     def get_json_schema(caller: GetMats=None)-> Objason:
@@ -638,13 +689,12 @@ class Input(InputTrait):
         ##################################################################################################
         ##################################################################################################
 
-        
         #line-1: Material name and relative quantity
         line_mat = self.put_material(time=lang_dict_cmn[tag_flow_cmn_rec_time],
-                                            method=lang_dict_chgng_specif[self.method],
-                                            record=lang_dict_chgng_specif[tag_part_rec_lot],
-                                            operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
-                                            witness=lang_dict_cmn[tag_flow_cmn_rec_sign],)
+                                     method=lang_dict_chgng_specif[self.method],
+                                     record=lang_dict_chgng_specif[tag_part_rec_lot],
+                                     operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
+                                     witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
         
         fifo_train = __get_fifo_train(self.vessel_train)
 
@@ -652,6 +702,10 @@ class Input(InputTrait):
         self.instruct_qty_range(method=fifo_train(),
                                 record=lang_dict_chgng_specif[tag_part_rec_qyt_input],
                                 line_mat=line_mat)
+
+        #line-3: Balance info
+        self.flowsheet.put_line(method=fifo_train(),
+                                record=lang_dict_chgng_specif[tag_part_rec_balance_id])
 
         #For liquid only, container ID, flex ID 
         if self.method in (method_liq, method_shower, method_mobile_tank):
@@ -686,33 +740,110 @@ class Input(InputTrait):
         self.flowsheet.linefeed()
 
 
-    def test_data_creation1(self):
-        self.material_name = 'H2O'
-        self.metrics_unit = opt_mtrcs_v_per_w
-        self.metrics_val = 1.0
-        self.error_pct = 5.0
-        self.method = method_liq
-        self.time_control = timectrl_min
-        self.time_min = '1h'
-        self.time_max = None
-        self.temp_control = temprctrl_min_max
-        self.temp_min = 15
-        self.temp_max = 25
-        self.calc_qty()
+    # def test_data_creation1(self):
+    #     self.material_name = 'H2O'
+    #     self.metrics_unit = opt_mtrcs_v_per_w
+    #     self.metrics_val = 1.0
+    #     self.error_pct = 5.0
+    #     self.method = method_liq
+    #     self.time_control = timectrl_min
+    #     self.time_min = '1h'
+    #     self.time_max = None
+    #     self.temp_control = temprctrl_min_max
+    #     self.temp_min = 15
+    #     self.temp_max = 25
+    #     self.calc_qty()
 
-    def test_data_creation2(self):
-        self.material_name = 'NaCl'
-        self.metrics_unit = opt_mtrcs_eq
-        self.metrics_val = 2.0
-        self.error_pct = 5.0
-        self.method = method_pow
-        self.time_control = timectrl_none
-        self.time_min = None
-        self.time_max = None
-        self.temp_control = temprctrl_min_max
-        self.temp_min = 15
-        self.temp_max = 25
-        self.calc_qty()
+    # def test_data_creation2(self):
+    #     self.material_name = 'NaCl'
+    #     self.metrics_unit = opt_mtrcs_eq
+    #     self.metrics_val = 2.0
+    #     self.error_pct = 5.0
+    #     self.method = method_pow
+    #     self.time_control = timectrl_none
+    #     self.time_min = None
+    #     self.time_max = None
+    #     self.temp_control = temprctrl_min_max
+    #     self.temp_min = 15
+    #     self.temp_max = 25
+    #     self.calc_qty()
+
+    @staticmethod
+    def generate_test_df(# precomment:str=None,
+                         # postcomment:str=None,
+                         material_name:str=None,
+                         metrics_val:float=None,
+                         metrics_unit:str=None,
+                         error_pct:float=error_pct_default,
+                         method:str=None,
+                         vessel_train:list[str]=None,
+                         time_control:str=timectrl_none,
+                         time_min:float=None,
+                         time_max:float=None,
+                         temp_control:str=temprctrl_none,
+                         temp_min:float=None,
+                         temp_max:float=None,
+                         id_input:int=None,
+                         list_id_basis_input:list[int]=None)->pd.DataFrame:
+        hedr:list[str] = defs.list_hedr_cmn_io_dtil + list_hedr
+        content: list[any] = [None]*len(hedr)
+        s:pd.Series = pd.Series(data=content, index=hedr)
+        df = s.to_frame().T
+        # df.at[df.index[0], defs.hedr_cmn_io_dtil_precmnt]=precomment
+        # df.at[df.index[0], defs.hedr_cmn_io_dtil_postcmnt]=postcomment
+        df.at[df.index[0], hedr_material_name]=material_name
+        df.at[df.index[0], hedr_metrics_value]=metrics_val
+        df.at[df.index[0], hedr_metrics_unit]=metrics_unit
+        df.at[df.index[0], hedr_error_pct]=error_pct
+        df.at[df.index[0], hedr_method]=method
+        # df.at[df.index[0], hedr_vessel]=vessel
+        df.at[df.index[0], hedr_train_vessel]=vessel_train
+        df.at[df.index[0], hedr_time_control]=time_control
+        df.at[df.index[0], hedr_time_min]=time_min
+        df.at[df.index[0], hedr_time_max]=time_max
+        df.at[df.index[0], hedr_temp_control]=temp_control
+        df.at[df.index[0], hedr_temp_min]=temp_min
+        df.at[df.index[0], hedr_temp_max]=temp_max
+        df.at[df.index[0], id_input_json]=id_input
+        df.at[df.index[0], hedr_basis_array_json]=list_id_basis_input
+
+        return df
+
+    @staticmethod
+    def add_to_test_df(df: pd.DataFrame=None,
+                       material_name:str=None,
+                       metrics_val:float=None,
+                       metrics_unit:str=None,
+                       error_pct:float=error_pct_default,
+                       method:str=None,
+                       vessel_train:list[str]=None,
+                       time_control:str=timectrl_none,
+                       time_min:float=None,
+                       time_max:float=None,
+                       temp_control:str=temprctrl_none,
+                       temp_min:float=None,
+                       temp_max:float=None,
+                       id_input:int=None,
+                       list_id_basis_input:list[int]=None)->None:
+        width:int = len(df.columns)
+        new_row:list[Any] = [None]*width
+        row:int = len(df)
+        df.loc[row]=new_row
+        df.at[row, hedr_material_name]=material_name
+        df.at[row, hedr_metrics_value]=metrics_val
+        df.at[row, hedr_metrics_unit]=metrics_unit
+        df.at[row, hedr_error_pct]=error_pct
+        df.at[row, hedr_method]=method
+        # df.at[row, hedr_vessel]=vessel
+        df.at[row, hedr_train_vessel]=vessel_train
+        df.at[row, hedr_time_control]=time_control
+        df.at[row, hedr_time_min]=time_min
+        df.at[row, hedr_time_max]=time_max
+        df.at[row, hedr_temp_control]=temp_control
+        df.at[row, hedr_temp_min]=temp_min
+        df.at[row, hedr_temp_max]=temp_max
+        df.at[row, id_input_json]=id_input
+        df.at[row, hedr_basis_array_json]=list_id_basis_input
 
 
     def mark_as_tgt(self):
@@ -733,7 +864,6 @@ class Input(InputTrait):
             raise RuntimeError(f"{self.__class__.__name__}.calc_qty() (input of \"{self.material_name}\"): No material data for provided in the material input worksheet.")
 
         if self.list_id_basis_input is None or len(self.list_id_basis_input) == 0:
-            # if self.material_class != cls_input_mat_sm and self.material_class != cls_input_mat_tgt:
             if (self.material_class not in (cls_input_mat_sm, cls_input_mat_tgt)
                 and self.metrics_unit not in (opt_mtrcs_wt_gro_abs, opt_mtrcs_vol_abs)):
                 raise RuntimeError(f"{self.__class__.__name__}.calc_qty() (input of \"{self.material_name}\"): No quantity calculation basis specified.")
@@ -1037,6 +1167,11 @@ class Input(InputTrait):
         if input_depended is None:
             raise RuntimeError(f"{__class__.__name__}.get_basis_name() (input of \"{self.material_name}\"): Dependent input with ID \"{first_id_basis}\" not found.")
         return input_depended.material_name
+
+    def is_based_on_tgt(self)->bool:
+        if not self.list_id_basis_input:
+            return False
+        return opt_special_id_basis_tgt in self.list_id_basis_input
 
     def put_material(self,
                      time=None,

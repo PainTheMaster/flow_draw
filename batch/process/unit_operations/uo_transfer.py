@@ -360,13 +360,12 @@ class Transfer(uo.UnitOperation, uo_tag=defs.tag_uo_transfer):
         self.filter_typ = json_dict.get(hedr_filter_typ, None)
 
 
-    @classmethod
-    def generate_test_df(cls,
-                       operation:str = None,
-                       origin:str = None,
-                       via:str = None,
-                       destination:str = None,
-                       filter:str = None)->pd.DataFrame:
+    @staticmethod
+    def generate_test_df(operation:str = None,
+                         origin:str = None,
+                         via:str = None,
+                         destination:str = None,
+                         filter:str = None)->pd.DataFrame:
         hedr:list[str] = defs.list_hedr_cmn_io_dtil + list_hedr
         content: list[any] = [None]*len(hedr)
         s:pd.Series = pd.Series(data=content, index=hedr)

@@ -35,7 +35,7 @@ from flow_draw.materials.materials import Materials as mats
 # from flow_draw.trait_def.trait_def import GetMats as GetMats
 # from flow_draw.trait_def.trait_def import GetProcName as GetProcName
 # from flow_draw.trait_def.trait_def import GetInputs as GetInputs
-from flow_draw.trait_def.trait_def import GetMats, GetProcName, GetInputs, MaterialIn
+from flow_draw.trait_def.trait_def import GetMats, GetProcName, GetInputs, MaterialReceiver
 
 from flow_draw.data_io import json_io
 from flow_draw.data_io.json_io import JsonEntity, Array, Objason, Primitive
@@ -304,17 +304,26 @@ class Process(GetMats, GetProcName, GetInputs):
 
         self.list_inpts.clear()
         for step in self.seq_uo:
-            if isinstance(step, MaterialIn):
+            if isinstance(step, MaterialReceiver):
                 self.list_inpts += step.get_list_inputs()
 
         self.__check_inpt_id_invalid()
 
-        input_tgt = matinp.Input(get_mats = self.mats_data, get_inputs = self, flowsheet=self.flowsheet)
-        input_tgt.mark_as_tgt()
-        is_tgt_calcd = input_tgt.calc_qty()
-        if not is_tgt_calcd:
-            raise RuntimeError(f'{self.__class__.__name__}.interprit_dict(): Quantity calculation for "input_tgt" failed.')
-        self.list_inpts.append(input_tgt)
+        #The target material is optional in the materials table.
+        input_tgt: matinp.Input = None
+        if self.mats_data.get_name_tgt() is not None:
+            input_tgt = matinp.Input(get_mats = self, get_inputs = self, flowsheet=self.flowsheet)
+            input_tgt.mark_as_tgt()
+            is_tgt_calcd = input_tgt.calc_qty()
+            if not is_tgt_calcd:
+                raise RuntimeError(f'{self.__class__.__name__}.interprit_dict(): Quantity calculation for "input_tgt" failed.')
+            self.list_inpts.append(input_tgt)
+        else:
+            for inpt in self.list_inpts:
+                if inpt.is_based_on_tgt():
+                    raise RuntimeError(f'{self.__class__.__name__}.interprit_dict(): "{inpt.material_name}" (input ID {inpt.id_input}) '
+                                       f'uses the target material (ID {matinp.opt_special_id_basis_tgt}) as its calculation basis, '
+                                       f'but no target material is designated in the materials table.')
 
         for _ in range(num_max_iter_calc_qty):
             calc_complete = True
@@ -329,7 +338,8 @@ class Process(GetMats, GetProcName, GetInputs):
             step.print_unit_operation()
 
         # self.flowsheet.put_material(mat_input=input_tgt)
-        input_tgt.put_material()
+        if input_tgt is not None:
+            input_tgt.put_material()
 
         for inpt in self.list_inpts:
             # self.flowsheet.put_qty_material(inputs=self, id_input=single_input.id_input)

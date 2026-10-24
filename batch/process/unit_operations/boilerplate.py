@@ -162,11 +162,10 @@ class ClassName(uo.UnitOperation, uo_tag=defs.tag_uo_"UO_NAME"):
             self.flowsheet.put_body_comments(self.post_comment)
             self.flowsheet.linefeed()
     
-    @classmethod
-    def generate_test_df(cls,
-                       precomment:str=None,
-                       postcomment:str=None, 
-                       PARAMETER=DEFALUT_VALUE)->pd.DataFrame:
+    @staticmethod
+    def generate_test_df(precomment:str=None,
+                         postcomment:str=None, 
+                         PARAMETER=DEFALUT_VALUE)->pd.DataFrame:
         hedr:list[str] = defs.list_hedr_cmn_io_dtil + list_hedr
         content: list[any] = [None]*len(hedr)
         s:pd.Series = pd.Series(data=content, index=hedr)
@@ -178,9 +177,8 @@ class ClassName(uo.UnitOperation, uo_tag=defs.tag_uo_"UO_NAME"):
 
         return df
     
-    @classmethod
-    def add_to_test_df(cls,
-                       df: pd.DataFrame=None,
+    @staticmethod
+    def add_to_test_df(df: pd.DataFrame=None,
                        PARAMETER=DEFALUT_VALUE)->None:
         width:int = len(df.columns)
         new_row:list[any] = [None]*width

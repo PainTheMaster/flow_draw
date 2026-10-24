@@ -10,7 +10,7 @@ from flow_draw.materials import materials as mats
 # if TYPE_CHECKING:
 from flow_draw.data_io.flowsheet import Flowsheet
 # import flow_draw.data_io.flowsheet as fsht
-from flow_draw.trait_def.trait_def import GetMats, GetInputs, MaterialIn
+from flow_draw.trait_def.trait_def import GetMats, GetInputs, MaterialReceiver
 from flow_draw.data_io.json_io import Objason, Primitive, Array
 from flow_draw.batch.process.unit_operations.material_input import Input  # Input and its constants; kept importable as chgng.<name> for existing callers
 
@@ -50,7 +50,7 @@ arry_inputs_json = 'arr_charging_input_entry'
 lang_dict_uo_titles = defs.dict_jp_part_uo_titles
 
 
-class Charging(uo.UnitOperation, MaterialIn, uo_tag=defs.tag_uo_charging):
+class Charging(uo.UnitOperation, MaterialReceiver, uo_tag=defs.tag_uo_charging):
     """
     TODO: Make some comment here.
     """

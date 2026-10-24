@@ -264,9 +264,8 @@ class Tare(uo.UnitOperation, uo_tag=defs.tag_uo_tare_pkg):
             self.flowsheet.put_body_comments(self.post_comment)
             self.flowsheet.linefeed()
     
-    @classmethod
-    def generate_test_df(cls,
-                         precomment='',
+    @staticmethod
+    def generate_test_df(precomment='',
                          pkg_location="isolator",
                          pkg_material=dict_parts_stcs[opt_pkg_polym_bag],
                          num_pkg=1,

@@ -22,6 +22,7 @@ import flow_draw.batch.process.unit_operations.uo_filter_setup as fltsup
 import flow_draw.batch.process.unit_operations.uo_drying as drying
 import flow_draw.batch.process.unit_operations.uo_alloc as alloc
 import flow_draw.batch.process.unit_operations.uo_tare as tare
+import flow_draw.batch.process.unit_operations.uo_cryst_wash as crystwash
 import flow_draw.data_io.flowsheet  as fsht
 import flow_draw.materials.materials as mats
 import flow_draw.trait_def.trait_def as trdef
@@ -381,11 +382,11 @@ class AgitationTest2000(unittest.TestCase, trdef.GetMats):
         mats_df = mats.Materials.generate_mats_df()
         mats_df = mats.Materials.add_to_mats_df(mats_df=mats_df,
                                       material="ぎゅうにく",
-                                      main_star=True,
+                                      sm_tgt=defs.itm_io_mats_sm,
                                       mw=100.0,
                                       density=1.1,
                                       conc_assay=90.0,
-                                      kg_main=2.0,
+                                      kg_sm=2.0,
                                       remark="残り10%は普通の肉が混入。何の肉かは聞いてはいけない。")
         mats_df = mats.Materials.add_to_mats_df(mats_df=mats_df,
                                       material="たまねぎ",
@@ -580,11 +581,11 @@ class CIPTest3000(unittest.TestCase, trdef.GetMats):
         mats_df = mats.Materials.generate_mats_df()
         mats_df = mats.Materials.add_to_mats_df(mats_df=mats_df,
                                       material="ぎゅうにく",
-                                      main_star=True,
+                                      sm_tgt=defs.itm_io_mats_sm,
                                       mw=100.0,
                                       density=1.1,
                                       conc_assay=90.0,
-                                      kg_main=2.0,
+                                      kg_sm=2.0,
                                       remark="残り10%は普通の肉が混入。何の肉かは聞いてはいけない。")
         mats_df = mats.Materials.add_to_mats_df(mats_df=mats_df,
                                       material="たまねぎ",
@@ -1152,6 +1153,9 @@ class TareTest4700(unittest.TestCase, trdef.GetProcName):
         test_inst.print_unit_operation()
         self.flowsheet.save("Test_4700_tare_full.xlsx")
         self.assertTrue(True)
+
+
+
 
 def suite_0000_40000():
     

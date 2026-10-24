@@ -60,11 +60,11 @@ class MaterialsTrait(ABC):
     @abstractmethod    
     def add_to_mats_df(mats_df:pd.DataFrame = None,
                        material:str = None,
-                       main_star:bool = False,
+                       sm_tgt:str = None,
                        mw:float = None,
                        density:float = None,
                        conc_assay:float=None,
-                       kg_main:float=None,
+                       kg_sm:float=None,
                        remark:str=None)->pd.DataFrame:
         pass
         
@@ -147,6 +147,10 @@ class InputTrait(ABC):
 
     @abstractmethod
     def get_basis_name(self)->str|None:
+        pass
+
+    @abstractmethod
+    def is_based_on_tgt(self)->bool:
         pass
 
     @abstractmethod
@@ -258,8 +262,8 @@ class GetInputs(UniversalTrait):
         """
         pass
 
-class MaterialIn(ABC):
+class MaterialReceiver(ABC):
     @abstractmethod
-    def get_list_inputs(self) -> list[type[InputTrait]]:
+    def get_list_inputs(self) -> list[InputTrait]:
         pass
     

@@ -196,12 +196,11 @@ class Alloc(uo.UnitOperation, uo_tag=defs.tag_uo_alloc):
         
         self.flowsheet.linefeed()
     
-    @classmethod
-    def generate_test_df(cls,
-                       precomment:str=None,
-                       postcomment:str=None,                   
-                       prod_cell:str = None,
-                       op_resouce:str = None)->pd.DataFrame:
+    @staticmethod
+    def generate_test_df(precomment:str=None,
+                         postcomment:str=None,                   
+                         prod_cell:str = None,
+                         op_resouce:str = None)->pd.DataFrame:
         hedr:list[str] = defs.list_hedr_cmn_io_dtil + [hedr_cell, hedr_op_resource]
         content: list[any] = [None]*len(hedr)
         s:pd.Series = pd.Series(data=content, index=hedr)
@@ -212,9 +211,8 @@ class Alloc(uo.UnitOperation, uo_tag=defs.tag_uo_alloc):
         df.at[df.index[0], hedr_op_resource] = op_resouce
         return df
     
-    @classmethod
-    def add_to_test_df(cls,
-                       df: pd.DataFrame=None,
+    @staticmethod
+    def add_to_test_df(df: pd.DataFrame=None,
                        prod_cell:str = None,
                        op_resouce:str = None)->None:
         width:int = len(df.columns)

@@ -102,7 +102,8 @@ class Materials(MaterialsTrait):
 
         df_extrd_tgt  = self.df_mats[self.df_mats[header_sm_tgt]==desig_tgt] 
         if df_extrd_tgt.empty:
-            raise RuntimeError(f'{self.__class__.__name__}: No target material is designated in the colum "{defs.hedr_io_mats_sm_tgt}".')
+            # raise RuntimeError(f'{self.__class__.__name__}: No target material is designated in the colum "{defs.hedr_io_mats_sm_tgt}".')
+            warnings.warn(f'{self.__class__.__name__}: No target material is designated in the colum "{defs.hedr_io_mats_sm_tgt}".', UserWarning)
         elif len(df_extrd_tgt) > 1:
             raise RuntimeError(f'{self.__class__.__name__}: More than one target materials are designated in the colum "{defs.hedr_io_mats_sm_tgt}".')
         else:
@@ -138,63 +139,63 @@ class Materials(MaterialsTrait):
     def get_kg_net_tgt_ideal(self) -> float:
         return self.kg_net_tgt_ideal
                
-    def to_kilogram(self, material_name:str = None, equiv: float = None, vol_per_weight:float = None) -> float:
-        """
-        Converts metrics value in equiv or volume/weight of a given material to kilogram.
-        This method depends on the DataFrame objects for both all the raw materials and the main starting material.
-        As long as they are set to the Materials instance beforehand, this method works.
+    # def to_kilogram(self, material_name:str = None, equiv: float = None, vol_per_weight:float = None) -> float:
+    #     """
+    #     Converts metrics value in equiv or volume/weight of a given material to kilogram.
+    #     This method depends on the DataFrame objects for both all the raw materials and the main starting material.
+    #     As long as they are set to the Materials instance beforehand, this method works.
 
-        Parameters
-        -------------
-        material:str
-            The name of a material whose input amount in kg is desired.
+    #     Parameters
+    #     -------------
+    #     material:str
+    #         The name of a material whose input amount in kg is desired.
         
-        equiv: float
-            Molar equivalent of  \"material\" to the main starting compund. Put either this or \"vol_per_weight\".
+    #     equiv: float
+    #         Molar equivalent of  \"material\" to the main starting compund. Put either this or \"vol_per_weight\".
         
-        vol_per_weight:int
-            Volue (liter) of \"material\" vs a kilogram of the main starting compound. Put either this or \"equiv\".
+    #     vol_per_weight:int
+    #         Volue (liter) of \"material\" vs a kilogram of the main starting compound. Put either this or \"equiv\".
         
-        Returns
-        -------
-            weight: float
-            Amount of \"material\" in kg.
+    #     Returns
+    #     -------
+    #         weight: float
+    #         Amount of \"material\" in kg.
 
-        """
-        if not (equiv is None or vol_per_weight is None):
-            raise ValueError(f"{self.__class__.__name__}.to_kilogram(): Dual input of equiv: {equiv} and vol_per_weight: {vol_per_weight} detected for the material \"{material_name}\". A value for only one of those shall be provided.")
-        if equiv is not None and vol_per_weight is not None:
-            raise ValueError(f"{self.__class__.__name__}.to_kilogram(): Both equiv: {equiv} and vol_per_weight: {vol_per_weight} are provided for the material \"{material_name}\". Only one of them should be provided.")
+    #     """
+    #     if not (equiv is None or vol_per_weight is None):
+    #         raise ValueError(f"{self.__class__.__name__}.to_kilogram(): Dual input of equiv: {equiv} and vol_per_weight: {vol_per_weight} detected for the material \"{material_name}\". A value for only one of those shall be provided.")
+    #     if equiv is not None and vol_per_weight is not None:
+    #         raise ValueError(f"{self.__class__.__name__}.to_kilogram(): Both equiv: {equiv} and vol_per_weight: {vol_per_weight} are provided for the material \"{material_name}\". Only one of them should be provided.")
         
-        if not self.df_mats[defs.hedr_io_mats_mat].isin([material_name]).any():
-            raise ValueError(f"{self.__class__.__name__}.to_kilogram(): A compound name \"{material_name}\" is not defined in the raw materials table.")
-        conc_assay_this = self.df_mats[self.df_mats[defs.hedr_io_mats_mat]==material_name][defs.hedr_io_mats_concasy].item()
-        # if math.isnan(conc_assay_this) or conc_assay_this==0.0:
-        if pd.isna(conc_assay_this) or conc_assay_this==0.0:
-            conc_assay_this = 100.0
-            warnings.warn(f'{self.__class__.__name__}.to_kilogram(): The concentration or assay for the material \"{material_name}\" is empty or zero. '
-                          'For this run, 100% is assumed.', UserWarning)
+    #     if not self.df_mats[defs.hedr_io_mats_mat].isin([material_name]).any():
+    #         raise ValueError(f"{self.__class__.__name__}.to_kilogram(): A compound name \"{material_name}\" is not defined in the raw materials table.")
+    #     conc_assay_this = self.df_mats[self.df_mats[defs.hedr_io_mats_mat]==material_name][defs.hedr_io_mats_concasy].item()
+    #     # if math.isnan(conc_assay_this) or conc_assay_this==0.0:
+    #     if pd.isna(conc_assay_this) or conc_assay_this==0.0:
+    #         conc_assay_this = 100.0
+    #         warnings.warn(f'{self.__class__.__name__}.to_kilogram(): The concentration or assay for the material \"{material_name}\" is empty or zero. '
+    #                       'For this run, 100% is assumed.', UserWarning)
         
-        mw_this = self.df_mats[self.df_mats[defs.hedr_io_mats_mat]==material_name][defs.hedr_io_mats_mw].item()
-        # if math.isnan(mw_this):
-        if equiv is not None and pd.isna(mw_this):
-            raise ValueError(f"{self.__class__.__name__}.to_kilogram(): No molecular weight is assigned to the material \"{material_name}\".")
-        density_this = self.df_mats[self.df_mats[defs.hedr_io_mats_mat]==material_name][defs.hedr_io_mats_dnsty].item()
-        # if math.isnan(density_this):
-        if vol_per_weight is not None and pd.isna(density_this):
-            raise ValueError(f"{self.__class__.__name__}.to_kilogram(): No density is assigned to the material \"{material_name}\".")
-        kg_this = 0.0
-        if equiv is not None:
-            mol_this = self.mol_sm * equiv
-            kg_this = mol_this * mw_this / (conc_assay_this/100.0) / 1000.0
-        elif vol_per_weight is not None:
-            #liq_volume_this = self.gross_kg_main_mat * vol_per_weight #unit = L
-            liq_volume_this = self.to_litre(vol_per_weight=vol_per_weight)
-            kg_this = liq_volume_this * density_this / (conc_assay_this/100.0)
-        else:
-            raise ValueError(f"{self.__class__.__name__}.to_kilogram(): Both equiv:float and vol_per_weight:folat arguments are \"None\". Either must be given.")
+    #     mw_this = self.df_mats[self.df_mats[defs.hedr_io_mats_mat]==material_name][defs.hedr_io_mats_mw].item()
+    #     # if math.isnan(mw_this):
+    #     if equiv is not None and pd.isna(mw_this):
+    #         raise ValueError(f"{self.__class__.__name__}.to_kilogram(): No molecular weight is assigned to the material \"{material_name}\".")
+    #     density_this = self.df_mats[self.df_mats[defs.hedr_io_mats_mat]==material_name][defs.hedr_io_mats_dnsty].item()
+    #     # if math.isnan(density_this):
+    #     if vol_per_weight is not None and pd.isna(density_this):
+    #         raise ValueError(f"{self.__class__.__name__}.to_kilogram(): No density is assigned to the material \"{material_name}\".")
+    #     kg_this = 0.0
+    #     if equiv is not None:
+    #         mol_this = self.mol_sm * equiv
+    #         kg_this = mol_this * mw_this / (conc_assay_this/100.0) / 1000.0
+    #     elif vol_per_weight is not None:
+    #         #liq_volume_this = self.gross_kg_main_mat * vol_per_weight #unit = L
+    #         liq_volume_this = self.to_litre(vol_per_weight=vol_per_weight)
+    #         kg_this = liq_volume_this * density_this / (conc_assay_this/100.0)
+    #     else:
+    #         raise ValueError(f"{self.__class__.__name__}.to_kilogram(): Both equiv:float and vol_per_weight:folat arguments are \"None\". Either must be given.")
         
-        return kg_this
+    #     return kg_this
 
     def to_litre(self, vol_per_weight:float = None) -> float:
         litre:float = None
@@ -242,41 +243,41 @@ class Materials(MaterialsTrait):
     @staticmethod
     def generate_mats_df()->pd.DataFrame:
         """
-        DataFrame generator for test. The header items of the new df is as follows.<br>
+        DataFrame generator for test. The header items of the new df are those in defs.list_hedr_mats_io:<br>
             defs.hedr_io_mats_mat<br>
-            defs.hedr_io_mats_main<br>
+            defs.hedr_io_mats_sm_tgt<br>
             defs.hedr_io_mats_mw<br>
             defs.hedr_io_mats_dnsty<br>
             defs.hedr_io_mats_concasy<br>
-            defs.hedr_io_mats_kgmain<br>
+            defs.hedr_io_mats_kg_sm<br>
             defs.hedr_io_mats_remark<br>
         """
-        hedr:list[str] = [defs.hedr_io_mats_mat,
-                          defs.hedr_io_mats_sm_tgt,
-                          defs.hedr_io_mats_mw,
-                          defs.hedr_io_mats_dnsty,
-                          defs.hedr_io_mats_concasy,
-                          defs.hedr_io_mats_kg_sm,
-                          defs.hedr_io_mats_remark]
-        empty_df: pd.DataFrame = pd.DataFrame(columns=hedr)
+        empty_df: pd.DataFrame = pd.DataFrame(columns=defs.list_hedr_mats_io)
         return empty_df
-    
+
 
     @staticmethod
     def add_to_mats_df(mats_df:pd.DataFrame = None,
                        material:str = None,
-                       main_star:bool = False,
+                       sm_tgt:str = None,
                        mw:float = None,
                        density:float = None,
                        conc_assay:float=None,
-                       kg_main:float=None,
+                       kg_sm:float=None,
                        remark:str=None)->pd.DataFrame:
-        star:str = None
-        if main_star:
-            star = desig_sm
-        else:
-            star = None
-        s:pd.Series = pd.Series(data=[material, star, mw, density, conc_assay, kg_main, remark],
+        """
+        Adds a material row to a DataFrame made by generate_mats_df() for test.
+
+        Parameters
+        -------------
+        sm_tgt: str
+            desig_sm for the starting material, desig_tgt for the target material, None for others.
+        kg_sm: float
+            Gross weight (kg) of the starting material. Necessary only for the starting material.
+        """
+        if sm_tgt not in (None, desig_sm, desig_tgt):
+            warnings.warn(f'Materials.add_to_mats_df(): "{sm_tgt}" for "{material}" is neither "{desig_sm}" nor "{desig_tgt}". It is put as it is.', UserWarning)
+        s:pd.Series = pd.Series(data=[material, sm_tgt, mw, density, conc_assay, kg_sm, remark],
                                 index=[defs.hedr_io_mats_mat,
                                        defs.hedr_io_mats_sm_tgt,
                                        defs.hedr_io_mats_mw,
@@ -284,8 +285,7 @@ class Materials(MaterialsTrait):
                                        defs.hedr_io_mats_concasy,
                                        defs.hedr_io_mats_kg_sm,
                                        defs.hedr_io_mats_remark])
-        mats_df = pd.concat([mats_df, s.to_frame().T])
-        mats_df.reset_index(inplace=True, drop=True)
+        mats_df = pd.concat([mats_df, s.to_frame().T], ignore_index=True)
         return mats_df
         
 

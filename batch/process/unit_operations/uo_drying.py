@@ -776,9 +776,8 @@ class Drying(uo.UnitOperation, uo_tag=defs.tag_uo_drying):
 
 
     
-    @classmethod
-    def generate_test_df(cls,
-                         precomment:str=None,
+    @staticmethod
+    def generate_test_df(precomment:str=None,
                          postcomment:str=None,
                          Tj_ctrl_cat:Literal["Tj_ctrl_spec", "Tj_ctrl_arbitrary", "Tj_ctrl_guide"]=None,
                          Tj_low:float=None,
@@ -819,9 +818,8 @@ class Drying(uo.UnitOperation, uo_tag=defs.tag_uo_drying):
 
         return df
     
-    @classmethod
-    def add_to_test_df(cls,
-                       df: pd.DataFrame=None,
+    @staticmethod
+    def add_to_test_df(df: pd.DataFrame=None,
                        test_cat:Literal["ipc", "monit_no_tgt", "monit_with_tgt", None]=None,
                        test_item:str=None,
                        test_val_tgt_criterion:float=None,

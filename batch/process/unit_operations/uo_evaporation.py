@@ -756,9 +756,8 @@ class Evaporation(uo.UnitOperation, uo_tag=defs.tag_uo_evap):
             self.flowsheet.put_line(record=dict_part_flow[tag_part_flow_rec_Ti_max])
             self.flowsheet.put_line(record=dict_part_flow[tag_part_flow_rec_Ti_end])
 
-    @classmethod
-    def generate_test_df(cls,
-                         precomment:str=None,
+    @staticmethod
+    def generate_test_df(precomment:str=None,
                          postcomment:str=None,
                          Tj_min:float=None,
                          Tj_max:float=None,
