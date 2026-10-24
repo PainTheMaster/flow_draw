@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Literal
+from typing import Literal, Any
 import json
 
 class JsonEntity(ABC):
@@ -69,7 +69,9 @@ class Array(JsonEntity):
 
         list_json_str.append('}')
         return list_json_str
-    
+    def asTypeNew(self)->dict[str,Any]:
+        pass
+
     def asEntity(self)->list[str]:
         list_json_str:list[str] = self.asType()
         list_json_str[0] =f'{self.json_literal(self.key)}:'+list_json_str[0]
@@ -254,6 +256,31 @@ class Primitive(JsonEntity):
                 list_json_str.append(f' "type": ["{self.prim_type}", "null"],')
             else:
                 list_json_str.append(f' "type":"{self.prim_type}",')
+
+        if self.enum is not None:
+            enum_values = ','.join(self.json_literal(item) for item in self.enum)
+            if self.nullable:
+                enum_values += ',null'
+            list_json_str.append(f' "enum":[{enum_values}],')
+
+        if self.const is not None:
+            list_json_str.append(f' "const":{self.json_literal(self.const)},')
+
+        list_json_str[-1]=list_json_str[-1].removesuffix(',')
+        list_json_str.append('}')
+        return list_json_str
+
+    def asTypeNew(self)->dict[str,Any]:
+        dict_this:dict[str:Any]={}
+
+        if self.description is not None:
+            # list_json_str.append(f' "description":{self.json_literal(self.description)},')
+            dict_this['"description"'] = f'"{self.description}"'
+
+        if self.nullable:
+            dict_this['"type"'] = [f'"{x}"' for x in self.prim_type] + ['"null"']
+        else:
+            dict_this['"type"'] = [f'"{x}"' for x in self.prim_type]
 
         if self.enum is not None:
             enum_values = ','.join(self.json_literal(item) for item in self.enum)
