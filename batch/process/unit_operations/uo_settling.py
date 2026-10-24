@@ -311,7 +311,7 @@ class Settling(uo.UnitOperation, uo_tag=defs.tag_uo_settling):
         self.Ti_max = json_dict.get(hedr_Ti_max, None)
 
     
-    def output_unit_operation(self):
+    def print_unit_operation(self):
         self.flowsheet.header_organizer(op_nr=self.operation_seq, title=lang_dict_uo_titles[self.uo_tag])
         if not (self.pre_comment == None or self.pre_comment == ''):
             self.flowsheet.put_body_comments(self.pre_comment)

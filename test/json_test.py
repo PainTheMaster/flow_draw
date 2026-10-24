@@ -820,7 +820,7 @@ class Test_21000_input_json(unittest.TestCase, trdef.GetMats):
         print(f'Ti_min: {self.settling_obj.Ti_min}')
         print(f'Ti_max: {self.settling_obj.Ti_max}')
 
-        self.settling_obj.output_unit_operation()
+        self.settling_obj.print_unit_operation()
         self.settling_obj.flowsheet.save(filename="settling_test_flowsheet.xlsx")
 
 

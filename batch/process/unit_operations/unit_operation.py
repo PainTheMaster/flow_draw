@@ -177,7 +177,7 @@ class UnitOperation(ABC):
         raise NotImplementedError()
 
     @abstractmethod
-    def output_unit_operation(self):
+    def print_unit_operation(self):
         """
         Outputs the items for the unit operation.
         Before calling this function, chem_data, flow_sheet, unit_operation, operation_seq must be set, and parameters must be loaded, normally by using load_from_df().

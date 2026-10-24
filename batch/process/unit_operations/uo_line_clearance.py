@@ -155,7 +155,7 @@ class LineClearance(uo.UnitOperation, uo_tag=defs.tag_uo_line_clearance):
         #self.sop = json_dict.get(key=hedr_sop, default='<placeholder>')        
         self.sop = json_dict.get(hedr_sop, '<placeholder>')
 
-    def output_unit_operation(self):
+    def print_unit_operation(self):
         self.flowsheet.header_organizer(op_nr=self.operation_seq, title=lang_dict_uo_titles[self.uo_tag])
         if not (self.pre_comment == None or self.pre_comment == ''):
             self.flowsheet.put_body_comments(self.pre_comment)

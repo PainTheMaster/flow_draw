@@ -35,7 +35,7 @@ from flow_draw.materials.materials import Materials as mats
 # from flow_draw.trait_def.trait_def import GetMats as GetMats
 # from flow_draw.trait_def.trait_def import GetProcName as GetProcName
 # from flow_draw.trait_def.trait_def import GetInputs as GetInputs
-from flow_draw.trait_def.trait_def import GetMats, GetProcName, GetInputs
+from flow_draw.trait_def.trait_def import GetMats, GetProcName, GetInputs, MaterialIn
 
 from flow_draw.data_io import json_io
 from flow_draw.data_io.json_io import JsonEntity, Array, Objason, Primitive
@@ -278,7 +278,7 @@ class Process(GetMats, GetProcName, GetInputs):
             self.seq_uo.append(new_uo_inst)
 
         for step in self.seq_uo:
-            step.output_unit_operation()
+            step.print_unit_operation()
 
         self.flowsheet.save(filename=self.process_name+".xlsx")
            
@@ -304,8 +304,8 @@ class Process(GetMats, GetProcName, GetInputs):
 
         self.list_inpts.clear()
         for step in self.seq_uo:
-            if isinstance(step, chgng.Charging):
-                self.list_inpts += step.list_inputs
+            if isinstance(step, MaterialIn):
+                self.list_inpts += step.get_list_inputs()
 
         self.__check_inpt_id_invalid()
 
@@ -326,7 +326,7 @@ class Process(GetMats, GetProcName, GetInputs):
             raise RuntimeError(f'{self.__class__.__name__}.interprit_dict(): Quantity calculation did not converge within {num_max_iter_calc_qty} iterations.')
 
         for step in self.seq_uo:
-            step.output_unit_operation()
+            step.print_unit_operation()
 
         # self.flowsheet.put_material(mat_input=input_tgt)
         input_tgt.put_material()

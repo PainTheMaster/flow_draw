@@ -251,7 +251,7 @@ class Transfer(uo.UnitOperation, uo_tag=defs.tag_uo_transfer):
     def get_detail_option_menu(self) -> Optional[dict[str, list[str]]]:
         return dict_drop_down
     
-    def output_unit_operation(self):
+    def print_unit_operation(self):
         custom_uo_title:str = None
         if self.operation == opt_operation_transfer:
             custom_uo_title = dict_component[tag_part_flow_uo_title_transfer]

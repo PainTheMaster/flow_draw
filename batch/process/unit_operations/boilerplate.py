@@ -150,7 +150,7 @@ class ClassName(uo.UnitOperation, uo_tag=defs.tag_uo_"UO_NAME"):
         super().load_from_json_dict(json_dict)
         pass
 
-    def output_unit_operation(self):
+    def print_unit_operation(self):
         self.flowsheet.header_organizer(op_nr=self.operation_seq, title=lang_dict_uo_titles[self.uo_tag])
         if not (self.pre_comment == None or self.pre_comment == ''):
             self.flowsheet.put_body_comments(self.pre_comment)

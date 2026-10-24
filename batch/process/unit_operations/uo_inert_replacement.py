@@ -201,7 +201,7 @@ class InertReplacement(uo.UnitOperation, uo_tag=defs.tag_uo_inert_replace):
         self.neg_pressure = json_dict.get(hedr_neg_pres, -0.08)
         self.num_repeat = json_dict.get(hedr_num_repeat, 2)
 
-    def output_unit_operation(self):
+    def print_unit_operation(self):
         self.flowsheet.header_organizer(op_nr=self.operation_seq, title=lang_dict_uo_titles[self.uo_tag])
         if not (self.pre_comment == None or self.pre_comment == ''):
             self.flowsheet.put_body_comments(self.pre_comment)

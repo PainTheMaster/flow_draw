@@ -10,7 +10,7 @@ from flow_draw.materials import materials as mats
 # if TYPE_CHECKING:
 from flow_draw.data_io.flowsheet import Flowsheet
 # import flow_draw.data_io.flowsheet as fsht
-from flow_draw.trait_def.trait_def import GetMats, GetInputs
+from flow_draw.trait_def.trait_def import GetMats, GetInputs, MaterialIn
 from flow_draw.data_io.json_io import Objason, Primitive, Array
 from flow_draw.batch.process.unit_operations.material_input import Input  # Input and its constants; kept importable as chgng.<name> for existing callers
 
@@ -50,7 +50,7 @@ arry_inputs_json = 'arr_charging_input_entry'
 lang_dict_uo_titles = defs.dict_jp_part_uo_titles
 
 
-class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
+class Charging(uo.UnitOperation, MaterialIn, uo_tag=defs.tag_uo_charging):
     """
     TODO: Make some comment here.
     """
@@ -68,7 +68,7 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
         self.mats_data: mats.Materials = None
         if caller is not None:
             self.mats_data = (self.caller).get_mats()
-        self.input_count = 0
+        # self.input_count = 0
         self.list_inputs: list[Input] = []
 
         #self.output_unit_operation()
@@ -99,7 +99,7 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
             #each line of the df = each input material, now, the Material instance is unique in terms of the content.
             new_input.load_params_from_series(subitem)
             self.list_inputs.append(new_input)
-            self.input_count += 1
+            # self.input_count += 1
 
     @staticmethod
     def get_json_schema(caller: GetMats=None)-> Objason:
@@ -120,14 +120,15 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
 
     def load_from_json_dict(self, json_dict: dict[str, any]):
         super().load_from_json_dict(json_dict=json_dict)
+        self.list_inputs.clear()
         arr_input: list[dict[str, str|float]] = json_dict[arry_inputs_json]
         for single_input in arr_input:
             new_input = Input(get_mats=self.caller, get_inputs=self.caller, flowsheet=self.flowsheet)
             new_input.load_from_json_dict(json_dict=single_input)
             self.list_inputs.append(new_input)
-            self.input_count += 1
+            # self.input_count += 1
 
-    def output_unit_operation(self):
+    def print_unit_operation(self):
         #TODO: Leave explanatory comments here.
         self.flowsheet.header_organizer(op_nr=self.operation_seq, title=lang_dict_uo_titles[self.uo_tag])
         if not (self.pre_comment == None or self.pre_comment == ''):
@@ -139,3 +140,6 @@ class Charging(uo.UnitOperation, uo_tag=defs.tag_uo_charging):
         if not (self.post_comment == None or self.post_comment == ''):
             self.flowsheet.put_body_comments(self.post_comment)
             self.flowsheet.linefeed()
+
+    def get_list_inputs(self) -> list[Input]:
+        return self.list_inputs

@@ -550,7 +550,7 @@ class Evaporation(uo.UnitOperation, uo_tag=defs.tag_uo_evap):
     def get_detail_option_menu(self) -> Optional[dict[str, list[str]]]:
         return dict_opt
     
-    def output_unit_operation(self):
+    def print_unit_operation(self):
         self.flowsheet.header_organizer(op_nr=self.operation_seq, title=lang_dict_uo_titles[self.uo_tag])
         if not (self.pre_comment == None or self.pre_comment == ''):
             self.flowsheet.put_body_comments(self.pre_comment)

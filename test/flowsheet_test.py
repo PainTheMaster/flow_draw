@@ -43,7 +43,7 @@ class SaltyWaterFlow(unittest.TestCase):
                                     edit_comment="put salt and water")
         tst_proc.seq_uo.append(tst_chgng)
         tst_proc.seq_uo[0].load_params_from_df(SetChgngForSaltWater())
-        tst_proc.seq_uo[0].output_unit_operation()
+        tst_proc.seq_uo[0].print_unit_operation()
         tst_proc.flowsheet.save("test000_SaltWaterOutputFlow.xlsx")
         self.assertTrue(True)
 
@@ -166,7 +166,7 @@ class UnitOperationOutputTest(unittest.TestCase):
         uo_instance.pre_comment='Test 1001 precomment\nTest1001 additional precomment (line-2)'
         uo_instance.num_lines = 0
         uo_instance.post_comment='Test 1001 postcomment'
-        uo_instance.output_unit_operation()
+        uo_instance.print_unit_operation()
         sheet.save(filename='Test1001_flowsheet_out.xlsx')
         self.assertTrue(True)
 
@@ -174,7 +174,7 @@ class UnitOperationOutputTest(unittest.TestCase):
         sheet = fsht.Flowsheet()
         uo_instance = lnclnc.LineClearance(flowsheet=sheet, operation_seq=2)
         uo_instance.sop = "TEST SOP"
-        uo_instance.output_unit_operation()
+        uo_instance.print_unit_operation()
         sheet.save(filename='Test1002_flowsheet_out.xlsx')
         self.assertTrue(True)
 
@@ -200,7 +200,7 @@ class UnitOperationOutputTest(unittest.TestCase):
         uo_instance.Tj_limit_high = 30.0
         uo_instance.Tj_limit_low = 0.0
 
-        uo_instance.output_unit_operation()
+        uo_instance.print_unit_operation()
         sheet.save(filename="Test1004_temp_prog_mode.xlsx")
         self.assertTrue(True)
 
@@ -224,7 +224,7 @@ class UnitOperationOutputTest(unittest.TestCase):
 
         print(uo_module.list_unit_ops)
 
-        uo_instance.output_unit_operation()
+        uo_instance.print_unit_operation()
         sheet.save(filename="Test1005_temp_TiTj_mode.xlsx")
         self.assertTrue(True)
         
@@ -247,7 +247,7 @@ class UnitOperationOutputTest(unittest.TestCase):
 
         # print(uo_module.list_unit_ops)
 
-        uo_instance.output_unit_operation()
+        uo_instance.print_unit_operation()
         sheet.save(filename="Test1006_tempr_Tj_mode.xlsx")
         self.assertTrue(True)
 
@@ -271,7 +271,7 @@ class UnitOperationOutputTest(unittest.TestCase):
 
         # print(uo_module.list_unit_ops)
 
-        uo_instance.output_unit_operation()
+        uo_instance.print_unit_operation()
         sheet.save(filename="Test1007_tempr_Ti_mode.xlsx")
         self.assertTrue(True)
 
@@ -289,7 +289,7 @@ class UnitOperationOutputTest(unittest.TestCase):
 
         print(uo_module.list_unit_ops)
 
-        uo_instance.output_unit_operation()
+        uo_instance.print_unit_operation()
         sheet.save(filename="Test1008_agitation_full.xlsx")
         self.assertTrue(True)
 
@@ -301,7 +301,7 @@ class UnitOperationOutputTest(unittest.TestCase):
 
         print(uo_module.list_unit_ops)
 
-        uo_instance.output_unit_operation()
+        uo_instance.print_unit_operation()
         sheet.save(filename="Test1009_agitation_minimal.xlsx")
         self.assertTrue(True)
 
@@ -317,7 +317,7 @@ class UnitOperationOutputTest(unittest.TestCase):
 
         print(uo_module.list_unit_ops)
 
-        uo_instance.output_unit_operation()
+        uo_instance.print_unit_operation()
         sheet.save(filename="Test1010_settling_full.xlsx")
         self.assertTrue(True)
 
@@ -327,7 +327,7 @@ class UnitOperationOutputTest(unittest.TestCase):
 
         print(uo_module.list_unit_ops)
 
-        uo_instance.output_unit_operation()
+        uo_instance.print_unit_operation()
         sheet.save(filename="Test1011_settling_minimal.xlsx")
         self.assertTrue(True)
     
@@ -343,7 +343,7 @@ class UnitOperationOutputTest(unittest.TestCase):
 
         print(uo_module.list_unit_ops)
 
-        uo_instance.output_unit_operation()
+        uo_instance.print_unit_operation()
         sheet.save(filename="Test1012_phase_disch_full.xlsx")
         self.assertTrue(True)
 
@@ -357,7 +357,7 @@ class UnitOperationOutputTest(unittest.TestCase):
 
         print(uo_module.list_unit_ops)
 
-        uo_instance.output_unit_operation()
+        uo_instance.print_unit_operation()
         sheet.save(filename="Test1013_phase_disch_med.xlsx")
         self.assertTrue(True)
 
@@ -368,7 +368,7 @@ class UnitOperationOutputTest(unittest.TestCase):
 
         print(uo_module.list_unit_ops)
 
-        uo_instance.output_unit_operation()
+        uo_instance.print_unit_operation()
         sheet.save(filename="Test1014_phase_disch_minimal.xlsx")
         self.assertTrue(True)
 
@@ -443,7 +443,7 @@ class AgitationTest2000(unittest.TestCase, trdef.GetMats):
                                                           num_subitems=1,
                                                           edit_comment=None)
         evap_instance.load_params_from_df(df=test_df)
-        evap_instance.output_unit_operation()
+        evap_instance.print_unit_operation()
         self.sheet.save("Test_2000_evap_flowsheet.xlsx")
         self.assertTrue(True)
 
@@ -538,7 +538,7 @@ class AgitationTest2000(unittest.TestCase, trdef.GetMats):
         # self.sheet.save("Test_2001_evap_flowsheet.xlsx")
         evap_instance.load_params_from_df(df=test_df)
         with self.assertRaises(expected_exception=ValueError):
-            evap_instance.output_unit_operation()
+            evap_instance.print_unit_operation()
 
 
     def test_2004_minimum_datasets(self):
@@ -566,7 +566,7 @@ class AgitationTest2000(unittest.TestCase, trdef.GetMats):
                                                           num_subitems=1,
                                                           edit_comment=None)
         evap_instance.load_params_from_df(df=test_df)
-        evap_instance.output_unit_operation()
+        evap_instance.print_unit_operation()
         self.sheet.save("Test_2004_evap_flowsheet.xlsx")
         self.assertTrue(True)
 
@@ -626,7 +626,7 @@ class CIPTest3000(unittest.TestCase, trdef.GetMats):
                                        num_subitems=2,
                                        edit_comment=None)
         cip_instance.load_params_from_df(df=test_df)
-        cip_instance.output_unit_operation()
+        cip_instance.print_unit_operation()
         self.sheet.save("Test_3000_cip_flowsheet.xlsx")
         self.assertTrue(True)
 
@@ -650,7 +650,7 @@ class CIPTest3000(unittest.TestCase, trdef.GetMats):
                                        num_subitems=2,
                                        edit_comment=None)
         cip_instance.load_params_from_df(df=test_df)
-        cip_instance.output_unit_operation()
+        cip_instance.print_unit_operation()
         self.sheet.save("Test_3001_cip_flowsheet.xlsx")
         self.assertTrue(True)
 
@@ -685,8 +685,8 @@ class TransfTest4100(unittest.TestCase, trdef.UniversalTrait):
                                                    filter="Transf test filt")
         test_inst_2.load_params_from_df(test_df_2)
 
-        test_inst_1.output_unit_operation()
-        test_inst_2.output_unit_operation()
+        test_inst_1.print_unit_operation()
+        test_inst_2.print_unit_operation()
         self.flowsheet.save("Test_4100_setup_transf_fullset.xlsx")
         self.assertTrue(True)
     
@@ -713,8 +713,8 @@ class TransfTest4100(unittest.TestCase, trdef.UniversalTrait):
                                                    filter="Transf test filt")
         test_inst_2.load_params_from_df(test_df_2)
 
-        test_inst_1.output_unit_operation()
-        test_inst_2.output_unit_operation()
+        test_inst_1.print_unit_operation()
+        test_inst_2.print_unit_operation()
         self.flowsheet.save("Test_4101_setup_transf_no_via.xlsx")
         self.assertTrue(True)
 
@@ -744,8 +744,8 @@ class TransfTest4100(unittest.TestCase, trdef.UniversalTrait):
                                                 )
         test_inst_2.load_params_from_df(test_df_2)
 
-        test_inst_1.output_unit_operation()
-        test_inst_2.output_unit_operation()
+        test_inst_1.print_unit_operation()
+        test_inst_2.print_unit_operation()
         self.flowsheet.save("Test_4102_setup_transf_minimum.xlsx")
         self.assertTrue(True)
 
@@ -803,7 +803,7 @@ class FiltTest4200(unittest.TestCase, trdef.UniversalTrait):
                                               P_unit=filt.opt_hedr_press_kPa,
                                               integ_test=filt.opt_integ_test_yes)
         test_inst.load_params_from_df(df)
-        test_inst.output_unit_operation()
+        test_inst.print_unit_operation()
         self.flowsheet.save("Test_4201_filt_full.xlsx")
         self.assertTrue(True)
 
@@ -819,7 +819,7 @@ class FiltTest4200(unittest.TestCase, trdef.UniversalTrait):
                                               P_unit=filt.opt_hedr_press_kPa,
                                               integ_test=filt.opt_integ_test_yes)
         test_inst.load_params_from_df(df)
-        test_inst.output_unit_operation()
+        test_inst.print_unit_operation()
         self.flowsheet.save("Test_4202_filt_p_max.xlsx")
         self.assertTrue(True)
 
@@ -835,7 +835,7 @@ class FiltTest4200(unittest.TestCase, trdef.UniversalTrait):
                                             #   P_unit=filt.opt_hedr_press_kPa,
                                             #   integ_test=filt.opt_integ_test_yes)
         test_inst.load_params_from_df(df)
-        test_inst.output_unit_operation()
+        test_inst.print_unit_operation()
         self.flowsheet.save("Test_4203_filt_minimum.xlsx")
         self.assertTrue(True)
 
@@ -903,7 +903,7 @@ class SamplingTest4300(unittest.TestCase, trdef.UniversalTrait):
                                        monit_rec_units="%\n",
                                        sample_comment="This is a comment for sample test 4301-2.")
         test_inst.load_params_from_df(df=df)
-        test_inst.output_unit_operation()
+        test_inst.print_unit_operation()
         self.flowsheet.save("Test_4301_sampling_full.xlsx")
         self.assertTrue(True)
 
@@ -919,7 +919,7 @@ class SamplingTest4300(unittest.TestCase, trdef.UniversalTrait):
                                               ipc_rec_units="%",
                                               sample_comment="This is a comment for sample test 4302.")
         test_inst.load_params_from_df(df=df)
-        test_inst.output_unit_operation()
+        test_inst.print_unit_operation()
         self.flowsheet.save("Test_4302_ipc_only.xlsx")
         self.assertTrue(True)
     
@@ -935,7 +935,7 @@ class SamplingTest4300(unittest.TestCase, trdef.UniversalTrait):
                                               monit_rec_units="",
                                               sample_comment="This is a comment for sample test 4303.")
         test_inst.load_params_from_df(df=df)
-        test_inst.output_unit_operation()
+        test_inst.print_unit_operation()
         self.flowsheet.save("Test_4303_monit_only.xlsx")
         self.assertTrue(True)
 
@@ -1032,7 +1032,7 @@ class FiltSetupTest4400(unittest.TestCase, trdef.UniversalTrait):
                                               time_leak_test = "10",
                                               unit_press='MPa')
         test_inst.load_params_from_df(df)
-        test_inst.output_unit_operation()
+        test_inst.print_unit_operation()
         self.flowsheet.save("Test_4400_filt_setup_full.xlsx")
         self.assertTrue(True)
 
@@ -1096,7 +1096,7 @@ class DryingTest4500(unittest.TestCase, trdef.GetProcName):
                                      test_item="pH")
 
         test_inst.load_params_from_df(df)
-        test_inst.output_unit_operation()
+        test_inst.print_unit_operation()
         self.flowsheet.save("Test_4500_drying_full.xlsx")
         self.assertTrue(True)
 
@@ -1121,7 +1121,7 @@ class AllocTest4600(unittest.TestCase, trdef.GetProcName):
                                 operation_seq=1,
                                 num_subitems=1,
                                 edit_comment="This is a comment for test 4600.")
-        test_inst.output_unit_operation()
+        test_inst.print_unit_operation()
         self.flowsheet.save("Test_4600_alloc_full.xlsx")
         self.assertTrue(True)
 
@@ -1149,7 +1149,7 @@ class TareTest4700(unittest.TestCase, trdef.GetProcName):
                                    num_pkg=5,
                                    postcomment="This is a post-comment for test 4700.")
         test_inst.load_params_from_df(df)
-        test_inst.output_unit_operation()
+        test_inst.print_unit_operation()
         self.flowsheet.save("Test_4700_tare_full.xlsx")
         self.assertTrue(True)
 

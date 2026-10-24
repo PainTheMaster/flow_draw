@@ -257,3 +257,9 @@ class GetInputs(UniversalTrait):
             This shall be a float representing the target stoichiometry of the process.
         """
         pass
+
+class MaterialIn(ABC):
+    @abstractmethod
+    def get_list_inputs(self) -> list[type[InputTrait]]:
+        pass
+    

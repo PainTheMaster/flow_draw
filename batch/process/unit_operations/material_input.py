@@ -548,8 +548,8 @@ class Input(InputTrait):
             self.conc_assay = self.mats_data.get_conc_assay(self.material_name)
             if self.material_name == self.mats_data.get_name_sm():
                 self.material_class = cls_input_mat_sm
-            elif self.material_name == self.mats_data.get_name_tgt():
-                self.material_class = cls_input_mat_tgt
+            # elif self.material_name == self.mats_data.get_name_tgt():
+            #     self.material_class = cls_input_mat_tgt
             else:
                 self.material_class = cls_input_mat_other
 

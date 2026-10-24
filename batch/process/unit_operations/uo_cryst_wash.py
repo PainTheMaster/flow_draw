@@ -10,7 +10,7 @@ from flow_draw.batch.process.unit_operations import unit_operation as uo
 from flow_draw.data_io import process_io as procio
 from flow_draw.materials import materials as mats
 from flow_draw.trait_def import trait_def as trdef
-from flow_draw.trait_def.trait_def import GetMats, GetInputs
+from flow_draw.trait_def.trait_def import GetMats, GetInputs, MaterialIn
 import flow_draw.batch.process.unit_operations.material_input as matin
 from flow_draw.batch.process.unit_operations.material_input import Input
 #from flow_draw.trait_def.trait_def import GetMats
@@ -49,7 +49,7 @@ hedr_equipment:str = 'Equipment'
 """Header item for the equipment used in the crystallization washing unit operation."""
 
 # """Header item for the vessels via which the solvent is added."""
-hedr_mode_washing = 'Crystal_Washiing_Mode'
+hedr_mode_washing = 'Crystal_Washing_Mode'
 """Header item for the crystal washing mode."""
 hedr_duration_washing_minutes:str = 'Washing_Duration_minutes'
 """Header item for the duration of the crystal washing."""
@@ -106,18 +106,22 @@ Language dictionary for common parts.
     tag_flow_cmn_time_unit_hour : part_flow_cmn_time_unit_hour
 """
 
-tag_part_rec_qty_input:str = "tag_input_qty"
-"""The key to a flowsheet part: the input quantity of washing solvent."""
-tag_part_rec_qty_lot:str = 'tag_lot'
-"""The key to a flowsheet part: the lot number of the input material."""
-tag_part_rec_id_balance:str = "tag_balance_id"
-"""The key to a flowsheet part: the ID of the balance."""
-tag_part_rec_id_cntnr:str = "tag_container_id"
-"""The key to a flowsheet part: the ID of the container of the input material."""
-tag_part_rec_hose:str = "tag_hose_id"
-"""The key to a flowsheet part: the hose of the input material."""
+# tag_part_rec_qty_input:str = "tag_input_qty"
+# """The key to a flowsheet part: the input quantity of washing solvent."""
+# tag_part_rec_qty_lot:str = 'tag_lot'
+# """The key to a flowsheet part: the lot number of the input material."""
+# tag_part_rec_id_balance:str = "tag_balance_id"
+# """The key to a flowsheet part: the ID of the balance."""
+# tag_part_rec_id_cntnr:str = "tag_container_id"
+# """The key to a flowsheet part: the ID of the container of the input material."""
+# tag_part_rec_hose:str = "tag_hose_id"
+# """The key to a flowsheet part: the hose of the input material."""
+tag_part_val_equipment_plchldr:str = "tag_placeholder_equipment"
+"""The key to a flowsheet part: placeholder for equipment."""
 tag_part_val_agit_rate_arbit:str = "tag_opt_agit_rate_arbit"
 """The key to a flowsheet part: arbitrary agitation rate."""
+tag_part_val_agit_time_plchldr:str = "tag_placeholder_washing_time"
+"""The key to a flowsheet part: placeholder for washing time."""
 tag_part_unit_agit_rpm:str = "tag_unit_agit_rpm"
 """The key to a flowsheet part: rpm, an unit of agitation rate."""
 tag_part_mthd_reslurry:str = "tag_method_reslurry"
@@ -130,42 +134,64 @@ tag_part_cntnt_instr_obs:str = "tag_content_instr_observation"
 """The key to a flowsheet part: instruction for observation during agitation."""
 tag_part_cntnt_instr_init_agit:str = "tag_content_instr_init_agit"
 """The key to a flowsheet part: instruction to start agitation."""
+tag_part_cntnt_instr_init_soaking:str = "tag_content_instr_init_soaking"
+"""The key to a flowsheet part: instruction to start soaking."""
+tag_part_cntnt_instr_init_displwash:str = "tag_content_instr_init_displacement_washing"
+"""The key to a flowsheet part: instruction to start displacement washing."""
 tag_part_cntnt_instr_end_agit:str = "tag_content_instr_end_agit"
 """The key to a flowsheet part: instruction to stop agitation."""
+tag_part_cntnt_instr_end_soaking:str = "tag_content_instr_end_soaking"
+"""The key to a flowsheet part: instruction to stop soaking."""
+tag_part_cntnt_instr_end_displwash:str = "tag_content_instr_end_displacemet_washing"
+"""The key to a flowsheet part: instruction to stop displacement washing."""
 tag_part_cntnt_instr_displ_wash:str = 'tag_content_instr_displacementwash'
 """The key to a flowsheet part: instruction to carry out displacement washing."""
-tag_part_rec_rech_agit_complt:str = "tag_reach_agit_complt"
+tag_part_rec_check_wash_ini:str = "tag_reach_agit_complt"
 """The key to a flowsheet part: record field component. Check box to record the completion of agitation."""
-
+tag_part_rec_rot_rate:str = "tag_rec_agitation_rpm"
+"""The key to a flowsheet part: record field for agitation rate"""
 
 tag_stc_cntnt_instr_reslurry:str = "tag_stc_instr_reslurry"
-"""The key to a flowsheet sentence template: instruction for reslurry. Includes place holders "{time_val}" and "{time_unit}". """
+"""The key to a flowsheet sentence template: instruction for reslurry. Includes place holders "{time_value}" and "{time_unit}". """
 tag_stc_cntnt_instr_soaking: str = 'tag_stc_instr_soaking'
-"""The key to a flowsheet sentence template: instruction for soaking. Includes place holders "{time_val}" and "{time_unit}". """
+"""The key to a flowsheet sentence template: instruction for soaking. Includes place holders "{time_value}" and "{time_unit}". """
 tag_stc_cntnt_agit_rate:str = "tag_stc_agit_rate"
 """The key to a flowsheet sentence template: instruction for agitation rate. Includes place holders "{rot_value}" and "{rot_unit}". """
 tag_stc_rec_agit_duration:str = "tag_stc_agit_duration"
 """The key to a flowsheet sentence template: record field for agitation duration. Includes a place holder "{time_unit}". """
+tag_stc_rec_soaking_duration:str = 'tag_stc_soak_duration'
+"""The key to a flowsheet sentence template: record field for soaking duration. Includes a place holder "{time_unit}". """
+tag_stc_rec_displ_duration:str = 'tag_stc_displwash_duration'
+"""The key to a flowsheet sentence template: record field for dislwash duration. Includes a place holder "{time_unit}". """
 
-
-dict_parts_stcs_jp = {tag_part_rec_qty_input : '仕込み量__________kg',
-                      tag_part_rec_qty_lot : 'ロット番号__________',
-                      tag_part_rec_id_balance : '秤量器ID__________',
-                      tag_part_rec_id_cntnr : '容器ID__________',
-                      tag_part_rec_hose: 'フレキID__________',
+dict_parts_stcs_jp = {# tag_part_rec_qty_input : '仕込み量__________kg',
+                    #   tag_part_rec_qty_lot : 'ロット番号__________',
+                    #   tag_part_rec_id_balance : '秤量器ID__________',
+                    #   tag_part_rec_id_cntnr : '容器ID__________',
+                    #   tag_part_rec_hose: 'フレキID__________',
+                      tag_part_val_equipment_plchldr : '<placeholder: 機器>',
                       tag_part_val_agit_rate_arbit: '現場調整',
+                      tag_part_val_agit_time_plchldr : '<placeholder: 攪拌時間>',
                       tag_part_unit_agit_rpm: 'rpm',
                       tag_part_mthd_reslurry : '懸濁攪拌',
                       tag_part_mthd_soaking : '浸漬洗浄',
-                      tag_part_mthd_displ_wash : 'かけ洗い',                      tag_part_cntnt_instr_obs : 'FD内の状態を確認しながら操作すること',
+                      tag_part_mthd_displ_wash : 'かけ洗い',                      
+                      tag_part_cntnt_instr_obs : 'FD内の状態を確認しながら操作すること',
                       tag_part_cntnt_instr_displ_wash: '洗浄溶媒を供給してかけ洗いする。',
                       tag_part_cntnt_instr_init_agit : '攪拌開始',
+                      tag_part_cntnt_instr_init_soaking: '浸漬開始',
+                      tag_part_cntnt_instr_init_displwash: 'かけ洗い開始',
                       tag_part_cntnt_instr_end_agit : '攪拌終了',
-                      tag_part_rec_rech_agit_complt : '□ 実施確認',
-                      tag_stc_cntnt_instr_reslurry :'最下端まで攪拌しながら掘り下げ後{time_val}{time_unit}以上攪拌して攪拌翼を最上端まで上げて次ステップに移行する。',
-                      tag_stc_cntnt_instr_soaking : 'ケークを{time_val}{time_unit}以上、洗浄溶媒に浸漬して次のステップに移行する。',
+                      tag_part_cntnt_instr_end_soaking : '浸漬終了',
+                      tag_part_cntnt_instr_end_displwash: 'かけ洗い終了',
+                      tag_part_rec_check_wash_ini : '□ 洗浄開始',
+                      tag_part_rec_rot_rate : '回転数:__________rpm',
+                      tag_stc_cntnt_instr_reslurry :'最下端まで攪拌しながら掘り下げ後{time_value}{time_unit}以上攪拌して攪拌翼を最上端まで上げて次ステップに移行する。',
+                      tag_stc_cntnt_instr_soaking : 'ケークを{time_value}{time_unit}以上、洗浄溶媒に浸漬して次のステップに移行する。',
                       tag_stc_cntnt_agit_rate : '攪拌数: {rot_value}{rot_unit}',
-                      tag_stc_rec_agit_duration : '攪拌時間:__________{time_unit}'}
+                      tag_stc_rec_agit_duration : '攪拌時間:__________{time_unit}',
+                      tag_stc_rec_soaking_duration: '浸漬時間:__________{time_unit}',
+                      tag_stc_rec_displ_duration: 'かけ洗い時間:__________{time_unit}'}
 
 dict_parts_stcs = dict_parts_stcs_jp
 
@@ -186,7 +212,7 @@ dict_parts_stcs = dict_parts_stcs_jp
 # output_unit_operation(self)
 #
 #########################################################
-class CrystWashing(uo.UnitOperation, uo_tag=defs.tag_uo_reslurry):
+class CrystWashing(uo.UnitOperation, MaterialIn, uo_tag=defs.tag_uo_cryst_wash):
     def __init__(self,
                  caller: GetMats|GetInputs =None,
                  flowsheet:fsht.Flowsheet=None, 
@@ -195,6 +221,8 @@ class CrystWashing(uo.UnitOperation, uo_tag=defs.tag_uo_reslurry):
                  edit_comment:str=None):
         super().__init__(caller=caller, flowsheet=flowsheet, operation_seq=operation_seq, num_subitems=num_subitems, edit_comment=edit_comment)
         # self.buffer_tank:list[str] = []
+        if caller is None:
+            raise ValueError(f'{self.__class__.__name__}._init_: "caller: GetMats|GetInputs"is required')
         self.mats_data = caller.get_mats()
         self.equipment:str = None
         self.mode_washing:str = None
@@ -261,7 +289,10 @@ class CrystWashing(uo.UnitOperation, uo_tag=defs.tag_uo_reslurry):
                         required=True)
         agitation_rpm = Primitive(prim_type='number',
                         key=hedr_agitation_rpm,
-                        description='Agitation speed in revolutions per minute during the crystal washing operation.',
+                        description='Agitation speed in revolutions per minute during the crystal washing operation. '
+                        f'This property is read if "{hedr_mode_washing}"=="{opt_washmode_reslurry}", but nullable. '
+                        'In that case, if a specific vale cannot be extracted from the data source, please put null. The user will take a necessary action. '
+                        f'If other options are chosen for "{hedr_mode_washing}", this property will be ignored.',
                         nullable=True,
                         required=True)
         input_entry = Input.get_json_schema(caller=caller)
@@ -280,11 +311,15 @@ class CrystWashing(uo.UnitOperation, uo_tag=defs.tag_uo_reslurry):
 
     def load_from_json_dict(self, json_dict: dict[str, Any]):
         super().load_from_json_dict(json_dict)
-        self.equipment = json_dict.get(key=hedr_equipment, default=None)
-        self.mode_washing = json_dict.get(key=hedr_mode_washing, default=None)
-        self.duration_washing_minutes = json_dict.get(key=hedr_duration_washing_minutes, default=None)
-        self.rpm_agit = json_dict.get(key=hedr_agitation_rpm, default=None)
-        solvents_json = json_dict.get(key=key_arr_solvent_json, default=None)
+        self.equipment = json_dict.get(hedr_equipment, None)
+        if not self.equipment:
+            self.equipment = dict_parts_stcs[tag_part_val_equipment_plchldr]
+        self.mode_washing = json_dict.get(hedr_mode_washing, None)
+        self.duration_washing_minutes = json_dict.get(hedr_duration_washing_minutes, None)
+        self.rpm_agit = json_dict.get(hedr_agitation_rpm, None)
+
+        self.arr_inputs.clear()
+        solvents_json = json_dict.get(key_arr_solvent_json, None)
         if solvents_json is None:
             solvents_json = []
         for solvent in solvents_json:
@@ -301,14 +336,99 @@ class CrystWashing(uo.UnitOperation, uo_tag=defs.tag_uo_reslurry):
 
 
 
-    def output_unit_operation(self):
+    def print_unit_operation(self):
+
+        def print_reslurry():
+            time_unit = lang_dict_cmn[tag_flow_cmn_time_unit_minute]
+        
+            if isinstance(self.duration_washing_minutes, (int, float)) and not isinstance(self.duration_washing_minutes, bool):
+                duration = self.duration_washing_minutes
+            else:
+                duration = dict_parts_stcs[tag_part_val_agit_time_plchldr]
+            stc_instr = dict_parts_stcs[tag_stc_cntnt_instr_reslurry].format(time_value=duration, time_unit=time_unit)
+            if isinstance(self.rpm_agit, (int, float)) and not isinstance(self.rpm_agit, bool):
+                stc_rot = dict_parts_stcs[tag_stc_cntnt_agit_rate].format(rot_value=self.rpm_agit, rot_unit=' '+dict_parts_stcs[tag_part_unit_agit_rpm])
+            else:
+                stc_rot = dict_parts_stcs[tag_stc_cntnt_agit_rate].format(rot_value=dict_parts_stcs[tag_part_val_agit_rate_arbit], rot_unit='')
+            self.flowsheet.put_line(content=stc_instr)
+            self.flowsheet.put_line(content=stc_rot,
+                                    record=dict_parts_stcs[tag_part_rec_rot_rate])
+            self.flowsheet.put_line(content=dict_parts_stcs[tag_part_cntnt_instr_obs])
+            self.flowsheet.linefeed()
+            self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
+                                    method=dict_parts_stcs[tag_part_mthd_reslurry],
+                                    content=dict_parts_stcs[tag_part_cntnt_instr_init_agit],
+                                    record=dict_parts_stcs[tag_part_rec_check_wash_ini],
+                                    operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
+                                    witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
+            self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
+                                    content=dict_parts_stcs[tag_part_cntnt_instr_end_agit],
+                                    record=dict_parts_stcs[tag_stc_rec_agit_duration].format(time_unit=time_unit),
+                                    operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
+                                    witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
+
+        def print_soaking():
+            time_unit = lang_dict_cmn[tag_flow_cmn_time_unit_minute]
+        
+            if isinstance(self.duration_washing_minutes, (int, float)) and not isinstance(self.duration_washing_minutes, bool):
+                duration = self.duration_washing_minutes
+            else:
+                duration = dict_parts_stcs[tag_part_val_agit_time_plchldr]
+            stc_instr = dict_parts_stcs[tag_stc_cntnt_instr_soaking].format(time_value=duration, time_unit=time_unit)
+            self.flowsheet.put_line(content=stc_instr)
+            self.flowsheet.put_line(content=dict_parts_stcs[tag_part_cntnt_instr_obs])
+            self.flowsheet.linefeed()
+            self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
+                                    method=dict_parts_stcs[tag_part_mthd_soaking],
+                                    content=dict_parts_stcs[tag_part_cntnt_instr_init_soaking],
+                                    record=dict_parts_stcs[tag_part_rec_check_wash_ini],
+                                    operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
+                                    witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
+            self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
+                                    content=dict_parts_stcs[tag_part_cntnt_instr_end_soaking],
+                                    record=dict_parts_stcs[tag_stc_rec_soaking_duration].format(time_unit=time_unit),
+                                    operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
+                                    witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
+
+        def print_diplwash():
+            time_unit = lang_dict_cmn[tag_flow_cmn_time_unit_minute]
+                    
+            self.flowsheet.put_line(content=dict_parts_stcs[tag_part_cntnt_instr_displ_wash])
+            self.flowsheet.put_line(content=dict_parts_stcs[tag_part_cntnt_instr_obs])
+            self.flowsheet.linefeed()
+            self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
+                                    method=dict_parts_stcs[tag_part_mthd_displ_wash],
+                                    content=dict_parts_stcs[tag_part_cntnt_instr_init_displwash],
+                                    record=dict_parts_stcs[tag_part_rec_check_wash_ini],
+                                    operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
+                                    witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
+            self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
+                                    content=dict_parts_stcs[tag_part_cntnt_instr_end_displwash],
+                                    record=dict_parts_stcs[tag_stc_rec_displ_duration].format(time_unit=time_unit),
+                                    operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
+                                    witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
+                
+
+
+        ################################################################################################
+        ################################################################################################
+
         self.flowsheet.header_organizer(op_nr=self.operation_seq, title=lang_dict_uo_titles[self.uo_tag])
         if not (self.pre_comment == None or self.pre_comment == ''):
             self.flowsheet.put_body_comments(self.pre_comment)
             self.flowsheet.linefeed()        
-
         for input_item in self.arr_inputs:
             input_item.print_input()
+        self.flowsheet.linefeed()
+
+        if self.mode_washing == opt_washmode_reslurry:
+            print_reslurry()
+        elif self.mode_washing == opt_washmode_soak:
+            print_soaking()
+        elif self.mode_washing == opt_washmode_displacement:
+            print_diplwash()
+        else:
+            print_soaking()
 
         if not (self.post_comment == None or self.post_comment == ''):
             self.flowsheet.put_body_comments(self.post_comment)
@@ -340,3 +460,6 @@ class CrystWashing(uo.UnitOperation, uo_tag=defs.tag_uo_reslurry):
         df.loc[row]=new_row
         df.at[row, HEADER_ITEM]=PARAMETER
         ...
+
+    def get_list_inputs(self) -> list[Input]:
+        return self.arr_inputs

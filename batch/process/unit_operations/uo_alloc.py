@@ -182,7 +182,7 @@ class Alloc(uo.UnitOperation, uo_tag=defs.tag_uo_alloc):
         self.prod_cell = json_dict.get(hedr_cell, '<placeholder: location>')
         self.op_resouce = json_dict.get(hedr_op_resource, '<placeholder: equipment>')
 
-    def output_unit_operation(self):
+    def print_unit_operation(self):
         op_resource = f'{self.prod_cell}\n{self.op_resouce}'
         self.flowsheet.header_organizer(op_nr=dict_parts[tag_number], title=op_resource)
 
