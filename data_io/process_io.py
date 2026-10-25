@@ -19,7 +19,7 @@ import base64
 import dotenv
 from openai import OpenAI
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import Any, List, Optional
 import pdf2image
 from pathlib import Path
 
@@ -474,7 +474,7 @@ class ProcessIO:
 
 
 
-    def json_uo(self, caller:trdef.UniversalTrait, list_uo: list[type[uo.UnitOperation]])->dict[str, any]:
+    def json_uo(self, caller:trdef.UniversalTrait, list_uo: list[type[uo.UnitOperation]])->dict[str, Any]:
         
         list_json_str:list[str] = []
         
