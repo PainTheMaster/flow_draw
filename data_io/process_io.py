@@ -476,50 +476,74 @@ class ProcessIO:
 
     def json_uo(self, caller:trdef.UniversalTrait, list_uo: list[type[uo.UnitOperation]])->dict[str, Any]:
         
-        list_json_str:list[str] = []
-        
-        list_json_str.append('{')
+        # list_json_str:list[str] = []
+        dict_this:dict[str, Any] = {}
+      
+        # list_json_str.append('{')
         # list_json_str.append(' "$schema": "https://json-schema.org/draft/2020-12/schema",')
         # temp_title = f'{self.process_name}'
         # list_json_str.append(f' "title": "{temp_title}",')
-        temp_descr = f'Unit operation sequence for process \\\"{self.process_name}\\\"'
-        list_json_str.append(f' "description": "{temp_descr}",')
-        list_json_str.append(' "type":"object",')
-        list_json_str.append(' "properties":{')
-        list_json_str.append(f'  "{defs.json_key_arr_uo_params}":{{')
-        list_json_str.append('   "type":"array",')
-        list_json_str.append('   "items":{')
-        list_json_str.append('    "anyOf": [')
-        
-        for uo_cls in list_uo:
-            temp_entry = f'     {{"$ref":"#/$defs/{uo_cls.uo_tag}"}},'
-            list_json_str.append(temp_entry)
-        list_json_str[-1] = list_json_str[-1].removesuffix(',')
-        
-        list_json_str.append('    ]') #corresponds to "anyOf":[
-        list_json_str.append('   }')  #corresponds to "items":{
-        list_json_str.append('  }') #corresponds to "<key_for_arrary>":{
-        list_json_str.append(' },')  #corresponds to "properties":{
-        list_json_str.append(f' "required":["{defs.json_key_arr_uo_params}"],')
-        list_json_str.append(' "additionalProperties":false,')
-        list_json_str.append(' "$defs":{')
-        for uo_cls in list_uo:
-            objson_uo:Objason = uo_cls.get_json_schema(caller)
-            arr_str_objason = objson_uo.asEntity()
-            for line in arr_str_objason:
-                list_json_str.append('  '+line)
-            list_json_str[-1] = list_json_str[-1]+','
-        list_json_str[-1] = list_json_str[-1].removesuffix(',')
 
-        list_json_str.append(' }') #corresponds to "$defs":{
-        list_json_str.append('}')  #corresponds to outer-most {
+        # temp_descr = f'Unit operation sequence for process \\\"{self.process_name}\\\"'
+        # list_json_str.append(f' "description": "{temp_descr}",')
+        dict_this['description'] = f'Unit operation sequence for process "{self.process_name}"'
+
+        # list_json_str.append(' "type":"object",')
+        dict_this['type']='object'
+
+        # list_json_str.append(' "properties":{')
+        # list_json_str.append(f'  "{defs.json_key_arr_uo_params}":{{')
+        # list_json_str.append('   "type":"array",')
+        # list_json_str.append('   "items":{')
+        # list_json_str.append('    "anyOf": [')
+        # for uo_cls in list_uo:
+        #     temp_entry = f'     {{"$ref":"#/$defs/{uo_cls.uo_tag}"}},'
+        #     list_json_str.append(temp_entry)
+        # list_json_str[-1] = list_json_str[-1].removesuffix(',')
+
+        dict_this['properties'] = {
+            defs.json_key_arr_uo_params : {
+                'type':'array',
+                'items':{
+                    'anyOf':[{'$ref':f'#/$defs/{uo_cls.uo_tag}'} for uo_cls in list_uo]
+                }
+            }
+        }
+
+        # list_json_str.append('    ]') #corresponds to "anyOf":[
+        # list_json_str.append('   }')  #corresponds to "items":{
+        # list_json_str.append('  }') #corresponds to "<key_for_arrary>":{
+        # list_json_str.append(' },')  #corresponds to "properties":{
+        
+        # list_json_str.append(f' "required":["{defs.json_key_arr_uo_params}"],')
+        dict_this['required']=[defs.json_key_arr_uo_params]
+
+        # list_json_str.append(' "additionalProperties":false,')
+        dict_this['additionalProperties'] = False
+
+        # list_json_str.append(' "$defs":{')
+        # for uo_cls in list_uo:
+        #     objson_uo:Objason = uo_cls.get_json_schema(caller)
+        #     arr_str_objason = objson_uo.asEntity()
+        #     for line in arr_str_objason:
+        #         list_json_str.append('  '+line)
+        #     list_json_str[-1] = list_json_str[-1]+','
+        # list_json_str[-1] = list_json_str[-1].removesuffix(',')
+
+        dict_this['$defs'] ={k:v for k,v in [uo_cls.get_json_schema(caller=caller).as_dict() for uo_cls in list_uo]}
+        
+
+        # list_json_str.append(' }') #corresponds to "$defs":{
+        # list_json_str.append('}')  #corresponds to outer-most {
 
         # for line in list_json_str:
         #     print(line)
 
-        single_str_json = '\n'.join(list_json_str)
-        return json.loads(single_str_json)
 
+        # single_str_json = '\n'.join(list_json_str)
+        # return json.loads(single_str_json)
+
+        return dict_this
 
     def ai_load_process_details(self, caller: trdef.GetMats=None,  list_uo: list[type[uo.UnitOperation]]=[]) -> list[dict[str, any]]:
         filename_input = self.process_name+'.pdf'
