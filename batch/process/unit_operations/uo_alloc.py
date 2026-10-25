@@ -165,16 +165,16 @@ class Alloc(uo.UnitOperation, uo_tag=defs.tag_uo_alloc):
                               'If no information is provided in the document or from the user, please put "<placeholder: location>".')
         prim_op_resource = Primitive(prim_type='string',
                                 key=hedr_op_resource,
-                                description='A property to specify an operation resoruce, such as a reactor, filter dryer, jet mill, etc. I.e., equipment. '
+                                description='A property to specify an operation resource, such as a reactor, filter dryer, jet mill, etc. I.e., a piece of equipment. '
                                 'If no information is provided in the document or from the user, please put "<placeholder: equipment>"')
         alloc_obj = Objason(key=Alloc.uo_tag,
                             props=common_schema+[prim_prod_cell, prim_op_resource],
-                            description='This class is for allocation of an operation resource for prodcution operation. '
-                            'Normamally, an operation resource can be specified by a comination of a production cell (a room in a facility) and the name of a piece of equimpent. '
-                            'At least an instace of this object is necessary at the top of the sequence of unit operations. '
-                            'Other than the beginning of the sequence, this object shall typicall appear when the process solution is transferred to another reactor, '
+                            description='This class is for allocation of an operation resource for production activity and so on, on the shop floor. '
+                            'Normally, an operation resource can be specified by a combination of a production cell (a room in a facility) and the name of a piece of equipment. '
+                            'At least an instance of this object is necessary at the top of the sequence of unit operations. '
+                            'Other than the beginning of the sequence, this object shall typically appear when the process solution is transferred to another reactor '
                             'or when a new stage of the process, such as filtration, begins. '
-                            'In a narrower meaning, this is not a unit operation on the shop floor. Thus, please do not try to assign a operation sequnce (number) to this object.')
+                            'In a narrower meaning, this per-se is not a unit operation. Thus, please do not try to assign a operation sequence (number) to this object.')
         return alloc_obj
 
     def load_from_json_dict(self, json_dict: dict[str, any]):
@@ -184,8 +184,9 @@ class Alloc(uo.UnitOperation, uo_tag=defs.tag_uo_alloc):
 
     def print_unit_operation(self):
         op_resource = f'{self.prod_cell}\n{self.op_resouce}'
-        self.flowsheet.header_organizer(op_nr=dict_parts[tag_number], title=op_resource)
-
+        # self.flowsheet.header_organizer(op_nr=dict_parts[tag_number], title=op_resource)
+        self.flowsheet.allocator_header_organizer(title=self.op_resouce)
+        
         if not (self.pre_comment == None or self.pre_comment == ''):
             self.flowsheet.put_body_comments(self.pre_comment)
             self.flowsheet.linefeed()        

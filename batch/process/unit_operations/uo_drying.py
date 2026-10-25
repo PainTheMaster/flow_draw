@@ -464,7 +464,7 @@ class Drying(uo.UnitOperation, uo_tag=defs.tag_uo_drying):
         Tbr_high:Primitive = Primitive(prim_type="number",
                                        key=hedr_Tbr_high,
                                        description=f'The upper limit of the condenser brine temperature. '
-                                       f'Nullable if not specified in the data source. The unit is in degree Celsius.'
+                                       f'Nullable if not specified in the data source. The unit is in degree Celsius. '
                                        f'If a guideline value is given as a single point, please put it in both "{hedr_Tbr_low}" and "{hedr_Tbr_high}".',
                                        nullable=True,
                                        required=True)

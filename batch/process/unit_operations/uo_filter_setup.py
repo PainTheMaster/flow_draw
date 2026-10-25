@@ -74,7 +74,7 @@ list_hedr:list[str]=[hedr_equip,
 # UO-specific options, list, header_item: list dictionry thereof (for data input and internalsignaling)
 #########################################################
 
-list_opt_press_unit: list[str] = [defs.opt_press_kPa, defs.opt_press_MPa]
+list_opt_press_unit: list[str] = [defs.opt_press_kPaG, defs.opt_press_MPaG]
 
 dict_opt = {hedr_press_unit: list_opt_press_unit}
 
@@ -299,7 +299,7 @@ class FiltSetup(uo.UnitOperation, uo_tag=defs.tag_uo_filt_setup):
         press_drop_leak_test = Primitive(prim_type='number',
                                           key = hedr_press_drop_leak_test,
                                           description = 'Pressure drop criterion for the leak test. '
-                                              'This is a mandatory property of the object. If the necessary information is not found in the given flowsheet, please put 0.02 (MPa) as the default.',
+                                              'This is a mandatory property of the object. If the necessary information is not found in the given flowsheet, please put 0.02 (MPaG) as the default.',
                                           nullable = False)
         time_leak_test = Primitive(prim_type='number',
                                    key = hedr_time_leak_test,
@@ -309,7 +309,7 @@ class FiltSetup(uo.UnitOperation, uo_tag=defs.tag_uo_filt_setup):
         unit_press = Primitive(prim_type='string',
                                key = hedr_press_unit,
                                enum = list_opt_press_unit,
-                               description = f'Unit for the leak test pressure. If the necessary information is not found in the given flowsheet, please select "{defs.opt_press_MPa}" as the default value.',
+                               description = f'Unit for the leak test pressure. If the necessary information is not found in the given flowsheet, please select "{defs.opt_press_MPaG}" as the default value.',
                                nullable = False)
         obj_filt_setup = Objason(key = FiltSetup.uo_tag,
                                 props = common_schema+[equip_id, typ_filt_cloth, num_filt_cloth, typ_bag_filt, press_leak_test, press_drop_leak_test, time_leak_test, unit_press],
@@ -373,7 +373,7 @@ class FiltSetup(uo.UnitOperation, uo_tag=defs.tag_uo_filt_setup):
                          press_leak_test:float=None,
                          press_drop_leak_test:float=None,
                          time_leak_test:float=None,
-                         unit_press:Literal['kPa', 'MPa', None]= None)->pd.DataFrame:
+                         unit_press:Literal['kPaG', 'MPaG', None]= None)->pd.DataFrame:
         hedr:list[str] = defs.list_hedr_cmn_io_dtil + list_hedr
         content: list[any] = [None]*len(hedr)
         s:pd.Series = pd.Series(data=content, index=hedr)

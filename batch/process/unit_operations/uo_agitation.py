@@ -426,9 +426,10 @@ class Agitation(uo.UnitOperation, uo_tag=defs.tag_uo_agitation):
         json_agitation = Objason(#key=defs.tag_uo_agitation,
                                  key=Agitation.uo_tag,
                                  props=list_cmn+[spec_agit, rpm, ti_min, ti_max, time_min, time_max, time_unit, dissolution_check],
-                                 description='This is the object to store information for an unit operation of "agitation" extracted from the source.'\
+                                 description='This is the object to store information for an unit operation of "agitation" extracted from the source. '
                                     '"agitation" is an unit operation where a solution/reaction mixture/slurry is agitated. '
-                                    f'If controlled heating/cooling (temperature ramp-up/down) is required, please consider prioritising "{defs.tag_uo_tempr_ctrl}" over this unit operation.',
+                                    f'If controlled heating/cooling (temperature ramp-up/down) is the main purpose, please consider prioritising "{defs.tag_uo_tempr_ctrl}" over this unit operation. '
+                                    f'If agitation is for the sake of washing the product/intermediate crystal or amourpoush, pelase consider applying "{defs.tag_uo_cryst_wash}" instead of this.',
                                  required=False)
         return json_agitation
         

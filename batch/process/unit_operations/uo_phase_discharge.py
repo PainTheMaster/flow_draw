@@ -201,7 +201,7 @@ class PhaseDisch(uo.UnitOperation, uo_tag=defs.tag_uo_phase_disch):
                         required = True)
         single_destin = Primitive(prim_type='string',
                                   key=key_json_single_destin,
-                                  description='Destination of the discharged process liquid. E.g., waste tank, etc.'
+                                  description='Destination of the discharged process liquid. E.g., waste tank, etc. '
                                   'Multiple destinations are allowed, as well as a sole destination. '
                                   'If not specified in the data source, please put <placeholder>.',
                                   nullable=False,

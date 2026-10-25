@@ -277,7 +277,7 @@ class Sampling(uo.UnitOperation, uo_tag=defs.tag_uo_sampling):
                                           description='The name of a sample.')
         sample_cat:Primitive=Primitive(prim_type='string',
                                        key=hedr_sampling_cat,
-                                       description=f'Category of the sample.'\
+                                       description=f'Category of the sample. '\
                                         f'"{opt_sampling_cat_ipc}" stands for in-process control with a must-satisfied criterion before moving to the next step. '\
                                         f'"{opt_sampling_cat_monit}" is sampling for technical information. Normally, not with a criterion. '\
                                         f'"{opt_sampling_cat_both}" is for both in-process control and monitoring. One or more analytical items are for decision making, whereas the other are just for info.',
@@ -286,9 +286,9 @@ class Sampling(uo.UnitOperation, uo_tag=defs.tag_uo_sampling):
         #以下、モニタリング
         monit_item_name = Primitive(prim_type='string',
                                     key=hedr_monit_item_high,
-                                    description=f'A monitoring item. This items is applicable to sampling categories of "{opt_sampling_cat_monit}" and "{opt_sampling_cat_both}". '\
-                                        'This is more a high-level identifier, such as purity, residual solvent, etc. '\
-                                        'instead of concrete names such as this impurity, that impurity, or this solvent... '\
+                                    description=f'A monitoring item. This item is applicable to sampling categories of "{opt_sampling_cat_monit}" and "{opt_sampling_cat_both}". '
+                                        'This is more a high-level identifier, such as purity, residual solvent, etc. '
+                                        'instead of concrete names such as this impurity, that impurity, or this solvent... '
                                         'if a right name cannot be read from the source, please put <placeholder>.')
         monit_item = Primitive(prim_type='string',
                                    key=hedr_monit_rec_items,
@@ -313,7 +313,7 @@ class Sampling(uo.UnitOperation, uo_tag=defs.tag_uo_sampling):
         
         arr_monit_items = Array(key=key_json_arr_monit_items,
                                 content=pair_monit,
-                                description=f'An array of pairing object of monitoring item and unit for it. This is linked to "{hedr_monit_item_high}" elsewhere on a higher leve.',
+                                description=f'An array of pairing object of monitoring item and unit for it. This is linked to "{hedr_monit_item_high}" elsewhere on a higher level.',
                                 required=True,
                                 nullable=True)
         obj_monit = Objason(key=key_json_obj_monit,
@@ -354,7 +354,7 @@ class Sampling(uo.UnitOperation, uo_tag=defs.tag_uo_sampling):
                             content=single_sample,
                             description="An array of samples belonging to one sampling block and the necessary monitoring and/or IPC requirements associated with them. "
                             "Please make replicate entries for each sample if multiple samples are appropriate in the same sampling block. "
-                            "For example if multiple samples in a certain time interval are anticipated."
+                            "For example if multiple samples in a certain time interval are anticipated. "
                             "For instance in more details, if sampling at 1, 2, 3...n hours is instructed, "
                             "n sampling objects shall be included in the array, each with the same or different monitoring and/or IPC requirements.",
                             required=True,

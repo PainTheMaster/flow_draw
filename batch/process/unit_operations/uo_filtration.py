@@ -67,11 +67,11 @@ list_hedr = [hedr_equip,
 # UO-specific options, list, header_item: list dictionry thereof (for data input and internalsignaling)
 #########################################################
 
-opt_hedr_press_kPa = defs.opt_press_kPa
+opt_hedr_press_kPaG = defs.opt_press_kPaG
 """option for the deader item for hedr_unit_press: kPa"""
-opt_hedr_press_MPa = defs.opt_press_MPa
+opt_hedr_press_MPaG = defs.opt_press_MPaG
 """option for the deader item for hedr_unit_press: MPa"""
-list_opt_unit_press = [opt_hedr_press_kPa, opt_hedr_press_MPa]
+list_opt_unit_press = [opt_hedr_press_kPaG, opt_hedr_press_MPaG]
 """list of options for the heder item hedr_unit_press"""
 
 opt_integ_test_yes = defs.opt_yes
@@ -259,7 +259,7 @@ class Filtration(uo.UnitOperation, uo_tag=defs.tag_uo_filt):
                               nullable=True)
         press_max = Primitive(prim_type = 'number',
                               key = hedr_press_max,
-                              description = 'Please designate the maximum pressure for the filtration operation. This property is optional and nullable.'
+                              description = 'Please designate the maximum pressure for the filtration operation. This property is optional and nullable. '
                               'Please follow the information on the given flowsheet',
                               nullable=True)
         press_unit = Primitive(prim_type='string',
@@ -277,8 +277,8 @@ class Filtration(uo.UnitOperation, uo_tag=defs.tag_uo_filt):
                                'Normally, only once is sufficient for a series of consecutive filtration-related unit operations with the filtration device.')
         obj_filtration = Objason(key=Filtration.uo_tag,
                                  props=cmn_schema + [filt_device, temp_jacket, press_min, press_max, press_unit, integ_test],
-                                 description='This object describes the filtration operation to obtain product crystals or to remove large amount of insoluble byproducts in the process liquid.'
-                                 f'To remove a small amount of partticulate matter, please choose a unit operation of "{defs.tag_uo_transfer}" for polishing filtration during transfer.')
+                                 description='This object describes the filtration operation to obtain product crystals or to remove large amount of insoluble byproducts in the process liquid. '
+                                 f'To remove a small amount of particulate matter, please choose a unit operation of "{defs.tag_uo_transfer}" for polishing filtration during transfer.')
         return obj_filtration
         
     def load_from_json_dict(self, json_dict):
@@ -371,7 +371,7 @@ class Filtration(uo.UnitOperation, uo_tag=defs.tag_uo_filt):
         if self.unit_press is not None:
             temp_press_unit = self.unit_press
         else:
-            temp_press_unit = opt_hedr_press_MPa
+            temp_press_unit = opt_hedr_press_MPaG
 
         self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
                                 method=dict_flowsheet_comp[tag_part_flow_method_instr_start],

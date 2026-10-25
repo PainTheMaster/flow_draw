@@ -120,7 +120,7 @@ opt_mtrcs_eq = "equiv"
 opt_mtrcs_v_per_w = "v/w"
 opt_mtrcs_wwpct = "w/w%"
 opt_mtrcs_wt_gro_abs = 'wt_gross_abs_kg'
-opt_mtrcs_vol_abs = 'vol_abs_kg'
+opt_mtrcs_vol_abs = 'vol_abs_litre'
 #list below
 list_metrics_unit = [opt_mtrcs_eq, opt_mtrcs_v_per_w, opt_mtrcs_wwpct, opt_mtrcs_wt_gro_abs, opt_mtrcs_vol_abs]
 
@@ -467,7 +467,7 @@ class Input(InputTrait):
                             required = True)
         qty_mats = Primitive(prim_type="number",
                              key=hedr_metrics_value,
-                             description=f'Relative quantity of the raw material, solvent, and other materials. This object is for the value only.'
+                             description=f'Relative quantity of the raw material, solvent, and other materials. This object is for the value only. '
                              f'The unit is selected in another entry. '
                              'As a special case, if this instance is one of the split charges of the starting material (the key building block), please put the fraction of the total quantity. '
                              f'For example, if the starting material is split into three charges, each charge should have a relative quantity of 0.333 {opt_mtrcs_eq}. '
@@ -498,9 +498,9 @@ class Input(InputTrait):
                                         f'"{method_shower}" is charging solvents by using a showering device in the reaction vessel to clean adhered solid material on the wall. '
                                         f'"{method_press}" is preferred for solvents and liquid reagents less than 10 liters. The liquid material is put in a container under some pressure. '
                                         f'The liquid is transferred to the reaction vessel at a controlled rate. '
-                                        f'"{method_mobile_tank}" is choses when a large volume of liquid, e.g. two-digit liters of solvent, needs to be measured and charged. '
+                                        f'"{method_mobile_tank}" is chosen when a large volume of liquid, e.g. two-digit liters of solvent, needs to be measured and charged. '
                                         f'"{method_pow}" is for solid material. A solid material is charged through an opening on the top of the reactor. '
-                                        'As a special case, slurry of crystal seed is charged by this method.'
+                                        'As a special case, slurry of crystal seed is charged by this method. '
                                         f'If you can\'t choose the right option, please select "{method_placeholder}"')
         
         vessel = Primitive(prim_type='string',
@@ -520,7 +520,7 @@ class Input(InputTrait):
                               key=hedr_time_control,
                               enum=list_time_control,
                               description=f'Constraint on time to dose/charge the material. '
-                                f'"{timectrl_none}" means time control is no needed. '
+                                f'"{timectrl_none}" means time control is not needed. '
                                 f'"{timectrl_min}" should be selected when lower limit must be complied. '
                                 f'"{timectrl_max}" should be selected when upper limit must be complied. '
                                 f'"{timectrl_min_max}" should be selected when the event has to happen in a specific range of time. '
@@ -544,18 +544,18 @@ class Input(InputTrait):
                               f'"{temprctrl_min}" is selected when the lower limit is set for the dosing/charging. '
                               f'"{temprctrl_max}" is selected when the upper limit is set for the dosing/charging. '
                               f'"{temprctrl_min_max}" is for a case where the charging/dosing have to take place in a certain specific temperature range. '
-                              f'Please select "{temprctrl_placeholder}" if the right option cannot be chosen based on the given infomation.',
+                              f'Please select "{temprctrl_placeholder}" if the right option cannot be chosen based on the given information.',
                               required=True)
         
         temp_min = Primitive(prim_type='number',
                              key=hedr_temp_min,
-                             description= f'An optional lower limit for internal temperature during dosing/charging.'
+                             description= f'An optional lower limit for internal temperature during dosing/charging. '
                              f'This is necessary if "{hedr_temp_control}" is "{temprctrl_min}" or "{temprctrl_min_max}". Nullable, otherwise.',
                              nullable=True,
                              required=True)
         temp_max = Primitive(prim_type='number',
                              key=hedr_temp_max,
-                             description=f'An optional upper limit for internal temperature during dosing/charging.'
+                             description=f'An optional upper limit for internal temperature during dosing/charging. '
                              f'This is necessary if "{hedr_temp_control}" is "{temprctrl_max}" or "{temprctrl_min_max}". Nullable, otherwise.',
                              nullable=True,
                              required=True)

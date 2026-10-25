@@ -27,14 +27,12 @@ import flow_draw.batch.process.unit_operations.uo_drying as drying
 import flow_draw.batch.process.unit_operations.uo_transfer as xfer
 import flow_draw.batch.process.unit_operations.uo_settling as stl
 import flow_draw.batch.process.unit_operations.uo_tare as tare
+import flow_draw.batch.process.unit_operations.uo_cryst_wash as wash
 
 from flow_draw.data_io import process_io as proc_io
 from flow_draw.data_io import flowsheet as fsht
 from flow_draw.materials.materials import Materials as mats
 
-# from flow_draw.trait_def.trait_def import GetMats as GetMats
-# from flow_draw.trait_def.trait_def import GetProcName as GetProcName
-# from flow_draw.trait_def.trait_def import GetInputs as GetInputs
 from flow_draw.trait_def.trait_def import GetMats, GetProcName, GetInputs, MaterialReceiver
 
 from flow_draw.data_io import json_io
@@ -57,6 +55,7 @@ list_uo_common: list[type[uo.UnitOperation]] = [chgng.Charging,
                                                  alloc.Alloc,
                                                  stl.Settling,
                                                  tare.Tare,
+                                                 wash.CrystWashing
                                                 ]
 
 
@@ -129,7 +128,6 @@ class Process(GetMats, GetProcName, GetInputs):
         
 
 
-    #TODO: Let the InputForm class create the summary input form.
     def generate_summary_mats_input_form(self):
         """
         This function generates forms for <b>process summary</b> and <b>material data</b> by calling ProcessIO.generate_proc_summary_form() and ProcessIO.generate_mats_form(). The forms are saved as sheets in the Excel file.
@@ -247,9 +245,6 @@ class Process(GetMats, GetProcName, GetInputs):
                                    f"detail table: {temp_detail[defs.hedr_cmn_io_dtil_uo].iloc[0]}")
                 
 
-    #TODO Let's implement self.prep_uo() to create a list of unit operations to be ready to receive detail data.
-
-
     def generate_proc_json(self):
         list_uo = list_uo_common
         json_dict = self.data_io.json_uo(caller=self, list_uo=list_uo)
@@ -261,8 +256,6 @@ class Process(GetMats, GetProcName, GetInputs):
     
 
     def ai_load_process_details(self):
-        # self.load_materials_data()
-        #lit_uo = list(unitop.registry_uo_cls.values())
         #TODO: Please replace list_uo with the real one before release.
         list_uo: list[type[uo.UnitOperation]] = list_uo_common
         arr_steps = self.data_io.ai_load_process_details(caller=self, list_uo=list_uo)
@@ -283,7 +276,6 @@ class Process(GetMats, GetProcName, GetInputs):
         self.flowsheet.save(filename=self.process_name+".xlsx")
            
     def interpret_dict(self, json_dict: dict[str, any]):
-        # list_uo: list[type[uo.UnitOperation]] = list_uo_common
         self.seq_uo.clear()
         self.flowsheet = fsht.Flowsheet()
 
@@ -413,13 +405,3 @@ class Process(GetMats, GetProcName, GetInputs):
         if any(x is None or x < 0 for x in ids):
             raise RuntimeError(f'{self.__class__.__name__}.__check_inputs_id_invalid():\n'
                                            f'Invalid {matinp.id_input_json}: An ID for input must be a non-negative integer.')
-
-
-@dataclass
-class Dependency:
-    name:str
-    list_id:list[int]
-    input_class:str
-    mol:float
-    wt_kg_gross:float
-    conc_assay:float

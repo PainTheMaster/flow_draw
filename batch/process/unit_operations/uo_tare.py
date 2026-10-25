@@ -210,19 +210,19 @@ class Tare(uo.UnitOperation, uo_tag=defs.tag_uo_tare_pkg):
         common_schema:list[Primitive] = Tare.json_common()
         pkg_location = Primitive(prim_type='string',
                                  key=hedr_location,
-                                 description='Place where the pacaging material(s) is tared. E.g, an isolator. If not specified in the data source, null is acceptable.',
+                                 description='Place where the packaging material(s) is tared. E.g, an isolator. If not specified in the data source, null is acceptable.',
                                  nullable=True,
                                  required=True)
         pkg_mat = Primitive(prim_type='string',
                              key=hedr_pkg,
                              enum=list_opt_pkg,
-                             description = f'Packaging material. Mandatory and non-nullable field. If no information is proviced, pelase select "{opt_pkg_plchldr}". ',
+                             description = f'Packaging material. Mandatory and non-nullable field. If no information is provided, please select "{opt_pkg_plchldr}". ',
                              nullable = False,
                              required = True)
         num_pkg = Primitive(prim_type='integer',
                             key=hedr_num_pkg,
                             description='Number of packaging materials. Depending on the amount/volume of the product/intermediate and the capacity of the packaging material, '
-                            'multiple pieces of mackaging materials is necessary. If no data is provided in the document, please put 1 as the default value.',
+                            'multiple pieces of packaging material are necessary. If no data is provided in the document, please put 1 as the default value.',
                             nullable=None,
                             required=True)
         obj_tare = Objason(key=Tare.uo_tag,

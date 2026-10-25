@@ -9,7 +9,6 @@ import flow_draw.definitions as defs
 import flow_draw.materials.materials as mats
 from openpyxl.worksheet.worksheet import Worksheet
 from openpyxl.worksheet.datavalidation import DataValidation
-#from typing import List, Dict
 import flow_draw.trait_def.trait_def as trdef
 import flow_draw.batch.process.unit_operations.unit_operation as uo
 
@@ -117,8 +116,6 @@ class ProcessIO:
         self.mats_ws: Worksheet = None
         self.title_detail_ws:str = process_name+suffix_detail_input_ws
         self.detail_ws: Worksheet = None
-        #self.__manage_io() #load from a file if exist, create otherwise.
-        #TODO Placing __manage_io() here is not appropriate. This shall be done just before read/write actions.
         self.df_summary: pd.DataFrame = None #To be loaded later by a triger. 
         self._current_line_summary:int = 1
         self._current_line_mats:int = 1
@@ -475,32 +472,10 @@ class ProcessIO:
 
 
     def json_uo(self, caller:trdef.UniversalTrait, list_uo: list[type[uo.UnitOperation]])->dict[str, Any]:
-        
-        # list_json_str:list[str] = []
         dict_this:dict[str, Any] = {}
       
-        # list_json_str.append('{')
-        # list_json_str.append(' "$schema": "https://json-schema.org/draft/2020-12/schema",')
-        # temp_title = f'{self.process_name}'
-        # list_json_str.append(f' "title": "{temp_title}",')
-
-        # temp_descr = f'Unit operation sequence for process \\\"{self.process_name}\\\"'
-        # list_json_str.append(f' "description": "{temp_descr}",')
         dict_this['description'] = f'Unit operation sequence for process "{self.process_name}"'
-
-        # list_json_str.append(' "type":"object",')
         dict_this['type']='object'
-
-        # list_json_str.append(' "properties":{')
-        # list_json_str.append(f'  "{defs.json_key_arr_uo_params}":{{')
-        # list_json_str.append('   "type":"array",')
-        # list_json_str.append('   "items":{')
-        # list_json_str.append('    "anyOf": [')
-        # for uo_cls in list_uo:
-        #     temp_entry = f'     {{"$ref":"#/$defs/{uo_cls.uo_tag}"}},'
-        #     list_json_str.append(temp_entry)
-        # list_json_str[-1] = list_json_str[-1].removesuffix(',')
-
         dict_this['properties'] = {
             defs.json_key_arr_uo_params : {
                 'type':'array',
@@ -509,39 +484,9 @@ class ProcessIO:
                 }
             }
         }
-
-        # list_json_str.append('    ]') #corresponds to "anyOf":[
-        # list_json_str.append('   }')  #corresponds to "items":{
-        # list_json_str.append('  }') #corresponds to "<key_for_arrary>":{
-        # list_json_str.append(' },')  #corresponds to "properties":{
-        
-        # list_json_str.append(f' "required":["{defs.json_key_arr_uo_params}"],')
         dict_this['required']=[defs.json_key_arr_uo_params]
-
-        # list_json_str.append(' "additionalProperties":false,')
         dict_this['additionalProperties'] = False
-
-        # list_json_str.append(' "$defs":{')
-        # for uo_cls in list_uo:
-        #     objson_uo:Objason = uo_cls.get_json_schema(caller)
-        #     arr_str_objason = objson_uo.asEntity()
-        #     for line in arr_str_objason:
-        #         list_json_str.append('  '+line)
-        #     list_json_str[-1] = list_json_str[-1]+','
-        # list_json_str[-1] = list_json_str[-1].removesuffix(',')
-
         dict_this['$defs'] ={k:v for k,v in [uo_cls.get_json_schema(caller=caller).as_dict() for uo_cls in list_uo]}
-        
-
-        # list_json_str.append(' }') #corresponds to "$defs":{
-        # list_json_str.append('}')  #corresponds to outer-most {
-
-        # for line in list_json_str:
-        #     print(line)
-
-
-        # single_str_json = '\n'.join(list_json_str)
-        # return json.loads(single_str_json)
 
         return dict_this
 

@@ -367,13 +367,13 @@ class TransferTest4100(FlowsheetTestBase):
 class FiltrationTest4200(FlowsheetTestBase):
     def test_4201_full(self):
         df = filt.Filtration.generate_test_df(equipment="test_4201_FD", Tj=25, P_min=100, P_max=100,
-                                              P_unit=filt.opt_hedr_press_kPa, integ_test=filt.opt_integ_test_yes)
+                                              P_unit=filt.opt_hedr_press_kPaG, integ_test=filt.opt_integ_test_yes)
         self.add_uo(filt.Filtration, df)
         self.output()
 
     def test_4202_p_max_only(self):
         df = filt.Filtration.generate_test_df(equipment="test_4202_FD", Tj=25, P_max=100,
-                                              P_unit=filt.opt_hedr_press_kPa, integ_test=filt.opt_integ_test_yes)
+                                              P_unit=filt.opt_hedr_press_kPaG, integ_test=filt.opt_integ_test_yes)
         self.add_uo(filt.Filtration, df)
         self.output()
 
@@ -383,7 +383,7 @@ class FiltrationTest4200(FlowsheetTestBase):
 
     def test_4204_no_equipment_err(self):
         df = filt.Filtration.generate_test_df(Tj=25, P_min=100, P_max=100,
-                                              P_unit=filt.opt_hedr_press_kPa, integ_test=filt.opt_integ_test_yes)
+                                              P_unit=filt.opt_hedr_press_kPaG, integ_test=filt.opt_integ_test_yes)
         with self.assertRaises(ValueError):
             self.add_uo(filt.Filtration, df)
 

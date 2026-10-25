@@ -97,7 +97,7 @@ class Placeholder(uo.UnitOperation, uo_tag=defs.tag_uo_placeholder):
                             nullable=True)
         precmnt = Primitive(prim_type="string",
                             key=defs.hedr_cmn_io_dtil_precmnt,
-                            description=f"If {Placeholder.uo_tag} is selected, please be sure to make a brief commnt on the step, such as intended activity or anticipated outcome.",
+                            description=f"If {Placeholder.uo_tag} is selected, please be sure to make a brief comment on the step, such as intended activity or anticipated outcome.",
                             required=True,
                             nullable=False)
         postcmnt = Primitive(prim_type="string",

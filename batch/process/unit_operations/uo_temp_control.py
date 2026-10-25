@@ -370,8 +370,8 @@ class TempControl(uo.UnitOperation, uo_tag=defs.tag_uo_tempr_ctrl):
         common_schema:list[Primitive] = TempControl.json_common()
         mode = Primitive(prim_type='string',
                          key=hedr_mode,
-                         description=f'Temperature control mode: This is a mandatory item.'
-                                     f'"{opt_mode_TiTj}" mode is most common. A specific set point of the reactor internal temperature (Ti) is given, whereas a specific range of the jacket temperature (Tj) is instructed.'
+                         description=f'Temperature control mode: This is a mandatory item. '
+                                     f'"{opt_mode_TiTj}" mode is most common. A specific set point of the reactor internal temperature (Ti) is given, whereas a specific range of the jacket temperature (Tj) is instructed. '
                                      f'"{opt_mode_Tj}" mode is selected when only the jacket temperature must be maintained at a specific set point. '
                                      f'"{opt_mode_prog}" mode means the reactor Ti approaches a specific set point within a specific time frame, whereas the jacket temperature is maintained within a specific range. Prioritise this mode if time constraint is given. '
                                      f'"{opt_mode_Ti}" mode is selected when only the reactor internal temperature must be maintained at a specific set point. This is less common. This is less reliable mode of control. Try to avoid this mode and prioritise other modes as much as possible. '

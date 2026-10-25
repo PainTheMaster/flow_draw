@@ -310,10 +310,10 @@ class Transfer(uo.UnitOperation, uo_tag=defs.tag_uo_transfer):
         common_schema:list[Primitive] = Transfer.json_common()
         instruction_type = Primitive(prim_type='string',
                                    key = hedr_operation,
-                                   description='This variable is to keep the type of the instruction'
+                                   description='This variable is to keep the type of the instruction. '
                                    f'"{opt_operation_setup}" means just setting up the transfer line is expected in this step. '
-                                   f'"{opt_operation_transfer}" the trasfer itself is needed together with the setting up. '
-                                   'This is an mandatory field.',
+                                   f'"{opt_operation_transfer}" the transfer itself is needed together with the setting up. '
+                                   'This is a mandatory field.',
                                    enum=list_opt_operation,
                                    nullable=False,
                                    required=True
@@ -333,13 +333,13 @@ class Transfer(uo.UnitOperation, uo_tag=defs.tag_uo_transfer):
                            key =hedr_destin,
                            description='Destination vessel, waste stream, etc of the process liquid/slurry. '
                            'Since any kinds of transfer operation has its destination by definition, this is a mandatory non-nullable field. '
-                           'If no god piece of information cannot be extracted from the data source, please put "<placeholder>" for editing later on.',
+                           'If no good piece of information cannot be extracted from the data source, please put "<placeholder>" for editing later on.',
                            nullable=False,
                            required=True)
         filter_typ = Primitive(prim_type='string',
                            key = hedr_filter_typ,
                            description='The type of the filter used amid the transfer. '
-                           'Normally, transfer through a polishing filter is required on the final (wet) stage of an API synthesis to remove any potential dusts and foreing matters. '
+                           'Normally, transfer through a polishing filter is required on the final (wet) stage of an API synthesis to remove any potential dusts and foreign matters. '
                            'This is an optional field and nullable. If polishing filtration is not required, please put null in this field.',
                            nullable=True,
                            required=True)
@@ -347,7 +347,7 @@ class Transfer(uo.UnitOperation, uo_tag=defs.tag_uo_transfer):
                              props=common_schema+[instruction_type, origin, via, destin, filter_typ],
                              description='This is a unit operation to set up a transfer line and/or to transfer a process solution or slurry from an origin vessel '
                              'to a destination vessel, waste stream, etc. '
-                             'Also, This operation is good at polishing filtration of process liquids.')
+                             'Also, This operation is good for polishing filtration of process liquids.')
         return obj_transf
 
 

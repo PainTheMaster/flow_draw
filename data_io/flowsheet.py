@@ -228,10 +228,19 @@ class Flowsheet:
         self.current_line += 1
         return self.current_line-1
 
-    def put_line(self, time: str =None, method: str=None, content: str=None, record: str=None, operator: str=None, witness: str=None)->int:
-        
+    def allocator_header_organizer(self, title:str=None)->int:
+        self.ws.merge_cells(start_row=self.current_line, start_column=col_title_left_half, end_row=self.current_line, end_column=col_title_right_half)
+        self.ws.cell(row=self.current_line, column=col_title_left_half).value = title
+        self.ws.cell(row=self.current_line, column=col_title_left_half).border = Border(left=line_thin, top=line_thin, bottom=line_thin)
+        self.ws.cell(row=self.current_line, column=col_title_right_half).border = Border(top=line_thin, bottom=line_thin, right=line_thin)
+        self.ws.cell(row=self.current_line, column=col_title_left_half).alignment = alignment_center
+        self.__put_excel_logic(line=self.current_line)        
+
+        self.current_line += 1
+        return self.current_line-1
+
+    def put_line(self, time: str =None, method: str=None, content: str=None, record: str=None, operator: str=None, witness: str=None)->int:   
         content = self.replace_plchld(content)
-        
         if time:
             self.ws.cell(row=self.current_line, column=col_time).value = time
         if method:
@@ -276,12 +285,6 @@ class Flowsheet:
                                f'"wwpct": {wwpct}\n'
                                f'"wt_abs_kg_gro": {wt_abs_kg_gro}\n'
                                f'"vol_abs_litre": {vol_abs_litre}')
-
-        # content = content.replace(f'{{{defs.plchld_flow_col_mat}}}', alph_col_mat)
-        # content = content.replace(f'{{{defs.plchld_flow_col_equiv}}}', alph_col_equiv)
-        # content = content.replace(f'{{{defs.plchld_flow_col_v_per_w}}}', alph_col_v_per_w)
-        # content = content.replace(f'{{{defs.plchld_flow_col_wwpct}}}', alph_col_wwpct)
-        # content = content.replace(f'{{{defs.plchld_flow_col_name_basis}}}', alph_col_wwpct)
 
         line = self.put_line(time = time,
                              method=method,

@@ -232,7 +232,7 @@ class CIP(uo.UnitOperation, uo_tag=defs.tag_uo_cip):
         unit_cip = Objason(key=key_json_unit_cip,
                            props=[cip_tgt, cip_solvent, cip_qty, cip_via],
                            description=f'This object holds information of a unit CIP element. '
-                           f'A unit CIP element holds "{hedr_cip_tgt}", "{hedr_solvent}", "{hedr_qty_kg}", "{hedr_via}".'
+                           f'A unit CIP element holds "{hedr_cip_tgt}", "{hedr_solvent}", "{hedr_qty_kg}", "{hedr_via}". '
                            f'A single CIP block can consist of multiple unit CIP elements.')
         arr_unit = Array(key=key_json_arr_unit,
                          content=unit_cip,

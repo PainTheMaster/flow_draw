@@ -278,8 +278,8 @@ class CrystWashing(uo.UnitOperation, MaterialReceiver, uo_tag=defs.tag_uo_cryst_
                         required=True)
         mode_washing = Primitive(prim_type='string',
                         key=hedr_mode_washing,
-                        description='Mode of the crystal washing operation.'
-                        f'"{opt_washmode_reslurry}": The mixture of the crystals and the washing solvent is agitated to form a slurry again. The most common mode of crystal wahing. '
+                        description='Mode of the crystal washing operation. '
+                        f'"{opt_washmode_reslurry}": The mixture of the crystals and the washing solvent is agitated to form a slurry again. The most common mode of crystal washing. '
                         f'"{opt_washmode_soak}": The crystals are washed without agitation, typically by simply adding the washing solvent and '
                         'soaking the wet cake in it for a certain period of time. '
                         f'"{opt_washmode_displacement}": The washing solvent is supplied to the filtration device where the crystals are retained and pressurized to flow through the crystals. '
@@ -298,16 +298,17 @@ class CrystWashing(uo.UnitOperation, MaterialReceiver, uo_tag=defs.tag_uo_cryst_
                         key=hedr_agitation_rpm,
                         description='Agitation speed in revolutions per minute during the crystal washing operation. '
                         f'This property is read if "{hedr_mode_washing}"=="{opt_washmode_reslurry}", but nullable. '
-                        'In that case, if a specific vale cannot be extracted from the data source, please put null. The user will take a necessary action. '
+                        'In that case, if a specific value cannot be extracted from the data source, please put null. The user will take a necessary action. '
                         f'If other options are chosen for "{hedr_mode_washing}", this property will be ignored.',
                         nullable=True,
                         required=True)
         input_entry = Input.get_json_schema(caller=caller)
         arr_input = Array(key=key_arr_solvent_json,
                           content=input_entry,
-                          description='A list of material input entries for solvents used in incrystal washing operation. '
-                          f'Material input can be a part of this unit operations or can be an independed "{defs.tag_uo_charging}" before this step if more appropriate.',
-                          required=False)
+                          description='A list of material input entries for solvents used in crystal washing operation. '
+                          f'Material input can be a part of this unit operations or can be an independent "{defs.tag_uo_charging}" before this step if more appropriate.',
+                          nullable=True,
+                          required=True)
         obj_uo = Objason(key=CrystWashing.uo_tag,
                          props=common_schema+[equipment, mode_washing, washing_duration_minutes, agitation_rpm, arr_input],
                          description='Crystal washing unit operation. This is typically carried out once or multiple times after the filtration of the recrystallized slurry of the intermediate or API.',

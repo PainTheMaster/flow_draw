@@ -171,20 +171,20 @@ class InertReplacement(uo.UnitOperation, uo_tag=defs.tag_uo_inert_replace):
         common_schema:list = InertReplacement.json_common()
         inert_gas = Primitive(prim_type='string',
                                key=hedr_gas,
-                               description=f"Inert gas for replacement of the air in the reactor for safety and quality."
+                               description=f"Inert gas for replacement of the air in the reactor for safety and quality. "
                                f"If no gas is selected, please use {opt_gas_N2} as default.",
                                enum=list_opt_gas,
                                nullable=False)
         
         neg_pressure =Primitive(prim_type='number',
                                 key=hedr_neg_pres,
-                                description=f"Negative pressure (MPaG) to be reached before inert gas compensation."
+                                description=f"Negative pressure (MPaG) to be reached before backfilling with inert gas. "
                                 "If no information is available, please use -0.08 MPaG as default.",
                                 nullable=False)
         
         num_repeat =Primitive(prim_type='integer',
                               key=hedr_num_repeat,
-                              description=f"Number of times the replacement (vacuum then compensation) is repeated."
+                              description=f"Number of times the replacement (vacuum then backfilling) is repeated. "
                               "If no information is available, please use 2 as default.",
                               nullable=False)
         
