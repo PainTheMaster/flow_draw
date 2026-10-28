@@ -682,7 +682,10 @@ class TempControl(uo.UnitOperation, uo_tag=defs.tag_uo_tempr_ctrl):
             uo_title = lang_dict_parts_flow[tag_part_flow_title_compl_tempr_ctrl]
         else:
             uo_title = lang_dict_parts_flow[tag_part_flow_title_tempr_config]
-        self.flowsheet.header_organizer(op_nr=self.operation_seq, title=uo_title)
+
+        # self.flowsheet.header_organizer(op_nr=self.operation_seq, title=uo_title)
+        self.flowsheet.header_organizer(title=uo_title)
+
         if not (self.pre_comment == None or self.pre_comment == ''):
             self.flowsheet.put_body_comments(self.pre_comment)
             self.flowsheet.linefeed()        

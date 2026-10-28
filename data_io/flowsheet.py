@@ -210,13 +210,17 @@ class Flowsheet:
                          op_nr: int|str|None=None,
                          title: str=None)->int:
         self.ws.merge_cells(start_row=self.current_line, start_column=col_title_left_half, end_row=self.current_line, end_column=col_title_right_half)
-        if isinstance(op_nr, int) or isinstance(op_nr, str):
-            self.ws.cell(row=self.current_line, column=col_op_nr, value=op_nr)
-        elif op_nr is None:
+        # if isinstance(op_nr, int) or isinstance(op_nr, str):
+        #     self.ws.cell(row=self.current_line, column=col_op_nr, value=op_nr)
+        if op_nr is None:
             cell_start = f'${alph_col_title_left_half}${line_start}'
             cell_this_line = f'{alph_col_title_left_half}{self.current_line}'
             xls_formular_count = f'=IF({cell_this_line}<>"", COUNTA({cell_start}:{cell_this_line}), "")'
+            xls_formular_count = f'=IF(ROW()<=2, 0, COUNTA($B$2:INDEX($B:$B,ROW()-1)))'
             self.ws.cell(row=self.current_line, column=col_op_nr, value=xls_formular_count)
+        else:
+            self.ws.cell(row=self.current_line, column=col_op_nr, value=op_nr)
+
         self.ws.cell(row=self.current_line, column=col_title_left_half, value=title)
         self.ws.cell(row=self.current_line, column=col_op_nr).border = border_around
         self.ws.cell(row=self.current_line, column=col_op_nr).alignment = alignment_center

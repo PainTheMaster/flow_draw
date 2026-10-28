@@ -130,7 +130,9 @@ class Charging(uo.UnitOperation, MaterialReceiver, uo_tag=defs.tag_uo_charging):
 
     def print_unit_operation(self):
         #TODO: Leave explanatory comments here.
-        self.flowsheet.header_organizer(op_nr=self.operation_seq, title=lang_dict_uo_titles[self.uo_tag])
+        # self.flowsheet.header_organizer(op_nr=self.operation_seq, title=lang_dict_uo_titles[self.uo_tag])
+        self.flowsheet.header_organizer(title=lang_dict_uo_titles[self.uo_tag])
+
         if not (self.pre_comment == None or self.pre_comment == ''):
             self.flowsheet.put_body_comments(self.pre_comment)
 

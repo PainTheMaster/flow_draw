@@ -257,7 +257,9 @@ class Transfer(uo.UnitOperation, uo_tag=defs.tag_uo_transfer):
             custom_uo_title = dict_component[tag_part_flow_uo_title_transfer]
         elif self.operation == opt_operation_setup:
             custom_uo_title = dict_component[tag_part_flow_uo_title_setup]
-        self.flowsheet.header_organizer(op_nr=self.operation_seq, title=custom_uo_title)
+        # self.flowsheet.header_organizer(op_nr=self.operation_seq, title=custom_uo_title)
+        self.flowsheet.header_organizer(title=custom_uo_title)
+
         if not (self.pre_comment == None or self.pre_comment == ''):
             self.flowsheet.put_body_comments(self.pre_comment)
             self.flowsheet.linefeed()        
