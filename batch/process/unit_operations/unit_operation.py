@@ -1,6 +1,6 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from typing import Optional
+from typing import Optional, Any
 import pandas as pd
 
 
@@ -247,7 +247,7 @@ class UnitOperation(ABC):
 
 
     @abstractmethod
-    def load_from_json_dict(self, json_dict: dict[str, any]):
+    def load_from_json_dict(self, json_dict: dict[str, Any]):
         """
         Load the unit operation data from a JSON dictionary. The following items are retrieved from the dictionary.
         <ul>
