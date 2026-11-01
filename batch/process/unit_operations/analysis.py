@@ -50,6 +50,7 @@ key_suffix_sample_name:str = "Sample_name_suffix"
 """Key to the suffix of sample name"""
 key_test_purpose:str = "Test_purpose"
 """Header item for sampling category; IPC, Monitoring, or Both"""
+key_analysis_attribute:str = "Analysis_attribute"
 hedr_ipc_criteria:str = "IPC_Criteria"
 """Header item for IPC criteria"""
 hedr_ipc_rec_titles:str = "IPC_Rec_Title"
@@ -149,15 +150,16 @@ opt_attrbt_cryst_form = "crystal_form"
 """An option for analysis attribute: crystal polymorphism"""
 opt_attrbt_filt_liq_indicator = "cryst_wash_filtrate_indicator"
 """An option for analysis attribute: wet cake wash filtrate indicator, e.g., conductivity, salt conc., color, etc."""
-
 opt_attrbt_filt_assay_tm = "target_material_assay"
 """An option for analysis attribute: assay of the target meterial in wet cake or dry product"""
-
 opt_attrbt_lod = "loss_on_drying"
 """An option for analysis attribute: LOD"""
-
 opt_attrbt_resid_solv = "residual_solvent_level"
 """An option for analysis attribute: indivdual residual solvent level"""
+opt_attrbt_resid_solv = "residual_solvent_level"
+"""An option for analysis attribute: indivdual residual solvent level"""
+opt_attrbt_other = 'attribute_other'
+"""An option for analysis attribute: other"""
 
 list_opt_attrbt = [opt_attrbt_resid_level,
                    opt_attrbt_conversion,
@@ -175,11 +177,9 @@ list_opt_attrbt = [opt_attrbt_resid_level,
                    opt_attrbt_cryst_form,
                    opt_attrbt_filt_liq_indicator,
                    opt_attrbt_filt_assay_tm,
+                   opt_attrbt_lod,
+                   opt_attrbt_resid_solv
                    ]
-
-
-
-
 
 
 
@@ -457,7 +457,20 @@ class Sampling(uo.UnitOperation, uo_tag=defs.tag_uo_sampling):
                                  enum=list_opt_analysis_purpose,
                                  nullable=None,
                                  required=True)
-        test_attribute =  
+        test_attribute =  Primitive(prim_type='string',
+                                    key=key_analysis_attribute,
+                                    description='An attribute is a measurable or observable property of a material at a definite point in process.\n'
+                                    '- Always has a subject (the material/sample it belongs to). e.g., "residual THF in intermediate X" not just THF.\n'
+                                    'May refer to an analyte (THF, impurity-x), but some attributes have non (crystal form, particle size).\n'
+                                    'Is NOT:'
+                                    '   - an analyte (THF itself is an analyte)'
+                                    '   - a process parameter (temperature, addition rate are inputs)\n'
+                                    '   - a test category (purity, residual solvents group attributes)\n'
+                                    '   - a test method (HPLC, GC, NMR measure attributes)\n'
+                                    f,
+                                    enum=list_opt_attrbt,
+                                    nullable=None,
+                                    required=True)
         
         
 
