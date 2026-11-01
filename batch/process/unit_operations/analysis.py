@@ -120,54 +120,52 @@ list_opt_analysis_purpose:list[str]=[opt_analysis_cat_ipc,
                                  opt_analysis_cat_info]
 """List of options for sampling_cat"""
 
-opt_attrbt_resid_level = 'residual_solvent_level'
-"""An option for analysis attribute: residual level of impurity"""
+
 opt_attrbt_conversion = 'conversion'
 """An option for analysis attribute: reaction conversion"""
-opt_attrbt_resid_sm = 'residual_sm'
-"""An option for analysis attribute: resiual SM"""
+opt_attrbt_rmnng_reactant = 'remaining_reactant'
+"""An option for analysis attribute: remaining reactant."""
 opt_attrbt_imp_level = 'impurity_level'
 """An option for analysis attribute: impurity level"""
 opt_attrbt_ee = 'ee'
 """An option for analysis attribute: enantiomeric excess"""
 opt_attrbt_de = 'de'
 """An option for analysis attribute: diastereomeric excess"""
-opt_attrbt_moist_level = 'moisture_relvel'
+opt_attrbt_water_cntnt = 'water_content'
 """An option for analysis attribute: moisture level"""
 opt_attrbt_pH = 'pH'
 """An option for analysis attribute: pH"""
-opt_attrbt_extract_loss = 'loss_in_liq_liq_wash_phase'
+opt_attrbt_extract_loss = 'loss_to_wash_phase'
 """An option for analysis attribute: product loss in liq-liq wash"""
-opt_attrbt_resid_excess = 'excess_reag_cat_in_purging_quenching'
-"""An option for analysis attribute: residusl excess reagent, buliding block, catalyst in purging"""
+opt_attrbt_resid_excess = 'residual_reagent_level'
+"""An option for analysis attribute: residual excess reagent, building block, catalyst in purging"""
 opt_attrbt_solv_fraction = 'solvent_fraction'
-"""An option for analysis attribute: residusl excess reagent, buliding block, catalyst in purging"""
+"""An option for analysis attribute: solvent fraction in a process liquid or filtrate"""
 opt_attrbt_tm_conc_pl = "target_material_concentration_in_process_liquid"
-"""An option for analysis attribute: concentration of target meterial in process liquid"""
+"""An option for analysis attribute: concentration of target material in process liquid"""
 opt_attrbt_tm_conc_ml = "target_material_concentration_in_mother_liquor"
-"""An option for analysis attribute: concentration of target meterial in mother liquor"""
+"""An option for analysis attribute: concentration of target material in mother liquor"""
 opt_attrbt_cryst_form = "crystal_form"
 """An option for analysis attribute: crystal polymorphism"""
 opt_attrbt_filt_liq_indicator = "cryst_wash_filtrate_indicator"
 """An option for analysis attribute: wet cake wash filtrate indicator, e.g., conductivity, salt conc., color, etc."""
 opt_attrbt_filt_assay_tm = "target_material_assay"
-"""An option for analysis attribute: assay of the target meterial in wet cake or dry product"""
+"""An option for analysis attribute: assay of the target material in wet cake or dry product"""
 opt_attrbt_lod = "loss_on_drying"
 """An option for analysis attribute: LOD"""
 opt_attrbt_resid_solv = "residual_solvent_level"
-"""An option for analysis attribute: indivdual residual solvent level"""
-opt_attrbt_resid_solv = "residual_solvent_level"
-"""An option for analysis attribute: indivdual residual solvent level"""
+"""An option for analysis attribute: individual residual solvent level"""
+opt_attrbt_particle_size = "particle_size"
+"""An option for analysis attribute: particle size."""
 opt_attrbt_other = 'attribute_other'
 """An option for analysis attribute: other"""
 
-list_opt_attrbt = [opt_attrbt_resid_level,
-                   opt_attrbt_conversion,
-                   opt_attrbt_resid_sm,
+list_opt_attrbt = [opt_attrbt_conversion,
+                   opt_attrbt_rmnng_reactant,
                    opt_attrbt_imp_level,
                    opt_attrbt_ee,
                    opt_attrbt_de,
-                   opt_attrbt_moist_level,
+                   opt_attrbt_water_cntnt,
                    opt_attrbt_pH,
                    opt_attrbt_extract_loss,
                    opt_attrbt_resid_excess,
@@ -178,7 +176,9 @@ list_opt_attrbt = [opt_attrbt_resid_level,
                    opt_attrbt_filt_liq_indicator,
                    opt_attrbt_filt_assay_tm,
                    opt_attrbt_lod,
-                   opt_attrbt_resid_solv
+                   opt_attrbt_resid_solv,
+                   opt_attrbt_particle_size,
+                   opt_attrbt_other
                    ]
 
 
@@ -459,15 +459,44 @@ class Sampling(uo.UnitOperation, uo_tag=defs.tag_uo_sampling):
                                  required=True)
         test_attribute =  Primitive(prim_type='string',
                                     key=key_analysis_attribute,
-                                    description='An attribute is a measurable or observable property of a material at a definite point in process.\n'
+                                    description='An attribute is a measurable or observable property of a material at a defined point in the process.\n'
                                     '- Always has a subject (the material/sample it belongs to). e.g., "residual THF in intermediate X" not just THF.\n'
-                                    'May refer to an analyte (THF, impurity-x), but some attributes have non (crystal form, particle size).\n'
-                                    'Is NOT:'
-                                    '   - an analyte (THF itself is an analyte)'
+                                    '- May refer to an analyte (THF, impurity-x), but some attributes have none (crystal form, particle size).\n'
+                                    '- Is NOT:\n'
+                                    '   - an analyte (THF itself is an analyte)\n'
                                     '   - a process parameter (temperature, addition rate are inputs)\n'
                                     '   - a test category (purity, residual solvents group attributes)\n'
                                     '   - a test method (HPLC, GC, NMR measure attributes)\n'
-                                    f,
+                                    f'"{opt_attrbt_conversion}": Conversion of the starting material. Normally associated with the starting material as the analyte. '
+                                        f'"{opt_attrbt_rmnng_reactant}" can be used for the same purpose. Please select an attribute in a source-faithful manner.\n'
+                                    f'"{opt_attrbt_rmnng_reactant}": Remaining reactant, e.g., starting material, intermediate, etc. Associated with the reactant as the analyte. '
+                                        f'In the case the starting material is the reactant, "{opt_attrbt_conversion}" can be used for the same purpose. Please choose an attribute in a source-faithful manner.\n'
+                                    f'"{opt_attrbt_imp_level}": Impurity level. Associated with a specified impurity as the analyte.\n'
+                                    f'"{opt_attrbt_ee}": Enantiomeric excess. Normally associated with the target material as the analyte, but another compound can be an analyte.\n'
+                                    f'"{opt_attrbt_de}": Diastereomeric excess. Normally associated with one of the diastereomers of the target compound, but another can be an analyte.\n'
+                                    f'"{opt_attrbt_water_cntnt}": Water content in the sample. Water is always the analyte. Can be associated with the target material, process liquid, etc.\n'
+                                    f'"{opt_attrbt_pH}": pH of the sample. Technically, analyte is hydroxonium ion. However, the analyte does not have to be specified, as pH can be regarded as physicochemical property of a solution.\n'
+                                    f'"{opt_attrbt_extract_loss}": Loss of target compound during liquid-liquid washing or extraction, but not necessarily limited to them. '
+                                        'In many cases, associated with the target material as an analyte. However, the starting material or intermediate can be the analyte if instructed by the process owner.\n'
+                                    f'"{opt_attrbt_resid_excess}": Remaining level of excess reagent, building block, catalyst, etc., during quenching or purging. '
+                                        'Normally the analytes are those excess compounds or the catalyst.\n'
+                                    f'"{opt_attrbt_solv_fraction}": Fraction of a specific solvent in the process liquid. The specified solvent is the analyte.\n'
+                                    f'"{opt_attrbt_tm_conc_pl}": Concentration of the target material in the process liquid. Sometimes, this value is required to determine the timing of seeding. '
+                                        'Needless to say, the target compound is the analyte.\n'
+                                    f'"{opt_attrbt_tm_conc_ml}": Concentration of the target material in the supernatant or filtrate in the recrystallization slurry. '
+                                        'This can be needed to ensure the completion of recrystallization, or to monitor the product loss in the filtrate. \n'
+                                    f'"{opt_attrbt_cryst_form}": Crystal form. Various compounds can be the analyte, but in many cases, it is the target material. '
+                                        'Sample can be crystals taken from the recrystallization slurry, wet cake of the filtration, the dry product, etc.\n'
+                                    f'"{opt_attrbt_filt_liq_indicator}": An indicator of the crystal wash filtrate to monitor the progress of crystal washing. '
+                                        'For example, conductivity, salt concentration, color, etc. Various compounds can be the analyte, or no analyte is specified if a physicochemical property is the indicator.\n'
+                                    f'"{opt_attrbt_filt_assay_tm}": Assay of the target material in wet cake, dry product, etc. The target compound is the analyte.\n'
+                                    f'"{opt_attrbt_lod}": Loss on drying of a sample. As this attribute is determined by the weight reduction of the material, no analyte is defined.\n'
+                                    f'"{opt_attrbt_resid_solv}": Residual solvent level in the solid sample, i.e., wet cake or dry product, etc. '
+                                        'Normally determined by means of gas chromatography. The analyte is the specified solvent. '
+                                    f'For solvent composition of a process liquid, use "{opt_attrbt_solv_fraction}".\n'
+                                    f'"{opt_attrbt_particle_size}": Particle size. Normally this is for the product powder, but not limited to it. '
+                                        'Various particle size indicators, such as D10, D50, D90, etc.\n'
+                                    f'"{opt_attrbt_other}": Attribute not mentioned earlier. Also in this case, the analyte can be designated if appropriate.\n',
                                     enum=list_opt_attrbt,
                                     nullable=None,
                                     required=True)
