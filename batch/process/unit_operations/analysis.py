@@ -51,8 +51,14 @@ key_suffix_sample_name:str = "Sample_name_suffix"
 key_test_purpose:str = "Test_purpose"
 """Header item for sampling category; IPC, Monitoring, or Both"""
 key_analysis_attribute:str = "Analysis_attribute"
-hedr_ipc_criteria:str = "IPC_Criteria"
-"""Header item for IPC criteria"""
+key_criteria_val_1:str = "Criteria_value_1"
+"""Header item for IPC criteria 1"""
+key_comparator_1:str = 'Criteria_comparator_1'
+"""Header item for IPC criteria relations 1"""
+key_criteria_val_2:str = "Criteria_value_2"
+"""Header item for IPC criteria 2"""
+key_comparator_2:str = 'Criteria_comparator_2'
+"""Header item for IPC criteria relations 2"""
 hedr_ipc_rec_titles:str = "IPC_Rec_Title"
 """Header item for IPC record title for each analytical item"""
 hedr_ipc_rec_units:str = "IPC_Rec_Unit"
@@ -66,9 +72,9 @@ hedr_monit_rec_units:str = "Monit_Rec_Unit"
 hedr_sample_comment:str = "Sample_Comment"
 """Header item for sampling category; sample comment"""
 
-list_hedr:list[str]=[hedr_sample_name,
-                     hedr_sampling_cat,
-                     hedr_ipc_criteria,
+list_hedr:list[str]=[key_stem_sample_name,
+                     key_suffix_sample_name,
+                     key_criteria_val_1,
                      hedr_ipc_rec_titles,
                      hedr_ipc_rec_units,
                      hedr_monit_item_high,
@@ -181,8 +187,24 @@ list_opt_attrbt = [opt_attrbt_conversion,
                    opt_attrbt_other
                    ]
 
-
-
+opt_comparator_equal = 'equal_to'
+"""An option for criteria relation: equal to"""
+opt_comparator_match = 'matches'
+"""An option for criteria relation: matches"""
+opt_comparator_less = 'less_than'
+"""An option for criteria relation: less than"""
+opt_comparator_nmt = 'not_more_than'
+"""An option for criteria relation: not more than"""
+opt_comparator_nlt = 'not_less_than'
+"""An option for criteria relation: not_less_than"""
+opt_comparator_gt = 'greater_than'
+"""An option for criteria relation: greater than"""
+list_opt_comparator = [opt_comparator_equal,
+                       opt_comparator_match,
+                       opt_comparator_less,
+                       opt_comparator_nmt,
+                       opt_comparator_nlt,
+                       opt_comparator_gt]
 
 dict_dropdown: dict[str, str] = {hedr_sampling_cat : list_opt_analysis_purpose}
 """header items vs dropdown items dictionary"""
@@ -409,6 +431,49 @@ class Sampling(uo.UnitOperation, uo_tag=defs.tag_uo_sampling):
                                     nullable=None,
                                     required=True)
         
+        criteria_val_1 = Primitive(prim_type=['number','string'],
+                              key=key_criteria_val_1,
+                              description='A criteria value 1 for IPC or monitoring with a target. Either quantitative (interval scale or ratio scale; normally number type) '
+                              'or qualitative (nominal scale; normally string type). '
+                              'This is the primary criteria. For an IPC or monitoring with a target, this is a mandatory field. '
+                              'If only one criteria is given, please put it in this property. '
+                              f'Together with this property, please specify the "{key_comparator_1}" to specify the criteria.',
+                              nullable=True,
+                              required=False)
+        criteria_comparator_1 = Primitive(prim_type='string',
+                                          key=key_comparator_1,
+                                          description=f'The comparator to specify the relationship between the actual analytical value and "{key_criteria_val_1}". Mandatory if the value is provided.\n'
+                                          f'"{opt_comparator_equal}": The analytical result shall be equal to the specification value. This is for quantitative criteria.\n'
+                                          f'"{opt_comparator_match}": The analytical result shall match the specification value. This is for qualitative criteria such as appearance, smell, taste, etc. \n'
+                                          f'"{opt_comparator_less}": The analytical result shall be less than the specification value.\n'
+                                          f'"{opt_comparator_nmt}": The analytical result shall be not more than the specification value.\n'
+                                          f'"{opt_comparator_nlt}": The analytical result shall be not less than the specification value.\n'
+                                          f'"{opt_comparator_gt}": The analytical result shall be greater than the specification value.'
+                                          enum=list_opt_comparator,
+                                          required=False,
+                                          nullable=True)
+        criteria_val_2 = Primitive(prim_type=['number','string'],
+                                   key=key_criteria_val_2,
+                                   description='A criteria value 1 for IPC or monitoring with a target. Either quantitative (interval scale or ratio scale; normally number type) '
+                                   'or qualitative (nominal scale; normally string type). '
+                                   'For some IPC or monitoring with a target, this property is required. '
+                                   'If a second parameter is specirid, please put it in this property, e.g., the upper limit of a range.'
+                                   'Together with this property, please specify the "relation" between the result and the set value to specify the criteria.',
+                                   nullable=True,
+                                   required=False)
+        criteria_comparator_2 = Primitive(prim_type='string',
+                                                  key=key_comparator_2,
+                                                  description=f'The comparator to specify the relationship between the actual analytical value and "{key_criteria_val_2}". Mandatory if the value is provided.\n'
+                                                  f'"{opt_comparator_equal}": The analytical result shall be equal to the specification value. This is for quantitative criteria.\n'
+                                                  f'"{opt_comparator_match}": The analytical result shall match the specification value. This is for qualitative criteria such as appearance, smell, taste, etc. \n'
+                                                  f'"{opt_comparator_less}": The analytical result shall be less than the specification value.\n'
+                                                  f'"{opt_comparator_nmt}": The analytical result shall be not more than the specification value.\n'
+                                                  f'"{opt_comparator_nlt}": The analytical result shall be not less than the specification value.\n'
+                                                  f'"{opt_comparator_gt}": The analytical result shall be greater than the specification value.'
+                                                  enum=list_opt_comparator,
+                                                  required=False,
+                                                  nullable=True)
+        
         
 
         return json_sampling 
@@ -442,7 +507,7 @@ class Sampling(uo.UnitOperation, uo_tag=defs.tag_uo_sampling):
         df = s.to_frame().T
         df.at[df.index[0], hedr_sample_name] = sample_name
         df.at[df.index[0], hedr_sampling_cat] = sampling_cat
-        df.at[df.index[0], hedr_ipc_criteria] = ipc_criteria
+        df.at[df.index[0], key_criteria_val_1] = ipc_criteria
         df.at[df.index[0], hedr_ipc_rec_titles] = ipc_rec_titles
         df.at[df.index[0], hedr_ipc_rec_units] = ipc_rec_units
         df.at[df.index[0], hedr_monit_item_high] = monit_items
@@ -470,7 +535,7 @@ class Sampling(uo.UnitOperation, uo_tag=defs.tag_uo_sampling):
         df.loc[row]=new_row
         df.at[row, hedr_sample_name] = sample_name
         df.at[row, hedr_sampling_cat] = sampling_cat
-        df.at[row, hedr_ipc_criteria] = ipc_criteria
+        df.at[row, key_criteria_val_1] = ipc_criteria
         df.at[row, hedr_ipc_rec_titles] = ipc_rec_titles
         df.at[row, hedr_ipc_rec_units] = ipc_rec_units
         df.at[row, hedr_monit_item_high] = monit_items
@@ -506,8 +571,8 @@ class SingleSample:
             raise ValueError(f"{caller.__class__.__name__} Op. Seq. {caller.get_seq}: No sampling category chosen for the {self.sample_seq+1}th sample in the detail input.")
         
         if self.category == opt_sampling_cat_ipc or self.category == opt_sampling_cat_both:
-            if not pd.isna(ser[hedr_ipc_criteria]):
-                str_criteria:str = ser[hedr_ipc_criteria]
+            if not pd.isna(ser[key_criteria_val_1]):
+                str_criteria:str = ser[key_criteria_val_1]
                 if not pd.isna(str_criteria):
                     self.content_ipc_criteria = str_criteria.split("\n")
             else:
@@ -566,7 +631,7 @@ class SingleSample:
                 )
             else:
                 for ipc in arr_ipc:
-                    self.content_ipc_criteria.append(ipc[hedr_ipc_criteria])
+                    self.content_ipc_criteria.append(ipc[key_criteria_val_1])
                     self.rec_ipc_item_name.append(ipc[hedr_ipc_rec_titles])
                     if ipc[hedr_ipc_rec_units] is not None:
                         self.rec_ipc_unit.append(ipc[hedr_ipc_rec_units])
