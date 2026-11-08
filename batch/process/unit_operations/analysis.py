@@ -5,7 +5,7 @@ import pandas as pd
 import warnings
 import flow_draw.definitions as defs
 import flow_draw.data_io.flowsheet as fsht
-from typing import Optional
+from typing import Optional, Any
 from flow_draw.batch.process.unit_operations import unit_operation as uo
 from flow_draw.data_io import process_io as procio
 from flow_draw.materials import materials as mats
@@ -44,6 +44,8 @@ opt_time_unit_hour:str = defs.tag_flow_cmn_time_unit_hour
 #hedr_<something> = defs.hedr_<unit operation>_<specification item>
 #list_hedr = defs.list_hedr_<list of header items for the uo>
 #dict_dtil_drpdwn = defs.dict_opt_<unit operation>
+key_class_name:str = 'Sample_class'
+"""Header item for """
 key_stem_sample_name:str = "Sample_name_stem"
 """Header item for sample names"""
 key_suffix_sample_name:str = "Sample_name_suffix"
@@ -51,6 +53,9 @@ key_suffix_sample_name:str = "Sample_name_suffix"
 key_test_purpose:str = "Test_purpose"
 """Header item for sampling category; IPC, Monitoring, or Both"""
 key_analysis_attribute:str = "Analysis_attribute"
+"""Header item for sampling category: analysis attribute"""
+key_analyte:str = 'Analyte'
+"""Header item for analyte of the analysis"""
 key_criteria_val_1:str = "Criteria_value_1"
 """Header item for IPC criteria 1"""
 key_comparator_1:str = 'Criteria_comparator_1'
@@ -59,6 +64,17 @@ key_criteria_val_2:str = "Criteria_value_2"
 """Header item for IPC criteria 2"""
 key_comparator_2:str = 'Criteria_comparator_2'
 """Header item for IPC criteria relations 2"""
+key_unit_meas:str = 'measurement_unit'
+"""Header item for analysis: unit"""
+key_obj_analysis:str = 'single_analysis_object'
+"""Header item for analysis: analysis object"""
+key_arr_analysis:str = 'array_of_analysis'
+"""Header item for analysis: """
+key_sample_comment:str = 'comment_for_sample'
+"""Header item for sample comment"""
+key_obj_sample:str = 'sample_object'
+"""header item for analysis: object for a sample"""
+
 hedr_ipc_rec_titles:str = "IPC_Rec_Title"
 """Header item for IPC record title for each analytical item"""
 hedr_ipc_rec_units:str = "IPC_Rec_Unit"
@@ -114,6 +130,9 @@ key_json_sampling_stage = "sampling_stage"
 #########################################################
 # UO-specific options, list, header_item: list dictionry thereof (for data input and internalsignaling)
 #########################################################
+
+const_class_sample = 'Sample_class'
+"""constant for the class name: sample_class"""
 
 opt_analysis_cat_ipc:str="Analysis_IPC"
 """Option for the header item sampling_categoy: IPC"""
@@ -206,7 +225,7 @@ list_opt_comparator = [opt_comparator_equal,
                        opt_comparator_nlt,
                        opt_comparator_gt]
 
-dict_dropdown: dict[str, str] = {hedr_sampling_cat : list_opt_analysis_purpose}
+# dict_dropdown: dict[str, str] = {hedr_sampling_cat : list_opt_analysis_purpose}
 """header items vs dropdown items dictionary"""
 
 #########################################################
@@ -306,14 +325,9 @@ dict_parts_stcs = dict_parts_stcs_jp
 # output_unit_operation(self)
 #
 #########################################################
-class Sampling(uo.UnitOperation, uo_tag=defs.tag_uo_sampling):
+class Sample(uo.UnitOperation, uo_tag=defs.tag_uo_sampling):
     def __init__(self,
-                 caller: type[trdef.UniversalTrait] =None,
-                 flowsheet:fsht.Flowsheet=None,
-                 operation_seq: int=None,
-                 num_subitems: int = None,
-                 edit_comment:str=None):
-        super().__init__(caller=caller, flowsheet=flowsheet, operation_seq=operation_seq, num_subitems=num_subitems, edit_comment=edit_comment)
+                 ):
         self.list_samples:list[SingleSample] = []
     
     def load_params_from_df(self, df: pd.DataFrame):
@@ -333,37 +347,19 @@ class Sampling(uo.UnitOperation, uo_tag=defs.tag_uo_sampling):
             temp_sample = SingleSample(flowsheet=self.flowsheet)
             temp_sample.load_from_series(caller=self, sample_seq=sample_seq, ser=subitem)
             self.list_samples.append(temp_sample)
-
-
-    def get_seq(self)-> int:
-        return self.operation_seq
     
-    def get_detail_header(self) -> list[str]:
-        return list_hedr
-
-    def get_detail_option_menu(self) -> Optional[dict[str, list[str]]]:
-        return dict_dropdown
-    
-    def print_unit_operation(self):
-        # self.flowsheet.header_organizer(op_nr=self.operation_seq, title=lang_dict_uo_titles[self.uo_tag])
-        self.flowsheet.header_organizer(title=lang_dict_uo_titles[self.uo_tag])
-
-        if not (self.pre_comment == None or self.pre_comment == ''):
-            self.flowsheet.put_body_comments(self.pre_comment)
-            self.flowsheet.linefeed()        
-
-        for sample in self.list_samples:
-            sample.output_single_sample()
-            self.flowsheet.linefeed()
-
-        if not (self.post_comment == None or self.post_comment == ''):
-            self.flowsheet.put_body_comments(self.post_comment)
-            self.flowsheet.linefeed()
+    def print_analysis(self):
+        pass
 
     @staticmethod
     def get_json_schema(caller:trdef.UniversalTrait = None) -> Objason:
-        common = Sampling.json_common()
-
+        common = Sample.json_common()
+        class_sample = Primitive(prim_type='string',
+                                 key=key_class_name,
+                                 description=f'Constant. The name of the class "{const_class_sample}".'
+                                 const=const_class_sample,
+                                 required=True,
+                                 nullable=False)
         stem_sample_name = Primitive(prim_type='string',
                                      key=key_stem_sample_name,
                                      description='Stem of the ample name.',
@@ -377,6 +373,11 @@ class Sampling(uo.UnitOperation, uo_tag=defs.tag_uo_sampling):
                                        'In another case, "top", "middle", and "bottom" are used when multiple samples are taken from bulk.',
                                        nullable=True,
                                        required=False)
+        comment = Primitive(prim_type='string',
+                            key=key_sample_comment,
+                            description='A commet(s) for the sample. Optional.',
+                            required=False,
+                            nullable=True)
         test_purpose = Primitive(prim_type='string',
                                  key=key_test_purpose,
                                  description='Purpose of the analysis. '
@@ -385,7 +386,7 @@ class Sampling(uo.UnitOperation, uo_tag=defs.tag_uo_sampling):
                                  'Meeting the target value is deriable, but not a strict requirement. Not only the target value, but also various relevant conditions are took into consideration. '
                                  f'"{opt_analysis_cat_info}" The analysis is done simply for the sake of process monitoring. No decision is made from the result.',
                                  enum=list_opt_analysis_purpose,
-                                 nullable=None,
+                                 nullable=False,
                                  required=True)
         test_attribute =  Primitive(prim_type='string',
                                     key=key_analysis_attribute,
@@ -412,9 +413,10 @@ class Sampling(uo.UnitOperation, uo_tag=defs.tag_uo_sampling):
                                         'Normally the analytes are those excess compounds or the catalyst.\n'
                                     f'"{opt_attrbt_solv_fraction}": Fraction of a specific solvent in the process liquid. The specified solvent is the analyte.\n'
                                     f'"{opt_attrbt_tm_conc_pl}": Concentration of the target material in the process liquid. Sometimes, this value is required to determine the timing of seeding. '
-                                        'Needless to say, the target compound is the analyte.\n'
+                                        'Needless to say, the analyte is the target compound.\n'
                                     f'"{opt_attrbt_tm_conc_ml}": Concentration of the target material in the supernatant or filtrate in the recrystallization slurry. '
-                                        'This can be needed to ensure the completion of recrystallization, or to monitor the product loss in the filtrate. \n'
+                                        'This can be needed to ensure the completion of recrystallization, or to monitor the product loss in the filtrate. '
+                                        'Typical unit of measurment is mg/mL, but please follow the data source if specified.\n'
                                     f'"{opt_attrbt_cryst_form}": Crystal form. Various compounds can be the analyte, but in many cases, it is the target material. '
                                         'Sample can be crystals taken from the recrystallization slurry, wet cake of the filtration, the dry product, etc.\n'
                                     f'"{opt_attrbt_filt_liq_indicator}": An indicator of the crystal wash filtrate to monitor the progress of crystal washing. '
@@ -428,12 +430,17 @@ class Sampling(uo.UnitOperation, uo_tag=defs.tag_uo_sampling):
                                         'Various particle size indicators, such as D10, D50, D90, etc.\n'
                                     f'"{opt_attrbt_other}": Attribute not mentioned earlier. Also in this case, the analyte can be designated if appropriate.\n',
                                     enum=list_opt_attrbt,
-                                    nullable=None,
+                                    nullable=False,
                                     required=True)
-        
+        analyte = Primitive(prim_type='string',
+                            key=key_analyte,
+                            description='Analyte of the analysis such as a specific solvent, e.g., THF, ethanol, water, etc., target compound, a specific impurity, and an unspecified impurity, etc. '
+                            'Analyte is required in most of cases, but not always. For instance, if pH is the test attribute, it is regarded as a physicochemical property, and the analyte is not specified.',
+                            nullable=True,
+                            required=False)
         criteria_val_1 = Primitive(prim_type=['number','string'],
                               key=key_criteria_val_1,
-                              description='A criteria value 1 for IPC or monitoring with a target. Either quantitative (interval scale or ratio scale; normally number type) '
+                              description='Criteria value 1 for IPC or monitoring with a target. Either quantitative (interval scale or ratio scale; normally number type) '
                               'or qualitative (nominal scale; normally string type). '
                               'This is the primary criteria. For an IPC or monitoring with a target, this is a mandatory field. '
                               'If only one criteria is given, please put it in this property. '
@@ -448,47 +455,73 @@ class Sampling(uo.UnitOperation, uo_tag=defs.tag_uo_sampling):
                                           f'"{opt_comparator_less}": The analytical result shall be less than the specification value.\n'
                                           f'"{opt_comparator_nmt}": The analytical result shall be not more than the specification value.\n'
                                           f'"{opt_comparator_nlt}": The analytical result shall be not less than the specification value.\n'
-                                          f'"{opt_comparator_gt}": The analytical result shall be greater than the specification value.'
+                                          f'"{opt_comparator_gt}": The analytical result shall be greater than the specification value.',
                                           enum=list_opt_comparator,
                                           required=False,
                                           nullable=True)
         criteria_val_2 = Primitive(prim_type=['number','string'],
                                    key=key_criteria_val_2,
-                                   description='A criteria value 1 for IPC or monitoring with a target. Either quantitative (interval scale or ratio scale; normally number type) '
+                                   description='Criteria value 2 for IPC or monitoring with a target. Either quantitative (interval scale or ratio scale; normally number type) '
                                    'or qualitative (nominal scale; normally string type). '
                                    'For some IPC or monitoring with a target, this property is required. '
-                                   'If a second parameter is specirid, please put it in this property, e.g., the upper limit of a range.'
-                                   'Together with this property, please specify the "relation" between the result and the set value to specify the criteria.',
+                                   'If a second parameter is specified please put it in this property, e.g., the upper limit of a range.'
+                                   f'Together with this property, please specify the "{key_comparator_2}" between the result and the set value to specify the criteria.',
                                    nullable=True,
                                    required=False)
         criteria_comparator_2 = Primitive(prim_type='string',
-                                                  key=key_comparator_2,
-                                                  description=f'The comparator to specify the relationship between the actual analytical value and "{key_criteria_val_2}". Mandatory if the value is provided.\n'
-                                                  f'"{opt_comparator_equal}": The analytical result shall be equal to the specification value. This is for quantitative criteria.\n'
-                                                  f'"{opt_comparator_match}": The analytical result shall match the specification value. This is for qualitative criteria such as appearance, smell, taste, etc. \n'
-                                                  f'"{opt_comparator_less}": The analytical result shall be less than the specification value.\n'
-                                                  f'"{opt_comparator_nmt}": The analytical result shall be not more than the specification value.\n'
-                                                  f'"{opt_comparator_nlt}": The analytical result shall be not less than the specification value.\n'
-                                                  f'"{opt_comparator_gt}": The analytical result shall be greater than the specification value.'
-                                                  enum=list_opt_comparator,
-                                                  required=False,
-                                                  nullable=True)
+                                          key=key_comparator_2,
+                                          description=f'The comparator to specify the relationship between the actual analytical value and "{key_criteria_val_2}". Mandatory if the value is provided.\n'
+                                          f'"{opt_comparator_equal}": The analytical result shall be equal to the specification value. This is for quantitative criteria.\n'
+                                          f'"{opt_comparator_match}": The analytical result shall match the specification value. This is for qualitative criteria such as appearance, smell, taste, etc. \n'
+                                          f'"{opt_comparator_less}": The analytical result shall be less than the specification value.\n'
+                                          f'"{opt_comparator_nmt}": The analytical result shall be not more than the specification value.\n'
+                                          f'"{opt_comparator_nlt}": The analytical result shall be not less than the specification value.\n'
+                                          f'"{opt_comparator_gt}": The analytical result shall be greater than the specification value.',
+                                          enum=list_opt_comparator,
+                                          required=False,
+                                          nullable=True)
+        unit = Primitive(prim_type='string',
+                         key=key_unit_meas,
+                         description='Unit of measurement for the analysis.',
+                         nullable=True,
+                         required=False)
+        single_analysis = Objason(key=key_obj_analysis,
+                                  props=[test_purpose, test_attribute, analyte, criteria_val_1, criteria_comparator_1, criteria_val_2, criteria_comparator_2, unit],
+                                  description='Object for a single analysis.',
+                                  required=True,
+                                  nullable=False)
+        arr_analysis = Array(key=key_arr_analysis,
+                             content=single_analysis,
+                             description='An array of single analysis belonging to a sample.',
+                             required=False,
+                             nullable=None)
+        obj_sample = Objason(key=key_obj_sample,
+                             props=[class_sample, stem_sample_name, suffix_sample_name, comment, arr_analysis],
+                             description='An object for a sample. Sample has a name and array of analysis. The latter is optional.')
         
+        return obj_sample
         
 
-        return json_sampling 
-        
-
-    def load_from_json_dict(self, json_dict:dict[str, any]):
-        super().load_from_json_dict(json_dict)
-        arr_sample:list[dict[str,any]] = json_dict[key_json_arr_samples]
-        if arr_sample is not None:
-            for i, sample in enumerate(arr_sample):
-                single_sample=SingleSample(flowsheet=self.flowsheet)
-                single_sample.load_from_single_sample_json(sample_seq=i+1, sample=sample)
-                self.list_samples.append(single_sample)
-
-
+    def __load_from_json_dict(self, json_dict:dict[str, Any]):
+        if json_dict.get(key_class_name) != const_class_sample:
+            warnings.warn(message=f'{self.__class__.__name__}.__load_from_json_dict(): The json_dictionary doesn\'t include the constant for the object name "{const_class_sample}".',
+                          type=RuntimeWarning)
+        self.stem_sample_name = json_dict.get(key_stem_sample_name)
+        if not self.stem_sample_name:
+            warnings.warn(message=f'{self.__class__.__name__}.__load_from_json_dict(): No sample name stem is provided.',
+                          type=RuntimeWarning)
+        self.suffix_sample_name = json_dict.get(key_suffix_sample_name)
+        self.sample_comment = json_dict.get(key_sample_comment)
+        arr_analysis = json_dict.get(key_arr_analysis)
+        if arr_analysis:
+            for single_analysis in arr_analysis:
+                purpose = single_analysis.get(key_test_purpose)
+                if purpose == opt_analysis_cat_ipc:
+                    self.list_ipc.append(single_analysis)
+                elif purpose == opt_analysis_cat_monit_tgt:
+                    self.list_monit_tgt.append(single_analysis)
+                elif purpose == opt_analysis_cat_info:
+                    self.list_cat_info.append(single_analysis)
 
     @staticmethod
     def generate_test_df(sample_name:str = None,
@@ -558,7 +591,7 @@ class SingleSample:
         self.rec_monit_unit:list[str] = []
         self.sample_comment:str = None
     
-    def load_from_series(self, caller:Sampling, sample_seq:int, ser:pd.Series):
+    def load_from_series(self, caller:Sample, sample_seq:int, ser:pd.Series):
         self.sample_seq = sample_seq
         if not pd.isna(ser[hedr_sample_name]):
             self.name = ser[hedr_sample_name]
