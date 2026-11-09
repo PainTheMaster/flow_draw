@@ -278,13 +278,13 @@ tag_part_flow_rec_sampleID:str = "sample ID"
 # part_flow_rec_sampleID_jp:str = "サンプルID____________"
 """A flowsheet component: record field for sample ID"""
 tag_stc_attrb_conversion:str = "sentence_conversion"
-'''A flowsheet compoent: the template for "conversion", includes a placeholder {reactant}'''
+'''A flowsheet compoent: the template for "conversion", includes a placeholder {analyte}'''
 tag_stc_attrb_rmnng_reactant:str = "sentence_remaining_reactant"
-"""A flowsheet compoent: the template for remaining reactant, includes a placeholder {reactant}"""
+"""A flowsheet compoent: the template for remaining reactant, includes a placeholder {analyte}"""
 tag_stc_attrb_imp_level:str = "sentence_impurity_level"
-"""A flowsheet compoent: the template for a impurity level, includes a palcehoder {impurity}"""
+"""A flowsheet compoent: the template for a impurity level, includes a palcehoder {analyte}"""
 tag_stc_attrb_ee:str = "sentence_ee"
-"""A flowsheet compoent: the template for ee of a sample, includes a palcehoder {sample}"""
+"""A flowsheet compoent: the template for ee of a sample, includes a palcehoder {analyte}"""
 
 
 tag_part_comparator_equal = opt_comparator_equal
@@ -336,9 +336,9 @@ dict_parts_stcs_jp = {tag_part_flow_mthod_instr_sampling : "サンプリング",
                       tag_part_comparator_lt : '<',
                       tag_part_comparator_nmt : '≦',
 
-                      tag_stc_attrb_conversion : "{reactant}転化率",
-                      tag_stc_attrb_rmnng_reactant : "{reactant}残存率",
-                      tag_stc_attrb_imp_level: "{impurity}量",
+                      tag_stc_attrb_conversion : "{analyte}転化率",
+                      tag_stc_attrb_rmnng_reactant : "{analyte}残存率",
+                      tag_stc_attrb_imp_level: "{analyte}量",
 
                       tag_stc_flow_content_sample_name : "サンプル名:{sample_name}",
                       tag_stc_flow_ipc : "IPC:{analysis_item}",
@@ -427,14 +427,7 @@ class Sampling(uo_tag=defs.tag_uo_sampling):
 
     def print_sample(self):
         def print_analytical_items(list_analysis:list[dict[str,Any]]=None):
-            # def comparator_to_str(item:str=None,
-            #                         val1:float|str|None=None, comparator1:str|None=None,
-            #                         val2:float|str|None=None, comparator2:str|None=None,
-            #                         unit:str|None=None)->str:
             def comparator_to_str(item:str=None,
-                                  # val1:float|str|None=None, comparator1:str|None=None,
-                                  # val2:float|str|None=None, comparator2:str|None=None,
-                                  # unit:str|None=None,
                                   analysis:dict[str, Any]=None)->str:
                 val1 = analysis.get(key_criteria_val_1)
                 comparator1 = analysis.get(key_comparator_1)
@@ -485,58 +478,105 @@ class Sampling(uo_tag=defs.tag_uo_sampling):
                 
                 return str_this
                         
-            def select_analysis_item(template_analysis_item:str=None, analysis:dict[str, Any]=None)->str:
-                if analysis.get(key_test_purpose) in [opt_analysis_cat_ipc, opt_analysis_cat_monit_tgt]:
-                    analysis_item = comparator_to_str(item=dict_parts_stcs[tag_stc_attrb_conversion],
-                                                        # val1=analysis.get(key_criteria_val_1),
-                                                        # comparator1=analysis.get(key_comparator_1),
-                                                        # val2=analysis.get(key_criteria_val_2),
-                                                        # comparator2=analysis.get(key_comparator_2),
-                                                        analysis=analysis)
-                else:
-                    analysis_item = dict_parts_stcs[tag_stc_attrb_conversion]
-                return analysis_item
-                   
-            def print_conversion(template_method_col:str=None, analysis:dict[str, Any]=None):
-                if analysis.get(key_test_purpose) in [opt_analysis_cat_ipc, opt_analysis_cat_monit_tgt]:
-                    analysis_item_method = comparator_to_str(item=dict_parts_stcs[tag_stc_attrb_conversion].format(reactant=analysis.get(key_analyte)),
-                                                        # val1=analysis.get(key_criteria_val_1),
-                                                        # comparator1=analysis.get(key_comparator_1),
-                                                        # val2=analysis.get(key_criteria_val_2),
-                                                        # comparator2=analysis.get(key_comparator_2),
-                                                        analysis=analysis)
-                else:
-                    analysis_item_method = dict_parts_stcs[tag_stc_attrb_conversion].format(reactant=analysis.get(key_analyte))
-                # analysis_item = select_analysis_item(template_analysis_item=template_analysis_item, analysis=analysis)
+            # def select_analysis_item(template_analysis_item:str=None, analysis:dict[str, Any]=None)->str:
+            #     if analysis.get(key_test_purpose) in [opt_analysis_cat_ipc, opt_analysis_cat_monit_tgt]:
+            #         analysis_item = comparator_to_str(item=dict_parts_stcs[tag_stc_attrb_conversion],
+            #                                             # val1=analysis.get(key_criteria_val_1),
+            #                                             # comparator1=analysis.get(key_comparator_1),
+            #                                             # val2=analysis.get(key_criteria_val_2),
+            #                                             # comparator2=analysis.get(key_comparator_2),
+            #                                             analysis=analysis)
+            #     else:
+            #         analysis_item = dict_parts_stcs[tag_stc_attrb_conversion]
+            #     return analysis_item
 
-                #recording field prepared
+            def print_generic_analysis_item(template_attrbt:str=None, analysis:dict[str, Any]=None):
+                #Template for method column: e.g., "IPC:{analysis_item}"
+                #Analysis item: e.g., "compound-x転化率" or "99.0%≦compound-x転化率≦99.9%"
+                #Finally, method colum component: e.g., "IPC:99.0%≦compound-x転化率≦99.9%"
+                test_purpose = analysis.get(key_test_purpose)
+                template_method_col:str=None
+                method_col_component:str=None
+                if test_purpose == opt_analysis_cat_ipc:
+                    template_method_col = dict_parts_stcs[tag_stc_flow_ipc]
+                    analysis_item_method = comparator_to_str(item=template_attrbt.replace('{analyte}', analysis.get(key_analyte, '')),
+                                                              analysis=analysis)
+                    method_col_component = template_method_col.replace('{analysis_item}', analysis_item_method)
+                elif test_purpose == opt_analysis_cat_monit_tgt:
+                    template_method_col = dict_parts_stcs[tag_stc_flow_monit_tgt]
+                    analysis_item_method = comparator_to_str(item=template_attrbt.replace('{analyte}', analysis.get(key_analyte, '')),
+                                                              analysis=analysis)
+                    method_col_component = template_method_col.replace('{analysis_item}', analysis_item_method)
+                elif template_analysis == opt_analysis_cat_fio:
+                    template_method_col = dict_parts_stcs[tag_stc_flow_fio]
+                    analysis_item_method = template_attrbt.replace('{analyte}', analysis.get(key_analyte, ''))
+                    method_col_component = template_method_col.replace('{analysis_item}', analysis_item_method)
+
+                #e.g., "compound-x転化率" or "99.0%≦compound-x転化率≦99.9%"
+                # if analysis.get(key_test_purpose) in [opt_analysis_cat_ipc, opt_analysis_cat_monit_tgt]:
+                #     analysis_item_method = comparator_to_str(item=template_attrbt.replace('{analyte}', analysis.get(key_analyte, '')),
+                #                                               analysis=analysis)
+                # else:
+                #     analysis_item_method = template_attrbt.replace('{analyte}', analysis.get(key_analyte, ''))
+
+                #Record field e.g. "転化率____________%"
                 unit = analysis.get(key_unit_meas)
                 unit = unit if unit else ''
-                analysis_item_rec = dict_parts_stcs[tag_stc_attrb_conversion].format(reactant='')
+                analysis_item_rec = template_attrbt.replace('{analyte}','')
                 record_conversion = dict_parts_stcs[tag_stc_flow_rec_analysis_result].format(analysis_item=analysis_item_rec, meas_unit=unit)
 
-                self.flowsheet.put_line(content=template_method_col.format(analysis_item = analysis_item_method), record=record_conversion)
+                # template_method_col.format(analysis_item=analysis_item_method) appears in the method column.
+                # e.g., "IPC:99.0%≦compound-x転化率≦99.9%"
+                # self.flowsheet.put_line(content=template_method_col.format(analysis_item=analysis_item_method), record=record_conversion)
+                self.flowsheet.put_line(content=method_col_component, record=record_conversion)
                 if analysis.get(key_test_purpose) in [opt_analysis_cat_ipc, opt_analysis_cat_monit_tgt]:
                     self.flowsheet.put_line(record = dict_parts_stcs[tag_part_flow_rec_ok_nok])
+
+            # def print_conversion(analysis:dict[str, Any]=None):
+            #     print_generic_analysis_item(template_attrbt=dict_parts_stcs[tag_stc_attrb_conversion],
+            #                                 analysis=analysis)
+            #     if analysis.get(key_test_purpose) in [opt_analysis_cat_ipc, opt_analysis_cat_monit_tgt]:
+            #         analysis_item_method = comparator_to_str(item=dict_parts_stcs[tag_stc_attrb_conversion].format(reactant=analysis.get(key_analyte)),
+            #                                             analysis=analysis)
+            #     else:
+            #         analysis_item_method = dict_parts_stcs[tag_stc_attrb_conversion].format(reactant=analysis.get(key_analyte))
+            #     # analysis_item = select_analysis_item(template_analysis_item=template_analysis_item, analysis=analysis)
+
+            #     #recording field prepared
+            #     unit = analysis.get(key_unit_meas)
+            #     unit = unit if unit else ''
+            #     analysis_item_rec = dict_parts_stcs[tag_stc_attrb_conversion].format(reactant='')
+            #     record_conversion = dict_parts_stcs[tag_stc_flow_rec_analysis_result].format(analysis_item=analysis_item_rec, meas_unit=unit)
+
+            #     self.flowsheet.put_line(content=template_method_col.format(analysis_item = analysis_item_method), record=record_conversion)
+            #     if analysis.get(key_test_purpose) in [opt_analysis_cat_ipc, opt_analysis_cat_monit_tgt]:
+            #         self.flowsheet.put_line(record = dict_parts_stcs[tag_part_flow_rec_ok_nok])
+
             
-            def print_rmnng_reactant(template_method_col:str=None, analysis:dict[str, Any]=None):
-                if analysis.get(key_test_purpose) in [opt_analysis_cat_ipc, opt_analysis_cat_monit_tgt]:
-                    analysis_item_method = comparator_to_str(item=dict_parts_stcs[tag_stc_attrb_rmnng_reactant].format(reactant=analysis.get(key_analyte)),
-                                                             analysis=analysis)
-                else:
-                    analysis_item_method = dict_parts_stcs[tag_stc_attrb_rmnng_reactant].format(reactant=analysis.get(key_analyte))
+            # def print_rmnng_reactant(template_method_col:str=None, analysis:dict[str, Any]=None):
+                # if analysis.get(key_test_purpose) in [opt_analysis_cat_ipc, opt_analysis_cat_monit_tgt]:
+                #     analysis_item_method = comparator_to_str(item=dict_parts_stcs[tag_stc_attrb_rmnng_reactant].format(reactant=analysis.get(key_analyte)),
+                #                                              analysis=analysis)
+                # else:
+                #     analysis_item_method = dict_parts_stcs[tag_stc_attrb_rmnng_reactant].format(reactant=analysis.get(key_analyte))
 
-                #Recording field
-                unit = analysis.get(key_unit_meas)
-                unit = unit if unit else ''
-                analysis_item_rec = dict_parts_stcs[tag_stc_attrb_rmnng_reactant].format(reactant='')
-                record_rmnng_reactant = dict_parts_stcs[tag_stc_flow_rec_analysis_result].format(analysis_item=analysis_item_rec, meas_unit=unit)
+                # #Recording field
+                # unit = analysis.get(key_unit_meas)
+                # unit = unit if unit else ''
+                # analysis_item_rec = dict_parts_stcs[tag_stc_attrb_rmnng_reactant].format(reactant='')
+                # record_rmnng_reactant = dict_parts_stcs[tag_stc_flow_rec_analysis_result].format(analysis_item=analysis_item_rec, meas_unit=unit)
 
-                self.flowsheet.put_line(content=template_method_col.format(analysis_item=analysis_item_method, record=record_rmnng_reactant))
-                if analysis.get(key_test_purpose) in [opt_analysis_cat_ipc, opt_analysis_cat_monit_tgt]:
-                    self.flowsheet.put_line(record = dict_parts_stcs[tag_part_flow_rec_ok_nok])
+                # self.flowsheet.put_line(content=template_method_col.format(analysis_item=analysis_item_method, record=record_rmnng_reactant))
+                # if analysis.get(key_test_purpose) in [opt_analysis_cat_ipc, opt_analysis_cat_monit_tgt]:
+                #     self.flowsheet.put_line(record = dict_parts_stcs[tag_part_flow_rec_ok_nok])
 
-                
+            # def print_imp_level(template_method_col:str=None, analysis:dict[str, Any]=None):
+            #     if analysis.get(key_test_purpose) in [opt_analysis_cat_ipc, opt_analysis_cat_monit_tgt]:
+            #         analysis_item_method = comparator_to_str(item=)
+
+
+
+            
             ############### functions inprint_analytical_items() till here #########################
 
             template_analysis:str = None
@@ -550,10 +590,10 @@ class Sampling(uo_tag=defs.tag_uo_sampling):
 
             for analysis in list_analysis:
                 if analysis.get(key_analysis_attribute) == opt_attrbt_conversion:
-                    print_conversion(template_method_col=template_analysis, analysis=analysis)
+                    # print_conversion(template_method_col=template_analysis, analysis=analysis)
+                    print_generic_analysis_item(template_attrbt=dict_parts_stcs[tag_stc_attrb_conversion])
                 elif analysis.get(key_analysis_attribute) == opt_attrbt_rmnng_reactant:
-                    print_rmnng_reactant(template_method_col=template_analysis, analysis=analysis)
-
+                    print_generic_analysis_item(template_attrbt=dict_parts_stcs[tag_stc_attrb_rmnng_reactant])
 
 
         if self.sample_comment:
