@@ -267,3 +267,13 @@ class MaterialReceiver(ABC):
     def get_list_inputs(self) -> list[InputTrait]:
         pass
     
+
+class SampleTrait(ABC):
+    @abstractmethod
+    def print_sample(self):
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def get_json_schema()->Objason:
+        pass

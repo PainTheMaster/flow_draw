@@ -372,7 +372,7 @@ dict_parts_stcs_jp = {tag_part_flow_mthod_instr_sampling : "サンプリング",
                       tag_stc_attrb_extract_loss: "洗浄相への{analyte}ロス",
                       tag_stc_attrb_resid_excess: "{analyte}残存量",
                       tag_stc_attrb_solv_fraction: "{analyte}含有率",
-                      tag_stc_attrb_tm_conc_pl: "プロセス液中{analyte}濃度",
+                      tag_stc_attrb_tm_conc_pl: "{analyte}濃度",
                       tag_stc_attrb_tm_conc_ml: "母液中{analyte}濃度",
                       tag_stc_attrb_cryst_form: "{analyte}結晶形",
                       tag_stc_attrb_filt_liq_indicator: "洗浄ろ液{analyte}指標",
@@ -410,7 +410,7 @@ dict_parts_stcs = dict_parts_stcs_jp
 # output_unit_operation(self)
 #
 #########################################################
-class Sampling(uo_tag=defs.tag_uo_sampling):
+class Sample(trdef.SampleTrait):
     def __init__(self, flowsheet:fsht.Flowsheet=None, json_dict:dict[str,Any]=None):
         self.flowsheet = flowsheet
         if not json_dict:
@@ -481,11 +481,11 @@ class Sampling(uo_tag=defs.tag_uo_sampling):
                 if not unit:
                     unit=''
                 str_this = ''
-                if ((val1 and comparator1) and not (val2 and comparator2)
-                    or (not(val1 and comparator1) and (val2 and comparator2))):
+                if ((val1 is not None and comparator1) and not (val2 is not None and comparator2)
+                    or (not(val1 is not None and comparator1) and (val2 is not None and comparator2))):
                     val = None
                     comp = None
-                    if val1:
+                    if val1 is not None:
                         val = val1
                         comp = comparator1
                     else:
@@ -501,7 +501,7 @@ class Sampling(uo_tag=defs.tag_uo_sampling):
                         str_this = str(val) + unit + dict_parts_stcs[tag_part_comparator_nmt] + item
                     elif comp ==  opt_comparator_gt:
                         str_this = str(val) + unit + dict_parts_stcs[tag_part_comparator_lt] + item
-                elif (val1 and comparator1) and (val2 and comparator2):
+                elif (val1 is not None and comparator1) and (val2 is not None and comparator2):
                     if comparator1 == opt_comparator_lt:
                         str_this = item + dict_parts_stcs[tag_part_comparator_lt] + str(val1) + unit
                     elif comparator1 == opt_comparator_nmt:
@@ -530,17 +530,17 @@ class Sampling(uo_tag=defs.tag_uo_sampling):
                 method_col_component:str=None
                 if test_purpose == opt_analysis_cat_ipc:
                     template_method_col = dict_parts_stcs[tag_stc_flow_ipc]
-                    analysis_item_method = comparator_to_str(item=template_attrbt.replace('{analyte}', analysis.get(key_analyte, '')),
+                    analysis_item_method = comparator_to_str(item=template_attrbt.replace('{analyte}', (analysis.get(key_analyte) or '')),
                                                               analysis=analysis)
                     method_col_component = template_method_col.replace('{analysis_item}', analysis_item_method)
                 elif test_purpose == opt_analysis_cat_monit_tgt:
                     template_method_col = dict_parts_stcs[tag_stc_flow_monit_tgt]
-                    analysis_item_method = comparator_to_str(item=template_attrbt.replace('{analyte}', analysis.get(key_analyte, '')),
+                    analysis_item_method = comparator_to_str(item=template_attrbt.replace('{analyte}', (analysis.get(key_analyte) or '')),
                                                               analysis=analysis)
                     method_col_component = template_method_col.replace('{analysis_item}', analysis_item_method)
-                elif template_analysis == opt_analysis_cat_fio:
+                elif test_purpose == opt_analysis_cat_fio:
                     template_method_col = dict_parts_stcs[tag_stc_flow_fio]
-                    analysis_item_method = template_attrbt.replace('{analyte}', analysis.get(key_analyte, ''))
+                    analysis_item_method = template_attrbt.replace('{analyte}', (analysis.get(key_analyte) or ''))
                     method_col_component = template_method_col.replace('{analysis_item}', analysis_item_method)
 
                 #Record field e.g. "転化率____________%"
@@ -554,14 +554,14 @@ class Sampling(uo_tag=defs.tag_uo_sampling):
                     self.flowsheet.put_line(record = dict_parts_stcs[tag_part_flow_rec_ok_nok])
             ############### functions inprint_analytical_items() till here #########################
 
-            template_analysis:str = None
-            test_purpose = list_analysis[0].get(key_test_purpose)
-            if test_purpose == opt_analysis_cat_ipc:
-                template_analysis = dict_parts_stcs[tag_stc_flow_ipc]
-            elif test_purpose == opt_analysis_cat_monit_tgt:
-                template_analysis = dict_parts_stcs[tag_stc_flow_monit_tgt]
-            elif template_analysis == opt_analysis_cat_fio:
-                template_analysis = dict_parts_stcs[tag_stc_flow_fio]
+            # template_analysis:str = None
+            # test_purpose = list_analysis[0].get(key_test_purpose)
+            # if test_purpose == opt_analysis_cat_ipc:
+            #     template_analysis = dict_parts_stcs[tag_stc_flow_ipc]
+            # elif test_purpose == opt_analysis_cat_monit_tgt:
+            #     template_analysis = dict_parts_stcs[tag_stc_flow_monit_tgt]
+            # elif template_analysis == opt_analysis_cat_fio:
+            #     template_analysis = dict_parts_stcs[tag_stc_flow_fio]
 
             for analysis in list_analysis:
                 if analysis.get(key_analysis_attribute) == opt_attrbt_conversion:
@@ -602,22 +602,32 @@ class Sampling(uo_tag=defs.tag_uo_sampling):
                     print_generic_analysis_item(template_attrbt=dict_parts_stcs[tag_stc_attrb_particle_size], analysis=analysis)
                 elif analysis.get(key_analysis_attribute) == opt_attrbt_other:
                     print_generic_analysis_item(template_attrbt=dict_parts_stcs[tag_stc_attrb_other], analysis=analysis)
+                else:
+                    warnings.warn(message=f'{self.__class__.__name__}.print_sample() Unknown attribute "{analysis.get(key_analysis_attribute)}".',
+                                  category=RuntimeWarning)
 
         if self.sample_comment:
             self.flowsheet.put_body_comments(self.sample_comment)
 
-        sample_name = self.stem_sample_name + self.suffix_sample_name if self.suffix_sample_name else ''
-        self.flowsheet.put_line(time=tag_flow_cmn_rec_time,
+        sample_name = self.stem_sample_name + (self.suffix_sample_name or '')
+        self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
                                 method=dict_parts_stcs[tag_part_flow_mthod_instr_sampling],
                                 content=dict_parts_stcs[tag_stc_flow_content_sample_name].format(sample_name=sample_name),
                                 record=dict_parts_stcs[tag_part_flow_rec_sampleID],
                                 operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
                                 witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
 
+        if self.list_ipc:
+           print_analytical_items(list_analysis=self.list_ipc)
+        if self.list_monit_tgt:
+            print_analytical_items(list_analysis=self.list_monit_tgt)
+        if self.list_fio:
+            print_analytical_items(list_analysis=self.list_fio) 
+
 
 
     @staticmethod
-    def get_json_schema(caller:trdef.UniversalTrait = None) -> Objason:
+    def get_json_schema() -> Objason:
         class_sample = Primitive(prim_type='string',
                                  key=key_class_name,
                                  description=f'Constant. The name of the class "{const_class_sample}".',
@@ -650,7 +660,7 @@ class Sampling(uo_tag=defs.tag_uo_sampling):
                                  'Meeting the target value is deriable, but not a strict requirement. Not only the target value, but also various relevant conditions are took into consideration. '
                                  f'"{opt_analysis_cat_fio}" The analysis is done simply for the sake of process monitoring. No decision is made from the result.',
                                  enum=list_opt_analysis_purpose,
-                                 nullable=None,
+                                 nullable=False,
                                  required=True)
         test_attribute =  Primitive(prim_type='string',
                                     key=key_analysis_attribute,
@@ -761,14 +771,19 @@ class Sampling(uo_tag=defs.tag_uo_sampling):
                              nullable=None)
         obj_sample = Objason(key=key_obj_sampe,
                              props=[class_sample, stem_sample_name, suffix_sample_name, comment, arr_analysis],
-                             description='An object for a sample. Sample has a name and ')
+                             description='An object for a sample. Sample has (stem and optional suffix for) a name and an optional array of analysis.',
+                             required=True,
+                             nullable=False)
         
         return obj_sample
         
 
     def __load_from_json_dict(self, json_dict:dict[str, Any]):
-        def sort_transf_analysis(orig:list[dict[str, Any]]=None, dest:list[dict[str, Any]]=None):
-            if not orig:
+        def sort_transf_analysis(orig:list[dict[str, Any]]=None, dest:list[dict[str, Any]]|None=None):
+            if orig is None:
+                return
+
+            if dest is None:
                 return
             
             for attr in list_opt_attrbt:
@@ -778,15 +793,19 @@ class Sampling(uo_tag=defs.tag_uo_sampling):
                     if attr == analysis.get(key_analysis_attribute):
                         matched.append(orig.pop(i))
                 dest.extend(reversed(matched))
+            if orig:
+                for element in orig:
+                    warnings.warn(message=f'{self.__class__.__name__}.__load_from_json_dict(): unknown attribute "{element.get(key_analysis_attribute)}"',
+                                  category=RuntimeWarning)
                         
-
         if json_dict.get(key_class_name) != const_class_sample:
             warnings.warn(message=f'{self.__class__.__name__}.__load_from_json_dict(): The json_dictionary doesn\'t include the constant for the object name "{const_class_sample}".',
-                          type=RuntimeWarning)
+                          category=RuntimeWarning)
         self.stem_sample_name = json_dict.get(key_stem_sample_name)
         if not self.stem_sample_name:
+            self.stem_sample_name = '<placeholder:samplename>'
             warnings.warn(message=f'{self.__class__.__name__}.__load_from_json_dict(): No sample name stem is provided.',
-                          type=RuntimeWarning)
+                          category=RuntimeWarning)
         self.suffix_sample_name = json_dict.get(key_suffix_sample_name)
         self.sample_comment = json_dict.get(key_sample_comment)
         arr_analysis = json_dict.get(key_arr_analysis)
@@ -804,7 +823,7 @@ class Sampling(uo_tag=defs.tag_uo_sampling):
                     buf_list_fio.append(single_analysis)
             sort_transf_analysis(orig=buf_list_ipc, dest=self.list_ipc)
             sort_transf_analysis(orig=buf_list_monit_tgt, dest=self.list_monit_tgt)
-            sort_transf_analysis(orig=buf_list_fio, dest=single_analysis)
+            sort_transf_analysis(orig=buf_list_fio, dest=self.list_fio)
 
 
     # @staticmethod
@@ -860,169 +879,6 @@ class Sampling(uo_tag=defs.tag_uo_sampling):
     #     df.at[row, hedr_monit_rec_units] = monit_rec_units
     #     df.at[row, hedr_sample_comment] = sample_comment
 
-class SingleSample:
-    def __init__(self, flowsheet:fsht.Flowsheet=None):
-        self.flowsheet:fsht.Flowsheet = flowsheet
-        self.sample_seq:int = None
-        self.name:str = None
-        self.category:str = None
-        """IPC, monitoring, both"""
-        self.content_ipc_criteria:list[str] = []
-        self.content_monit_items:list[str] = []
-        self.rec_ipc_item_name:list[str] = []
-        self.rec_ipc_unit:list[str] = []
-        self.rec_monit_item_name:list[str] = []
-        self.rec_monit_unit:list[str] = []
-        self.sample_comment:str = None
-    
-    def load_from_series(self, caller:Sampling, sample_seq:int, ser:pd.Series):
-        self.sample_seq = sample_seq
-        if not pd.isna(ser[hedr_sample_name]):
-            self.name = ser[hedr_sample_name]
-        else:
-            raise ValueError(f"{caller.__class__.__name__} Op. Seq. {caller.get_seq}: No name provided for the {self.sample_seq+1}th sample in the detail input.")
-        
-        if not pd.isna(ser[hedr_sampling_cat]):
-            self.category = ser[hedr_sampling_cat]
-        else:
-            raise ValueError(f"{caller.__class__.__name__} Op. Seq. {caller.get_seq}: No sampling category chosen for the {self.sample_seq+1}th sample in the detail input.")
-        
-        if self.category == opt_sampling_cat_ipc or self.category == opt_sampling_cat_both:
-            if not pd.isna(ser[key_criteria_val_1]):
-                str_criteria:str = ser[key_criteria_val_1]
-                if not pd.isna(str_criteria):
-                    self.content_ipc_criteria = str_criteria.split("\n")
-            else:
-                raise ValueError(f"{caller.__class__.__name__} Op. Seq. {caller.get_seq}: No IPC criteria provided for the {self.sample_seq+1}th sample in the detail input \
-                                although {opt_sampling_cat_ipc}/{opt_sampling_cat_both} is selected in the colum {hedr_sampling_cat}.")
-            if not pd.isna(ser[hedr_ipc_rec_titles]):
-                str_ipc_rec_titles:str = ser[hedr_ipc_rec_titles]
-                str_ipc_rec_units:str = ser[hedr_ipc_rec_units]
-                self.rec_ipc_item_name = str_ipc_rec_titles.split("\n")
-                if not pd.isna(str_ipc_rec_units):
-                    self.rec_ipc_unit = str_ipc_rec_units.split("\n")
-                if len(self.rec_ipc_item_name) != len(self.rec_ipc_unit):
-                    raise ValueError(f"{caller.__class__.__name__} Op. Seq. {caller.get_seq}: Mismatched numbers of IPC items and their units for the {self.sample_seq+1}th sample in the detail input.")
-                if len(self.rec_ipc_item_name) != len(self.content_ipc_criteria):
-                    raise ValueError(f"{caller.__class__.__name__} Op. Seq. {caller.get_seq}: Mismatched numbers of IPC criteria and their units for the {self.sample_seq+1}th sample in the detail input.")
-            else:
-                raise ValueError(f"{caller.__class__.__name__} Op. Seq. {caller.get_seq}: No IPC record name provided for the {self.sample_seq+1}th sample in the detail input \
-                                although {opt_sampling_cat_ipc}/{opt_sampling_cat_both} is selected in the colum {hedr_sampling_cat}.")
-        
-        if self.category == opt_sampling_cat_monit or self.category == opt_sampling_cat_both:
-            if not pd.isna(ser[hedr_monit_item_high]):
-                str_monit_item:str = ser[hedr_monit_item_high]
-                self.content_monit_items = str_monit_item.split("\n")
-            if not pd.isna(ser[hedr_monit_rec_items]):
-                str_monit_rec_items:str =  ser[hedr_monit_rec_items]
-                str_monit_rec_units:str = ser[hedr_monit_rec_units]
-                self.rec_monit_item_name = str_monit_rec_items.split("\n")
-                if not pd.isna(str_monit_rec_units):
-                    self.rec_monit_unit = str_monit_rec_units.split("\n")
-                if len(self.rec_monit_item_name) != len(self.rec_monit_unit):
-                    raise ValueError(f"{caller.__class__.__name__} Op. Seq. {caller.get_seq}: Mismatched numbers of monitoring items and their units for the {self.sample_seq+1}th sample in the detail input.")
-        if not pd.isna(ser[hedr_sample_comment]):
-            self.sample_comment = ser[hedr_sample_comment]
-
-    def load_from_single_sample_json(self, sample_seq:int=None, sample:dict[str,any]=None):
-        self.sample_seq = sample_seq
-        self.name = sample[hedr_sample_name]
-        if self.name is None:
-            warnings.warn(
-                message=f"No name given for sample sequence {self.sample_seq}",
-                category=RuntimeWarning
-            )
-        self.category=sample[hedr_sampling_cat]
-        if self.category is None:
-            warnings.warn(
-                message=f"No sampling category given for sample sequence {self.sample_seq}",
-                category=RuntimeWarning
-            )
-
-        if self.category == opt_sampling_cat_ipc or self.category == opt_sampling_cat_both:
-            arr_ipc:list[dict[str, any]] = sample[key_json_arr_ipc_items]
-            if arr_ipc is None:
-                warnings.warn(
-                    message=f'"{key_json_arr_ipc_items}" is null for sample sequence {self.sample_seq} '
-                    f'although the catetory is "{opt_sampling_cat_ipc}" is "{opt_sampling_cat_both}."'
-                )
-            else:
-                for ipc in arr_ipc:
-                    self.content_ipc_criteria.append(ipc[key_criteria_val_1])
-                    self.rec_ipc_item_name.append(ipc[hedr_ipc_rec_titles])
-                    if ipc[hedr_ipc_rec_units] is not None:
-                        self.rec_ipc_unit.append(ipc[hedr_ipc_rec_units])
-                    else:
-                        self.rec_ipc_unit.append("")
-        
-        if self.category == opt_sampling_cat_monit or self.category == opt_sampling_cat_both:
-            arr_monit:list[dict[str, any]] = sample[key_json_arr_monit]
-            if arr_monit is None:
-                warnings.warn(
-                    message=f'"{key_json_arr_monit}" is null for sample sequence {self.sample_seq} '
-                    f'although the catetory is "{opt_sampling_cat_monit}" is "{opt_sampling_cat_both}."'
-                )
-            else:
-                for monit in arr_monit: #"monit" corresponds to obj_monit
-                   self.__process_obj_monit(sample_seq=sample_seq, obj_monit=monit)
-
-    def __process_obj_monit(self, sample_seq:int = None, obj_monit:dict[str, any]=None):
-        if obj_monit[key_json_arr_monit_items] is None:
-            warnings.warn(
-                message=f'"arr_monit_items" is empty for sample sequence {sample_seq}',
-                category=RuntimeWarning)
-        else:
-            for i, monit_pair in enumerate(obj_monit[key_json_arr_monit_items]):
-                high_level_item:str = ""
-                if i == 0:
-                    high_level_item = obj_monit[hedr_monit_item_high]
-                self.content_monit_items.append(high_level_item)
-                self.rec_monit_item_name.append(monit_pair[hedr_monit_rec_items])
-                if monit_pair[hedr_monit_rec_units] is None:
-                    self.rec_monit_unit.append("")
-                else:
-                    self.rec_monit_unit.append(monit_pair[hedr_monit_rec_units])
-
-
-    def output_single_sample(self):
-        self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
-                                method=dict_parts_stcs[tag_part_flow_mthod_instr_sampling],
-                                content=dict_parts_stcs[tag_stc_flow_content_sample_name].format(sample_name=self.name),
-                                record=dict_parts_stcs[tag_part_flow_rec_sampleID],
-                                operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
-                                witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
-        if self.category == opt_sampling_cat_ipc or self.category == opt_sampling_cat_both:
-            self.__output_IPC()
-        if self.category == opt_sampling_cat_monit or self.category == opt_sampling_cat_both:
-            self.__output_monit()
-        
-
-
-    def __output_IPC(self):
-        for idx in range(len(self.content_ipc_criteria)):
-            temp_ipc_criteria:str = dict_parts_stcs[tag_stc_flow_ipc].format(ipc_criterion=self.content_ipc_criteria[idx])
-            temp_ipc_rec:str = dict_parts_stcs[tag_stc_flow_rec_ipc_result].format(ipc_item=self.rec_ipc_item_name[idx], ipc_rec_unit=self.rec_ipc_unit[idx])
-            self.flowsheet.put_line(content=temp_ipc_criteria,
-                                    record=temp_ipc_rec)
-            self.flowsheet.put_line(record=dict_parts_stcs[tag_part_flow_rec_ok_nok])
-
-    def __output_monit(self):
-        idx_longer:int = None
-        if len(self.content_monit_items) >= len(self.rec_monit_item_name):
-            idx_longer = len(self.content_monit_items)
-        else:
-            idx_longer = len(self.rec_monit_item_name)
-        
-        for idx in range(idx_longer):
-            temp_content_monit_item: str = ""
-            if idx <=len(self.content_monit_items)-1:
-                temp_content_monit_item = dict_parts_stcs[tag_stc_flow_fio].format(monit_item=self.content_monit_items[idx])
-            temp_rec_monit_item:str = ""
-            if idx <= len(self.rec_monit_item_name)-1:
-                temp_rec_monit_item = dict_parts_stcs[tag_stc_flow_rec_monit_result].format(monit_item=self.rec_monit_item_name[idx],
-                                                                                            monit_rec_unit=self.rec_monit_unit[idx])
-            self.flowsheet.put_line(content=temp_content_monit_item,
-                                    record=temp_rec_monit_item)
 
             
 
