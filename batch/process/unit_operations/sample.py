@@ -159,6 +159,8 @@ opt_attrbt_rmnng_reactant = 'remaining_reactant'
 """An option for analysis attribute: remaining reactant."""
 opt_attrbt_imp_level = 'impurity_level'
 """An option for analysis attribute: impurity level"""
+opt_attrbt_purity = 'purity'
+"""An option for analysis attribute: purity of the target material, e.g., HPLC area%"""
 opt_attrbt_ee = 'ee'
 """An option for analysis attribute: enantiomeric excess"""
 opt_attrbt_de = 'de'
@@ -195,6 +197,7 @@ opt_attrbt_other = 'attribute_other'
 list_opt_attrbt = [opt_attrbt_conversion,
                    opt_attrbt_rmnng_reactant,
                    opt_attrbt_imp_level,
+                   opt_attrbt_purity,
                    opt_attrbt_ee,
                    opt_attrbt_de,
                    opt_attrbt_water_cntnt,
@@ -283,6 +286,8 @@ tag_stc_attrb_rmnng_reactant:str = "sentence_remaining_reactant"
 """A flowsheet compoent: the template for remaining reactant, includes a placeholder {analyte}"""
 tag_stc_attrb_imp_level:str = "sentence_impurity_level"
 """A flowsheet compoent: the template for a impurity level, includes a palcehoder {analyte}"""
+tag_stc_attrb_purity:str = "sentence_purity"
+"""A flowsheet compoent: the template for purity of the target material, includes a placeholder {analyte}"""
 tag_stc_attrb_ee:str = "sentence_ee"
 """A flowsheet compoent: the template for ee of a sample, includes a palcehoder {analyte}"""
 tag_stc_attrb_de:str = "sentence_de"
@@ -365,6 +370,7 @@ dict_parts_stcs_jp = {tag_part_flow_mthod_instr_sampling : "サンプリング",
                       tag_stc_attrb_conversion : "{analyte}転化率",
                       tag_stc_attrb_rmnng_reactant : "{analyte}残存率",
                       tag_stc_attrb_imp_level: "{analyte}量",
+                      tag_stc_attrb_purity: "{analyte}純度",
                       tag_stc_attrb_ee: "{analyte}ee",
                       tag_stc_attrb_de: '{analyte}de',
                       tag_stc_attrb_water_cntnt: "水分含量",
@@ -561,6 +567,8 @@ class Sample(trdef.SampleTrait):
                     print_generic_analysis_item(template_attrbt=dict_parts_stcs[tag_stc_attrb_rmnng_reactant], analysis=analysis)
                 elif analysis.get(key_analysis_attribute) == opt_attrbt_imp_level:
                     print_generic_analysis_item(template_attrbt=dict_parts_stcs[tag_stc_attrb_imp_level], analysis=analysis)
+                elif analysis.get(key_analysis_attribute) == opt_attrbt_purity:
+                    print_generic_analysis_item(template_attrbt=dict_parts_stcs[tag_stc_attrb_purity], analysis=analysis)
                 elif analysis.get(key_analysis_attribute) == opt_attrbt_ee:
                     print_generic_analysis_item(template_attrbt=dict_parts_stcs[tag_stc_attrb_ee], analysis=analysis)
                 elif analysis.get(key_analysis_attribute) == opt_attrbt_de:
@@ -661,13 +669,17 @@ class Sample(trdef.SampleTrait):
                                     '- Is NOT:\n'
                                     '   - an analyte (THF itself is an analyte)\n'
                                     '   - a process parameter (temperature, addition rate are inputs)\n'
-                                    '   - a test category (purity, residual solvents group attributes)\n'
+                                    '   - a test category that groups attributes (e.g., "related substances" as a group of individual impurities, "residual solvents" as a group of individual solvents). '
+                                    f'Note that purity of the target material as a single value (e.g., HPLC area%) IS an attribute; use "{opt_attrbt_purity}".\n'
                                     '   - a test method (HPLC, GC, NMR measure attributes)\n'
                                     f'"{opt_attrbt_conversion}": Conversion of the starting material. Normally associated with the starting material as the analyte. '
                                         f'"{opt_attrbt_rmnng_reactant}" can be used for the same purpose. Please select an attribute in a source-faithful manner.\n'
                                     f'"{opt_attrbt_rmnng_reactant}": Remaining reactant, e.g., starting material, intermediate, etc. Associated with the reactant as the analyte. '
                                         f'In the case the starting material is the reactant, "{opt_attrbt_conversion}" can be used for the same purpose. Please choose an attribute in a source-faithful manner.\n'
                                     f'"{opt_attrbt_imp_level}": Impurity level. Associated with a specified impurity as the analyte.\n'
+                                    f'"{opt_attrbt_purity}": Purity of the target material, normally expressed as HPLC area%. The target material is the analyte. '
+                                        f'For the level of an individual impurity, use "{opt_attrbt_imp_level}". '
+                                        f'For quantitative content of the target material against a reference standard (wt%), use "{opt_attrbt_filt_assay_tm}".\n'
                                     f'"{opt_attrbt_ee}": Enantiomeric excess. Normally associated with the target material as the analyte, but another compound can be an analyte.\n'
                                     f'"{opt_attrbt_de}": Diastereomeric excess. Normally associated with one of the diastereomers of the target compound, but another can be an analyte.\n'
                                     f'"{opt_attrbt_water_cntnt}": Water content in the sample. Water is always the analyte. Can be associated with the target material, process liquid, etc.\n'
