@@ -110,7 +110,7 @@ dict_parts_stcs = dict_parts_stcs_jp
 class ClassName(uo.UnitOperation, uo_tag=defs.tag_uo_"UO_NAME"):
     def __init__(self,
                  caller: type[trdef.UniversalTrait] =None,
-                 flowsheet:fsht.Flowsheet=None,
+                 flowsheet:trdef.FlowsheetTrait=None,
                  operation_seq: int=None,
                  num_subitems: int = None,
                  edit_comment:str=None):

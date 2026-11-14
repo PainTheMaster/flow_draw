@@ -5,7 +5,7 @@
 #########################################################
 import pandas as pd
 import flow_draw.definitions as defs
-import flow_draw.data_io.flowsheet as fsht
+# import flow_draw.data_io.flowsheet as fsht
 from typing import Optional
 from flow_draw.batch.process.unit_operations import unit_operation as uo
 from flow_draw.data_io import process_io as procio
@@ -179,7 +179,7 @@ dict_flow_parts:dict[str, str] = dict_flow_part_jp
 class CIP(uo.UnitOperation, uo_tag=defs.tag_uo_cip):
     def __init__(self,
                  caller: trdef.GetMats =None,
-                 flowsheet:fsht.Flowsheet=None,
+                 flowsheet:trdef.FlowsheetTrait=None,
                  operation_seq: int=None,
                  num_subitems: int = None,
                  edit_comment:str=None):
@@ -325,8 +325,8 @@ class CIP(uo.UnitOperation, uo_tag=defs.tag_uo_cip):
 
 class UnitCleaning:
     # def __init__(self, caller:trdef.UniversalTrait=None, sheet:fsht.Flowsheet=None, ser_cip:pd.Series=None):
-    def __init__(self, sheet:fsht.Flowsheet=None):
-        self.flowsheet:fsht.Flowsheet = sheet
+    def __init__(self, sheet:trdef.FlowsheetTrait=None):
+        self.flowsheet:trdef.FlowsheetTrait = sheet
         self.target:str = None
         self.solvent:str = None
         self.qty_kg:float = None

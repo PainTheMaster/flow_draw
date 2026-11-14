@@ -9,6 +9,90 @@ from flow_draw.data_io.json_io import Objason
 # from flow_draw.trait_def.trait_def import AbstInput
 
 
+class FlowsheetTrait(ABC):
+    @abstractmethod
+    def __init__(self):
+        pass
+
+    @abstractmethod
+    def put_body_comments(self, comments:str):
+        pass
+
+    @abstractmethod
+    def header_organizer(self,
+                         op_nr: int|str|None=None,
+                         title: str=None)->int:
+        pass
+
+    @abstractmethod
+    def allocator_header_organizer(self, title:str=None)->int:
+        pass    
+
+    @abstractmethod
+    def put_line(self,
+                 time: str =None,
+                 method: str=None,
+                 content: str=None,
+                 record: str=None,
+                 operator: str=None,
+                 witness: str=None)->int:
+        pass
+
+    @abstractmethod
+    def put_material(self,
+                     time: str ='',
+                     method: str='',
+                     content:str='',
+                     record: str='',
+                     operator: str='',
+                     witness: str='',
+                     name_mat:str=None,
+                     mw:float=None,
+                     dens:float=None,
+                     conc_assay:float=None,
+                     equiv:float=None,
+                     v_per_w:float=None,
+                     wwpct:float=None,
+                     wt_abs_kg_gro:float=None,
+                     vol_abs_litre:float=None,
+                     error_rel:float=None)->int:
+        pass
+
+    @abstractmethod
+    def put_links(self,
+                  line_fs_this:int=None,
+                  name_basis:str=None,
+                  ref_mol_basis:str=None,
+                  ref_kg_net_basis:str=None)->int:
+        pass
+
+
+    @abstractmethod
+    def body_organizer(self,
+                       list_col_time: list[str],
+                       list_col_method: list[str],
+                       list_col_content: list[str],
+                       list_col_record: list[str],
+                       list_col_operator: list[str],
+                       list_col_witness: list[str])->int:
+        pass
+
+
+    @abstractmethod
+    def linefeed(self)->int:
+        pass
+
+    @abstractmethod
+    def get_current_line(self) -> int:
+        pass
+
+    @abstractmethod
+    def save(self, filename:str):
+        pass
+
+
+
+
 class MaterialsTrait(ABC):
     @abstractmethod
     def get_name_sm(self)->str:
@@ -120,6 +204,10 @@ class GetProcName(UniversalTrait):
 
 
 class InputTrait(ABC):
+    @abstractmethod
+    def __init__(self, flowsheet:FlowsheetTrait=None, json_dict:dict[str, Any]=None):
+        pass
+
     @abstractmethod
     def load_params_from_series(self, ser: pd.Series):
         pass
@@ -270,10 +358,13 @@ class MaterialReceiver(ABC):
 
 class SampleTrait(ABC):
     @abstractmethod
+    def __init__(self, flowsheet:FlowsheetTrait=None, json_dict:dict[str, Any]=None)
+
+    @abstractmethod
     def print_sample(self):
         pass
 
     @staticmethod
     @abstractmethod
-    def get_json_schema()->Objason:
+    def get_json_schema(caller:UniversalTrait=None)->Objason:
         pass

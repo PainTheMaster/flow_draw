@@ -2,13 +2,14 @@ import pandas as pd
 import json
 import flow_draw.definitions as defs
 import warnings
+import flow_draw.trait_def.trait_def as trdef
 from typing import Optional
 from flow_draw.batch.process.unit_operations import unit_operation as uo
 from flow_draw.data_io import process_io
 from flow_draw.materials import materials as mats
 # from typing import TYPE_CHECKING
 # if TYPE_CHECKING:
-from flow_draw.data_io.flowsheet import Flowsheet
+# from flow_draw.data_io.flowsheet import Flowsheet
 # import flow_draw.data_io.flowsheet as fsht
 from flow_draw.trait_def.trait_def import GetMats, GetInputs, MaterialReceiver
 from flow_draw.data_io.json_io import Objason, Primitive, Array
@@ -55,7 +56,7 @@ class Charging(uo.UnitOperation, MaterialReceiver, uo_tag=defs.tag_uo_charging):
     TODO: Make some comment here.
     """
     
-    def __init__(self, caller: GetMats|GetInputs=None, flowsheet:"Flowsheet"=None, operation_seq:int=None, num_subitems: int =None, edit_comment:str=None):
+    def __init__(self, caller: GetMats|GetInputs=None, flowsheet:trdef.FlowsheetTrait=None, operation_seq:int=None, num_subitems: int =None, edit_comment:str=None):
         """
         Initialises the newly created instance of the class Charging.
 

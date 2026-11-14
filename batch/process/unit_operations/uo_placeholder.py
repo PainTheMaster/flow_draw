@@ -7,7 +7,7 @@ from typing import Optional
 from flow_draw.batch.process.unit_operations import unit_operation as uo
 from flow_draw.data_io import process_io as procio
 from flow_draw.materials import materials as mats
-from flow_draw.data_io.flowsheet import Flowsheet as fsht
+# from flow_draw.data_io.flowsheet import Flowsheet as fsht
 from flow_draw.trait_def import trait_def as trdef
 from flow_draw.data_io.json_io import Objason, Array, Primitive
 
@@ -65,7 +65,7 @@ class Placeholder(uo.UnitOperation, uo_tag=defs.tag_uo_placeholder):
 
     def __init__(self,
                  caller:type[trdef.UniversalTrait]=None,
-                 flowsheet:fsht.Flowsheet = None,
+                 flowsheet:trdef.FlowsheetTrait = None,
                  operation_seq:int = None,
                  num_subitems:int = None,
                  edit_comment:str = None):

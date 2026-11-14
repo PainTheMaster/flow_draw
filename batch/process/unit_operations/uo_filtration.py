@@ -3,7 +3,7 @@
 #########################################################
 import pandas as pd
 import flow_draw.definitions as defs
-import flow_draw.data_io.flowsheet as fsht
+# import flow_draw.data_io.flowsheet as fsht
 from typing import Optional
 from flow_draw.batch.process.unit_operations import unit_operation as uo
 from flow_draw.data_io import process_io as procio
@@ -229,7 +229,7 @@ dict_flowsheet_comp = dict_flowsheet_comp_jp
 class Filtration(uo.UnitOperation, uo_tag=defs.tag_uo_filt):
     def __init__(self,
                  caller: type[trdef.UniversalTrait] =None,
-                 flowsheet:fsht.Flowsheet=None,
+                 flowsheet:trdef.FlowsheetTrait=None,
                  operation_seq: int=None,
                  num_subitems: int = None,
                  edit_comment:str=None):

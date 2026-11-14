@@ -3,7 +3,7 @@
 #########################################################
 import pandas as pd
 import flow_draw.definitions as defs
-import flow_draw.data_io.flowsheet as fsht
+# import flow_draw.data_io.flowsheet as fsht
 import warnings
 from typing import Optional
 from flow_draw.batch.process.unit_operations import unit_operation as uo
@@ -293,7 +293,7 @@ dict_stcs = dict_stcs_jp
 class Agitation(uo.UnitOperation, uo_tag=defs.tag_uo_agitation):
     def __init__(self,
                  caller:type[trdef.UniversalTrait] = None,
-                 flowsheet:fsht.Flowsheet = None,
+                 flowsheet:trdef.FlowsheetTrait = None,
                  operation_seq:int = None,
                  num_subitems: int = None,
                  edit_comment:str = None):

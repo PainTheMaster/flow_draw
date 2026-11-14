@@ -4,7 +4,7 @@
 import pandas as pd
 import warnings
 import flow_draw.definitions as defs
-import flow_draw.data_io.flowsheet as fsht
+# import flow_draw.data_io.flowsheet as fsht
 from typing import Optional
 from typing import Literal
 from flow_draw.batch.process.unit_operations import unit_operation as uo
@@ -341,7 +341,7 @@ dict_stc:dict[str, str] = dict_stc_jp
 class Drying(uo.UnitOperation, uo_tag=defs.tag_uo_drying):
     def __init__(self,
                  caller: type[trdef.GetProcName] =None,
-                 flowsheet:fsht.Flowsheet=None,
+                 flowsheet:trdef.FlowsheetTrait=None,
                  operation_seq: int=None,
                  num_subitems: int = None,
                  edit_comment:str=None):

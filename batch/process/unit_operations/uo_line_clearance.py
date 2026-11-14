@@ -4,7 +4,7 @@
 #########################################################
 import pandas as pd
 import flow_draw.definitions as defs
-import flow_draw.data_io.flowsheet as fsht
+# import flow_draw.data_io.flowsheet as fsht
 from typing import Optional
 from flow_draw.batch.process.unit_operations import unit_operation as uo
 from flow_draw.data_io import process_io as procio
@@ -107,7 +107,7 @@ lang_dict_stcs_lnclrnc = dict_jp_stcs_flow_lnclrnc
 class LineClearance(uo.UnitOperation, uo_tag=defs.tag_uo_line_clearance):
     def __init__(self,
                  caller:trdef.UniversalTrait = None,
-                 flowsheet:fsht.Flowsheet  = None,
+                 flowsheet:trdef.FlowsheetTrait = None,
                  operation_seq:int = None,
                  num_subitems:int = None,
                  edit_comment:str = None):

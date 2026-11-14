@@ -6,7 +6,7 @@ import pandas as pd
 
 from flow_draw import definitions as defs
 #from flow_draw import chemistry as chem
-from flow_draw.data_io import flowsheet as fsht
+# from flow_draw.data_io import flowsheet as fsht
 from flow_draw.trait_def import trait_def as trdef
 from flow_draw.data_io.json_io import JsonEntity, Array, Objason, Primitive
 
@@ -93,7 +93,7 @@ class UnitOperation(ABC):
 
     def __init__(self,
                  caller: type[trdef.UniversalTrait] =None,
-                 flowsheet:"fsht.Flowsheet"=None,
+                 flowsheet:trdef.FlowsheetTrait=None,
                  operation_seq: int=None,
                  num_subitems: int = None,
                  edit_comment:str=None):    
@@ -116,7 +116,7 @@ class UnitOperation(ABC):
          None
         """
         self.caller: type[trdef.UniversalTrait] = caller
-        self.flowsheet: "fsht.Flowsheet" = flowsheet
+        self.flowsheet: trdef.FlowsheetTrait = flowsheet
         self.operation_seq: int = operation_seq
         self.num_subitems: int = num_subitems
         self.edit_comment:str = edit_comment

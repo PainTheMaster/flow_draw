@@ -4,7 +4,7 @@
 import pandas as pd
 import warnings
 import flow_draw.definitions as defs
-import flow_draw.data_io.flowsheet as fsht
+# import flow_draw.data_io.flowsheet as fsht
 from typing import Optional, Any
 from flow_draw.batch.process.unit_operations import unit_operation as uo
 from flow_draw.data_io import process_io as procio
@@ -411,7 +411,7 @@ dict_parts_stcs = dict_parts_stcs_jp
 #
 #########################################################
 class Sample(trdef.SampleTrait):
-    def __init__(self, flowsheet:fsht.Flowsheet=None, json_dict:dict[str,Any]=None):
+    def __init__(self, flowsheet:trdef.FlowsheetTrait=None, json_dict:dict[str,Any]=None):
         self.flowsheet = flowsheet
         if not json_dict:
             raise RuntimeError(f'{self.__class__.__name__}: No json_dict provided.')
@@ -554,15 +554,6 @@ class Sample(trdef.SampleTrait):
                     self.flowsheet.put_line(record = dict_parts_stcs[tag_part_flow_rec_ok_nok])
             ############### functions inprint_analytical_items() till here #########################
 
-            # template_analysis:str = None
-            # test_purpose = list_analysis[0].get(key_test_purpose)
-            # if test_purpose == opt_analysis_cat_ipc:
-            #     template_analysis = dict_parts_stcs[tag_stc_flow_ipc]
-            # elif test_purpose == opt_analysis_cat_monit_tgt:
-            #     template_analysis = dict_parts_stcs[tag_stc_flow_monit_tgt]
-            # elif template_analysis == opt_analysis_cat_fio:
-            #     template_analysis = dict_parts_stcs[tag_stc_flow_fio]
-
             for analysis in list_analysis:
                 if analysis.get(key_analysis_attribute) == opt_attrbt_conversion:
                     print_generic_analysis_item(template_attrbt=dict_parts_stcs[tag_stc_attrb_conversion], analysis=analysis)
@@ -627,7 +618,7 @@ class Sample(trdef.SampleTrait):
 
 
     @staticmethod
-    def get_json_schema() -> Objason:
+    def get_json_schema(caller:trdef.UniversalTrait=None) -> Objason:
         class_sample = Primitive(prim_type='string',
                                  key=key_class_name,
                                  description=f'Constant. The name of the class "{const_class_sample}".',

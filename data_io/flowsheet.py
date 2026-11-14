@@ -4,6 +4,7 @@ from openpyxl.styles import Alignment, PatternFill, Font
 from typing import List
 import re
 import flow_draw.definitions as defs
+import flow_draw.trait_def.trait_def as trdef
 import math
 
 # from flow_draw.trait_def.trait_def import GetInputs
@@ -185,7 +186,7 @@ alph_col_err_rel = num_to_alph(num_col = col_xlslog_err_rel)
 alph_col_err_abs = num_to_alph(num_col = col_xlslog_err_abs)
 
 
-class Flowsheet:
+class Flowsheet(trdef.FlowsheetTrait):
     def __init__(self):
         self.wb = xl.Workbook()
         self.ws = self.wb.active
@@ -193,18 +194,19 @@ class Flowsheet:
         self.mol_std:float = 0.0
         self.wt_net_std:float = 0.0
 
-    def set_standards(self, mol_std: float=0.0, wt_net_std: float=0.0):
-        self.mol_std = mol_std
-        self.wt_net_std = wt_net_std
+    # def set_standards(self, mol_std: float=0.0, wt_net_std: float=0.0):
+    #     self.mol_std = mol_std
+    #     self.wt_net_std = wt_net_std
 
     def put_body_comments(self, comments :str):
-        cmt_brkdwn = re.split('[\n;]', comments)
-        self.body_organizer(list_col_time=[],
-                            list_col_method=[],
-                            list_col_content=cmt_brkdwn,
-                            list_col_record=[],
-                            list_col_operator=[],
-                            list_col_witness=[])
+        if comments is not None:
+            cmt_brkdwn = re.split('[\n;]', comments)
+            self.body_organizer(list_col_time=[],
+                                list_col_method=[],
+                                list_col_content=cmt_brkdwn,
+                                list_col_record=[],
+                                list_col_operator=[],
+                                list_col_witness=[])
 
     def header_organizer(self,
                          op_nr: int|str|None=None,
@@ -243,8 +245,14 @@ class Flowsheet:
         self.current_line += 1
         return self.current_line-1
 
-    def put_line(self, time: str =None, method: str=None, content: str=None, record: str=None, operator: str=None, witness: str=None)->int:   
-        content = self.replace_plchld(content)
+    def put_line(self,
+                 time: str =None,
+                 method: str=None,
+                 content: str=None,
+                 record: str=None,
+                 operator: str=None,
+                 witness: str=None)->int:   
+        content = self.__replace_plchld(content)
         if time:
             self.ws.cell(row=self.current_line, column=col_time).value = time
         if method:
@@ -334,22 +342,22 @@ class Flowsheet:
         if name_basis is not None:
             self.ws.cell(row=line_fs_this, column=col_xlslog_name_basis).value = name_basis
         if ref_mol_basis is not None:
-            ref_mol_basis = self.replace_plchld(ref_mol_basis)
+            ref_mol_basis = self.__replace_plchld(ref_mol_basis)
             self.ws.cell(row=line_fs_this, column=col_xlslog_mol_basis).value = ref_mol_basis
         if ref_kg_net_basis is not None:
-            ref_kg_net_basis = self.replace_plchld(ref_kg_net_basis)
+            ref_kg_net_basis = self.__replace_plchld(ref_kg_net_basis)
             self.ws.cell(row=line_fs_this, column=col_xlslog_kg_net_basis).value = ref_kg_net_basis
 
         return line_fs_this
 
 
     def body_organizer(self,
-                       list_col_time: List[str],
-                       list_col_method: List[str],
-                       list_col_content: List[str],
-                       list_col_record: List[str],
-                       list_col_operator: List[str],
-                       list_col_witness: List[str])->int:
+                       list_col_time: list[str],
+                       list_col_method: list[str],
+                       list_col_content: list[str],
+                       list_col_record: list[str],
+                       list_col_operator: list[str],
+                       list_col_witness: list[str])->int:
         len_list_time = len(list_col_time)
         for row_rel in range(len_list_time):
             self.ws.cell(row=self.current_line+row_rel, column=col_time).value = list_col_time[row_rel]
@@ -396,7 +404,7 @@ class Flowsheet:
         return self.current_line-1
 
     @staticmethod
-    def replace_plchld(template:str|None)->str|None:
+    def __replace_plchld(template:str|None)->str|None:
         if template:
             template = template.replace(f'{{{defs.plchld_flow_col_mat}}}', alph_col_mat)
             template = template.replace(f'{{{defs.plchld_flow_col_equiv}}}', alph_col_equiv)

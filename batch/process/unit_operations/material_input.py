@@ -7,8 +7,8 @@ import pandas as pd
 import warnings
 import flow_draw.definitions as defs
 from flow_draw.materials import materials as mats
-from flow_draw.data_io.flowsheet import Flowsheet
-from flow_draw.trait_def.trait_def import GetMats, GetInputs, InputTrait
+# from flow_draw.data_io.flowsheet import Flowsheet
+from flow_draw.trait_def.trait_def import GetMats, GetInputs, InputTrait, FlowsheetTrait
 from flow_draw.data_io.json_io import Objason, Primitive, Array
 
 
@@ -281,7 +281,7 @@ class Input(InputTrait):
     """
     This class is for each material charged, each instance correspnds to each dosage in a charging operation.
     """
-    def __init__(self, get_mats: GetMats = None, get_inputs: GetInputs = None, flowsheet:Flowsheet=None):
+    def __init__(self, get_mats: GetMats = None, get_inputs: GetInputs = None, flowsheet:FlowsheetTrait=None):
         #Material constants
         # self.mats_data: mats.Materials = get_mats
         self.mats_data: mats.Materials = get_mats.get_mats()

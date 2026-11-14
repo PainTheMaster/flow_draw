@@ -3,7 +3,7 @@
 #########################################################
 import pandas as pd
 import flow_draw.definitions as defs
-import flow_draw.data_io.flowsheet as fsht
+# import flow_draw.data_io.flowsheet as fsht
 
 from typing import Optional, Any
 from flow_draw.batch.process.unit_operations import unit_operation as uo
@@ -201,7 +201,7 @@ dict_parts_stcs = dict_parts_stcs_jp
 class CrystWashing(uo.UnitOperation, MaterialReceiver, uo_tag=defs.tag_uo_cryst_wash):
     def __init__(self,
                  caller: GetMats|GetInputs =None,
-                 flowsheet:fsht.Flowsheet=None, 
+                 flowsheet:trdef.FlowsheetTrait=None, 
                  operation_seq: int=None,
                  num_subitems: int = None,
                  edit_comment:str=None):

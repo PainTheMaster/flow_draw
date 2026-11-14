@@ -4,7 +4,7 @@
 import pandas as pd
 import warnings
 import flow_draw.definitions as defs
-import flow_draw.data_io.flowsheet as fsht
+# import flow_draw.data_io.flowsheet as fsht
 from typing import Optional
 from flow_draw.batch.process.unit_operations import unit_operation as uo
 from flow_draw.data_io import process_io as procio
@@ -220,7 +220,7 @@ dict_parts_stcs = dict_parts_stcs_jp
 class Sampling(uo.UnitOperation, uo_tag=defs.tag_uo_sampling):
     def __init__(self,
                  caller: type[trdef.UniversalTrait] =None,
-                 flowsheet:fsht.Flowsheet=None,
+                 flowsheet:trdef.FlowsheetTrait=None,
                  operation_seq: int=None,
                  num_subitems: int = None,
                  edit_comment:str=None):
@@ -304,14 +304,6 @@ class Sampling(uo.UnitOperation, uo_tag=defs.tag_uo_sampling):
         pair_monit = Objason(key=key_json_pair_monit,
                             props=[monit_item, monit_unit],
                             description="A pair of monitoring item and the unit for it.")
-        
-        # tuple_monit = Tuple(key=key_json_tuple_monit,
-        #                     content=[monit_item, monit_unit],
-        #                     description='A pair of monitoring item and unit for it.')
-        # arr_monit_items = Array(key=key_json_arr_monit_items,
-        #                         content=tuple_monit,
-        #                         description=f'An array of tuple of monitoring item and unit for it. This is linked to "{hedr_monit_item_high}".',
-        #                         required=False)
         
         arr_monit_items = Array(key=key_json_arr_monit_items,
                                 content=pair_monit,
@@ -435,8 +427,8 @@ class Sampling(uo.UnitOperation, uo_tag=defs.tag_uo_sampling):
         df.at[row, hedr_sample_comment] = sample_comment
 
 class SingleSample:
-    def __init__(self, flowsheet:fsht.Flowsheet=None):
-        self.flowsheet:fsht.Flowsheet = flowsheet
+    def __init__(self, flowsheet:trdef.FlowsheetTrait=None):
+        self.flowsheet:trdef.FlowsheetTrait = flowsheet
         self.sample_seq:int = None
         self.name:str = None
         self.category:str = None
