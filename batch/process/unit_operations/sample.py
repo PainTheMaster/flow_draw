@@ -4,13 +4,11 @@
 import pandas as pd
 import warnings
 import flow_draw.definitions as defs
-# import flow_draw.data_io.flowsheet as fsht
 from typing import Optional, Any
 from flow_draw.batch.process.unit_operations import unit_operation as uo
 from flow_draw.data_io import process_io as procio
 from flow_draw.materials import materials as mats
 from flow_draw.trait_def import trait_def as trdef
-#from flow_draw.trait_def.trait_def import GetMats
 from flow_draw.data_io.json_io import Objason, Primitive, Array, Tuple
 
 
@@ -42,8 +40,7 @@ opt_time_unit_hour:str = defs.tag_flow_cmn_time_unit_hour
 #########################################################
 
 #hedr_<something> = defs.hedr_<unit operation>_<specification item>
-#list_hedr = defs.list_hedr_<list of header items for the uo>
-#dict_dtil_drpdwn = defs.dict_opt_<unit operation>
+
 key_class_name:str = 'Sample_class'
 """Header item for the class name"""
 key_stem_sample_name:str = "Sample_name_stem"
@@ -75,18 +72,6 @@ key_sample_comment:str = 'comment_for_sample'
 key_obj_sampe:str = 'sample_object'
 """header item for analysis: object for a sample"""
 
-# hedr_ipc_rec_titles:str = "IPC_Rec_Title"
-"""Header item for IPC record title for each analytical item"""
-# hedr_ipc_rec_units:str = "IPC_Rec_Unit"
-# """Header item for IPC record unit for each analytical item"""
-# hedr_monit_item_high:str = "Monit_Item_High_Level"
-# """Header item for sampling category; Monitoring items"""
-# hedr_monit_rec_items:str = "Monit_Rec_Title"
-# """Header item for sampling category; monitoring record title for each analytical item"""
-# hedr_monit_rec_units:str = "Monit_Rec_Unit"
-# """Header item for sampling category; monitoring record unit for each analytical item"""
-# hedr_sample_comment:str = "Sample_Comment"
-"""Header item for sampling category; sample comment"""
 
 list_hedr:list[str]=[key_class_name, 
                      key_stem_sample_name,
@@ -400,22 +385,8 @@ dict_parts_stcs_jp = {tag_part_flow_mthod_instr_sampling : "サンプリング",
 
 dict_parts_stcs = dict_parts_stcs_jp
 
-#########################################################
-# Class (uo.UnitOperation, uo_tag=defs.tag_uo_<UO_NAME>)
-#------------------------------------------
-# Mandatory methods
-# __init__(self,
-#           caller: type[trdef.UniversalTrait] =None,
-#           flowsheet:fsht.Flowsheet=None,
-#           operation_seq: int=None,
-#           num_subitems: int = None,
-#           edit_comment:str=None)
-# get_detail_header(self) -> list[str]
+##############################################################
 
-# load_papams_from_df(self, df: pd.DataFrame)
-# output_unit_operation(self)
-#
-#########################################################
 class Sample(trdef.SampleTrait):
     def __init__(self, flowsheet:trdef.FlowsheetTrait=None, json_dict:dict[str,Any]=None):
         self.flowsheet = flowsheet
@@ -428,51 +399,6 @@ class Sample(trdef.SampleTrait):
         self.list_monit_tgt: list[dict[str,Any]] = []
         self.list_fio: list[dict[str,Any]] =[]
         self.__load_from_json_dict(json_dict)
-
-    
-    # def load_params_from_df(self, df: pd.DataFrame):
-    #     """
-    #     Loads necessary parameters from a DataFrame object.
-    #     The header items must be in line with the definition the class Charging.
-    #     The header items can be passed from the get_detail_header() of each UnitOperation-drived class.
-    #     This is the overriding mehtod in the class Charging..
-    #     """
-
-    #     first_row = df.iloc[0]
-    #     if not pd.isna(first_row[hedr_precomment]):
-    #         self.pre_comment = first_row[hedr_precomment]
-    #     if not pd.isna(first_row[hedr_postcomment]):
-    #         self.post_comment = first_row[hedr_postcomment]
-    #     for sample_seq, subitem in df.iterrows():
-    #         temp_sample = SingleSample(flowsheet=self.flowsheet)
-    #         temp_sample.load_from_series(caller=self, sample_seq=sample_seq, ser=subitem)
-    #         self.list_samples.append(temp_sample)
-
-
-    # def get_seq(self)-> int:
-    #     return self.operation_seq
-    
-    # def get_detail_header(self) -> list[str]:
-    #     return list_hedr
-
-    # def get_detail_option_menu(self) -> Optional[dict[str, list[str]]]:
-    #     return dict_dropdown
-    
-    # def print_unit_operation(self):
-    #     # self.flowsheet.header_organizer(op_nr=self.operation_seq, title=lang_dict_uo_titles[self.uo_tag])
-    #     self.flowsheet.header_organizer(title=lang_dict_uo_titles[self.uo_tag])
-
-    #     if not (self.pre_comment == None or self.pre_comment == ''):
-    #         self.flowsheet.put_body_comments(self.pre_comment)
-    #         self.flowsheet.linefeed()        
-
-    #     for sample in self.list_samples:
-    #         sample.output_single_sample()
-    #         self.flowsheet.linefeed()
-
-    #     if not (self.post_comment == None or self.post_comment == ''):
-    #         self.flowsheet.put_body_comments(self.post_comment)
-    #         self.flowsheet.linefeed()
 
     def print_sample(self):
         def print_analytical_items(list_analysis:list[dict[str,Any]]=None):
@@ -827,63 +753,6 @@ class Sample(trdef.SampleTrait):
             sort_transf_analysis(orig=buf_list_ipc, dest=self.list_ipc)
             sort_transf_analysis(orig=buf_list_monit_tgt, dest=self.list_monit_tgt)
             sort_transf_analysis(orig=buf_list_fio, dest=self.list_fio)
-
-
-    # @staticmethod
-    # def generate_test_df(sample_name:str = None,
-    #                      sampling_cat:str = None,
-    #                      ipc_criteria:str = None,
-    #                      ipc_rec_titles:str = None,
-    #                      ipc_rec_units:str = None,
-    #                      monit_items:str = None,
-    #                      monit_rec_items:str = None,
-    #                      monit_rec_units:str = None,
-    #                      sample_comment:str = None
-    #                      )->pd.DataFrame:
-    #     hedr:list[str] = defs.list_hedr_cmn_io_dtil + list_hedr
-    #     content: list[any] = [None]*len(hedr)
-    #     s:pd.Series = pd.Series(data=content, index=hedr)
-    #     df = s.to_frame().T
-    #     df.at[df.index[0], hedr_sample_name] = sample_name
-    #     df.at[df.index[0], hedr_sampling_cat] = sampling_cat
-    #     df.at[df.index[0], key_criteria_val_1] = ipc_criteria
-    #     df.at[df.index[0], hedr_ipc_rec_titles] = ipc_rec_titles
-    #     df.at[df.index[0], hedr_ipc_rec_units] = ipc_rec_units
-    #     df.at[df.index[0], hedr_monit_item_high] = monit_items
-    #     df.at[df.index[0], hedr_monit_rec_items] = monit_rec_items
-    #     df.at[df.index[0], hedr_monit_rec_units] = monit_rec_units
-    #     df.at[df.index[0], hedr_sample_comment] = sample_comment
-
-    #     return df
-    
-    # @staticmethod
-    # def add_to_test_df(df: pd.DataFrame=None,
-    #                    sample_name:str = None,
-    #                    sampling_cat:str = None,
-    #                    ipc_criteria:str = None,
-    #                    ipc_rec_titles:str = None,
-    #                    ipc_rec_units:str = None,
-    #                    monit_items:str = None,
-    #                    monit_rec_items:str = None,
-    #                    monit_rec_units:str = None,
-    #                    sample_comment:str = None
-    #                    )->None:
-    #     width:int = len(df.columns)
-    #     new_row:list[any] = [None]*width
-    #     row:int = len(df)
-    #     df.loc[row]=new_row
-    #     df.at[row, hedr_sample_name] = sample_name
-    #     df.at[row, hedr_sampling_cat] = sampling_cat
-    #     df.at[row, key_criteria_val_1] = ipc_criteria
-    #     df.at[row, hedr_ipc_rec_titles] = ipc_rec_titles
-    #     df.at[row, hedr_ipc_rec_units] = ipc_rec_units
-    #     df.at[row, hedr_monit_item_high] = monit_items
-    #     df.at[row, hedr_monit_rec_items] = monit_rec_items
-    #     df.at[row, hedr_monit_rec_units] = monit_rec_units
-    #     df.at[row, hedr_sample_comment] = sample_comment
-
-
-            
 
 
 
