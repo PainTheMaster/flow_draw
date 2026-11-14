@@ -358,7 +358,8 @@ class MaterialReceiver(ABC):
 
 class SampleTrait(ABC):
     @abstractmethod
-    def __init__(self, flowsheet:FlowsheetTrait=None, json_dict:dict[str, Any]=None)
+    def __init__(self, flowsheet:FlowsheetTrait=None, json_dict:dict[str, Any]=None):
+        pass
 
     @abstractmethod
     def print_sample(self):

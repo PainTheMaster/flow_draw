@@ -5,7 +5,7 @@ import pandas as pd
 import warnings
 import flow_draw.definitions as defs
 # import flow_draw.data_io.flowsheet as fsht
-from typing import Optional
+from typing import Optional, Any
 from flow_draw.batch.process.unit_operations import unit_operation as uo
 from flow_draw.data_io import process_io as procio
 from flow_draw.materials import materials as mats
@@ -225,25 +225,25 @@ class Sampling(uo.UnitOperation, uo_tag=defs.tag_uo_sampling):
                  num_subitems: int = None,
                  edit_comment:str=None):
         super().__init__(caller=caller, flowsheet=flowsheet, operation_seq=operation_seq, num_subitems=num_subitems, edit_comment=edit_comment)
-        self.list_samples:list[SingleSample] = []
+        self.list_samples:list[trdef.SampleTrait] = []
     
-    def load_params_from_df(self, df: pd.DataFrame):
-        """
-        Loads necessary parameters from a DataFrame object.
-        The header items must be in line with the definition the class Charging.
-        The header items can be passed from the get_detail_header() of each UnitOperation-drived class.
-        This is the overriding mehtod in the class Charging..
-        """
+    # def load_params_from_df(self, df: pd.DataFrame):
+    #     """
+    #     Loads necessary parameters from a DataFrame object.
+    #     The header items must be in line with the definition the class Charging.
+    #     The header items can be passed from the get_detail_header() of each UnitOperation-drived class.
+    #     This is the overriding mehtod in the class Charging..
+    #     """
 
-        first_row = df.iloc[0]
-        if not pd.isna(first_row[hedr_precomment]):
-            self.pre_comment = first_row[hedr_precomment]
-        if not pd.isna(first_row[hedr_postcomment]):
-            self.post_comment = first_row[hedr_postcomment]
-        for sample_seq, subitem in df.iterrows():
-            temp_sample = SingleSample(flowsheet=self.flowsheet)
-            temp_sample.load_from_series(caller=self, sample_seq=sample_seq, ser=subitem)
-            self.list_samples.append(temp_sample)
+    #     first_row = df.iloc[0]
+    #     if not pd.isna(first_row[hedr_precomment]):
+    #         self.pre_comment = first_row[hedr_precomment]
+    #     if not pd.isna(first_row[hedr_postcomment]):
+    #         self.post_comment = first_row[hedr_postcomment]
+    #     for sample_seq, subitem in df.iterrows():
+    #         temp_sample = SingleSample(flowsheet=self.flowsheet)
+    #         temp_sample.load_from_series(caller=self, sample_seq=sample_seq, ser=subitem)
+    #         self.list_samples.append(temp_sample)
 
 
     def get_seq(self)-> int:
@@ -259,117 +259,119 @@ class Sampling(uo.UnitOperation, uo_tag=defs.tag_uo_sampling):
         # self.flowsheet.header_organizer(op_nr=self.operation_seq, title=lang_dict_uo_titles[self.uo_tag])
         self.flowsheet.header_organizer(title=lang_dict_uo_titles[self.uo_tag])
 
-        if not (self.pre_comment == None or self.pre_comment == ''):
+        if self.pre_comment:
             self.flowsheet.put_body_comments(self.pre_comment)
             self.flowsheet.linefeed()        
 
         for sample in self.list_samples:
-            sample.output_single_sample()
+            # sample.output_single_sample()
+            # self.flowsheet.linefeed()
+            sample.print_sample()
             self.flowsheet.linefeed()
 
-        if not (self.post_comment == None or self.post_comment == ''):
+        if self.post_comment:
             self.flowsheet.put_body_comments(self.post_comment)
             self.flowsheet.linefeed()
 
     @staticmethod
     def get_json_schema(caller:trdef.UniversalTrait = None) -> Objason:
         common = Sampling.json_common()
-        sample_name:Primitive = Primitive(prim_type='string',
-                                          key=hedr_sample_name,
-                                          description='The name of a sample.')
-        sample_cat:Primitive=Primitive(prim_type='string',
-                                       key=hedr_sampling_cat,
-                                       description=f'Category of the sample. '\
-                                        f'"{opt_sampling_cat_ipc}" stands for in-process control with a must-satisfied criterion before moving to the next step. '\
-                                        f'"{opt_sampling_cat_monit}" is sampling for technical information. Normally, not with a criterion. '\
-                                        f'"{opt_sampling_cat_both}" is for both in-process control and monitoring. One or more analytical items are for decision making, whereas the other are just for info.',
-                                       enum=list_opt_sampling_cat)
+        # sample_name:Primitive = Primitive(prim_type='string',
+        #                                   key=hedr_sample_name,
+        #                                   description='The name of a sample.')
+        # sample_cat:Primitive=Primitive(prim_type='string',
+        #                                key=hedr_sampling_cat,
+        #                                description=f'Category of the sample. '\
+        #                                 f'"{opt_sampling_cat_ipc}" stands for in-process control with a must-satisfied criterion before moving to the next step. '\
+        #                                 f'"{opt_sampling_cat_monit}" is sampling for technical information. Normally, not with a criterion. '\
+        #                                 f'"{opt_sampling_cat_both}" is for both in-process control and monitoring. One or more analytical items are for decision making, whereas the other are just for info.',
+        #                                enum=list_opt_sampling_cat)
         
-        #以下、モニタリング
-        monit_item_name = Primitive(prim_type='string',
-                                    key=hedr_monit_item_high,
-                                    description=f'A monitoring item. This item is applicable to sampling categories of "{opt_sampling_cat_monit}" and "{opt_sampling_cat_both}". '
-                                        'This is more a high-level identifier, such as purity, residual solvent, etc. '
-                                        'instead of concrete names such as this impurity, that impurity, or this solvent... '
-                                        'if a right name cannot be read from the source, please put <placeholder>.')
-        monit_item = Primitive(prim_type='string',
-                                   key=hedr_monit_rec_items,
-                                   description=f'A lower-layer recording item belonging to a super-category "{hedr_monit_item_high}"'\
-                                   'a concrete analytical items such as a specific residual solvent (e.g., EtOH, THF...), impurity-x, assay, pH, etc.')
-        monit_unit = Primitive(prim_type='string',
-                                   key=hedr_monit_rec_units,
-                                   description=f'Unit for a monitoring item. Null is accepted.',
-                                   nullable=True,
-                                   required=True)
-        pair_monit = Objason(key=key_json_pair_monit,
-                            props=[monit_item, monit_unit],
-                            description="A pair of monitoring item and the unit for it.")
+        # #以下、モニタリング
+        # monit_item_name = Primitive(prim_type='string',
+        #                             key=hedr_monit_item_high,
+        #                             description=f'A monitoring item. This item is applicable to sampling categories of "{opt_sampling_cat_monit}" and "{opt_sampling_cat_both}". '
+        #                                 'This is more a high-level identifier, such as purity, residual solvent, etc. '
+        #                                 'instead of concrete names such as this impurity, that impurity, or this solvent... '
+        #                                 'if a right name cannot be read from the source, please put <placeholder>.')
+        # monit_item = Primitive(prim_type='string',
+        #                            key=hedr_monit_rec_items,
+        #                            description=f'A lower-layer recording item belonging to a super-category "{hedr_monit_item_high}"'\
+        #                            'a concrete analytical items such as a specific residual solvent (e.g., EtOH, THF...), impurity-x, assay, pH, etc.')
+        # monit_unit = Primitive(prim_type='string',
+        #                            key=hedr_monit_rec_units,
+        #                            description=f'Unit for a monitoring item. Null is accepted.',
+        #                            nullable=True,
+        #                            required=True)
+        # pair_monit = Objason(key=key_json_pair_monit,
+        #                     props=[monit_item, monit_unit],
+        #                     description="A pair of monitoring item and the unit for it.")
         
-        arr_monit_items = Array(key=key_json_arr_monit_items,
-                                content=pair_monit,
-                                description=f'An array of pairing object of monitoring item and unit for it. This is linked to "{hedr_monit_item_high}" elsewhere on a higher level.',
-                                required=True,
-                                nullable=True)
-        obj_monit = Objason(key=key_json_obj_monit,
-                            props=[monit_item_name, arr_monit_items],
-                            description='A set of process monitoring information linked to a sample.')
-        arr_monit = Array(key=key_json_arr_monit,
-                          content = obj_monit,
-                          description="An array of various kinds of monitoring items.",
-                          required=True,
-                          nullable=True)
+        # arr_monit_items = Array(key=key_json_arr_monit_items,
+        #                         content=pair_monit,
+        #                         description=f'An array of pairing object of monitoring item and unit for it. This is linked to "{hedr_monit_item_high}" elsewhere on a higher level.',
+        #                         required=True,
+        #                         nullable=True)
+        # obj_monit = Objason(key=key_json_obj_monit,
+        #                     props=[monit_item_name, arr_monit_items],
+        #                     description='A set of process monitoring information linked to a sample.')
+        # arr_monit = Array(key=key_json_arr_monit,
+        #                   content = obj_monit,
+        #                   description="An array of various kinds of monitoring items.",
+        #                   required=True,
+        #                   nullable=True)
         
-        #IPC below
-        ipc_item = Primitive(prim_type='string',
-                             key=hedr_ipc_rec_titles,
-                             description='IPC items, such as a residual solvent, a specific impurity, conversion, etc.')
-        ipc_unit = Primitive(prim_type='string',
-                             key=hedr_ipc_rec_units,
-                             description='reporting unit for the IPC item, such as %, ppm, etc.',
-                             nullable=True)
-        ipc_criterion = Primitive(prim_type='string',
-                                 key=hedr_ipc_criteria,
-                                 description='IPC criterion, e.g., "conversion>99.95%"')
-        obj_ipc = Objason(key=key_json_obj_ipc,
-                          props=[ipc_item, ipc_unit, ipc_criterion],
-                          description='A set of IPC item, unit for the item, and the IPC criterion for it.')
+        # #IPC below
+        # ipc_item = Primitive(prim_type='string',
+        #                      key=hedr_ipc_rec_titles,
+        #                      description='IPC items, such as a residual solvent, a specific impurity, conversion, etc.')
+        # ipc_unit = Primitive(prim_type='string',
+        #                      key=hedr_ipc_rec_units,
+        #                      description='reporting unit for the IPC item, such as %, ppm, etc.',
+        #                      nullable=True)
+        # ipc_criterion = Primitive(prim_type='string',
+        #                          key=hedr_ipc_criteria,
+        #                          description='IPC criterion, e.g., "conversion>99.95%"')
+        # obj_ipc = Objason(key=key_json_obj_ipc,
+        #                   props=[ipc_item, ipc_unit, ipc_criterion],
+        #                   description='A set of IPC item, unit for the item, and the IPC criterion for it.')
         
-        arr_ipc = Array(key=key_json_arr_ipc_items,
-                        content=obj_ipc,
-                        description='A series (array) of a set of IPC items, unit for it, and criterion for one sample.',
-                        required=True,
-                        nullable=True)
+        # arr_ipc = Array(key=key_json_arr_ipc_items,
+        #                 content=obj_ipc,
+        #                 description='A series (array) of a set of IPC items, unit for it, and criterion for one sample.',
+        #                 required=True,
+        #                 nullable=True)
         
-        single_sample = Objason(key=key_json_single_sample,
-                                props=[sample_name, sample_cat, arr_monit, arr_ipc],
-                                description="Descriptor of a sample. A collection of the sample name, sampling category (monitoring and/or IPC), necessary monitoring items, IPC items, and the criteria for the IPC.")
+        # single_sample = Objason(key=key_json_single_sample,
+        #                         props=[sample_name, sample_cat, arr_monit, arr_ipc],
+        #                         description="Descriptor of a sample. A collection of the sample name, sampling category (monitoring and/or IPC), necessary monitoring items, IPC items, and the criteria for the IPC.")
         
+        single_sample = trdef.SampleTrait.get_json_schema(caller=caller)
+
         arr_samples = Array(key=key_json_arr_samples,
                             content=single_sample,
-                            description="An array of samples belonging to one sampling block and the necessary monitoring and/or IPC requirements associated with them. "
-                            "Please make replicate entries for each sample if multiple samples are appropriate in the same sampling block. "
-                            "For example if multiple samples in a certain time interval are anticipated. "
-                            "For instance in more details, if sampling at 1, 2, 3...n hours is instructed, "
-                            "n sampling objects shall be included in the array, each with the same or different monitoring and/or IPC requirements.",
+                            description="An array of samples belonging to one sampling block and the necessary monitoring and/or IPC requirements associated with them. ",
                             required=True,
                             nullable=True)
 
-        json_sampling = Objason(#key=key_json_sampling_stage,
-                                key=Sampling.uo_tag,
+        json_sampling = Objason(key=Sampling.uo_tag,
                                 props=common+[arr_samples],
                                 description='An object for a single sampling stage.')
 
         return json_sampling 
         
 
-    def load_from_json_dict(self, json_dict:dict[str, any]):
+    def load_from_json_dict(self, json_dict:dict[str, Any]):
         super().load_from_json_dict(json_dict)
-        arr_sample:list[dict[str,any]] = json_dict[key_json_arr_samples]
+        arr_sample:list[dict[str,Any]] = json_dict[key_json_arr_samples]
         if arr_sample is not None:
-            for i, sample in enumerate(arr_sample):
-                single_sample=SingleSample(flowsheet=self.flowsheet)
-                single_sample.load_from_single_sample_json(sample_seq=i+1, sample=sample)
+            for sample in arr_sample:
+                # single_sample=SingleSample(flowsheet=self.flowsheet)
+                # single_sample.load_from_single_sample_json(sample_seq=i+1, sample=sample)
+                # self.list_samples.append(single_sample)
+                single_sample = trdef.SampleTrait(flowsheet=self.flowsheet, json_dict=sample)
                 self.list_samples.append(single_sample)
+
 
 
 
@@ -426,169 +428,169 @@ class Sampling(uo.UnitOperation, uo_tag=defs.tag_uo_sampling):
         df.at[row, hedr_monit_rec_units] = monit_rec_units
         df.at[row, hedr_sample_comment] = sample_comment
 
-class SingleSample:
-    def __init__(self, flowsheet:trdef.FlowsheetTrait=None):
-        self.flowsheet:trdef.FlowsheetTrait = flowsheet
-        self.sample_seq:int = None
-        self.name:str = None
-        self.category:str = None
-        """IPC, monitoring, both"""
-        self.content_ipc_criteria:list[str] = []
-        self.content_monit_items:list[str] = []
-        self.rec_ipc_item_name:list[str] = []
-        self.rec_ipc_unit:list[str] = []
-        self.rec_monit_item_name:list[str] = []
-        self.rec_monit_unit:list[str] = []
-        self.sample_comment:str = None
+# class SingleSample:
+#     def __init__(self, flowsheet:trdef.FlowsheetTrait=None):
+#         self.flowsheet:trdef.FlowsheetTrait = flowsheet
+#         self.sample_seq:int = None
+#         self.name:str = None
+#         self.category:str = None
+#         """IPC, monitoring, both"""
+#         self.content_ipc_criteria:list[str] = []
+#         self.content_monit_items:list[str] = []
+#         self.rec_ipc_item_name:list[str] = []
+#         self.rec_ipc_unit:list[str] = []
+#         self.rec_monit_item_name:list[str] = []
+#         self.rec_monit_unit:list[str] = []
+#         self.sample_comment:str = None
     
-    def load_from_series(self, caller:Sampling, sample_seq:int, ser:pd.Series):
-        self.sample_seq = sample_seq
-        if not pd.isna(ser[hedr_sample_name]):
-            self.name = ser[hedr_sample_name]
-        else:
-            raise ValueError(f"{caller.__class__.__name__} Op. Seq. {caller.get_seq}: No name provided for the {self.sample_seq+1}th sample in the detail input.")
+#     def load_from_series(self, caller:Sampling, sample_seq:int, ser:pd.Series):
+#         self.sample_seq = sample_seq
+#         if not pd.isna(ser[hedr_sample_name]):
+#             self.name = ser[hedr_sample_name]
+#         else:
+#             raise ValueError(f"{caller.__class__.__name__} Op. Seq. {caller.get_seq}: No name provided for the {self.sample_seq+1}th sample in the detail input.")
         
-        if not pd.isna(ser[hedr_sampling_cat]):
-            self.category = ser[hedr_sampling_cat]
-        else:
-            raise ValueError(f"{caller.__class__.__name__} Op. Seq. {caller.get_seq}: No sampling category chosen for the {self.sample_seq+1}th sample in the detail input.")
+#         if not pd.isna(ser[hedr_sampling_cat]):
+#             self.category = ser[hedr_sampling_cat]
+#         else:
+#             raise ValueError(f"{caller.__class__.__name__} Op. Seq. {caller.get_seq}: No sampling category chosen for the {self.sample_seq+1}th sample in the detail input.")
         
-        if self.category == opt_sampling_cat_ipc or self.category == opt_sampling_cat_both:
-            if not pd.isna(ser[hedr_ipc_criteria]):
-                str_criteria:str = ser[hedr_ipc_criteria]
-                if not pd.isna(str_criteria):
-                    self.content_ipc_criteria = str_criteria.split("\n")
-            else:
-                raise ValueError(f"{caller.__class__.__name__} Op. Seq. {caller.get_seq}: No IPC criteria provided for the {self.sample_seq+1}th sample in the detail input \
-                                although {opt_sampling_cat_ipc}/{opt_sampling_cat_both} is selected in the colum {hedr_sampling_cat}.")
-            if not pd.isna(ser[hedr_ipc_rec_titles]):
-                str_ipc_rec_titles:str = ser[hedr_ipc_rec_titles]
-                str_ipc_rec_units:str = ser[hedr_ipc_rec_units]
-                self.rec_ipc_item_name = str_ipc_rec_titles.split("\n")
-                if not pd.isna(str_ipc_rec_units):
-                    self.rec_ipc_unit = str_ipc_rec_units.split("\n")
-                if len(self.rec_ipc_item_name) != len(self.rec_ipc_unit):
-                    raise ValueError(f"{caller.__class__.__name__} Op. Seq. {caller.get_seq}: Mismatched numbers of IPC items and their units for the {self.sample_seq+1}th sample in the detail input.")
-                if len(self.rec_ipc_item_name) != len(self.content_ipc_criteria):
-                    raise ValueError(f"{caller.__class__.__name__} Op. Seq. {caller.get_seq}: Mismatched numbers of IPC criteria and their units for the {self.sample_seq+1}th sample in the detail input.")
-            else:
-                raise ValueError(f"{caller.__class__.__name__} Op. Seq. {caller.get_seq}: No IPC record name provided for the {self.sample_seq+1}th sample in the detail input \
-                                although {opt_sampling_cat_ipc}/{opt_sampling_cat_both} is selected in the colum {hedr_sampling_cat}.")
+#         if self.category == opt_sampling_cat_ipc or self.category == opt_sampling_cat_both:
+#             if not pd.isna(ser[hedr_ipc_criteria]):
+#                 str_criteria:str = ser[hedr_ipc_criteria]
+#                 if not pd.isna(str_criteria):
+#                     self.content_ipc_criteria = str_criteria.split("\n")
+#             else:
+#                 raise ValueError(f"{caller.__class__.__name__} Op. Seq. {caller.get_seq}: No IPC criteria provided for the {self.sample_seq+1}th sample in the detail input \
+#                                 although {opt_sampling_cat_ipc}/{opt_sampling_cat_both} is selected in the colum {hedr_sampling_cat}.")
+#             if not pd.isna(ser[hedr_ipc_rec_titles]):
+#                 str_ipc_rec_titles:str = ser[hedr_ipc_rec_titles]
+#                 str_ipc_rec_units:str = ser[hedr_ipc_rec_units]
+#                 self.rec_ipc_item_name = str_ipc_rec_titles.split("\n")
+#                 if not pd.isna(str_ipc_rec_units):
+#                     self.rec_ipc_unit = str_ipc_rec_units.split("\n")
+#                 if len(self.rec_ipc_item_name) != len(self.rec_ipc_unit):
+#                     raise ValueError(f"{caller.__class__.__name__} Op. Seq. {caller.get_seq}: Mismatched numbers of IPC items and their units for the {self.sample_seq+1}th sample in the detail input.")
+#                 if len(self.rec_ipc_item_name) != len(self.content_ipc_criteria):
+#                     raise ValueError(f"{caller.__class__.__name__} Op. Seq. {caller.get_seq}: Mismatched numbers of IPC criteria and their units for the {self.sample_seq+1}th sample in the detail input.")
+#             else:
+#                 raise ValueError(f"{caller.__class__.__name__} Op. Seq. {caller.get_seq}: No IPC record name provided for the {self.sample_seq+1}th sample in the detail input \
+#                                 although {opt_sampling_cat_ipc}/{opt_sampling_cat_both} is selected in the colum {hedr_sampling_cat}.")
         
-        if self.category == opt_sampling_cat_monit or self.category == opt_sampling_cat_both:
-            if not pd.isna(ser[hedr_monit_item_high]):
-                str_monit_item:str = ser[hedr_monit_item_high]
-                self.content_monit_items = str_monit_item.split("\n")
-            if not pd.isna(ser[hedr_monit_rec_items]):
-                str_monit_rec_items:str =  ser[hedr_monit_rec_items]
-                str_monit_rec_units:str = ser[hedr_monit_rec_units]
-                self.rec_monit_item_name = str_monit_rec_items.split("\n")
-                if not pd.isna(str_monit_rec_units):
-                    self.rec_monit_unit = str_monit_rec_units.split("\n")
-                if len(self.rec_monit_item_name) != len(self.rec_monit_unit):
-                    raise ValueError(f"{caller.__class__.__name__} Op. Seq. {caller.get_seq}: Mismatched numbers of monitoring items and their units for the {self.sample_seq+1}th sample in the detail input.")
-        if not pd.isna(ser[hedr_sample_comment]):
-            self.sample_comment = ser[hedr_sample_comment]
+#         if self.category == opt_sampling_cat_monit or self.category == opt_sampling_cat_both:
+#             if not pd.isna(ser[hedr_monit_item_high]):
+#                 str_monit_item:str = ser[hedr_monit_item_high]
+#                 self.content_monit_items = str_monit_item.split("\n")
+#             if not pd.isna(ser[hedr_monit_rec_items]):
+#                 str_monit_rec_items:str =  ser[hedr_monit_rec_items]
+#                 str_monit_rec_units:str = ser[hedr_monit_rec_units]
+#                 self.rec_monit_item_name = str_monit_rec_items.split("\n")
+#                 if not pd.isna(str_monit_rec_units):
+#                     self.rec_monit_unit = str_monit_rec_units.split("\n")
+#                 if len(self.rec_monit_item_name) != len(self.rec_monit_unit):
+#                     raise ValueError(f"{caller.__class__.__name__} Op. Seq. {caller.get_seq}: Mismatched numbers of monitoring items and their units for the {self.sample_seq+1}th sample in the detail input.")
+#         if not pd.isna(ser[hedr_sample_comment]):
+#             self.sample_comment = ser[hedr_sample_comment]
 
-    def load_from_single_sample_json(self, sample_seq:int=None, sample:dict[str,any]=None):
-        self.sample_seq = sample_seq
-        self.name = sample[hedr_sample_name]
-        if self.name is None:
-            warnings.warn(
-                message=f"No name given for sample sequence {self.sample_seq}",
-                category=RuntimeWarning
-            )
-        self.category=sample[hedr_sampling_cat]
-        if self.category is None:
-            warnings.warn(
-                message=f"No sampling category given for sample sequence {self.sample_seq}",
-                category=RuntimeWarning
-            )
+#     def load_from_single_sample_json(self, sample_seq:int=None, sample:dict[str,any]=None):
+#         self.sample_seq = sample_seq
+#         self.name = sample[hedr_sample_name]
+#         if self.name is None:
+#             warnings.warn(
+#                 message=f"No name given for sample sequence {self.sample_seq}",
+#                 category=RuntimeWarning
+#             )
+#         self.category=sample[hedr_sampling_cat]
+#         if self.category is None:
+#             warnings.warn(
+#                 message=f"No sampling category given for sample sequence {self.sample_seq}",
+#                 category=RuntimeWarning
+#             )
 
-        if self.category == opt_sampling_cat_ipc or self.category == opt_sampling_cat_both:
-            arr_ipc:list[dict[str, any]] = sample[key_json_arr_ipc_items]
-            if arr_ipc is None:
-                warnings.warn(
-                    message=f'"{key_json_arr_ipc_items}" is null for sample sequence {self.sample_seq} '
-                    f'although the catetory is "{opt_sampling_cat_ipc}" is "{opt_sampling_cat_both}."'
-                )
-            else:
-                for ipc in arr_ipc:
-                    self.content_ipc_criteria.append(ipc[hedr_ipc_criteria])
-                    self.rec_ipc_item_name.append(ipc[hedr_ipc_rec_titles])
-                    if ipc[hedr_ipc_rec_units] is not None:
-                        self.rec_ipc_unit.append(ipc[hedr_ipc_rec_units])
-                    else:
-                        self.rec_ipc_unit.append("")
+#         if self.category == opt_sampling_cat_ipc or self.category == opt_sampling_cat_both:
+#             arr_ipc:list[dict[str, any]] = sample[key_json_arr_ipc_items]
+#             if arr_ipc is None:
+#                 warnings.warn(
+#                     message=f'"{key_json_arr_ipc_items}" is null for sample sequence {self.sample_seq} '
+#                     f'although the catetory is "{opt_sampling_cat_ipc}" is "{opt_sampling_cat_both}."'
+#                 )
+#             else:
+#                 for ipc in arr_ipc:
+#                     self.content_ipc_criteria.append(ipc[hedr_ipc_criteria])
+#                     self.rec_ipc_item_name.append(ipc[hedr_ipc_rec_titles])
+#                     if ipc[hedr_ipc_rec_units] is not None:
+#                         self.rec_ipc_unit.append(ipc[hedr_ipc_rec_units])
+#                     else:
+#                         self.rec_ipc_unit.append("")
         
-        if self.category == opt_sampling_cat_monit or self.category == opt_sampling_cat_both:
-            arr_monit:list[dict[str, any]] = sample[key_json_arr_monit]
-            if arr_monit is None:
-                warnings.warn(
-                    message=f'"{key_json_arr_monit}" is null for sample sequence {self.sample_seq} '
-                    f'although the catetory is "{opt_sampling_cat_monit}" is "{opt_sampling_cat_both}."'
-                )
-            else:
-                for monit in arr_monit: #"monit" corresponds to obj_monit
-                   self.__process_obj_monit(sample_seq=sample_seq, obj_monit=monit)
+#         if self.category == opt_sampling_cat_monit or self.category == opt_sampling_cat_both:
+#             arr_monit:list[dict[str, any]] = sample[key_json_arr_monit]
+#             if arr_monit is None:
+#                 warnings.warn(
+#                     message=f'"{key_json_arr_monit}" is null for sample sequence {self.sample_seq} '
+#                     f'although the catetory is "{opt_sampling_cat_monit}" is "{opt_sampling_cat_both}."'
+#                 )
+#             else:
+#                 for monit in arr_monit: #"monit" corresponds to obj_monit
+#                    self.__process_obj_monit(sample_seq=sample_seq, obj_monit=monit)
 
-    def __process_obj_monit(self, sample_seq:int = None, obj_monit:dict[str, any]=None):
-        if obj_monit[key_json_arr_monit_items] is None:
-            warnings.warn(
-                message=f'"arr_monit_items" is empty for sample sequence {sample_seq}',
-                category=RuntimeWarning)
-        else:
-            for i, monit_pair in enumerate(obj_monit[key_json_arr_monit_items]):
-                high_level_item:str = ""
-                if i == 0:
-                    high_level_item = obj_monit[hedr_monit_item_high]
-                self.content_monit_items.append(high_level_item)
-                self.rec_monit_item_name.append(monit_pair[hedr_monit_rec_items])
-                if monit_pair[hedr_monit_rec_units] is None:
-                    self.rec_monit_unit.append("")
-                else:
-                    self.rec_monit_unit.append(monit_pair[hedr_monit_rec_units])
+#     def __process_obj_monit(self, sample_seq:int = None, obj_monit:dict[str, any]=None):
+#         if obj_monit[key_json_arr_monit_items] is None:
+#             warnings.warn(
+#                 message=f'"arr_monit_items" is empty for sample sequence {sample_seq}',
+#                 category=RuntimeWarning)
+#         else:
+#             for i, monit_pair in enumerate(obj_monit[key_json_arr_monit_items]):
+#                 high_level_item:str = ""
+#                 if i == 0:
+#                     high_level_item = obj_monit[hedr_monit_item_high]
+#                 self.content_monit_items.append(high_level_item)
+#                 self.rec_monit_item_name.append(monit_pair[hedr_monit_rec_items])
+#                 if monit_pair[hedr_monit_rec_units] is None:
+#                     self.rec_monit_unit.append("")
+#                 else:
+#                     self.rec_monit_unit.append(monit_pair[hedr_monit_rec_units])
 
 
-    def output_single_sample(self):
-        self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
-                                method=dict_parts_stcs[tag_part_flow_mthod_instr_sampling],
-                                content=dict_parts_stcs[tag_stc_flow_content_sample_name].format(sample_name=self.name),
-                                record=dict_parts_stcs[tag_part_flow_rec_sampleID],
-                                operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
-                                witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
-        if self.category == opt_sampling_cat_ipc or self.category == opt_sampling_cat_both:
-            self.__output_IPC()
-        if self.category == opt_sampling_cat_monit or self.category == opt_sampling_cat_both:
-            self.__output_monit()
+#     def output_single_sample(self):
+#         self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
+#                                 method=dict_parts_stcs[tag_part_flow_mthod_instr_sampling],
+#                                 content=dict_parts_stcs[tag_stc_flow_content_sample_name].format(sample_name=self.name),
+#                                 record=dict_parts_stcs[tag_part_flow_rec_sampleID],
+#                                 operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
+#                                 witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
+#         if self.category == opt_sampling_cat_ipc or self.category == opt_sampling_cat_both:
+#             self.__output_IPC()
+#         if self.category == opt_sampling_cat_monit or self.category == opt_sampling_cat_both:
+#             self.__output_monit()
         
 
 
-    def __output_IPC(self):
-        for idx in range(len(self.content_ipc_criteria)):
-            temp_ipc_criteria:str = dict_parts_stcs[tag_stc_flow_ipc_criterion].format(ipc_criterion=self.content_ipc_criteria[idx])
-            temp_ipc_rec:str = dict_parts_stcs[tag_stc_flow_rec_ipc_result].format(ipc_item=self.rec_ipc_item_name[idx], ipc_rec_unit=self.rec_ipc_unit[idx])
-            self.flowsheet.put_line(content=temp_ipc_criteria,
-                                    record=temp_ipc_rec)
-            self.flowsheet.put_line(record=dict_parts_stcs[tag_part_flow_rec_criterion_ok_nok])
+#     def __output_IPC(self):
+#         for idx in range(len(self.content_ipc_criteria)):
+#             temp_ipc_criteria:str = dict_parts_stcs[tag_stc_flow_ipc_criterion].format(ipc_criterion=self.content_ipc_criteria[idx])
+#             temp_ipc_rec:str = dict_parts_stcs[tag_stc_flow_rec_ipc_result].format(ipc_item=self.rec_ipc_item_name[idx], ipc_rec_unit=self.rec_ipc_unit[idx])
+#             self.flowsheet.put_line(content=temp_ipc_criteria,
+#                                     record=temp_ipc_rec)
+#             self.flowsheet.put_line(record=dict_parts_stcs[tag_part_flow_rec_criterion_ok_nok])
 
-    def __output_monit(self):
-        idx_longer:int = None
-        if len(self.content_monit_items) >= len(self.rec_monit_item_name):
-            idx_longer = len(self.content_monit_items)
-        else:
-            idx_longer = len(self.rec_monit_item_name)
+#     def __output_monit(self):
+#         idx_longer:int = None
+#         if len(self.content_monit_items) >= len(self.rec_monit_item_name):
+#             idx_longer = len(self.content_monit_items)
+#         else:
+#             idx_longer = len(self.rec_monit_item_name)
         
-        for idx in range(idx_longer):
-            temp_content_monit_item: str = ""
-            if idx <=len(self.content_monit_items)-1:
-                temp_content_monit_item = dict_parts_stcs[tag_stc_flow_monit_item].format(monit_item=self.content_monit_items[idx])
-            temp_rec_monit_item:str = ""
-            if idx <= len(self.rec_monit_item_name)-1:
-                temp_rec_monit_item = dict_parts_stcs[tag_stc_flow_rec_monit_result].format(monit_item=self.rec_monit_item_name[idx],
-                                                                                            monit_rec_unit=self.rec_monit_unit[idx])
-            self.flowsheet.put_line(content=temp_content_monit_item,
-                                    record=temp_rec_monit_item)
+#         for idx in range(idx_longer):
+#             temp_content_monit_item: str = ""
+#             if idx <=len(self.content_monit_items)-1:
+#                 temp_content_monit_item = dict_parts_stcs[tag_stc_flow_monit_item].format(monit_item=self.content_monit_items[idx])
+#             temp_rec_monit_item:str = ""
+#             if idx <= len(self.rec_monit_item_name)-1:
+#                 temp_rec_monit_item = dict_parts_stcs[tag_stc_flow_rec_monit_result].format(monit_item=self.rec_monit_item_name[idx],
+#                                                                                             monit_rec_unit=self.rec_monit_unit[idx])
+#             self.flowsheet.put_line(content=temp_content_monit_item,
+#                                     record=temp_rec_monit_item)
 
             
 
