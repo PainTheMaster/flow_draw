@@ -12,6 +12,7 @@ from flow_draw.materials import materials as mats
 from flow_draw.trait_def import trait_def as trdef
 #from flow_draw.trait_def.trait_def import GetMats
 from flow_draw.data_io.json_io import Objason, Primitive, Array, Tuple
+from flow_draw.batch.process.unit_operations.sample import Sample
 
 
 
@@ -74,12 +75,12 @@ list_hedr:list[str]=[hedr_sample_name,
                      hedr_sample_comment]
 """header items for the detail input form"""
 
-key_json_arr_monit_items = 'json_array_monit_items'
-"""Key to a JSON entity: An array of monitoring items"""
+# key_json_arr_monit_items = 'json_array_monit_items'
+# """Key to a JSON entity: An array of monitoring items"""
 # key_json_tuple_monit ='json_monitoring_pair'
 # """Key to a JSON entity: A pair (tuple) of monitoring item name and unit."""
-key_json_pair_monit ='json_monit_pair'
-"""Key to a JSON entity: A pair (object) of monitoring item name and unit."""
+# key_json_pair_monit ='json_monit_pair'
+# """Key to a JSON entity: A pair (object) of monitoring item name and unit."""
 
 key_json_monit_item_name ='json_monit_item'
 """Key to a JSON entity: A pair (object) of monitoring item name and unit."""
@@ -87,16 +88,16 @@ key_json_monit_item_name ='json_monit_item'
 key_json_monit_unit ='json_monit_unit'
 """Key to a JSON entity: A pair (object) of monitoring item name and unit."""
 
-key_json_obj_monit = 'json_proc_monit'
-"""Key to a JSON entity: A set of process monitoring for a sample."""
-key_json_arr_monit = 'json_arr_monit'
-"""key to a JSON entity: An array of monitoring items."""
-key_json_obj_ipc = 'json_obj_ipc'
-"""Kye to a JSON entry: A tuple of ipc item, unit, and criterion."""
-key_json_arr_ipc_items = 'json_array_ipc_items'
-"""Key to a JSON entry: an array of tuple of IPC items"""
-key_json_single_sample = "json_single_sample"
-"""Key to a JSON entry: an object for a single sample"""
+# key_json_obj_monit = 'json_proc_monit'
+# """Key to a JSON entity: A set of process monitoring for a sample."""
+# key_json_arr_monit = 'json_arr_monit'
+# """key to a JSON entity: An array of monitoring items."""
+# key_json_obj_ipc = 'json_obj_ipc'
+# """Kye to a JSON entry: A tuple of ipc item, unit, and criterion."""
+# key_json_arr_ipc_items = 'json_array_ipc_items'
+# """Key to a JSON entry: an array of tuple of IPC items"""
+# key_json_single_sample = "json_single_sample"
+# """Key to a JSON entry: an object for a single sample"""
 key_json_arr_samples = "json_array_samples"
 """key to a JSON entity: an array of objects for samples"""
 key_json_sampling_stage = "sampling_stage"
@@ -117,7 +118,7 @@ list_opt_sampling_cat:list[str]=[opt_sampling_cat_ipc,
                                  opt_sampling_cat_both]
 """List of options for sampling_cat"""
 
-dict_dropdown: dict[str, str] = {hedr_sampling_cat : list_opt_sampling_cat}
+dict_dropdown: dict[str, list[str]] = {hedr_sampling_cat : list_opt_sampling_cat}
 """header items vs dropdown items dictionary"""
 
 #########################################################
@@ -127,79 +128,79 @@ lang_dict_uo_titles = defs.dict_jp_part_uo_titles
 
 
         ##### Tags (keys) for translation of common parts ####
-tag_flow_cmn_rec_time:str = defs.tag_flow_cmn_rec_time
-"""The key to the time-recording field for the flowsheet, a common item."""
-tag_flow_cmn_rec_sign:str = defs.tag_flow_cmn_rec_sign
-"""The key to the ignature field for the flowsheet, a common item."""
+# tag_flow_cmn_rec_time:str = defs.tag_flow_cmn_rec_time
+# """The key to the time-recording field for the flowsheet, a common item."""
+# tag_flow_cmn_rec_sign:str = defs.tag_flow_cmn_rec_sign
+# """The key to the ignature field for the flowsheet, a common item."""
 tag_flow_cmn_time_unit_second = opt_time_unit_second
 """Tag for a common flowsheet component for an unit of time: second"""
 tag_flow_cmn_time_unit_minute = opt_time_unit_minute
 """Tag for a common flowsheet component for an unit of time: minute"""
 tag_flow_cmn_time_unit_hour = opt_time_unit_hour
 """Tag for a common flowsheet component for an unit of time: hour"""
-lang_dict_cmn:dict[str, str] = defs.dict_jp_part_flow_cmn
-"""
-Language dictionary for common parts.
-    tag_flow_cmn_rec_time : part_flow_cmn_rec_time_jp,
-    tag_flow_cmn_rec_sign : part_flow_cmn_rec_sign_jp
-    tag_flow_cmn_time_unit_second : part_flow_cmn_time_unit_second,
-    tag_flow_cmn_time_unit_minute : part_flow_cmn_time_unit_minute,
-    tag_flow_cmn_time_unit_hour : part_flow_cmn_time_unit_hour
-"""
+# lang_dict_cmn:dict[str, str] = defs.dict_jp_part_flow_cmn
+# """
+# Language dictionary for common parts.
+#     tag_flow_cmn_rec_time : part_flow_cmn_rec_time_jp,
+#     tag_flow_cmn_rec_sign : part_flow_cmn_rec_sign_jp
+#     tag_flow_cmn_time_unit_second : part_flow_cmn_time_unit_second,
+#     tag_flow_cmn_time_unit_minute : part_flow_cmn_time_unit_minute,
+#     tag_flow_cmn_time_unit_hour : part_flow_cmn_time_unit_hour
+# """
 
-tag_part_flow_mthod_instr_sampling:str = "method col sampling"
-"""Tag for a flowsheet component: sampling"""
-part_flow_mthod_instr_sampling_jp:str = "サンプリング"
-"""A flowsheet component: sampling"""
+# tag_part_flow_mthod_instr_sampling:str = "method col sampling"
+# """Tag for a flowsheet component: sampling"""
+# part_flow_mthod_instr_sampling_jp:str = "サンプリング"
+# """A flowsheet component: sampling"""
 
-tag_part_flow_rec_criterion_ok_nok:str = "ok nok"
-"""Tag for a flowsheet component: IPC criterion OK or NOK"""
-part_flow_rec_criterion_ok_nok_jp:str = "□ 適 □ 不適"
-"""A flowsheet component: IPC criterion OK or NOK"""
+# tag_part_flow_rec_criterion_ok_nok:str = "ok nok"
+# """Tag for a flowsheet component: IPC criterion OK or NOK"""
+# part_flow_rec_criterion_ok_nok_jp:str = "□ 適 □ 不適"
+# """A flowsheet component: IPC criterion OK or NOK"""
 
-tag_part_flow_rec_sampleID:str = "sample ID"
-"""Tag for a flowsheet component: record field for sample ID"""
-part_flow_rec_sampleID_jp:str = "サンプルID____________"
-"""A flowsheet component: record field for sample ID"""
+# tag_part_flow_rec_sampleID:str = "sample ID"
+# """Tag for a flowsheet component: record field for sample ID"""
+# part_flow_rec_sampleID_jp:str = "サンプルID____________"
+# """A flowsheet component: record field for sample ID"""
 
 
 
-tag_stc_flow_content_sample_name = "content sample name"
-"""Tag for a sentence template: sample name field for content column; includes placeholders {sample_name}"""
-stc_flow_content_sample_name_jp = "サンプル名:{sample_name}"
-"""a sentence template: sample name template for content column; includes placeholders {sample_name}"""
+# tag_stc_flow_content_sample_name = "content sample name"
+# """Tag for a sentence template: sample name field for content column; includes placeholders {sample_name}"""
+# stc_flow_content_sample_name_jp = "サンプル名:{sample_name}"
+# """a sentence template: sample name template for content column; includes placeholders {sample_name}"""
 
-tag_stc_flow_ipc_criterion = "stc ipc criterion"
-"""Tag for a sentence template: ipc criteron template for content column; includes placeholders {ipc_criterion}"""
-stc_flow_ipc_criterion_jp = "IPC:{ipc_criterion}"
-"""a sentence template: ipc criteron template for content column; includes placeholders {ipc_criterion}"""
+# tag_stc_flow_ipc_criterion = "stc ipc criterion"
+# """Tag for a sentence template: ipc criteron template for content column; includes placeholders {ipc_criterion}"""
+# stc_flow_ipc_criterion_jp = "IPC:{ipc_criterion}"
+# """a sentence template: ipc criteron template for content column; includes placeholders {ipc_criterion}"""
 
-tag_stc_flow_rec_ipc_result = "rec ipc result"
-"""Tag for a sentence template: record field for ipc result; includes placeholders {ipc_item} and {ipc_rec_unit}"""
-stc_flow_rec_ipc_result_jp = "{ipc_item}:__________{ipc_rec_unit}"
-"""a sentence template: record field for ipc result; includes placeholders {ipc_item} and {ipc_rec_unit}"""
+# tag_stc_flow_rec_ipc_result = "rec ipc result"
+# """Tag for a sentence template: record field for ipc result; includes placeholders {ipc_item} and {ipc_rec_unit}"""
+# stc_flow_rec_ipc_result_jp = "{ipc_item}:__________{ipc_rec_unit}"
+# """a sentence template: record field for ipc result; includes placeholders {ipc_item} and {ipc_rec_unit}"""
 
-tag_stc_flow_monit_item = "content monitoring item"
-"""Tag for a sentence template: sentence template for monitoring item in the content column; includes placeholders {monit_item}"""
-stc_flow_monit_item_jp = "モニタリング:{monit_item}"
-"""a sentence template: sentence template for monitoring item in the content column; includes placeholders {monit_item}"""
+# tag_stc_flow_monit_item = "content monitoring item"
+# """Tag for a sentence template: sentence template for monitoring item in the content column; includes placeholders {monit_item}"""
+# stc_flow_monit_item_jp = "モニタリング:{monit_item}"
+# """a sentence template: sentence template for monitoring item in the content column; includes placeholders {monit_item}"""
 
-tag_stc_flow_rec_monit_result = "rec monitoring result"
-"""Tag for a sentence template: record field for monitoring result; includes placeholders {monit_item} and {monit_rec_unit}"""
-stc_flow_rec_monit_result_jp = "{monit_item}:__________{monit_rec_unit}"
-"""a sentence template: record field for monitoring result; includes placeholders {monit_item} and {monit_rec_unit}"""
+# tag_stc_flow_rec_monit_result = "rec monitoring result"
+# """Tag for a sentence template: record field for monitoring result; includes placeholders {monit_item} and {monit_rec_unit}"""
+# stc_flow_rec_monit_result_jp = "{monit_item}:__________{monit_rec_unit}"
+# """a sentence template: record field for monitoring result; includes placeholders {monit_item} and {monit_rec_unit}"""
 
-dict_parts_stcs_jp = {tag_part_flow_mthod_instr_sampling : part_flow_mthod_instr_sampling_jp,
-                      tag_part_flow_rec_criterion_ok_nok : part_flow_rec_criterion_ok_nok_jp,
-                      tag_part_flow_rec_sampleID : part_flow_rec_sampleID_jp,
-                      tag_stc_flow_content_sample_name : stc_flow_content_sample_name_jp,
-                      tag_stc_flow_ipc_criterion : stc_flow_ipc_criterion_jp,
-                      tag_stc_flow_rec_ipc_result : stc_flow_rec_ipc_result_jp,
-                      tag_stc_flow_monit_item : stc_flow_monit_item_jp,
-                      tag_stc_flow_rec_monit_result : stc_flow_rec_monit_result_jp}
-"""JP language dictionary for flowsheet parts and sentence templates"""
+# dict_parts_stcs_jp = {tag_part_flow_mthod_instr_sampling : part_flow_mthod_instr_sampling_jp,
+#                       tag_part_flow_rec_criterion_ok_nok : part_flow_rec_criterion_ok_nok_jp,
+#                       tag_part_flow_rec_sampleID : part_flow_rec_sampleID_jp,
+#                       tag_stc_flow_content_sample_name : stc_flow_content_sample_name_jp,
+#                       tag_stc_flow_ipc_criterion : stc_flow_ipc_criterion_jp,
+#                       tag_stc_flow_rec_ipc_result : stc_flow_rec_ipc_result_jp,
+#                       tag_stc_flow_monit_item : stc_flow_monit_item_jp,
+#                       tag_stc_flow_rec_monit_result : stc_flow_rec_monit_result_jp}
+# """JP language dictionary for flowsheet parts and sentence templates"""
 
-dict_parts_stcs = dict_parts_stcs_jp
+# dict_parts_stcs = dict_parts_stcs_jp
 
 #########################################################
 # Class (uo.UnitOperation, uo_tag=defs.tag_uo_<UO_NAME>)
@@ -219,31 +220,32 @@ dict_parts_stcs = dict_parts_stcs_jp
 #########################################################
 class Sampling(uo.UnitOperation, uo_tag=defs.tag_uo_sampling):
     def __init__(self,
-                 caller: type[trdef.UniversalTrait] =None,
+                 caller: trdef.UniversalTrait =None,
                  flowsheet:trdef.FlowsheetTrait=None,
                  operation_seq: int=None,
                  num_subitems: int = None,
                  edit_comment:str=None):
         super().__init__(caller=caller, flowsheet=flowsheet, operation_seq=operation_seq, num_subitems=num_subitems, edit_comment=edit_comment)
-        self.list_samples:list[trdef.SampleTrait] = []
+        self.list_samples:list[Sample] = []
     
-    # def load_params_from_df(self, df: pd.DataFrame):
-    #     """
-    #     Loads necessary parameters from a DataFrame object.
-    #     The header items must be in line with the definition the class Charging.
-    #     The header items can be passed from the get_detail_header() of each UnitOperation-drived class.
-    #     This is the overriding mehtod in the class Charging..
-    #     """
+    def load_params_from_df(self, df: pd.DataFrame):
+        """
+        Loads necessary parameters from a DataFrame object.
+        The header items must be in line with the definition the class Charging.
+        The header items can be passed from the get_detail_header() of each UnitOperation-drived class.
+        This is the overriding mehtod in the class Charging..
+        """
 
-    #     first_row = df.iloc[0]
-    #     if not pd.isna(first_row[hedr_precomment]):
-    #         self.pre_comment = first_row[hedr_precomment]
-    #     if not pd.isna(first_row[hedr_postcomment]):
-    #         self.post_comment = first_row[hedr_postcomment]
-    #     for sample_seq, subitem in df.iterrows():
-    #         temp_sample = SingleSample(flowsheet=self.flowsheet)
-    #         temp_sample.load_from_series(caller=self, sample_seq=sample_seq, ser=subitem)
-    #         self.list_samples.append(temp_sample)
+        # first_row = df.iloc[0]
+        # if not pd.isna(first_row[hedr_precomment]):
+        #     self.pre_comment = first_row[hedr_precomment]
+        # if not pd.isna(first_row[hedr_postcomment]):
+        #     self.post_comment = first_row[hedr_postcomment]
+        # for sample_seq, subitem in df.iterrows():
+        #     temp_sample = SingleSample(flowsheet=self.flowsheet)
+        #     temp_sample.load_from_series(caller=self, sample_seq=sample_seq, ser=subitem)
+        #     self.list_samples.append(temp_sample)
+        pass
 
 
     def get_seq(self)-> int:
@@ -346,7 +348,7 @@ class Sampling(uo.UnitOperation, uo_tag=defs.tag_uo_sampling):
         #                         props=[sample_name, sample_cat, arr_monit, arr_ipc],
         #                         description="Descriptor of a sample. A collection of the sample name, sampling category (monitoring and/or IPC), necessary monitoring items, IPC items, and the criteria for the IPC.")
         
-        single_sample = trdef.SampleTrait.get_json_schema(caller=caller)
+        single_sample = Sample.get_json_schema(caller=caller)
 
         arr_samples = Array(key=key_json_arr_samples,
                             content=single_sample,
@@ -363,13 +365,14 @@ class Sampling(uo.UnitOperation, uo_tag=defs.tag_uo_sampling):
 
     def load_from_json_dict(self, json_dict:dict[str, Any]):
         super().load_from_json_dict(json_dict)
-        arr_sample:list[dict[str,Any]] = json_dict[key_json_arr_samples]
+        arr_sample:list[dict[str,Any]] = json_dict.get(key_json_arr_samples)
+        self.list_samples.clear()
         if arr_sample is not None:
             for sample in arr_sample:
                 # single_sample=SingleSample(flowsheet=self.flowsheet)
                 # single_sample.load_from_single_sample_json(sample_seq=i+1, sample=sample)
                 # self.list_samples.append(single_sample)
-                single_sample = trdef.SampleTrait(flowsheet=self.flowsheet, json_dict=sample)
+                single_sample = Sample(flowsheet=self.flowsheet, json_dict=sample)
                 self.list_samples.append(single_sample)
 
 
