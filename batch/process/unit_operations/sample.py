@@ -4,7 +4,7 @@
 import pandas as pd
 import warnings
 import flow_draw.definitions as defs
-from typing import Optional, Any
+from typing import Optional, Any, Literal
 from flow_draw.batch.process.unit_operations import unit_operation as uo
 from flow_draw.data_io import process_io as procio
 from flow_draw.materials import materials as mats
@@ -305,6 +305,9 @@ tag_stc_attrb_particle_size:str = "sentence_particle_size"
 """A flowsheet compoent: the template for particle size. No analyte placeholder."""
 tag_stc_attrb_other:str = "sentence_attribute_other"
 """A flowsheet compoent: the template for other attributes, includes a placeholder {analyte}"""
+tag_stc_attrb_unk:str = "sentence_unk_attribute"
+"""A flowsheet compoent: the template for an unknown attribute, includes a placeholder {analyte} and {unk}"""
+
 
 tag_part_comparator_equal = opt_comparator_equal
 """A flowsheet compoent the word for equal"""
@@ -314,10 +317,10 @@ tag_part_comparator_lt = 'less_than'
 '''A flowsheet compoent the word for "<"'''
 tag_part_comparator_nmt = 'not_more_than'
 """A flowsheet compoent the word for not ≦"""
-tag_part_comparator_nlt = opt_comparator_nlt
-"""A flowsheet compoent the word for not less than"""
-tag_part_comparator_gt = opt_comparator_gt
-"""A flowsheet compoent the word for greater than"""
+tag_part_comparator_nlt = 'not_less_than'
+"""A flowsheet compoent the word for not less than ≧"""
+tag_part_comparator_gt = 'greater_than'
+"""A flowsheet compoent the word for greater than >"""
 
 
 
@@ -351,34 +354,37 @@ dict_parts_stcs_jp = {tag_part_flow_mthod_instr_sampling : "サンプリング",
                       tag_part_comparator_match : ': ',
                       tag_part_comparator_lt : '<',
                       tag_part_comparator_nmt : '≦',
+                      tag_part_comparator_nlt : '≧',
+                      tag_part_comparator_gt : '>',
 
                       tag_stc_attrb_conversion : "{analyte}転化率",
-                      tag_stc_attrb_rmnng_reactant : "{analyte}残存率",
+                      tag_stc_attrb_rmnng_reactant : "残存{analyte}",
                       tag_stc_attrb_imp_level: "{analyte}量",
                       tag_stc_attrb_purity: "{analyte}純度",
                       tag_stc_attrb_ee: "{analyte}ee",
                       tag_stc_attrb_de: '{analyte}de',
                       tag_stc_attrb_water_cntnt: "水分含量",
                       tag_stc_attrb_pH: "pH",
-                      tag_stc_attrb_extract_loss: "洗浄相への{analyte}ロス",
+                      tag_stc_attrb_extract_loss: "洗浄相中{analyte}ロス",
                       tag_stc_attrb_resid_excess: "{analyte}残存量",
                       tag_stc_attrb_solv_fraction: "{analyte}含有率",
                       tag_stc_attrb_tm_conc_pl: "{analyte}濃度",
                       tag_stc_attrb_tm_conc_ml: "母液中{analyte}濃度",
                       tag_stc_attrb_cryst_form: "{analyte}結晶形",
-                      tag_stc_attrb_filt_liq_indicator: "洗浄ろ液{analyte}指標",
+                      tag_stc_attrb_filt_liq_indicator: "ろ液中{analyte}量",
                       tag_stc_attrb_filt_assay_tm: "{analyte}含量",
                       tag_stc_attrb_lod: "乾燥減量",
                       tag_stc_attrb_resid_solv: "残留{analyte}量",
                       tag_stc_attrb_particle_size: "粒度",
                       tag_stc_attrb_other: "{analyte}<placeholder>",
+                      tag_stc_attrb_unk:"[warn!]{analyte}<unknown attribute {unk}>",
 
 
-                      tag_stc_flow_content_sample_name : "サンプル名:{sample_name}",
-                      tag_stc_flow_ipc : "IPC:{analysis_item}",
+                      tag_stc_flow_content_sample_name : "サンプル名: {sample_name}",
+                      tag_stc_flow_ipc : "IPC: {analysis_item}",
                     #   tag_stc_flow_rec_ipc_result : "{analysis_item}:__________{meas_unit}",
-                      tag_stc_flow_monit_tgt : 'モニタリング(目標):{analysis_item}',
-                      tag_stc_flow_fio : "モニタリング:{analysis_item}",
+                      tag_stc_flow_monit_tgt : 'モニタリング(目標): {analysis_item}',
+                      tag_stc_flow_fio : "モニタリング: {analysis_item}",
                       tag_stc_flow_rec_analysis_result : "{analysis_item}:__________{meas_unit}",
                       }
 """JP language dictionary for flowsheet parts and sentence templates"""
@@ -400,29 +406,47 @@ class Sample(trdef.SampleTrait):
         self.list_fio: list[dict[str,Any]] =[]
         self.__load_from_json_dict(json_dict)
 
+    @staticmethod
+    def __cmprtr_key_to_str(key_comparator:str=None)->str:
+        if key_comparator == opt_comparator_equal:
+            return dict_parts_stcs[tag_part_comparator_equal] 
+        elif key_comparator == opt_comparator_match:
+            return dict_parts_stcs[tag_part_comparator_match] 
+        elif key_comparator == opt_comparator_lt:
+            return dict_parts_stcs[tag_part_comparator_lt]
+        elif key_comparator == opt_comparator_nmt:
+            return dict_parts_stcs[tag_part_comparator_nmt]
+        elif key_comparator == opt_comparator_nlt:
+            return dict_parts_stcs[tag_part_comparator_nlt]
+        elif key_comparator == opt_comparator_gt:
+            return dict_parts_stcs[tag_part_comparator_gt]
+        else:
+            return ''
+
+
     def print_sample(self):
         def print_analytical_items(list_analysis:list[dict[str,Any]]=None):
             def comparator_to_str(item:str=None,
                                   analysis:dict[str, Any]=None)->str:
                 val1 = analysis.get(key_criteria_val_1)
-                comparator1 = analysis.get(key_comparator_1)
+                comp1 = analysis.get(key_comparator_1)
                 val2 = analysis.get(key_criteria_val_2)
-                comparator2 = analysis.get(key_comparator_2)                
+                comp2 = analysis.get(key_comparator_2)                
                 unit = analysis.get(key_unit_meas)
 
                 if not unit:
                     unit=''
                 str_this = ''
-                if ((val1 is not None and comparator1) and not (val2 is not None and comparator2)
-                    or (not(val1 is not None and comparator1) and (val2 is not None and comparator2))):
+                if ((val1 is not None and comp1) and not (val2 is not None and comp2)
+                    or (not(val1 is not None and comp1) and (val2 is not None and comp2))):
                     val = None
                     comp = None
-                    if val1 is not None:
+                    if val1 is not None and comp1:
                         val = val1
-                        comp = comparator1
+                        comp = comp1
                     else:
                         val = val2
-                        comp = comparator2
+                        comp = comp2
                     if comp in [opt_comparator_equal, opt_comparator_match]:
                         str_this = item+dict_parts_stcs[comp]+str(val) + unit
                     elif comp == opt_comparator_lt:
@@ -430,30 +454,80 @@ class Sample(trdef.SampleTrait):
                     elif comp == opt_comparator_nmt:
                         str_this = item + dict_parts_stcs[tag_part_comparator_nmt] + str(val) + unit
                     elif comp == opt_comparator_nlt:
-                        str_this = str(val) + unit + dict_parts_stcs[tag_part_comparator_nmt] + item
+                        # str_this = str(val) + unit + dict_parts_stcs[tag_part_comparator_nmt] + item
+                        str_this = item + dict_parts_stcs[tag_part_comparator_nlt] + str(val) + unit
                     elif comp ==  opt_comparator_gt:
-                        str_this = str(val) + unit + dict_parts_stcs[tag_part_comparator_lt] + item
-                elif (val1 is not None and comparator1) and (val2 is not None and comparator2):
-                    if comparator1 == opt_comparator_lt:
+                        # str_this = str(val) + unit + dict_parts_stcs[tag_part_comparator_lt] + item
+                        str_this = item + dict_parts_stcs[tag_part_comparator_gt] + str(val) + unit
+                elif (val1 is not None and comp1) and (val2 is not None and comp2):
+                    if comp1 == opt_comparator_lt:
                         str_this = item + dict_parts_stcs[tag_part_comparator_lt] + str(val1) + unit
-                    elif comparator1 == opt_comparator_nmt:
+                    elif comp1 == opt_comparator_nmt:
                         str_this = item + dict_parts_stcs[tag_part_comparator_nmt] + str(val1) + unit
-                    elif comparator1 == opt_comparator_nlt:
+                    elif comp1 == opt_comparator_nlt:
                         str_this = str(val1) + unit + dict_parts_stcs[tag_part_comparator_nmt] + item
-                    elif comparator1 ==  opt_comparator_gt:
+                    elif comp1 ==  opt_comparator_gt:
                         str_this = str(val1) + unit + dict_parts_stcs[tag_part_comparator_lt] + item
-                    if comparator2 == opt_comparator_lt:
+                    if comp2 == opt_comparator_lt:
                         str_this = str_this + dict_parts_stcs[tag_part_comparator_lt] + str(val2) + unit
-                    elif comparator2 == opt_comparator_nmt:
+                    elif comp2 == opt_comparator_nmt:
                         str_this = str_this + dict_parts_stcs[tag_part_comparator_nmt] + str(val2) + unit
-                    elif comparator2 == opt_comparator_nlt:
+                    elif comp2 == opt_comparator_nlt:
                         str_this = str(val2) + unit + dict_parts_stcs[tag_part_comparator_nmt] + str_this
-                    elif comparator2 == opt_comparator_gt:
+                    elif comp2 == opt_comparator_gt:
                         str_this = str(val2) + unit + dict_parts_stcs[tag_part_comparator_lt] + str_this
+
+                    if ((comp1, comp2) in {(opt_comparator_lt, opt_comparator_lt),
+                                                      (opt_comparator_lt, opt_comparator_nmt),
+                                                      (opt_comparator_nmt, opt_comparator_lt),
+                                                      (opt_comparator_nmt, opt_comparator_nmt),
+                                                      (opt_comparator_nlt, opt_comparator_nlt),
+                                                      (opt_comparator_nlt, opt_comparator_gt),
+                                                      (opt_comparator_gt, opt_comparator_nlt),
+                                                      (opt_comparator_gt, opt_comparator_gt)}
+                        or comp1 in {opt_comparator_equal, opt_comparator_match}
+                        or comp2 in {opt_comparator_equal, opt_comparator_match}):
+                        warnings.warn(message=f'{self.__class__.__name__}.print_sample().print_analytical_items().comparator_to_str(): '
+                                      f'Invalid combination of comparators. (comparator1, comparator2)==("{comp1}", "{comp2}").\n'
+                                      'The criteria is printed with a mark "[warn!]".',
+                                      category=RuntimeWarning)
+                        str_this = f'[warn!]{item}{self.__cmprtr_key_to_str(comp1)}{val1}{unit} and {item}{self.__cmprtr_key_to_str(comp2)}{val2}{unit}'
+
+                    if (((comp1, comp2) in {(opt_comparator_lt, opt_comparator_nlt),
+                                           (opt_comparator_lt, opt_comparator_gt),
+                                        #    (opt_comparator_nmt, opt_comparator_nlt),
+                                           (opt_comparator_nmt, opt_comparator_gt)}
+                                           and isinstance(val1, (float, int)) and isinstance(val2, (float, int))
+                                           and val1 <= val2)
+                        or 
+                        ((comp1, comp2) == (opt_comparator_nmt, opt_comparator_nlt)
+                         and isinstance(val1, (float, int)) and isinstance(val2, (float, int))
+                         and val1 < val2)
+                        or
+                        ((comp1, comp2) in {(opt_comparator_gt, opt_comparator_nmt),
+                                             (opt_comparator_gt, opt_comparator_lt),
+                                             (opt_comparator_nlt, opt_comparator_lt)}
+                                             and isinstance(val1, (float, int)) and isinstance(val2, (float, int))
+                                             and val1 >= val2)
+                        or
+                        ((comp1, comp2) == (opt_comparator_nlt, opt_comparator_nmt)
+                         and isinstance(val1, (float, int)) and isinstance(val2, (float, int))
+                         and val1 > val2)):
+                        warnings.warn(message=f'{self.__class__.__name__}.print_sample().print_analytical_items().comparator_to_str(): '
+                                      f'Invalid combination of comparators and values.\n'
+                                      f'{item}{self.__cmprtr_key_to_str(comp1)}{val1}{unit} and {item}{self.__cmprtr_key_to_str(comp2)}{val2}{unit}',
+                                      category=RuntimeWarning)
+                        str_this = '[warn!]' + str_this           
+                        
+                # if no criterion is provided
+                else:
+                    str_this = item
                 
                 return str_this
 
-            def print_generic_analysis_item(template_attrbt:str=None, analysis:dict[str, Any]=None):
+            def print_generic_analysis_item(template_attrbt:str=None,
+                                            rec_title:Literal['attrb', 'analyte', 'both']|None='attrb',
+                                            analysis:dict[str, Any]=None):
                 #Template for method column: e.g., "IPC:{analysis_item}"
                 #Analysis item: e.g., "compound-x転化率" or "99.0%≦compound-x転化率≦99.9%"
                 #Finally, method colum component: e.g., "IPC:99.0%≦compound-x転化率≦99.9%"
@@ -474,62 +548,86 @@ class Sample(trdef.SampleTrait):
                     template_method_col = dict_parts_stcs[tag_stc_flow_fio]
                     analysis_item_method = template_attrbt.replace('{analyte}', (analysis.get(key_analyte) or ''))
                     method_col_component = template_method_col.replace('{analysis_item}', analysis_item_method)
+                else:
+                    # test_purpose = opt_analysis_cat_fio
+                    template_method_col = '[warn!]' + dict_parts_stcs[tag_stc_flow_fio]
+                    analysis_item_method = template_attrbt.replace('{analyte}', (analysis.get(key_analyte) or ''))
+                    method_col_component = template_method_col.replace('{analysis_item}', analysis_item_method)
+                    warnings.warn(message=f'{self.__class__.__name__}.print_sample().print_analytical_items().print_generic_analysis_items(): '
+                                  f'Unknown test purpose "{test_purpose}". The analysis item will be printed as FIO with an warning mark "[warn!]"',
+                                  category=RuntimeWarning)
+
+                # if not analysis.get(key_analysis_attribute) in list_opt_attrbt:
+                #     analysis_item_method = analysis_item_method.replace('{unk}', (analysis.get(key_analysis_attribute) or ''))
+
 
                 #Record field e.g. "転化率____________%"
                 unit = analysis.get(key_unit_meas)
                 unit = unit if unit else ''
-                analysis_item_rec = template_attrbt.replace('{analyte}','')
-                record_conversion = dict_parts_stcs[tag_stc_flow_rec_analysis_result].format(analysis_item=analysis_item_rec, meas_unit=unit)
+                if rec_title is None:
+                    rec_title='both'
 
-                self.flowsheet.put_line(content=method_col_component, record=record_conversion)
+                analysis_item_rec = ''
+                if rec_title == 'attrb':
+                    analysis_item_rec = template_attrbt.replace('{analyte}','')
+                elif rec_title == 'analyte':
+                    analysis_item_rec = analysis.get(key_analyte) or '<placeholder_analyte>'
+                elif rec_title == 'both':
+                    analysis_item_rec = template_attrbt.replace('{analyte}',
+                                                                analysis.get(key_analyte) or '<placeholder_analyte>')
+                # analysis_item_rec = template_attrbt.replace('{analyte}','')
+                text_rec_field = dict_parts_stcs[tag_stc_flow_rec_analysis_result].format(analysis_item=analysis_item_rec, meas_unit=unit)
+
+                self.flowsheet.put_line(content=method_col_component, record=text_rec_field)
                 if analysis.get(key_test_purpose) in [opt_analysis_cat_ipc, opt_analysis_cat_monit_tgt]:
                     self.flowsheet.put_line(record = dict_parts_stcs[tag_part_flow_rec_ok_nok])
             ############### functions inprint_analytical_items() till here #########################
 
             for analysis in list_analysis:
                 if analysis.get(key_analysis_attribute) == opt_attrbt_conversion:
-                    print_generic_analysis_item(template_attrbt=dict_parts_stcs[tag_stc_attrb_conversion], analysis=analysis)
+                    print_generic_analysis_item(template_attrbt=dict_parts_stcs[tag_stc_attrb_conversion], rec_title='attrb', analysis=analysis)
                 elif analysis.get(key_analysis_attribute) == opt_attrbt_rmnng_reactant:
-                    print_generic_analysis_item(template_attrbt=dict_parts_stcs[tag_stc_attrb_rmnng_reactant], analysis=analysis)
+                    print_generic_analysis_item(template_attrbt=dict_parts_stcs[tag_stc_attrb_rmnng_reactant], rec_title='analyte', analysis=analysis)
                 elif analysis.get(key_analysis_attribute) == opt_attrbt_imp_level:
-                    print_generic_analysis_item(template_attrbt=dict_parts_stcs[tag_stc_attrb_imp_level], analysis=analysis)
+                    print_generic_analysis_item(template_attrbt=dict_parts_stcs[tag_stc_attrb_imp_level], rec_title='analyte', analysis=analysis)
                 elif analysis.get(key_analysis_attribute) == opt_attrbt_purity:
-                    print_generic_analysis_item(template_attrbt=dict_parts_stcs[tag_stc_attrb_purity], analysis=analysis)
+                    print_generic_analysis_item(template_attrbt=dict_parts_stcs[tag_stc_attrb_purity], rec_title='attrb', analysis=analysis)
                 elif analysis.get(key_analysis_attribute) == opt_attrbt_ee:
-                    print_generic_analysis_item(template_attrbt=dict_parts_stcs[tag_stc_attrb_ee], analysis=analysis)
+                    print_generic_analysis_item(template_attrbt=dict_parts_stcs[tag_stc_attrb_ee], rec_title='attrb', analysis=analysis)
                 elif analysis.get(key_analysis_attribute) == opt_attrbt_de:
-                    print_generic_analysis_item(template_attrbt=dict_parts_stcs[tag_stc_attrb_de], analysis=analysis)
+                    print_generic_analysis_item(template_attrbt=dict_parts_stcs[tag_stc_attrb_de], rec_title='attrb', analysis=analysis)
                 elif analysis.get(key_analysis_attribute) == opt_attrbt_water_cntnt:
-                    print_generic_analysis_item(template_attrbt=dict_parts_stcs[tag_stc_attrb_water_cntnt], analysis=analysis)
+                    print_generic_analysis_item(template_attrbt=dict_parts_stcs[tag_stc_attrb_water_cntnt], rec_title='attrb', analysis=analysis)
                 elif analysis.get(key_analysis_attribute) == opt_attrbt_pH:
-                    print_generic_analysis_item(template_attrbt=dict_parts_stcs[tag_stc_attrb_pH], analysis=analysis)
+                    print_generic_analysis_item(template_attrbt=dict_parts_stcs[tag_stc_attrb_pH], rec_title='attrb', analysis=analysis)
                 elif analysis.get(key_analysis_attribute) == opt_attrbt_extract_loss:
-                    print_generic_analysis_item(template_attrbt=dict_parts_stcs[tag_stc_attrb_extract_loss], analysis=analysis)
+                    print_generic_analysis_item(template_attrbt=dict_parts_stcs[tag_stc_attrb_extract_loss], rec_title='attrb', analysis=analysis)
                 elif analysis.get(key_analysis_attribute) == opt_attrbt_resid_excess:
-                    print_generic_analysis_item(template_attrbt=dict_parts_stcs[tag_stc_attrb_resid_excess], analysis=analysis)
+                    print_generic_analysis_item(template_attrbt=dict_parts_stcs[tag_stc_attrb_resid_excess], rec_title='attrb', analysis=analysis)
                 elif analysis.get(key_analysis_attribute) == opt_attrbt_solv_fraction:
-                    print_generic_analysis_item(template_attrbt=dict_parts_stcs[tag_stc_attrb_solv_fraction], analysis=analysis)
+                    print_generic_analysis_item(template_attrbt=dict_parts_stcs[tag_stc_attrb_solv_fraction], rec_title='analyte', analysis=analysis)
                 elif analysis.get(key_analysis_attribute) == opt_attrbt_tm_conc_pl:
-                    print_generic_analysis_item(template_attrbt=dict_parts_stcs[tag_stc_attrb_tm_conc_pl], analysis=analysis)
+                    print_generic_analysis_item(template_attrbt=dict_parts_stcs[tag_stc_attrb_tm_conc_pl], rec_title='both', analysis=analysis)
                 elif analysis.get(key_analysis_attribute) == opt_attrbt_tm_conc_ml:
-                    print_generic_analysis_item(template_attrbt=dict_parts_stcs[tag_stc_attrb_tm_conc_ml], analysis=analysis)
+                    print_generic_analysis_item(template_attrbt=dict_parts_stcs[tag_stc_attrb_tm_conc_ml], rec_title='attrb', analysis=analysis)
                 elif analysis.get(key_analysis_attribute) == opt_attrbt_cryst_form:
-                    print_generic_analysis_item(template_attrbt=dict_parts_stcs[tag_stc_attrb_cryst_form], analysis=analysis)
+                    print_generic_analysis_item(template_attrbt=dict_parts_stcs[tag_stc_attrb_cryst_form], rec_title='attrb', analysis=analysis)
                 elif analysis.get(key_analysis_attribute) == opt_attrbt_filt_liq_indicator:
-                    print_generic_analysis_item(template_attrbt=dict_parts_stcs[tag_stc_attrb_filt_liq_indicator], analysis=analysis)
+                    print_generic_analysis_item(template_attrbt=dict_parts_stcs[tag_stc_attrb_filt_liq_indicator], rec_title='analyte', analysis=analysis)
                 elif analysis.get(key_analysis_attribute) == opt_attrbt_filt_assay_tm:
-                    print_generic_analysis_item(template_attrbt=dict_parts_stcs[tag_stc_attrb_filt_assay_tm], analysis=analysis)
+                    print_generic_analysis_item(template_attrbt=dict_parts_stcs[tag_stc_attrb_filt_assay_tm], rec_title='attrb', analysis=analysis)
                 elif analysis.get(key_analysis_attribute) == opt_attrbt_lod:
-                    print_generic_analysis_item(template_attrbt=dict_parts_stcs[tag_stc_attrb_lod], analysis=analysis)
+                    print_generic_analysis_item(template_attrbt=dict_parts_stcs[tag_stc_attrb_lod], rec_title='attrb', analysis=analysis)
                 elif analysis.get(key_analysis_attribute) == opt_attrbt_resid_solv:
-                    print_generic_analysis_item(template_attrbt=dict_parts_stcs[tag_stc_attrb_resid_solv], analysis=analysis)
+                    print_generic_analysis_item(template_attrbt=dict_parts_stcs[tag_stc_attrb_resid_solv], rec_title='analyte', analysis=analysis)
                 elif analysis.get(key_analysis_attribute) == opt_attrbt_particle_size:
-                    print_generic_analysis_item(template_attrbt=dict_parts_stcs[tag_stc_attrb_particle_size], analysis=analysis)
+                    print_generic_analysis_item(template_attrbt=dict_parts_stcs[tag_stc_attrb_particle_size], rec_title='attrb', analysis=analysis)
                 elif analysis.get(key_analysis_attribute) == opt_attrbt_other:
-                    print_generic_analysis_item(template_attrbt=dict_parts_stcs[tag_stc_attrb_other], analysis=analysis)
+                    print_generic_analysis_item(template_attrbt=dict_parts_stcs[tag_stc_attrb_other],rec_title='both', analysis=analysis)
                 else:
                     warnings.warn(message=f'{self.__class__.__name__}.print_sample() Unknown attribute "{analysis.get(key_analysis_attribute)}".',
                                   category=RuntimeWarning)
+                    print_generic_analysis_item(template_attrbt=dict_parts_stcs[tag_stc_attrb_unk].replace('{unk}', analysis.get(key_analysis_attribute) or ''), rec_title='both', analysis=analysis)
 
         if self.sample_comment:
             self.flowsheet.put_body_comments(self.sample_comment)
@@ -561,14 +659,14 @@ class Sample(trdef.SampleTrait):
                                  nullable=False)
         stem_sample_name = Primitive(prim_type='string',
                                      key=key_stem_sample_name,
-                                     description='Stem of the ample name.',
+                                     description='Stem of the sample name.',
                                      nullable=False,
                                      required=True)
         suffix_sample_name = Primitive(prim_type='string',
                                        key=key_suffix_sample_name,
-                                       description='Suffix of the sample name. Not necessarily required, but useful in some cases., '
+                                       description='Suffix of the sample name. Not necessarily required, but useful in some cases. '
                                        'For instance, samples are taken in a time series such as 1hr, 2hr... to trace the progress of the reaction. '
-                                       'The same is true for drying. In such cases, time is a simple and comveninent suffix to identify a sample. '
+                                       'The same is true for drying. In such cases, time is a simple and convenient suffix to identify a sample. '
                                        'In another case, "top", "middle", and "bottom" are used when multiple samples are taken from bulk.',
                                        nullable=True,
                                        required=False)
@@ -582,7 +680,7 @@ class Sample(trdef.SampleTrait):
                                  description='Purpose of the analysis. '
                                  f'"{opt_analysis_cat_ipc}": A decision about the operation is made based on the result of the analysis. '
                                  f'"{opt_analysis_cat_monit_tgt}": The analysis is done for the sake of process monitoring. Meanwhile a target value is set for that. '
-                                 'Meeting the target value is deriable, but not a strict requirement. Not only the target value, but also various relevant conditions are took into consideration. '
+                                 'Meeting the target value is desirable, but not a strict requirement. Not only the target value, but also various relevant conditions are took into consideration. '
                                  f'"{opt_analysis_cat_fio}" The analysis is done simply for the sake of process monitoring. No decision is made from the result.',
                                  enum=list_opt_analysis_purpose,
                                  nullable=False,
@@ -667,7 +765,7 @@ class Sample(trdef.SampleTrait):
                                    description='Criteria value 2 for IPC or monitoring with a target. Either quantitative (interval scale or ratio scale; normally number type) '
                                    'or qualitative (nominal scale; normally string type). '
                                    'For some IPC or monitoring with a target, this property is required. '
-                                   'If a second parameter is specified please put it in this property, e.g., the upper limit of a range.'
+                                   'If a second parameter is specified please put it in this property, e.g., the upper limit of a range. '
                                    f'Together with this property, please specify the "{key_comparator_2}" between the result and the set value to specify the criteria.',
                                    nullable=True,
                                    required=False)
@@ -724,8 +822,9 @@ class Sample(trdef.SampleTrait):
                 dest.extend(reversed(matched))
             if orig:
                 for element in orig:
-                    warnings.warn(message=f'{self.__class__.__name__}.__load_from_json_dict(): unknown attribute "{element.get(key_analysis_attribute)}"',
-                                  category=RuntimeWarning)
+                    # warnings.warn(message=f'{self.__class__.__name__}.__load_from_json_dict(): unknown attribute "{element.get(key_analysis_attribute)}"',
+                    #               category=RuntimeWarning)
+                    dest.append(element)
                         
         if json_dict.get(key_class_name) != const_class_sample:
             warnings.warn(message=f'{self.__class__.__name__}.__load_from_json_dict(): The json_dictionary doesn\'t include the constant for the object name "{const_class_sample}".',
@@ -749,6 +848,8 @@ class Sample(trdef.SampleTrait):
                 elif purpose == opt_analysis_cat_monit_tgt:
                     buf_list_monit_tgt.append(single_analysis)
                 elif purpose == opt_analysis_cat_fio:
+                    buf_list_fio.append(single_analysis)
+                else:
                     buf_list_fio.append(single_analysis)
             sort_transf_analysis(orig=buf_list_ipc, dest=self.list_ipc)
             sort_transf_analysis(orig=buf_list_monit_tgt, dest=self.list_monit_tgt)

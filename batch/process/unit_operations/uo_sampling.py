@@ -75,29 +75,12 @@ list_hedr:list[str]=[hedr_sample_name,
                      hedr_sample_comment]
 """header items for the detail input form"""
 
-# key_json_arr_monit_items = 'json_array_monit_items'
-# """Key to a JSON entity: An array of monitoring items"""
-# key_json_tuple_monit ='json_monitoring_pair'
-# """Key to a JSON entity: A pair (tuple) of monitoring item name and unit."""
-# key_json_pair_monit ='json_monit_pair'
-# """Key to a JSON entity: A pair (object) of monitoring item name and unit."""
-
 key_json_monit_item_name ='json_monit_item'
 """Key to a JSON entity: A pair (object) of monitoring item name and unit."""
 
 key_json_monit_unit ='json_monit_unit'
 """Key to a JSON entity: A pair (object) of monitoring item name and unit."""
 
-# key_json_obj_monit = 'json_proc_monit'
-# """Key to a JSON entity: A set of process monitoring for a sample."""
-# key_json_arr_monit = 'json_arr_monit'
-# """key to a JSON entity: An array of monitoring items."""
-# key_json_obj_ipc = 'json_obj_ipc'
-# """Kye to a JSON entry: A tuple of ipc item, unit, and criterion."""
-# key_json_arr_ipc_items = 'json_array_ipc_items'
-# """Key to a JSON entry: an array of tuple of IPC items"""
-# key_json_single_sample = "json_single_sample"
-# """Key to a JSON entry: an object for a single sample"""
 key_json_arr_samples = "json_array_samples"
 """key to a JSON entity: an array of objects for samples"""
 key_json_sampling_stage = "sampling_stage"
@@ -147,60 +130,6 @@ tag_flow_cmn_time_unit_hour = opt_time_unit_hour
 #     tag_flow_cmn_time_unit_minute : part_flow_cmn_time_unit_minute,
 #     tag_flow_cmn_time_unit_hour : part_flow_cmn_time_unit_hour
 # """
-
-# tag_part_flow_mthod_instr_sampling:str = "method col sampling"
-# """Tag for a flowsheet component: sampling"""
-# part_flow_mthod_instr_sampling_jp:str = "サンプリング"
-# """A flowsheet component: sampling"""
-
-# tag_part_flow_rec_criterion_ok_nok:str = "ok nok"
-# """Tag for a flowsheet component: IPC criterion OK or NOK"""
-# part_flow_rec_criterion_ok_nok_jp:str = "□ 適 □ 不適"
-# """A flowsheet component: IPC criterion OK or NOK"""
-
-# tag_part_flow_rec_sampleID:str = "sample ID"
-# """Tag for a flowsheet component: record field for sample ID"""
-# part_flow_rec_sampleID_jp:str = "サンプルID____________"
-# """A flowsheet component: record field for sample ID"""
-
-
-
-# tag_stc_flow_content_sample_name = "content sample name"
-# """Tag for a sentence template: sample name field for content column; includes placeholders {sample_name}"""
-# stc_flow_content_sample_name_jp = "サンプル名:{sample_name}"
-# """a sentence template: sample name template for content column; includes placeholders {sample_name}"""
-
-# tag_stc_flow_ipc_criterion = "stc ipc criterion"
-# """Tag for a sentence template: ipc criteron template for content column; includes placeholders {ipc_criterion}"""
-# stc_flow_ipc_criterion_jp = "IPC:{ipc_criterion}"
-# """a sentence template: ipc criteron template for content column; includes placeholders {ipc_criterion}"""
-
-# tag_stc_flow_rec_ipc_result = "rec ipc result"
-# """Tag for a sentence template: record field for ipc result; includes placeholders {ipc_item} and {ipc_rec_unit}"""
-# stc_flow_rec_ipc_result_jp = "{ipc_item}:__________{ipc_rec_unit}"
-# """a sentence template: record field for ipc result; includes placeholders {ipc_item} and {ipc_rec_unit}"""
-
-# tag_stc_flow_monit_item = "content monitoring item"
-# """Tag for a sentence template: sentence template for monitoring item in the content column; includes placeholders {monit_item}"""
-# stc_flow_monit_item_jp = "モニタリング:{monit_item}"
-# """a sentence template: sentence template for monitoring item in the content column; includes placeholders {monit_item}"""
-
-# tag_stc_flow_rec_monit_result = "rec monitoring result"
-# """Tag for a sentence template: record field for monitoring result; includes placeholders {monit_item} and {monit_rec_unit}"""
-# stc_flow_rec_monit_result_jp = "{monit_item}:__________{monit_rec_unit}"
-# """a sentence template: record field for monitoring result; includes placeholders {monit_item} and {monit_rec_unit}"""
-
-# dict_parts_stcs_jp = {tag_part_flow_mthod_instr_sampling : part_flow_mthod_instr_sampling_jp,
-#                       tag_part_flow_rec_criterion_ok_nok : part_flow_rec_criterion_ok_nok_jp,
-#                       tag_part_flow_rec_sampleID : part_flow_rec_sampleID_jp,
-#                       tag_stc_flow_content_sample_name : stc_flow_content_sample_name_jp,
-#                       tag_stc_flow_ipc_criterion : stc_flow_ipc_criterion_jp,
-#                       tag_stc_flow_rec_ipc_result : stc_flow_rec_ipc_result_jp,
-#                       tag_stc_flow_monit_item : stc_flow_monit_item_jp,
-#                       tag_stc_flow_rec_monit_result : stc_flow_rec_monit_result_jp}
-# """JP language dictionary for flowsheet parts and sentence templates"""
-
-# dict_parts_stcs = dict_parts_stcs_jp
 
 #########################################################
 # Class (uo.UnitOperation, uo_tag=defs.tag_uo_<UO_NAME>)
@@ -278,76 +207,7 @@ class Sampling(uo.UnitOperation, uo_tag=defs.tag_uo_sampling):
     @staticmethod
     def get_json_schema(caller:trdef.UniversalTrait = None) -> Objason:
         common = Sampling.json_common()
-        # sample_name:Primitive = Primitive(prim_type='string',
-        #                                   key=hedr_sample_name,
-        #                                   description='The name of a sample.')
-        # sample_cat:Primitive=Primitive(prim_type='string',
-        #                                key=hedr_sampling_cat,
-        #                                description=f'Category of the sample. '\
-        #                                 f'"{opt_sampling_cat_ipc}" stands for in-process control with a must-satisfied criterion before moving to the next step. '\
-        #                                 f'"{opt_sampling_cat_monit}" is sampling for technical information. Normally, not with a criterion. '\
-        #                                 f'"{opt_sampling_cat_both}" is for both in-process control and monitoring. One or more analytical items are for decision making, whereas the other are just for info.',
-        #                                enum=list_opt_sampling_cat)
-        
-        # #以下、モニタリング
-        # monit_item_name = Primitive(prim_type='string',
-        #                             key=hedr_monit_item_high,
-        #                             description=f'A monitoring item. This item is applicable to sampling categories of "{opt_sampling_cat_monit}" and "{opt_sampling_cat_both}". '
-        #                                 'This is more a high-level identifier, such as purity, residual solvent, etc. '
-        #                                 'instead of concrete names such as this impurity, that impurity, or this solvent... '
-        #                                 'if a right name cannot be read from the source, please put <placeholder>.')
-        # monit_item = Primitive(prim_type='string',
-        #                            key=hedr_monit_rec_items,
-        #                            description=f'A lower-layer recording item belonging to a super-category "{hedr_monit_item_high}"'\
-        #                            'a concrete analytical items such as a specific residual solvent (e.g., EtOH, THF...), impurity-x, assay, pH, etc.')
-        # monit_unit = Primitive(prim_type='string',
-        #                            key=hedr_monit_rec_units,
-        #                            description=f'Unit for a monitoring item. Null is accepted.',
-        #                            nullable=True,
-        #                            required=True)
-        # pair_monit = Objason(key=key_json_pair_monit,
-        #                     props=[monit_item, monit_unit],
-        #                     description="A pair of monitoring item and the unit for it.")
-        
-        # arr_monit_items = Array(key=key_json_arr_monit_items,
-        #                         content=pair_monit,
-        #                         description=f'An array of pairing object of monitoring item and unit for it. This is linked to "{hedr_monit_item_high}" elsewhere on a higher level.',
-        #                         required=True,
-        #                         nullable=True)
-        # obj_monit = Objason(key=key_json_obj_monit,
-        #                     props=[monit_item_name, arr_monit_items],
-        #                     description='A set of process monitoring information linked to a sample.')
-        # arr_monit = Array(key=key_json_arr_monit,
-        #                   content = obj_monit,
-        #                   description="An array of various kinds of monitoring items.",
-        #                   required=True,
-        #                   nullable=True)
-        
-        # #IPC below
-        # ipc_item = Primitive(prim_type='string',
-        #                      key=hedr_ipc_rec_titles,
-        #                      description='IPC items, such as a residual solvent, a specific impurity, conversion, etc.')
-        # ipc_unit = Primitive(prim_type='string',
-        #                      key=hedr_ipc_rec_units,
-        #                      description='reporting unit for the IPC item, such as %, ppm, etc.',
-        #                      nullable=True)
-        # ipc_criterion = Primitive(prim_type='string',
-        #                          key=hedr_ipc_criteria,
-        #                          description='IPC criterion, e.g., "conversion>99.95%"')
-        # obj_ipc = Objason(key=key_json_obj_ipc,
-        #                   props=[ipc_item, ipc_unit, ipc_criterion],
-        #                   description='A set of IPC item, unit for the item, and the IPC criterion for it.')
-        
-        # arr_ipc = Array(key=key_json_arr_ipc_items,
-        #                 content=obj_ipc,
-        #                 description='A series (array) of a set of IPC items, unit for it, and criterion for one sample.',
-        #                 required=True,
-        #                 nullable=True)
-        
-        # single_sample = Objason(key=key_json_single_sample,
-        #                         props=[sample_name, sample_cat, arr_monit, arr_ipc],
-        #                         description="Descriptor of a sample. A collection of the sample name, sampling category (monitoring and/or IPC), necessary monitoring items, IPC items, and the criteria for the IPC.")
-        
+       
         single_sample = Sample.get_json_schema(caller=caller)
 
         arr_samples = Array(key=key_json_arr_samples,
@@ -369,13 +229,8 @@ class Sampling(uo.UnitOperation, uo_tag=defs.tag_uo_sampling):
         self.list_samples.clear()
         if arr_sample is not None:
             for sample in arr_sample:
-                # single_sample=SingleSample(flowsheet=self.flowsheet)
-                # single_sample.load_from_single_sample_json(sample_seq=i+1, sample=sample)
-                # self.list_samples.append(single_sample)
                 single_sample = Sample(flowsheet=self.flowsheet, json_dict=sample)
                 self.list_samples.append(single_sample)
-
-
 
 
     @staticmethod
@@ -430,173 +285,6 @@ class Sampling(uo.UnitOperation, uo_tag=defs.tag_uo_sampling):
         df.at[row, hedr_monit_rec_items] = monit_rec_items
         df.at[row, hedr_monit_rec_units] = monit_rec_units
         df.at[row, hedr_sample_comment] = sample_comment
-
-# class SingleSample:
-#     def __init__(self, flowsheet:trdef.FlowsheetTrait=None):
-#         self.flowsheet:trdef.FlowsheetTrait = flowsheet
-#         self.sample_seq:int = None
-#         self.name:str = None
-#         self.category:str = None
-#         """IPC, monitoring, both"""
-#         self.content_ipc_criteria:list[str] = []
-#         self.content_monit_items:list[str] = []
-#         self.rec_ipc_item_name:list[str] = []
-#         self.rec_ipc_unit:list[str] = []
-#         self.rec_monit_item_name:list[str] = []
-#         self.rec_monit_unit:list[str] = []
-#         self.sample_comment:str = None
-    
-#     def load_from_series(self, caller:Sampling, sample_seq:int, ser:pd.Series):
-#         self.sample_seq = sample_seq
-#         if not pd.isna(ser[hedr_sample_name]):
-#             self.name = ser[hedr_sample_name]
-#         else:
-#             raise ValueError(f"{caller.__class__.__name__} Op. Seq. {caller.get_seq}: No name provided for the {self.sample_seq+1}th sample in the detail input.")
-        
-#         if not pd.isna(ser[hedr_sampling_cat]):
-#             self.category = ser[hedr_sampling_cat]
-#         else:
-#             raise ValueError(f"{caller.__class__.__name__} Op. Seq. {caller.get_seq}: No sampling category chosen for the {self.sample_seq+1}th sample in the detail input.")
-        
-#         if self.category == opt_sampling_cat_ipc or self.category == opt_sampling_cat_both:
-#             if not pd.isna(ser[hedr_ipc_criteria]):
-#                 str_criteria:str = ser[hedr_ipc_criteria]
-#                 if not pd.isna(str_criteria):
-#                     self.content_ipc_criteria = str_criteria.split("\n")
-#             else:
-#                 raise ValueError(f"{caller.__class__.__name__} Op. Seq. {caller.get_seq}: No IPC criteria provided for the {self.sample_seq+1}th sample in the detail input \
-#                                 although {opt_sampling_cat_ipc}/{opt_sampling_cat_both} is selected in the colum {hedr_sampling_cat}.")
-#             if not pd.isna(ser[hedr_ipc_rec_titles]):
-#                 str_ipc_rec_titles:str = ser[hedr_ipc_rec_titles]
-#                 str_ipc_rec_units:str = ser[hedr_ipc_rec_units]
-#                 self.rec_ipc_item_name = str_ipc_rec_titles.split("\n")
-#                 if not pd.isna(str_ipc_rec_units):
-#                     self.rec_ipc_unit = str_ipc_rec_units.split("\n")
-#                 if len(self.rec_ipc_item_name) != len(self.rec_ipc_unit):
-#                     raise ValueError(f"{caller.__class__.__name__} Op. Seq. {caller.get_seq}: Mismatched numbers of IPC items and their units for the {self.sample_seq+1}th sample in the detail input.")
-#                 if len(self.rec_ipc_item_name) != len(self.content_ipc_criteria):
-#                     raise ValueError(f"{caller.__class__.__name__} Op. Seq. {caller.get_seq}: Mismatched numbers of IPC criteria and their units for the {self.sample_seq+1}th sample in the detail input.")
-#             else:
-#                 raise ValueError(f"{caller.__class__.__name__} Op. Seq. {caller.get_seq}: No IPC record name provided for the {self.sample_seq+1}th sample in the detail input \
-#                                 although {opt_sampling_cat_ipc}/{opt_sampling_cat_both} is selected in the colum {hedr_sampling_cat}.")
-        
-#         if self.category == opt_sampling_cat_monit or self.category == opt_sampling_cat_both:
-#             if not pd.isna(ser[hedr_monit_item_high]):
-#                 str_monit_item:str = ser[hedr_monit_item_high]
-#                 self.content_monit_items = str_monit_item.split("\n")
-#             if not pd.isna(ser[hedr_monit_rec_items]):
-#                 str_monit_rec_items:str =  ser[hedr_monit_rec_items]
-#                 str_monit_rec_units:str = ser[hedr_monit_rec_units]
-#                 self.rec_monit_item_name = str_monit_rec_items.split("\n")
-#                 if not pd.isna(str_monit_rec_units):
-#                     self.rec_monit_unit = str_monit_rec_units.split("\n")
-#                 if len(self.rec_monit_item_name) != len(self.rec_monit_unit):
-#                     raise ValueError(f"{caller.__class__.__name__} Op. Seq. {caller.get_seq}: Mismatched numbers of monitoring items and their units for the {self.sample_seq+1}th sample in the detail input.")
-#         if not pd.isna(ser[hedr_sample_comment]):
-#             self.sample_comment = ser[hedr_sample_comment]
-
-#     def load_from_single_sample_json(self, sample_seq:int=None, sample:dict[str,any]=None):
-#         self.sample_seq = sample_seq
-#         self.name = sample[hedr_sample_name]
-#         if self.name is None:
-#             warnings.warn(
-#                 message=f"No name given for sample sequence {self.sample_seq}",
-#                 category=RuntimeWarning
-#             )
-#         self.category=sample[hedr_sampling_cat]
-#         if self.category is None:
-#             warnings.warn(
-#                 message=f"No sampling category given for sample sequence {self.sample_seq}",
-#                 category=RuntimeWarning
-#             )
-
-#         if self.category == opt_sampling_cat_ipc or self.category == opt_sampling_cat_both:
-#             arr_ipc:list[dict[str, any]] = sample[key_json_arr_ipc_items]
-#             if arr_ipc is None:
-#                 warnings.warn(
-#                     message=f'"{key_json_arr_ipc_items}" is null for sample sequence {self.sample_seq} '
-#                     f'although the catetory is "{opt_sampling_cat_ipc}" is "{opt_sampling_cat_both}."'
-#                 )
-#             else:
-#                 for ipc in arr_ipc:
-#                     self.content_ipc_criteria.append(ipc[hedr_ipc_criteria])
-#                     self.rec_ipc_item_name.append(ipc[hedr_ipc_rec_titles])
-#                     if ipc[hedr_ipc_rec_units] is not None:
-#                         self.rec_ipc_unit.append(ipc[hedr_ipc_rec_units])
-#                     else:
-#                         self.rec_ipc_unit.append("")
-        
-#         if self.category == opt_sampling_cat_monit or self.category == opt_sampling_cat_both:
-#             arr_monit:list[dict[str, any]] = sample[key_json_arr_monit]
-#             if arr_monit is None:
-#                 warnings.warn(
-#                     message=f'"{key_json_arr_monit}" is null for sample sequence {self.sample_seq} '
-#                     f'although the catetory is "{opt_sampling_cat_monit}" is "{opt_sampling_cat_both}."'
-#                 )
-#             else:
-#                 for monit in arr_monit: #"monit" corresponds to obj_monit
-#                    self.__process_obj_monit(sample_seq=sample_seq, obj_monit=monit)
-
-#     def __process_obj_monit(self, sample_seq:int = None, obj_monit:dict[str, any]=None):
-#         if obj_monit[key_json_arr_monit_items] is None:
-#             warnings.warn(
-#                 message=f'"arr_monit_items" is empty for sample sequence {sample_seq}',
-#                 category=RuntimeWarning)
-#         else:
-#             for i, monit_pair in enumerate(obj_monit[key_json_arr_monit_items]):
-#                 high_level_item:str = ""
-#                 if i == 0:
-#                     high_level_item = obj_monit[hedr_monit_item_high]
-#                 self.content_monit_items.append(high_level_item)
-#                 self.rec_monit_item_name.append(monit_pair[hedr_monit_rec_items])
-#                 if monit_pair[hedr_monit_rec_units] is None:
-#                     self.rec_monit_unit.append("")
-#                 else:
-#                     self.rec_monit_unit.append(monit_pair[hedr_monit_rec_units])
-
-
-#     def output_single_sample(self):
-#         self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
-#                                 method=dict_parts_stcs[tag_part_flow_mthod_instr_sampling],
-#                                 content=dict_parts_stcs[tag_stc_flow_content_sample_name].format(sample_name=self.name),
-#                                 record=dict_parts_stcs[tag_part_flow_rec_sampleID],
-#                                 operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
-#                                 witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
-#         if self.category == opt_sampling_cat_ipc or self.category == opt_sampling_cat_both:
-#             self.__output_IPC()
-#         if self.category == opt_sampling_cat_monit or self.category == opt_sampling_cat_both:
-#             self.__output_monit()
-        
-
-
-#     def __output_IPC(self):
-#         for idx in range(len(self.content_ipc_criteria)):
-#             temp_ipc_criteria:str = dict_parts_stcs[tag_stc_flow_ipc_criterion].format(ipc_criterion=self.content_ipc_criteria[idx])
-#             temp_ipc_rec:str = dict_parts_stcs[tag_stc_flow_rec_ipc_result].format(ipc_item=self.rec_ipc_item_name[idx], ipc_rec_unit=self.rec_ipc_unit[idx])
-#             self.flowsheet.put_line(content=temp_ipc_criteria,
-#                                     record=temp_ipc_rec)
-#             self.flowsheet.put_line(record=dict_parts_stcs[tag_part_flow_rec_criterion_ok_nok])
-
-#     def __output_monit(self):
-#         idx_longer:int = None
-#         if len(self.content_monit_items) >= len(self.rec_monit_item_name):
-#             idx_longer = len(self.content_monit_items)
-#         else:
-#             idx_longer = len(self.rec_monit_item_name)
-        
-#         for idx in range(idx_longer):
-#             temp_content_monit_item: str = ""
-#             if idx <=len(self.content_monit_items)-1:
-#                 temp_content_monit_item = dict_parts_stcs[tag_stc_flow_monit_item].format(monit_item=self.content_monit_items[idx])
-#             temp_rec_monit_item:str = ""
-#             if idx <= len(self.rec_monit_item_name)-1:
-#                 temp_rec_monit_item = dict_parts_stcs[tag_stc_flow_rec_monit_result].format(monit_item=self.rec_monit_item_name[idx],
-#                                                                                             monit_rec_unit=self.rec_monit_unit[idx])
-#             self.flowsheet.put_line(content=temp_content_monit_item,
-#                                     record=temp_rec_monit_item)
-
-            
-
 
 
 
