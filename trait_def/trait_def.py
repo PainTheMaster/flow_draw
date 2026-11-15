@@ -362,10 +362,23 @@ class SampleTrait(ABC):
         pass
 
     @abstractmethod
-    def print_sample(self):
+    def print_sample(self, analysis_only:bool=False):
         pass
 
     @staticmethod
     @abstractmethod
     def get_json_schema(caller:UniversalTrait=None)->Objason:
+        pass
+
+
+    @abstractmethod
+    def is_ipc(self)->bool:
+        pass
+
+    @abstractmethod
+    def is_monit_tgt(self)->bool:
+        pass
+
+    @abstractmethod
+    def is_fio(self)->bool:
         pass

@@ -5,8 +5,8 @@ import pandas as pd
 import warnings
 import flow_draw.definitions as defs
 # import flow_draw.data_io.flowsheet as fsht
-from typing import Optional
-from typing import Literal
+import flow_draw.batch.process.unit_operations.sample as sample
+from typing import Optional, Literal, Any
 from flow_draw.batch.process.unit_operations import unit_operation as uo
 from flow_draw.data_io import process_io as procio
 from flow_draw.materials import materials as mats
@@ -91,7 +91,7 @@ hedr_test_unit:str = "test_unit"
 
 key_json_obj_test:str = "test_drying"
 """Key for the JSON object for the test description for drying operation."""
-key_json_arr_test:str = "list_test_drying"
+key_json_arr_sample:str = "list_test_drying"
 """Key for the JSON array for the list of test description for drying operation."""
 
 
@@ -196,6 +196,8 @@ tag_part_content_Tbr_arbitrary:str = "content_Tbr_arbitrary"
 
 tag_part_rec_temp_cond_brine:str = "rec_temp_cond_brine"
 """The key to the record of the condenser brine temperature for the drying operation."""
+tag_part_content_press_full_vac:str = "press_full_vacuum"
+"""The key to the full vacuum setting for the drying operation."""
 tag_part_content_press_arbitrary:str = "press_arbitrary"
 """The key to the arbitrary vacuum setting for the drying operation."""
 tag_part_rec_press_drying:str = "rec_press"
@@ -212,7 +214,7 @@ tag_part_content_instr_digging:str = "content_instr_digging"
 """The key to the instruction for digging the cake in the filter dryer during the drying operation."""
 tag_part_method_instr_end:str = "instr_end_drying"
 """The key to the instruction to end the drying operation."""
-tag_part_content_record_monitoring:str = "content_record_monitoring"
+tag_part_content_record_final:str = "content_record_monitoring"
 """The key to the instruction for recording the monitoring of the drying operation."""
 tag_part_record_ok_nok:str = "record_ok_nok"
 """The key to the record field for the monitoring result of the drying operation."""
@@ -226,8 +228,9 @@ jp_dict_parts:dict[str, str] = {
     tag_part_content_Tj_arbitrary : "外温設定:現場調整",
     tag_part_content_Tbr_arbitrary : "冷却用ブライン:現場調整",
     tag_part_rec_temp_cond_brine : "冷却用ブライン温度:___________℃",
+    tag_part_content_press_full_vac : '真空度:FV',
     tag_part_content_press_arbitrary : "真空度:現場調整",
-    tag_part_rec_press_drying : "真空度:___________MPa",
+    tag_part_rec_press_drying : "真空度:___________MPaG",
     tag_part_content_rot_arbitrary : "回転数:現場調整",
     tag_part_rec_rot_drying : "回転数:___________rpm",
     tag_part_content_instr_intermission : "乾燥作業の途中で保管しても良い。保管する場合は保管前後でサンプリングすること。",
@@ -235,7 +238,7 @@ jp_dict_parts:dict[str, str] = {
     tag_part_content_instr_digging : "乾燥終点の評価は攪拌乾燥で翼が最下端まで到達して乾燥継続した後のサンプルから実施し、"
     "それ以前のサンプルはモニタリング用とする。",
     tag_part_method_instr_end : "乾燥終了",
-    tag_part_content_record_monitoring : "*最終結果を記載する",
+    tag_part_content_record_final : "*最終結果を記載する",
     tag_part_record_ok_nok : "□適 □不適",
     tag_part_content_instr_continue_till_tgt : "目標値達成まで乾燥を継続する。継続後も目標値に到達しない場合、製薬研・製管責と対応を協議すること。"
 }
@@ -272,11 +275,11 @@ tag_stc_Tbr_range:str = "stc_Tbr_range_drying"
 tag_stc_Tbr_guide_single:str = "stc_Tbr_guidance_single"
 """The key to the sentence for the single point guidance of the condenser brine temperature. Includes placeholder "Tbr_guide"."""
 tag_stc_press_low:str = "stc_press_min_drying"
-"""The key to the sentence for the lower limit of the drying pressure. Includes a placeholder "pres_low". In the unit of MPa."""
+"""The key to the sentence for the lower limit of the drying pressure. Includes a placeholder "pres_low". In the unit of MPaG."""
 tag_stc_press_high:str = "stc_press_max_drying"
 """The key to the sentence for the upper limit of the drying pressure. Includes a placeholder "pres_high". In the unit of MPa."""
 tag_stc_press_range:str = "stc_press_range_drying"
-"""The key to the sentence for the range of the drying pressure. Includes placeholders "pres_low" and "pres_high". In the unit of MPa."""
+"""The key to the sentence for the range of the drying pressure. Includes placeholders "pres_low" and "pres_high". In the unit of MPaG."""
 tag_stc_rot_min:str = "stc_rot_min_drying"
 """The key to the sentence for the lower limit of the rotation rate of the filter dryer. Includes a placeholder "rpm_min"."""
 tag_stc_rot_max:str = "stc_rot_max_drying"
@@ -306,9 +309,9 @@ dict_stc_jp:dict[str, str] = {
     tag_stc_Tbr_limit_high : "冷却用ブライン:{Tbr_high}℃以下",
     tag_stc_Tbr_range : "冷却用ブライン:{Tbr_low}～{Tbr_high}℃",
     tag_stc_Tbr_guide_single : "冷却用ブライン目安:{Tbr_guide}℃",
-    tag_stc_press_low : "真空度:{pres_low}MPa以上",
-    tag_stc_press_high : "真空度:{pres_high}MPa以下",
-    tag_stc_press_range : "真空度:{pres_low}～{pres_high}MPa",
+    tag_stc_press_low : "真空度:{pres_low}MPaG以上",
+    tag_stc_press_high : "真空度:{pres_high}MPaG以下",
+    tag_stc_press_range : "真空度:{pres_low}～{pres_high}MPaG",
     tag_stc_rot_min : "回転数:{rpm_min}rpm以上",
     tag_stc_rot_max : "回転数:{rpm_max}rpm以下",
     tag_stc_rot_range : "回転数:{rpm_min}～{rpm_max}rpm",
@@ -359,12 +362,14 @@ class Drying(uo.UnitOperation, uo_tag=defs.tag_uo_drying):
         self.rpm_max: float = None
         self.intermission: bool = None
         """Intermission of the drying operation is allowed or not. Refer to list_opt_intermission for the options."""
-        self.list_ipc: list[TestDescription] = []
-        """List of IPC items for the drying operation."""
-        self.list_monit_with_tgt: list[TestDescription] = []
-        """List of monitoring items with target criterion for the drying operation."""
-        self.list_monit_no_tgt: list[TestDescription] = []
-        """List of monitoring items without target criterion for the drying operation."""
+        self.list_samples: list[sample.Sample] = []
+
+        # self.list_ipc: list[TestDescription] = []
+        # """List of IPC items for the drying operation."""
+        # self.list_monit_with_tgt: list[TestDescription] = []
+        # """List of monitoring items with target criterion for the drying operation."""
+        # self.list_monit_no_tgt: list[TestDescription] = []
+        # """List of monitoring items without target criterion for the drying operation."""
 
     
     def load_params_from_df(self, df: pd.DataFrame):
@@ -482,14 +487,14 @@ class Drying(uo.UnitOperation, uo_tag=defs.tag_uo_drying):
                                        key=hedr_pres_low,
                                        description=f'The lower limit of the drying pressure. '
                                        f'If "{hedr_mode_vac}" is "{opt_mode_vac_range}", '
-                                       f'at least one of this value or "{hedr_pres_high}" is mandatory. Nullable, otherwise. The unit is in MPa absolute.',
+                                       f'at least one of this value or "{hedr_pres_high}" is mandatory. Nullable, otherwise. The unit is in MPaG.',
                                        nullable=True,
                                        required=True)
         pres_high:Primitive = Primitive(prim_type="number",
                                         key=hedr_pres_high,
                                         description=f'The upper limit of the drying pressure. '
                                         f'If "{hedr_mode_vac}" is "{opt_mode_vac_range}", '
-                                        f'at least one of this value or "{hedr_pres_low}" is mandatory. Nullable, otherwise. The unit is in MPa absolute.',
+                                        f'at least one of this value or "{hedr_pres_low}" is mandatory. Nullable, otherwise. The unit is in MPaG.',
                                         nullable=True,
                                         required=True)
         rpm_min:Primitive = Primitive(prim_type="number",
@@ -511,39 +516,44 @@ class Drying(uo.UnitOperation, uo_tag=defs.tag_uo_drying):
                                             enum=list_opt_intermission,
                                             nullable=False,
                                             required=True)
-        test_cat:Primitive = Primitive(prim_type="string",
-                                       key=hedr_test_cat,
-                                       description=f'The test category for the drying operation. Options are "{opt_test_cat_ipc}", "{opt_test_cat_monit_with_tgt}", and "{opt_test_cat_monit_no_tgt}". '
-                                       f'"{opt_test_cat_ipc}": In-Process Control (IPC) with a test item name and a criterion. '
-                                       f'"{opt_test_cat_monit_with_tgt}": Monitoring with target criterion with an item name, a target value, and a unit. '
-                                       f'"{opt_test_cat_monit_no_tgt}": Monitoring without target criterion with an item name.',                                       
-                                       enum=list_opt_test_cat,
-                                       nullable=False,
-                                       required=True)
-        test_item:Primitive = Primitive(prim_type="string",
-                                        key=hedr_test_item,
-                                        description='The test item name for the drying operation.',
-                                        nullable=False,
-                                        required=True)
-        test_val_tgt_criterion:Primitive = Primitive(prim_type=['number', 'string'],
-                                                    key=hedr_test_val_tgt_criterion,
-                                                    description='The target value or the criterion for the test item for the drying operation. '
-                                                    f'If "{hedr_test_cat}" is "{opt_test_cat_ipc}" or "{opt_test_cat_monit_with_tgt}", this value is mandatory. Nullable, otherwise. '
-                                                    'Please return the value in "number" type in lieu of "string" type as far as possible.',
-                                                    nullable=True,
-                                                    required=True)
-        test_unit_val:Primitive = Primitive(prim_type='string',
-                                            key=hedr_test_unit,
-                                            description='The unit for the value of the test target, criterion, and the result for the drying operation. Nullable where appropriate.',
-                                            nullable=True,
-                                            required=True)
-        obj_test:Objason = Objason(key=key_json_obj_test,
-                                   props=[test_cat, test_item, test_val_tgt_criterion, test_unit_val],
-                                   description='The JSON object for the test description for the drying operation.')
-        arr_test:Array = Array(key=key_json_arr_test,
-                               content=obj_test,
-                               description='The JSON array for the list of test description for the drying operation. '
-                               'Normally, multiple test items of various categories are possible for a drying operation.')
+        # test_cat:Primitive = Primitive(prim_type="string",
+        #                                key=hedr_test_cat,
+        #                                description=f'The test category for the drying operation. Options are "{opt_test_cat_ipc}", "{opt_test_cat_monit_with_tgt}", and "{opt_test_cat_monit_no_tgt}". '
+        #                                f'"{opt_test_cat_ipc}": In-Process Control (IPC) with a test item name and a criterion. '
+        #                                f'"{opt_test_cat_monit_with_tgt}": Monitoring with target criterion with an item name, a target value, and a unit. '
+        #                                f'"{opt_test_cat_monit_no_tgt}": Monitoring without target criterion with an item name.',                                       
+        #                                enum=list_opt_test_cat,
+        #                                nullable=False,
+        #                                required=True)
+        # test_item:Primitive = Primitive(prim_type="string",
+        #                                 key=hedr_test_item,
+        #                                 description='The test item name for the drying operation.',
+        #                                 nullable=False,
+        #                                 required=True)
+        # test_val_tgt_criterion:Primitive = Primitive(prim_type=['number', 'string'],
+        #                                             key=hedr_test_val_tgt_criterion,
+        #                                             description='The target value or the criterion for the test item for the drying operation. '
+        #                                             f'If "{hedr_test_cat}" is "{opt_test_cat_ipc}" or "{opt_test_cat_monit_with_tgt}", this value is mandatory. Nullable, otherwise. '
+        #                                             'Please return the value in "number" type in lieu of "string" type as far as possible.',
+        #                                             nullable=True,
+        #                                             required=True)
+        # test_unit_val:Primitive = Primitive(prim_type='string',
+        #                                     key=hedr_test_unit,
+        #                                     description='The unit for the value of the test target, criterion, and the result for the drying operation. Nullable where appropriate.',
+        #                                     nullable=True,
+        #                                     required=True)
+        # obj_test:Objason = Objason(key=key_json_obj_test,
+        #                            props=[test_cat, test_item, test_val_tgt_criterion, test_unit_val],
+        #                            description='The JSON object for the test description for the drying operation.')
+
+        obj_sample = sample.Sample.get_json_schema(caller=caller)
+
+        arr_test:Array = Array(key=key_json_arr_sample,
+                               content=obj_sample,
+                               description='The JSON array for a list of sample(s) and testing for them. '
+                               'Normally, multiple test items of various categories are possible for a drying operation. '
+                               'As the intermediate results are reported in a separate form, this form should keep only the final result. '
+                               'Hence, please put only one sample object in this array. ')
         obj_drying:Objason = Objason(key=Drying.uo_tag,
                                     props=common_schema+[Tj_ctrl_cat,
                                                           Tj_low, Tj_high,
@@ -552,13 +562,12 @@ class Drying(uo.UnitOperation, uo_tag=defs.tag_uo_drying):
                                                           rpm_min, rpm_max,
                                                           intermission,
                                                           arr_test],
-                                    description='The JSON object for the drying operation.',
-                                    )
+                                    description='The JSON object for the drying operation.')
         return obj_drying
         
 
 
-    def load_from_json_dict(self, json_dict: dict[str, any]):
+    def load_from_json_dict(self, json_dict: dict[str, Any]):
         super().load_from_json_dict(json_dict)
         self.Tj_ctrl_cat = json_dict.get(hedr_Tj_ctrl_cat, opt_Tj_ctrl_cat_arbitrary)
         self.Tj_low = json_dict.get(hedr_Tj_low, None)
@@ -571,18 +580,24 @@ class Drying(uo.UnitOperation, uo_tag=defs.tag_uo_drying):
         self.rpm_min = json_dict.get(hedr_rpm_min, None)
         self.rpm_max = json_dict.get(hedr_rpm_max, None)
         self.intermission = (json_dict.get(hedr_intermission, opt_no) == opt_yes)
-        list_test: list[dict[str, any]] = json_dict.get(key_json_arr_test, [])
-        for test_dict in list_test:
-            test_item:TestDescription = TestDescription(test_cat=test_dict.get(hedr_test_cat, None),
-                                                        test_item=test_dict.get(hedr_test_item, None),
-                                                        test_val_tgt_criterion=test_dict.get(hedr_test_val_tgt_criterion, None),
-                                                        test_unit_val=test_dict.get(hedr_test_unit, None))
-            if test_item.test_cat == opt_test_cat_ipc:
-                self.list_ipc.append(test_item)
-            elif test_item.test_cat == opt_test_cat_monit_with_tgt:
-                self.list_monit_with_tgt.append(test_item)
-            elif test_item.test_cat == opt_test_cat_monit_no_tgt:
-                self.list_monit_no_tgt.append(test_item)
+        arr_sample: list[dict[str, Any]] = json_dict.get(key_json_arr_sample)
+        # for test_dict in list_test:
+        #     test_item:TestDescription = TestDescription(test_cat=test_dict.get(hedr_test_cat, None),
+        #                                                 test_item=test_dict.get(hedr_test_item, None),
+        #                                                 test_val_tgt_criterion=test_dict.get(hedr_test_val_tgt_criterion, None),
+        #                                                 test_unit_val=test_dict.get(hedr_test_unit, None))
+        #     if test_item.test_cat == opt_test_cat_ipc:
+        #         self.list_ipc.append(test_item)
+        #     elif test_item.test_cat == opt_test_cat_monit_with_tgt:
+        #         self.list_monit_with_tgt.append(test_item)
+        #     elif test_item.test_cat == opt_test_cat_monit_no_tgt:
+        #         self.list_monit_no_tgt.append(test_item)
+        self.list_samples.clear()
+        if arr_sample:
+            for dict_single_sample in arr_sample:
+                obj_single_sample = sample.Sample(flowsheet=self.flowsheet, json_dict=dict_single_sample)
+                self.list_samples.append(obj_single_sample)
+
             
 
     def print_unit_operation(self):
@@ -664,15 +679,29 @@ class Drying(uo.UnitOperation, uo_tag=defs.tag_uo_drying):
         
         
     def __put_vac_ctrl(self):
-        stc_press:str = None
-        if self.pres_low is not None and self.pres_high is not None:
-            stc_press = dict_stc[tag_stc_press_range].format(pres_low=self.pres_low, pres_high=self.pres_high)
-        elif self.pres_low is not None:
-            stc_press = dict_stc[tag_stc_press_low].format(pres_low=self.pres_low)
-        elif self.pres_high is not None:
-            stc_press = dict_stc[tag_stc_press_high].format(pres_high=self.pres_high)
-        else:
+        stc_press:str = ''
+        if self.mode_vac == opt_mode_vac_arbitrary:
             stc_press = dict_parts[tag_part_content_press_arbitrary]
+        elif self.mode_vac == opt_mode_vac_range:
+            if self.pres_low is not None and self.pres_high is not None:
+                stc_press = dict_stc[tag_stc_press_range].format(pres_low=self.pres_low, pres_high=self.pres_high)
+            elif self.pres_low is not None:
+                stc_press = dict_stc[tag_stc_press_low].format(pres_low=self.pres_low)
+            elif self.pres_high is not None:
+                stc_press = dict_stc[tag_stc_press_high].format(pres_high=self.pres_high)
+            else:
+                stc_press = dict_parts[tag_part_content_press_arbitrary]
+                warnings.warn(message=f'{self.__class__.__name__}.__put_vac_ctrl(): Vacuum mode "{opt_mode_vac_range}" is set, '
+                            'but neither upper nor lower pressure limit is specified. Instruction for an arbitrary pressure is chosen for this run.',
+                            category=RuntimeWarning)                
+        elif self.mode_vac == opt_mode_vac_full_vacuum:
+            stc_press = dict_parts[tag_part_content_press_full_vac]
+        else:
+            # self.mode_vac = opt_mode_vac_arbitrary
+            stc_press = dict_parts[tag_part_content_press_arbitrary]
+            warnings.warn(message=f'{self.__class__.__name__}.__put_vac_ctrl(): Unknown vacuum mode "{self.mode_vac}". '
+                          f'"{opt_mode_vac_arbitrary}" is assumed for now to proceed with the data processing.',
+                          category=RuntimeWarning)
         self.flowsheet.put_line(content=stc_press,
                                 record=dict_parts[tag_part_rec_press_drying])    
 
@@ -690,89 +719,108 @@ class Drying(uo.UnitOperation, uo_tag=defs.tag_uo_drying):
                                 record=dict_parts[tag_part_rec_rot_drying])
 
     def __terminate_drying(self):
-        is_first: bool = True
+        # is_first: bool = True
 
-        if self.list_ipc is not None and len(self.list_ipc) > 0:
-            is_ipc_set = True
-        else:
-            is_ipc_set = False
+        # if self.list_ipc is not None and len(self.list_ipc) > 0:
+        #     is_ipc_set = True
+        # else:
+        #     is_ipc_set = False
 
-        if self.list_monit_with_tgt is not None and len(self.list_monit_with_tgt) > 0:
-            is_monit_with_tgt_set = True
-        else:
-            is_monit_with_tgt_set = False
+        # if self.list_monit_with_tgt is not None and len(self.list_monit_with_tgt) > 0:
+        #     is_monit_with_tgt_set = True
+        # else:
+        #     is_monit_with_tgt_set = False
 
-        if self.list_monit_no_tgt is not None and len(self.list_monit_no_tgt) > 0:
-            is_monit_no_tgt_set = True
-        else:
-            is_monit_no_tgt_set = False
+        # if self.list_monit_no_tgt is not None and len(self.list_monit_no_tgt) > 0:
+        #     is_monit_no_tgt_set = True
+        # else:
+        #     is_monit_no_tgt_set = False
 
 
-        if is_ipc_set:
-            for test in self.list_ipc:
-                content:str = dict_stc[tag_stc_content_ipc].format(test_item=test.test_item,
-                                                                   criterion=test.test_val_tgt_criterion,
-                                                                   unit=test.test_unit_val if test.test_unit_val is not None else '')
-                record:str = dict_stc[tag_stc_record_test_result].format(test_item=test.test_item,
-                                                                         unit=test.test_unit_val if test.test_unit_val is not None else '')
-                if is_first:
-                    self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
-                                            method=dict_parts[tag_part_method_instr_end],
-                                            content=dict_parts[tag_part_content_record_monitoring],
-                                            record=dict_parts[tag_part_record_ok_nok],
-                                            operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
-                                            witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
-                    self.flowsheet.put_line(content=content,
-                                            record=record,)
-                    is_first = False
-                else:
-                    self.flowsheet.put_line(content=content,
-                                            record=record)
-        if is_monit_with_tgt_set:
-            for test in self.list_monit_with_tgt:
-                content:str = dict_stc[tag_stc_content_monit_with_tgt].format(test_item=test.test_item,
-                                                                             criterion=test.test_val_tgt_criterion,
-                                                                             unit=test.test_unit_val if test.test_unit_val is not None else '')
-                record:str = dict_stc[tag_stc_record_test_result].format(test_item=test.test_item,
-                                                                         unit=test.test_unit_val if test.test_unit_val is not None else '')
-                if is_first:
-                    self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
-                                            method=dict_parts[tag_part_method_instr_end],
-                                            content=dict_parts[tag_part_content_record_monitoring],
-                                            record=dict_parts[tag_part_record_ok_nok],
-                                            operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
-                                            witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
-                    self.flowsheet.put_line(content=content,
-                                            record=record)
-                    is_first = False
-                else:
-                    self.flowsheet.put_line(content=content,
-                                            record=record)
-        if is_monit_no_tgt_set:
-            for test in self.list_monit_no_tgt:
-                content:str = dict_stc[tag_stc_content_monit_no_tgt].format(test_item=test.test_item)
-                record:str = dict_stc[tag_stc_record_test_result].format(test_item=test.test_item,
-                                                                         unit=test.test_unit_val if test.test_unit_val is not None else '')
-                if is_first:
-                    self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
-                                            method=dict_parts[tag_part_method_instr_end],
-                                            content=dict_parts[tag_part_content_record_monitoring],
-                                            record=dict_parts[tag_part_record_ok_nok],
-                                            operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
-                                            witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
-                    self.flowsheet.put_line(content=content,
-                                            record=record)
-                    is_first = False
-                else:
-                    self.flowsheet.put_line(content=content,
-                                            record=record)
-        if not (is_ipc_set or is_monit_with_tgt_set or is_monit_no_tgt_set):
+        # if is_ipc_set:
+        #     for test in self.list_ipc:
+        #         content:str = dict_stc[tag_stc_content_ipc].format(test_item=test.test_item,
+        #                                                            criterion=test.test_val_tgt_criterion,
+        #                                                            unit=test.test_unit_val if test.test_unit_val is not None else '')
+        #         record:str = dict_stc[tag_stc_record_test_result].format(test_item=test.test_item,
+        #                                                                  unit=test.test_unit_val if test.test_unit_val is not None else '')
+        #         if is_first:
+        #             self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
+        #                                     method=dict_parts[tag_part_method_instr_end],
+        #                                     content=dict_parts[tag_part_content_record_final],
+        #                                     record=dict_parts[tag_part_record_ok_nok],
+        #                                     operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
+        #                                     witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
+        #             self.flowsheet.put_line(content=content,
+        #                                     record=record,)
+        #             is_first = False
+        #         else:
+        #             self.flowsheet.put_line(content=content,
+        #                                     record=record)
+        # if is_monit_with_tgt_set:
+        #     for test in self.list_monit_with_tgt:
+        #         content:str = dict_stc[tag_stc_content_monit_with_tgt].format(test_item=test.test_item,
+        #                                                                      criterion=test.test_val_tgt_criterion,
+        #                                                                      unit=test.test_unit_val if test.test_unit_val is not None else '')
+        #         record:str = dict_stc[tag_stc_record_test_result].format(test_item=test.test_item,
+        #                                                                  unit=test.test_unit_val if test.test_unit_val is not None else '')
+        #         if is_first:
+        #             self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
+        #                                     method=dict_parts[tag_part_method_instr_end],
+        #                                     content=dict_parts[tag_part_content_record_final],
+        #                                     record=dict_parts[tag_part_record_ok_nok],
+        #                                     operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
+        #                                     witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
+        #             self.flowsheet.put_line(content=content,
+        #                                     record=record)
+        #             is_first = False
+        #         else:
+        #             self.flowsheet.put_line(content=content,
+        #                                     record=record)
+        # if is_monit_no_tgt_set:
+        #     for test in self.list_monit_no_tgt:
+        #         content:str = dict_stc[tag_stc_content_monit_no_tgt].format(test_item=test.test_item)
+        #         record:str = dict_stc[tag_stc_record_test_result].format(test_item=test.test_item,
+        #                                                                  unit=test.test_unit_val if test.test_unit_val is not None else '')
+        #         if is_first:
+        #             self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
+        #                                     method=dict_parts[tag_part_method_instr_end],
+        #                                     content=dict_parts[tag_part_content_record_final],
+        #                                     record=dict_parts[tag_part_record_ok_nok],
+        #                                     operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
+        #                                     witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
+        #             self.flowsheet.put_line(content=content,
+        #                                     record=record)
+        #             is_first = False
+        #         else:
+        #             self.flowsheet.put_line(content=content,
+        #                                     record=record)
+
+        if self.list_samples:
             self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
                                     method=dict_parts[tag_part_method_instr_end],
+                                    content=dict_parts[tag_part_content_record_final],
                                     record=dict_parts[tag_part_record_ok_nok],
                                     operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
                                     witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
-        if is_monit_with_tgt_set:
+            for single_sample in self.list_samples:
+                single_sample.print_sample(analysis_only=True)
+
+        else:
+             self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
+                                    method=dict_parts[tag_part_method_instr_end],
+                                    record=dict_parts[tag_part_record_ok_nok],
+                                    operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
+                                    witness=lang_dict_cmn[tag_flow_cmn_rec_sign])           
+
+
+        # if not (is_ipc_set or is_monit_with_tgt_set or is_monit_no_tgt_set):
+        #     self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
+        #                             method=dict_parts[tag_part_method_instr_end],
+        #                             record=dict_parts[tag_part_record_ok_nok],
+        #                             operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
+        #                             witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
+        if (True in [s.is_monit_tgt() for s in self.list_samples]) and (True not in [s.is_ipc() for s in self.list_samples]):
             self.flowsheet.put_line(content=dict_parts[tag_part_content_instr_continue_till_tgt])
 
 

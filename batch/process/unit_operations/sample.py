@@ -347,7 +347,7 @@ tag_stc_flow_rec_analysis_result = "rec monitoring result"
 
 
 dict_parts_stcs_jp = {tag_part_flow_mthod_instr_sampling : "サンプリング",
-                      tag_part_flow_rec_ok_nok : "□ 適 □ 不適",
+                      tag_part_flow_rec_ok_nok : "□適 □不適",
                       tag_part_flow_rec_sampleID : "サンプルID____________",
                       
                       tag_part_comparator_equal : '=',
@@ -424,7 +424,7 @@ class Sample(trdef.SampleTrait):
             return ''
 
 
-    def print_sample(self):
+    def print_sample(self, analysis_only:bool=False):
         def print_analytical_items(list_analysis:list[dict[str,Any]]=None):
             def comparator_to_str(item:str=None,
                                   analysis:dict[str, Any]=None)->str:
@@ -579,7 +579,7 @@ class Sample(trdef.SampleTrait):
                 text_rec_field = dict_parts_stcs[tag_stc_flow_rec_analysis_result].format(analysis_item=analysis_item_rec, meas_unit=unit)
 
                 self.flowsheet.put_line(content=method_col_component, record=text_rec_field)
-                if analysis.get(key_test_purpose) in [opt_analysis_cat_ipc, opt_analysis_cat_monit_tgt]:
+                if analysis.get(key_test_purpose) in [opt_analysis_cat_ipc, opt_analysis_cat_monit_tgt] and not analysis_only:
                     self.flowsheet.put_line(record = dict_parts_stcs[tag_part_flow_rec_ok_nok])
             ############### functions inprint_analytical_items() till here #########################
 
@@ -629,16 +629,17 @@ class Sample(trdef.SampleTrait):
                                   category=RuntimeWarning)
                     print_generic_analysis_item(template_attrbt=dict_parts_stcs[tag_stc_attrb_unk].replace('{unk}', analysis.get(key_analysis_attribute) or ''), rec_title='both', analysis=analysis)
 
-        if self.sample_comment:
+        if self.sample_comment and not analysis_only:
             self.flowsheet.put_body_comments(self.sample_comment)
 
         sample_name = self.stem_sample_name + (self.suffix_sample_name or '')
-        self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
-                                method=dict_parts_stcs[tag_part_flow_mthod_instr_sampling],
-                                content=dict_parts_stcs[tag_stc_flow_content_sample_name].format(sample_name=sample_name),
-                                record=dict_parts_stcs[tag_part_flow_rec_sampleID],
-                                operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
-                                witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
+        if not analysis_only:
+            self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
+                                    method=dict_parts_stcs[tag_part_flow_mthod_instr_sampling],
+                                    content=dict_parts_stcs[tag_stc_flow_content_sample_name].format(sample_name=sample_name),
+                                    record=dict_parts_stcs[tag_part_flow_rec_sampleID],
+                                    operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
+                                    witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
 
         if self.list_ipc:
            print_analytical_items(list_analysis=self.list_ipc)
@@ -855,7 +856,23 @@ class Sample(trdef.SampleTrait):
             sort_transf_analysis(orig=buf_list_monit_tgt, dest=self.list_monit_tgt)
             sort_transf_analysis(orig=buf_list_fio, dest=self.list_fio)
 
+    def is_ipc(self):
+        if self.list_ipc:
+            return True
+        else:
+            return False
 
+    def is_monit_tgt(self):
+        if self.list_monit_tgt:
+            return True
+        else:
+            return False
+
+    def is_fio(self):
+        if self.list_fio:
+            return True
+        else:
+            return False
 
 
 
