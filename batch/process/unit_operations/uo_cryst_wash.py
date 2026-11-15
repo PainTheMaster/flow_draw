@@ -12,6 +12,7 @@ from flow_draw.materials import materials as mats
 from flow_draw.trait_def import trait_def as trdef
 from flow_draw.trait_def.trait_def import GetMats, GetInputs, MaterialReceiver
 import flow_draw.batch.process.unit_operations.material_input as matin
+import flow_draw.batch.process.unit_operations.sample as sample
 from flow_draw.batch.process.unit_operations.material_input import Input
 #from flow_draw.trait_def.trait_def import GetMats
 from flow_draw.data_io.json_io import Objason, Array, Primitive
@@ -55,6 +56,8 @@ hedr_agitation_rpm:str = 'Agitation_rpm'
 """Header item for the agitation speed in revolutions per minute."""
 key_arr_solvent_json:str = 'Solvent_Input_Array'
 """Key for the material input JSON object in the crystallization washing unit operation."""
+key_arr_sample_json:str = 'list_samples_cryst_wash'
+"""Key for the optional JSON array of samples (sampling and analysis) in the crystallization washing unit operation."""
 
 
 list_hedr = [hedr_equipment,
@@ -214,10 +217,12 @@ class CrystWashing(uo.UnitOperation, MaterialReceiver, uo_tag=defs.tag_uo_cryst_
         self.duration_washing_minutes:float = None
         self.rpm_agit:float = None
         self.arr_inputs:list[Input] = []
+        self.list_samples:list[sample.Sample] = []
+        """Samples (with analysis) taken after the washing. Empty in most cases; nothing is printed then."""
 
 
 
-    
+
     def load_params_from_df(self, df: pd.DataFrame):
         """
         Loads necessary parameters from a DataFrame object.
@@ -309,8 +314,17 @@ class CrystWashing(uo.UnitOperation, MaterialReceiver, uo_tag=defs.tag_uo_cryst_
                           f'Material input can be a part of this unit operations or can be an independent "{defs.tag_uo_charging}" before this step if more appropriate.',
                           nullable=True,
                           required=True)
+        obj_sample = sample.Sample.get_json_schema(caller=caller)
+        arr_sample = Array(key=key_arr_sample_json,
+                           content=obj_sample,
+                           description='OPTIONAL. A list of sample(s) taken after the crystal washing and the analysis for them (e.g., wash filtrate indicator, residual solvent, assay, crystal form). '
+                           'Sampling and analysis are NOT required in most crystal washing operations. '
+                           'Please include this property only if the data source explicitly instructs sampling or analysis in this operation. '
+                           'Otherwise, omit this property or put null. Do not invent samples or analysis.',
+                           nullable=True,
+                           required=False)
         obj_uo = Objason(key=CrystWashing.uo_tag,
-                         props=common_schema+[equipment, mode_washing, washing_duration_minutes, agitation_rpm, arr_input],
+                         props=common_schema+[equipment, mode_washing, washing_duration_minutes, agitation_rpm, arr_input, arr_sample],
                          description='Crystal washing unit operation. This is typically carried out once or multiple times after the filtration of the recrystallized slurry of the intermediate or API.',
                          required=False,
                          nullable=False)
@@ -341,6 +355,15 @@ class CrystWashing(uo.UnitOperation, MaterialReceiver, uo_tag=defs.tag_uo_cryst_
             if not vessel_train or vessel_train[-1] != self.equipment:
                 vessel_train.append(self.equipment)
             self.arr_inputs.append(new_input)
+
+        # Sampling/analysis is optional: a missing key, null, or an empty array leaves the list empty.
+        self.list_samples.clear()
+        arr_sample_json = json_dict.get(key_arr_sample_json, None)
+        if arr_sample_json:
+            for dict_single_sample in arr_sample_json:
+                if not dict_single_sample:
+                    continue
+                self.list_samples.append(sample.Sample(flowsheet=self.flowsheet, json_dict=dict_single_sample))
 
 
 
@@ -437,6 +460,12 @@ class CrystWashing(uo.UnitOperation, MaterialReceiver, uo_tag=defs.tag_uo_cryst_
             print_diplwash()
         else:
             print_soaking()
+
+        # Print sampling/analysis only when samples are given.
+        if self.list_samples:
+            self.flowsheet.linefeed()
+            for single_sample in self.list_samples:
+                single_sample.print_sample()
 
         if not (self.post_comment == None or self.post_comment == ''):
             self.flowsheet.put_body_comments(self.post_comment)

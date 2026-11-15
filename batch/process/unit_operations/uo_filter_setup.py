@@ -127,7 +127,7 @@ part_flow_content_chrono_rec_jp:str = "*作業詳細は経時的な作業記録�
 
 tag_flow_content_gas_exhaust:str = "content_gas_exhaust"
 """Tag for the instruction comment: exhaust the gas from the waste liquor tank"""
-part_flow_content_gas_exhaust_jp:str = "*WGはろ布の浮き上がり防止の為ろ過液タンク側を開とすること"
+part_flow_content_gas_exhaust_jp:str = "*WGはろ布の浮き上がり防止の為、ろ過液タンク側を開とすること"
 """A flowsheet component for the instruction comment: exhaust the gas from the waste liquor tank, in JP"""
 
 tag_flow_rec_lot_cloth:str = "rec_lot_filter_cloth"
@@ -142,7 +142,7 @@ part_flow_rec_num_cloth_jp:str = "ろ布:_______枚"
 
 tag_flow_rec_leak_test_result:str = "rec_leak_test_result"
 """Tag for a flowsheet component: result of the leak test"""
-part_flow_rec_leak_test_result_jp:str = "判定: 適 / 不適"
+part_flow_rec_leak_test_result_jp:str = "判定: □適 □不適"
 """A flowsheet component for the result of the leak test, in JP"""
 
 
