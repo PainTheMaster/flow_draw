@@ -484,7 +484,18 @@ class TempControl(uo.UnitOperation, uo_tag=defs.tag_uo_tempr_ctrl):
         self.time_unit_prog = json_dict.get(hedr_prog_time_unit, None)
         self.endpoint_check = (json_dict.get(hedr_endpoint_check, opt_no)== opt_yes)
 
+    def __Tj_or_placeholder(self, value:float, name:str, mode_desc:str):
+        """Returns value as is, or a placeholder string with a warning if value is None.
+        name: "Tj_sp", "Tj_limit_low", or "Tj_limit_high"."""
+        if value is None:
+            warnings.warn(message=f"{self.__class__.__name__}: Op. Seq. {self.operation_seq} {name} not specified in the input form for {mode_desc}. Placeholder is shown instead.",
+                          category = RuntimeWarning)
+            return f"<placeholder_Tj_{name}>"
+        return value
+
     def __put_TiTj_mode(self):
+        Tj_low = self.__Tj_or_placeholder(self.Tj_limit_low, "Tj_limit_low", "Ti/Tj control mode")
+        Tj_high = self.__Tj_or_placeholder(self.Tj_limit_high, "Tj_limit_high", "Ti/Tj control mode")
         stc_spec:str = None
         if self.Ti_limit_low is None and self.Ti_limit_high is None:
             raise ValueError(f"{self.__class__.__name__}: Op. Seq. {self.operation_seq} Ti limit not specified in the input form for Ti/Tj control mode.")
@@ -516,7 +527,7 @@ class TempControl(uo.UnitOperation, uo_tag=defs.tag_uo_tempr_ctrl):
 
         self.flowsheet.put_line(time=lang_dict_cmn[tag_flow_cmn_rec_time],
                                 method=lang_dict_parts_flow[tag_part_flow_instr_init_temp_ctrl],
-                                content=lang_dict_stcs[tag_stc_Ti_Tj_config].format(Ti=self.Ti_sp, Tj_low=self.Tj_limit_low, Tj_high=self.Tj_limit_high),
+                                content=lang_dict_stcs[tag_stc_Ti_Tj_config].format(Ti=self.Ti_sp, Tj_low=Tj_low, Tj_high=Tj_high),
                                 record=lang_dict_parts_flow[tag_part_flow_check_config],
                                 operator=lang_dict_cmn[tag_flow_cmn_rec_sign],
                                 witness=lang_dict_cmn[tag_flow_cmn_rec_sign])
@@ -525,11 +536,8 @@ class TempControl(uo.UnitOperation, uo_tag=defs.tag_uo_tempr_ctrl):
         self.flowsheet.linefeed()
 
     def __put_Tj_mode(self):
-        sentence_Tj:str = None
-        if self.Tj_sp is None:
-            raise ValueError(f"{self.__class__.__name__}: Op. Seq. {self.operation_seq} Tj not specified in the input form for Tj control mode.")
-        else:
-            sentence_Tj = lang_dict_stcs[tag_stc_Tj_sp].format(Tj=self.Tj_sp)
+        Tj_sp = self.__Tj_or_placeholder(self.Tj_sp, "Tj_sp", "Tj control mode")
+        sentence_Tj:str = lang_dict_stcs[tag_stc_Tj_sp].format(Tj=Tj_sp)
         
         stc_spec_Ti:str = None
         if self.Ti_limit_low is None and self.Ti_limit_high is None:
@@ -582,12 +590,10 @@ class TempControl(uo.UnitOperation, uo_tag=defs.tag_uo_tempr_ctrl):
         instr_main_sentence:str = None
         if self.Ti_sp is None:
             raise ValueError(f"{self.__class__.__name__}: Op. Seq. {self.operation_seq} Ti set point not specified in the input form for programme temperature control mode.")
-        elif self.Tj_limit_low is None:
-            raise ValueError(f"{self.__class__.__name__}: Op. Seq. {self.operation_seq} Tj lower limit not specified in the input form for programme temperature control mode.")
-        elif self.Tj_limit_high is None:
-            raise ValueError(f"{self.__class__.__name__}: Op. Seq. {self.operation_seq} Tj higher limit not specified in the input form for programme temperature control mode.")
         else:
-            instr_main_sentence = lang_dict_stcs[tag_stc_prog_mode].format(Ti=self.Ti_sp, Tj_low=self.Tj_limit_low, Tj_high=self.Tj_limit_high)
+            Tj_low = self.__Tj_or_placeholder(self.Tj_limit_low, "Tj_limit_low", "programme temperature control mode")
+            Tj_high = self.__Tj_or_placeholder(self.Tj_limit_high, "Tj_limit_high", "programme temperature control mode")
+            instr_main_sentence = lang_dict_stcs[tag_stc_prog_mode].format(Ti=self.Ti_sp, Tj_low=Tj_low, Tj_high=Tj_high)
         
         instr_ramp_time_sentence:str = None
         if self.time_val_prog is None:

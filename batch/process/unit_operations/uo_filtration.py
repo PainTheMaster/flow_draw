@@ -278,7 +278,8 @@ class Filtration(uo.UnitOperation, uo_tag=defs.tag_uo_filt):
         obj_filtration = Objason(key=Filtration.uo_tag,
                                  props=cmn_schema + [filt_device, temp_jacket, press_min, press_max, press_unit, integ_test],
                                  description='This object describes the filtration operation to obtain product crystals or to remove large amount of insoluble byproducts in the process liquid. '
-                                 f'To remove a small amount of particulate matter, please choose a unit operation of "{defs.tag_uo_transfer}" for polishing filtration during transfer.')
+                                 f'To remove a small amount of particulate matter, please choose a unit operation of "{defs.tag_uo_transfer}" for polishing filtration during transfer. '
+                                 f'Typically, this unit operation is preceded by "{defs.tag_uo_filt_setup}" or "{defs.tag_uo_cryst_wash}".')
         return obj_filtration
         
     def load_from_json_dict(self, json_dict):

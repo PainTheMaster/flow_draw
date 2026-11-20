@@ -325,7 +325,11 @@ class CrystWashing(uo.UnitOperation, MaterialReceiver, uo_tag=defs.tag_uo_cryst_
                            required=False)
         obj_uo = Objason(key=CrystWashing.uo_tag,
                          props=common_schema+[equipment, mode_washing, washing_duration_minutes, agitation_rpm, arr_input, arr_sample],
-                         description='Crystal washing unit operation. This is typically carried out once or multiple times after the filtration of the recrystallized slurry of the intermediate or API.',
+                         description='Crystal washing unit operation. This is typically carried out once or multiple times after the filtration of the recrystallized slurry of the intermediate or API. '
+                         f'Normally, this unit operation is preceded by a combination of instances of "{defs.tag_uo_charging}" to charge solvent(s) in a reactor '
+                         f'and "{defs.tag_uo_transfer}" to transfer the blended solvent into the filtering device. In some cases, depending on the process, only an instance of "{defs.tag_uo_charging}"'
+                         f'is required. In that case, a single sort of solvent or pre-blended solvent is directly charged into the filtering device. '
+                         f'In most cases, this unit operation is followed by "{defs.tag_uo_filt}" to remove the washing liquor.',
                          required=False,
                          nullable=False)
         return obj_uo

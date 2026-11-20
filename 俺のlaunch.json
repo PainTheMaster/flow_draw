@@ -9,21 +9,42 @@
             "name": "Python Debugger: Module",
             "type": "debugpy",
             "request": "launch",
-            "module": "flow_draw.main"
+            "module": "flow_draw.main",
         },
         {
             "name": "IO Test",
             "type": "debugpy",
             "request": "launch",
             "module": "flow_draw.test.io_test",
-            "args": ["-v"]
+            "args": ["-v"],
         },
         {
             "name": "Flowsheet Test",
             "type": "debugpy",
             "request": "launch",
             "module": "flow_draw.test.flowsheet_test",
-            "args": ["-v"]
+            "args": ["-v"],
+        },
+        {
+            "name": "JSON Test",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "flow_draw.test.json_test",
+            "args": ["-v"],
+        },
+        {
+            "name": "Integrated Test",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "flow_draw.test.integ_test",
+            "args": ["-v"],
+        },
+        {
+            "name": "ManOp Test",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "flow_draw.test.man_op_test",
+            "args": ["-v"],
         }
     ]
 }
